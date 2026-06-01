@@ -28,6 +28,17 @@ from scripts.run_rule_acquisition_pass import (  # noqa: E402
     _runtime_trial,
     _rule_trial_item_promotion_ready,
 )
+from scripts.run_domain_bootstrap_file import (  # noqa: E402
+    _apply_domain_omission_carrier_signature_reduction,
+    _apply_fda_consultant_citation_scope_reduction,
+    _apply_fda_date_atom_reduction,
+    _apply_fda_facility_identity_atom_reduction,
+    _apply_fda_facility_subject_convergence,
+    _apply_fda_lot_identifier_atom_reduction,
+    _apply_fda_office_atom_reduction,
+    _apply_fda_warning_letter_subject_convergence,
+    _enforce_fda_correspondence_party_placeholder_contract,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -64,6 +75,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Do not validate merged clauses in the local Prolog runtime before writing.",
     )
+    parser.add_argument(
+        "--apply-domain-reducers",
+        action="store_true",
+        help="Apply deterministic typed-domain reducers after merging admitted clauses. This reads no source prose.",
+    )
     return parser.parse_args()
 
 
@@ -77,6 +93,24 @@ def main() -> int:
     facts = _ordered_unique(_source_compile_items(records, "facts"))
     rules = _ordered_unique(_source_compile_items(records, "rules"))
     queries = _ordered_unique(_source_compile_items(records, "queries"))
+    reducer_reports: dict[str, Any] = {}
+    if bool(args.apply_domain_reducers):
+        reduced_compile = {"facts": facts, "rules": rules, "queries": queries}
+        for name, reducer in (
+            ("fda_warning_letter_subject_convergence", _apply_fda_warning_letter_subject_convergence),
+            ("fda_date_atom_reduction", _apply_fda_date_atom_reduction),
+            ("fda_facility_subject_convergence", _apply_fda_facility_subject_convergence),
+            ("fda_lot_identifier_atom_reduction", _apply_fda_lot_identifier_atom_reduction),
+            ("fda_facility_identity_atom_reduction", _apply_fda_facility_identity_atom_reduction),
+            ("fda_consultant_citation_scope_reduction", _apply_fda_consultant_citation_scope_reduction),
+            ("fda_office_atom_reduction", _apply_fda_office_atom_reduction),
+            ("fda_correspondence_party_placeholder_contract", _enforce_fda_correspondence_party_placeholder_contract),
+            ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),
+        ):
+            reducer_reports[name] = reducer(reduced_compile)
+        facts = _ordered_unique(_compile_items({"source_compile": reduced_compile}, "facts"))
+        rules = _ordered_unique(_compile_items({"source_compile": reduced_compile}, "rules"))
+        queries = _ordered_unique(_compile_items({"source_compile": reduced_compile}, "queries"))
     runtime_trial: dict[str, Any] = {}
     trial_facts: list[str] = []
     if args.trial_backbone_json is not None:
@@ -150,6 +184,8 @@ def main() -> int:
                 "trial_backbone_json": str(args.trial_backbone_json or ""),
                 "trial_fact_count": len(trial_facts),
                 "drop_non_promotion_ready_rules": bool(args.drop_non_promotion_ready_rules),
+                "domain_reducers_applied": bool(args.apply_domain_reducers),
+                "domain_reducer_reports": reducer_reports,
                 "positive_queries": [str(item) for item in args.positive_query if str(item).strip()],
                 "negative_queries": [str(item) for item in args.negative_query if str(item).strip()],
                 "policy": [

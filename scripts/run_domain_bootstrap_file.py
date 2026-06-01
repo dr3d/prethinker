@@ -2170,6 +2170,9 @@ def main() -> int:
         _apply_governed_obligation_detail_atom_reduction(record["source_compile"])
         _apply_document_subject_atom_convergence(record["source_compile"])
         _attach_governed_companion_subject_health(record["source_compile"])
+        _apply_fda_warning_letter_subject_convergence(record["source_compile"])
+        _apply_fda_date_atom_reduction(record["source_compile"])
+        _apply_fda_facility_subject_convergence(record["source_compile"])
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
@@ -2191,6 +2194,9 @@ def main() -> int:
                 extra_context=extra_compile_context,
             )
             _attach_governed_companion_subject_health(record["source_compile"])
+        _apply_fda_warning_letter_subject_convergence(record["source_compile"])
+        _apply_fda_date_atom_reduction(record["source_compile"])
+        _apply_fda_facility_subject_convergence(record["source_compile"])
         if (
             bool(getattr(args, "profile_registry_completion_followup", False))
             and profile_registry
@@ -2221,8 +2227,11 @@ def main() -> int:
             )
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
+        _apply_fda_date_atom_reduction(record["source_compile"])
+        _apply_fda_facility_subject_convergence(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
+        _apply_fda_warning_letter_subject_convergence(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7340,6 +7349,233 @@ def _canonical_fda_lot_identifier(value: str) -> str:
     if not match:
         return ""
     return f"lot_{match.group(1)}_{match.group(2)}"
+
+
+def _fda_warning_letter_date_key(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.search(r"(20\d{2})[_-](\d{1,2})[_-](\d{1,2})", text)
+    if not match:
+        return ""
+    return f"{int(match.group(1)):04d}_{int(match.group(2)):02d}_{int(match.group(3)):02d}"
+
+
+def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Converge date-shaped FDA warning-letter aliases onto typed wrapper ids."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    date_to_letter: dict[str, str] = {}
+    ambiguous_dates: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "fda_warning_letter" or len(args) != 5:
+            continue
+        date_key = _fda_warning_letter_date_key(args[3])
+        letter_id = str(args[0]).strip()
+        if not date_key or not letter_id:
+            continue
+        if date_key in date_to_letter and date_to_letter[date_key] != letter_id:
+            ambiguous_dates.add(date_key)
+            continue
+        date_to_letter[date_key] = letter_id
+    for date_key in ambiguous_dates:
+        date_to_letter.pop(date_key, None)
+    if not date_to_letter:
+        source_compile["deterministic_fda_warning_letter_subject_convergence_count"] = 0
+        source_compile["deterministic_fda_warning_letter_subject_convergence_policy"] = {
+            "schema_version": "deterministic_fda_warning_letter_subject_convergence_v1",
+            "authority": "typed_subject_normalization_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+        }
+        return {"reduction_count": 0, "reductions": []}
+
+    subject_positions = {
+        "domain_omission": {0},
+        "fda_adulteration_basis": {0},
+        "fda_conclusion_scope": {0},
+        "fda_consultant_recommendation": {0},
+        "fda_response_requirement": {0},
+        "fda_violation": {1},
+        "fda_violation_citation": {0},
+        "fda_violation_detail": {0},
+    }
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in subject_positions.get(predicate, set()):
+            if index >= len(args):
+                continue
+            date_key = _fda_warning_letter_date_key(args[index])
+            canonical = date_to_letter.get(date_key, "")
+            if canonical and args[index] != canonical:
+                args[index] = canonical
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_warning_letter_subject_convergence_count"] = len(reductions)
+    source_compile["deterministic_fda_warning_letter_subject_convergence_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_warning_letter_subject_convergence_policy"] = {
+        "schema_version": "deterministic_fda_warning_letter_subject_convergence_v1",
+        "authority": "typed_subject_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Maps date-shaped FDA warning-letter aliases such as fda_warning_letter_2025_05_14 "
+            "onto the source-compiled fda_warning_letter/5 wrapper id for the same issue date. "
+            "It does not infer warning letters or inspect source prose."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_fda_date_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.fullmatch(r"(?:v_)?(20\d{2})[_-](\d{1,2})[_-](\d{1,2})", text)
+    if not match:
+        return ""
+    return f"v_{int(match.group(1)):04d}_{int(match.group(2)):02d}_{int(match.group(3)):02d}"
+
+
+def _apply_fda_date_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize FDA date slots to v_YYYY_MM_DD atoms."""
+
+    date_positions = {
+        "fda_form483_response": {2},
+        "fda_inspection_event": {2, 3},
+        "fda_prior_warning_letter": {2},
+        "fda_regulatory_meeting": {2},
+        "fda_warning_letter": {3},
+    }
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in date_positions.get(predicate, set()):
+            if index >= len(args):
+                continue
+            canonical = _canonical_fda_date_atom(args[index])
+            if canonical and args[index] != canonical:
+                args[index] = canonical
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_date_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_date_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_date_atom_reduction_policy"] = {
+        "schema_version": "deterministic_fda_date_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": "Canonicalizes date-shaped FDA carrier slots to v_YYYY_MM_DD atoms without reading source prose.",
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_fda_facility_subject_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Converge FDA facility-name references onto typed facility ids."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    facility_by_name: dict[str, str] = {}
+    ambiguous_names: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "fda_facility_identity" or len(args) != 5:
+            continue
+        facility_id = str(args[0]).strip()
+        facility_name = str(args[1]).strip()
+        if not facility_id or not facility_name:
+            continue
+        if facility_name in facility_by_name and facility_by_name[facility_name] != facility_id:
+            ambiguous_names.add(facility_name)
+            continue
+        facility_by_name[facility_name] = facility_id
+    for facility_name in ambiguous_names:
+        facility_by_name.pop(facility_name, None)
+    subject_positions = {
+        "fda_inspection_event": {1},
+    }
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in subject_positions.get(predicate, set()):
+            if index >= len(args):
+                continue
+            canonical = facility_by_name.get(args[index], "")
+            if canonical and args[index] != canonical:
+                args[index] = canonical
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_facility_subject_convergence_count"] = len(reductions)
+    source_compile["deterministic_fda_facility_subject_convergence_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_facility_subject_convergence_policy"] = {
+        "schema_version": "deterministic_fda_facility_subject_convergence_v1",
+        "authority": "typed_subject_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Maps FDA carrier facility-name references onto fda_facility_identity/5 facility ids "
+            "when the name-to-id mapping is unique in typed facts."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
 
 
 def _apply_fda_lot_identifier_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:

@@ -660,6 +660,58 @@ Reading:
   lens is not blocked for a missing wrapper signatory omission it was not
   allowed to emit.
 
+R31-R35 per-lens probe summary:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r31_r35_lens_probe_summary.md
+
+wrapper: 4/4 lens subset, clean
+chronology: emitted event shapes but missed expected date/facility normalization
+violation: 8/10 lens subset, clean
+response_obligation: 4/5 lens subset, clean
+conclusion: 1/2 lens subset, failed omission audit due invalid carrier reference
+```
+
+R38 deterministic clean-lens union:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r38_clean_lens_union_reduced
+inputs: wrapper, chronology, violation, response_obligation lens probes
+excluded: conclusion lens because omission audit failed
+union policy: no source prose read; mapper-admitted facts only; deterministic typed reducers applied
+typed micro match: 17 / 22
+atom-shape audit: pass, 29 registered facts, 0 blockers
+value-domain audit: pass, 29 facts, 37 checked slots, 0 violations
+omission accountability audit: pass
+runtime load errors: 0
+```
+
+Governance:
+
+```text
+C:\prethinker_tmp_archive\research_integrity_gate_fda_lens_union_reducers_20260601
+status: pass
+focused governance tests: 416 passed
+```
+
+What this proves:
+
+- lens-scoped extraction plus deterministic typed union is a promising domain
+  architecture. It lifted this FDA micro from the same-condition 18/22 broad
+  compile baseline to a cleaner per-lens decomposition, and the clean four-lens
+  union reaches 17/22 without using the failed conclusion lens.
+- deterministic typed reducers are doing real, sign-clean work at the
+  inter-lens seam: warning-letter subject convergence, FDA date atom
+  normalization, and facility-subject convergence moved the union from 11/22 to
+  17/22 without reading source prose.
+- the remaining misses are now well-shaped:
+  `fda_inspection_event/6` inspecting body value (`opqo` vs expected `fda`),
+  violation 1 record-review subject, violation 2 category
+  (`aseptic_processing` vs `contamination_control`), and the two conclusion
+  rows. Do not normalize these by fiat; they need either better lens guidance,
+  a value-domain decision, or evidence that the expected oracle should admit an
+  alternative.
+
 ## Next Moves
 
 1. Build or receive an unlike FDA warning-letter transfer micro using

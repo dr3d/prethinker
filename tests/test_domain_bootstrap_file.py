@@ -95,6 +95,9 @@ from scripts.run_domain_bootstrap_file import (
     _profile_registry_accountability_followup_context_lines,
     _apply_profile_registry_accountability_followup_pass,
     _apply_domain_omission_carrier_signature_reduction,
+    _apply_fda_warning_letter_subject_convergence,
+    _apply_fda_date_atom_reduction,
+    _apply_fda_facility_subject_convergence,
     _apply_fda_lot_identifier_atom_reduction,
     _apply_fda_facility_identity_atom_reduction,
     _apply_fda_consultant_citation_scope_reduction,
@@ -7004,6 +7007,104 @@ def test_domain_omission_carrier_signature_reduction_canonicalizes_registered_re
     ]
     assert source_compile["deterministic_domain_omission_signature_invalid_count"] == 1
     assert source_compile["deterministic_domain_omission_signature_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_warning_letter_subject_convergence_uses_typed_wrapper_date() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(letter_2025_05_14_marigold, office_of_pharmaceutical_quality_operations, marigold_sterile_products_inc, v_2025_05_14, src_line_1).",
+            "fda_violation(violation_1, fda_warning_letter_2025_05_14, violation_1, quality_unit_failure, src_line_2).",
+            "fda_violation_citation(fda_warning_letter_2025_05_14, cfr_21_211_34, consultant_qualification, src_line_3).",
+            "fda_response_requirement(fda_warning_letter_2025_05_14, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_warning_letter_subject_convergence(source_compile)
+
+    assert report["reduction_count"] == 3
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_2025_05_14_marigold, office_of_pharmaceutical_quality_operations, marigold_sterile_products_inc, v_2025_05_14, src_line_1).",
+        "fda_violation(violation_1, letter_2025_05_14_marigold, violation_1, quality_unit_failure, src_line_2).",
+        "fda_violation_citation(letter_2025_05_14_marigold, cfr_21_211_34, consultant_qualification, src_line_3).",
+        "fda_response_requirement(letter_2025_05_14_marigold, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, src_line_4).",
+    ]
+    policy = source_compile["deterministic_fda_warning_letter_subject_convergence_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_warning_letter_subject_convergence_ignores_ambiguous_dates() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(letter_a, office, firm_a, v_2025_05_14, src_line_1).",
+            "fda_warning_letter(letter_b, office, firm_b, v_2025_05_14, src_line_2).",
+            "fda_violation(violation_1, fda_warning_letter_2025_05_14, violation_1, quality_unit_failure, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_warning_letter_subject_convergence(source_compile)
+
+    assert report["reduction_count"] == 0
+    assert source_compile["facts"][2] == (
+        "fda_violation(violation_1, fda_warning_letter_2025_05_14, violation_1, quality_unit_failure, src_line_3)."
+    )
+
+
+def test_fda_date_atom_reduction_canonicalizes_registered_date_slots() -> None:
+    source_compile = {
+        "facts": [
+            "fda_inspection_event(inspection_1, facility_1, 2025_02_03, 2025_02_07, fda, src_line_4).",
+            "fda_form483_response(response_1, inspection_1, 2025_02_21, src_line_5).",
+            "fda_regulatory_meeting(meeting_1, firm_1, v_2025_04_03, src_line_6).",
+        ]
+    }
+
+    report = _apply_fda_date_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_inspection_event(inspection_1, facility_1, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+        "fda_form483_response(response_1, inspection_1, v_2025_02_21, src_line_5).",
+        "fda_regulatory_meeting(meeting_1, firm_1, v_2025_04_03, src_line_6).",
+    ]
+    assert source_compile["deterministic_fda_date_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_facility_subject_convergence_uses_typed_facility_identity() -> None:
+    source_compile = {
+        "facts": [
+            "fda_facility_identity(camden_facility, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, src_line_1).",
+            "fda_inspection_event(inspection_1, marigold_sterile_products_inc, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_facility_subject_convergence(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_facility_identity(camden_facility, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, src_line_1).",
+        "fda_inspection_event(inspection_1, camden_facility, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+    ]
+    policy = source_compile["deterministic_fda_facility_subject_convergence_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_facility_subject_convergence_ignores_ambiguous_names() -> None:
+    source_compile = {
+        "facts": [
+            "fda_facility_identity(facility_a, same_name, place_a, fei_1, src_line_1).",
+            "fda_facility_identity(facility_b, same_name, place_b, fei_2, src_line_2).",
+            "fda_inspection_event(inspection_1, same_name, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_facility_subject_convergence(source_compile)
+
+    assert report["reduction_count"] == 0
+    assert source_compile["facts"][2] == (
+        "fda_inspection_event(inspection_1, same_name, v_2025_02_03, v_2025_02_07, fda, src_line_4)."
+    )
 
 
 def test_fda_lot_identifier_atom_reduction_canonicalizes_affected_lot_values() -> None:
