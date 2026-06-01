@@ -550,8 +550,9 @@ R27-R30 corrected-schema unsupported facts:
 
 ## Next Moves
 
-1. Decide whether strict FDA micro expected facts need controlled alternatives
-   for legitimate compact normalizations.
+1. Build or receive an unlike FDA warning-letter transfer micro using
+   `docs\FDA_DOMAIN_TRANSFER_WORK_ORDER.md`. More same-fixture tuning is now
+   high overfit risk.
 2. Run a same-condition N=3 cell only after the current code settles; use
    `scripts\summarize_typed_micro_series.py` and promote only support>=2 rows
    with clean gates. Use the same-predicate variant section to decide whether a
