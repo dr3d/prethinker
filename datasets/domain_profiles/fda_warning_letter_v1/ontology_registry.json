@@ -17,6 +17,58 @@
       "trigger": "source_explicitly_states_no_signatory_or_signature_block"
     }
   ],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "Document wrapper, facility identity, and correspondence parties.",
+      "allowed_signatures": [
+        "fda_warning_letter/5",
+        "fda_facility_identity/5",
+        "fda_correspondence_party/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "chronology",
+      "purpose": "Inspection, Form 483 response, prior-warning-letter, and meeting chronology.",
+      "allowed_signatures": [
+        "fda_inspection_event/6",
+        "fda_form483_response/4",
+        "fda_prior_warning_letter/5",
+        "fda_regulatory_meeting/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "violation",
+      "purpose": "Numbered violations, CFR citations, and atomic violation details.",
+      "allowed_signatures": [
+        "fda_violation/5",
+        "fda_violation_citation/4",
+        "fda_violation_detail/5",
+        "fda_adulteration_basis/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "response_obligation",
+      "purpose": "Response requirements, consultant recommendation, and consultant citation scoping.",
+      "allowed_signatures": [
+        "fda_response_requirement/6",
+        "fda_consultant_recommendation/4",
+        "fda_violation_citation/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "conclusion",
+      "purpose": "Conclusion scope, not-all-inclusive language, recurrence responsibility, and accountable omissions.",
+      "allowed_signatures": [
+        "fda_conclusion_scope/4",
+        "domain_omission/5"
+      ]
+    }
+  ],
   "predicates": [
     {
       "signature": "fda_warning_letter/5",

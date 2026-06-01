@@ -184,6 +184,14 @@ FDA micro forbidden facts: 6
 focused tests: 24 passed
 ```
 
+Lens-scoped registry validation:
+
+```text
+FDA registry lenses: wrapper, chronology, violation, response_obligation, conclusion
+validation: 15 predicates, 0 blocking errors, 0 warnings
+artifact: C:\prethinker_tmp_archive\fda_warning_letter_v1_lens_schema_validation_20260601.md
+```
+
 Live compile sequence, Qwen 35B A3B via OpenRouter:
 
 ```text

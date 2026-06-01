@@ -115,7 +115,9 @@ python scripts\validate_domain_predicate_schema.py --root datasets\domain_profil
 
 This checks that each domain registry uses registered carrier signatures, keeps
 argument order aligned with the carrier contracts, and does not silently drift
-into a local one-off predicate language.
+into a local one-off predicate language. It also validates lens allowlists:
+every `lenses[].allowed_signatures[]` entry must already exist in the domain
+registry, so a lens cannot acquire predicates that the domain did not offer.
 
 ## Build Loop
 

@@ -238,6 +238,54 @@ def _validate_registry(path: Path) -> dict[str, Any]:
                     elif not ARG_RE.match(value):
                         errors.append(f"{requirement_id}:invalid_{field_name}:{value}")
 
+    lenses = data.get("lenses", [])
+    lens_rows: list[dict[str, Any]] = []
+    if lenses:
+        if not isinstance(lenses, list):
+            errors.append("lenses_not_list")
+        else:
+            seen_lenses: set[str] = set()
+            for index, item in enumerate(lenses):
+                if not isinstance(item, dict):
+                    errors.append(f"lens_{index + 1}:not_object")
+                    continue
+                lens_id = str(item.get("id") or f"lens_{index + 1}").strip()
+                lens_errors: list[str] = []
+                lens_warnings: list[str] = []
+                if not ARG_RE.match(lens_id):
+                    lens_errors.append("invalid_lens_id")
+                if lens_id in seen_lenses:
+                    lens_errors.append("duplicate_lens_id")
+                seen_lenses.add(lens_id)
+                allowed = [
+                    str(signature).strip()
+                    for signature in item.get("allowed_signatures", [])
+                    if str(signature).strip()
+                ] if isinstance(item.get("allowed_signatures"), list) else []
+                if not allowed:
+                    lens_errors.append("missing_allowed_signatures")
+                for signature in allowed:
+                    if not SIGNATURE_RE.match(signature):
+                        lens_errors.append(f"invalid_allowed_signature_shape:{signature}")
+                    if signature not in predicate_signatures:
+                        lens_errors.append(f"allowed_signature_not_in_domain_registry:{signature}")
+                if len(set(allowed)) != len(allowed):
+                    lens_errors.append("duplicate_allowed_signature")
+                if "domain_omission/5" in predicate_signatures and "domain_omission/5" not in allowed:
+                    lens_warnings.append("domain_omission_not_allowed")
+                if not str(item.get("purpose") or "").strip():
+                    lens_warnings.append("missing_purpose")
+                errors.extend(f"lens:{lens_id}:{error}" for error in lens_errors)
+                warnings.extend(f"lens:{lens_id}:{warning}" for warning in lens_warnings)
+                lens_rows.append(
+                    {
+                        "id": lens_id,
+                        "allowed_signatures": allowed,
+                        "errors": lens_errors,
+                        "warnings": lens_warnings,
+                    }
+                )
+
     return {
         "registry": str(path),
         "fixture": fixture,
@@ -248,6 +296,8 @@ def _validate_registry(path: Path) -> dict[str, Any]:
         "errors": errors,
         "warnings": warnings,
         "predicates": predicate_rows,
+        "lens_count": len(lens_rows),
+        "lenses": lens_rows,
     }
 
 
