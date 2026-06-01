@@ -62,6 +62,16 @@ carrier registry gives deterministic tooling one place to inspect signatures,
 value domains, and contract guidance. The worksheet records experiments and
 decisions.
 
+Validate the registry-to-contract seam with:
+
+```text
+python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
+```
+
+This checks that each domain registry uses registered carrier signatures, keeps
+argument order aligned with the carrier contracts, and does not silently drift
+into a local one-off predicate language.
+
 ## Build Loop
 
 1. Pick the wedge.
@@ -144,6 +154,7 @@ Validate the fixture with:
 
 ```text
 python scripts\validate_typed_micro_fixtures.py --root datasets\compile_micro_fixtures
+python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 ```
 
 7. Run a dry compile.

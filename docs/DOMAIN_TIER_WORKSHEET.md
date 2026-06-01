@@ -154,6 +154,7 @@ scripts/audit_redaction_replay.py
 scripts/audit_reference_judge_null_controls.py
 scripts/audit_typed_plan_replay.py
 scripts/summarize_hard_clean_answer_classes.py
+scripts/validate_domain_predicate_schema.py
 ```
 
 Validation:
@@ -176,6 +177,7 @@ Static validation:
 
 ```text
 typed micro-fixtures: 5 fixtures, 0 blocking errors
+domain predicate registries: 1 registry, 15 predicates, 0 blocking errors, 0 warnings
 FDA micro expected facts: 23
 FDA micro forbidden facts: 6
 focused tests: 24 passed
