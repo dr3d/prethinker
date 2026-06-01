@@ -137,6 +137,10 @@ The batch wrapper forwards the same flag:
 python scripts\run_domain_bootstrap_file_batch.py ... --profile-registry datasets\domain_profiles\fda_warning_letter_v1\ontology_registry.json --profile-registry-lens violation
 ```
 
+The post-backbone support and rule acquisition passes also accept
+`--profile-registry-lens` so an overlay/lens pass can be given a narrowed
+domain vocabulary without reopening the whole domain pack.
+
 ## Build Loop
 
 1. Pick the wedge.

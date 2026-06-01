@@ -28,6 +28,7 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _call_lmstudio_json_schema,
     _load_profile_registry,
     _profile_from_registry,
+    _profile_registry_for_lens,
     _slug,
     _source_pass_ops_to_semantic_ir,
 )
@@ -197,6 +198,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--text-file", type=Path, required=True)
     parser.add_argument("--backbone-json", type=Path, required=True)
     parser.add_argument("--profile-registry", type=Path, required=True)
+    parser.add_argument(
+        "--profile-registry-lens",
+        default="",
+        help="Optional domain-registry lens id limiting the backbone predicate vocabulary offered to this acquisition pass.",
+    )
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--base-url", default="http://127.0.0.1:1234")
@@ -224,6 +230,9 @@ def main() -> int:
     registry = _load_profile_registry(args.profile_registry)
     if not registry:
         raise SystemExit("--profile-registry did not load")
+    requested_profile_registry_lens = str(args.profile_registry_lens or "").strip()
+    if requested_profile_registry_lens:
+        registry = _profile_registry_for_lens(registry, requested_profile_registry_lens)
     parsed_profile = _support_acquisition_profile(
         _profile_from_registry(registry, domain_hint=str(args.domain_hint or "")),
         lens=str(args.lens or "support"),
@@ -254,6 +263,12 @@ def main() -> int:
         "backend": "lmstudio",
         "model": str(args.model),
         "profile_registry": str(args.profile_registry),
+        "profile_registry_lens": requested_profile_registry_lens,
+        "active_profile_registry_lens": (
+            registry.get("active_lens", {})
+            if isinstance(registry.get("active_lens"), dict)
+            else {}
+        ),
         "support_backbone_json": str(backbone_path),
         "lens": str(args.lens or "support"),
         "source_line_start": int(args.source_line_start or 0),

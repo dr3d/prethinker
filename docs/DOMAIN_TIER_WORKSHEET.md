@@ -206,6 +206,8 @@ chronology lens does not receive violation predicates. This makes
 `offered_predicates = f(domain_registry, lens)` an executable runner
 constraint, not just a schema note. The batch wrapper now forwards the same
 flag so multi-fixture runs cannot accidentally reopen the full domain registry.
+The post-backbone support and rule acquisition passes also accept the flag,
+keeping acquisition overlays on the same lens-scoped vocabulary boundary.
 
 Live compile sequence, Qwen 35B A3B via OpenRouter:
 
