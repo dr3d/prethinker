@@ -752,6 +752,38 @@ Reading:
   detail rows without changing the score. That matters because a stable domain
   pack needs clean extra facts, not only clean expected rows.
 
+R45-R48 violation-detail guidance and reconciliation diagnostic:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r45_violation_lens_record_review_guidance_or
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r47_union_violation_number_reduced
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r48_union_dual_violation_lenses
+
+change: fda_violation_detail/5 contract now says record-review failures should emit record_review_subject or missing_record_type rows
+single updated violation-lens union: 19 / 22
+dual old+new violation-lens diagnostic union: 20 / 22
+dual diagnostic gates: value-domain pass, omission pass, atom-shape pass
+```
+
+Reading:
+
+- the contract guidance worked: the updated violation lens emitted
+  `fda_violation_detail(violation_1, record_review_subject,
+  batch_production_records, pre_release_quality_review, source_document)`.
+- the updated lens also omitted the letter-level consultant citation that the
+  older violation lens happened to emit. A dual violation-lens union recovers
+  both rows and reaches 20/22, but that is reconciliation evidence, not a
+  promoted score. It mixes old and new lens histories and carries duplicate
+  violation facts with different provenance scopes.
+- a narrow typed reducer now canonicalizes `fda_violation/5` violation-number
+  slots from `1`/`2` into `violation_1`/`violation_2`. This is typed value
+  normalization only; it does not read source prose or create violations.
+- remaining promoted-state misses are still the inspection-body value
+  (`opqo` vs `fda`), violation 2 category (`aseptic_processing` vs
+  `contamination_control`), and consultant citation stability. Do not solve
+  these by deterministic source-shaped fiat; they need N-pass reconciliation
+  policy, an oracle-alternative decision, or unlike-document evidence.
+
 ## Next Moves
 
 1. Build or receive an unlike FDA warning-letter transfer micro using

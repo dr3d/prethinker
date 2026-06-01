@@ -37,6 +37,7 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_fda_lot_identifier_atom_reduction,
     _apply_fda_office_atom_reduction,
     _apply_fda_violation_detail_subject_integrity,
+    _apply_fda_violation_number_atom_reduction,
     _apply_fda_warning_letter_subject_convergence,
     _enforce_fda_correspondence_party_placeholder_contract,
 )
@@ -105,6 +106,7 @@ def main() -> int:
             ("fda_facility_identity_atom_reduction", _apply_fda_facility_identity_atom_reduction),
             ("fda_consultant_citation_scope_reduction", _apply_fda_consultant_citation_scope_reduction),
             ("fda_office_atom_reduction", _apply_fda_office_atom_reduction),
+            ("fda_violation_number_atom_reduction", _apply_fda_violation_number_atom_reduction),
             ("fda_violation_detail_subject_integrity", _apply_fda_violation_detail_subject_integrity),
             ("fda_correspondence_party_placeholder_contract", _enforce_fda_correspondence_party_placeholder_contract),
             ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),

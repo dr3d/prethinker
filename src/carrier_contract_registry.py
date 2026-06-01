@@ -306,6 +306,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "detail_kind is a compact structural role such as affected_lot, affected_product, record_review_subject, missing_record_type, process_area, procedure_scope, or response_status.",
             "detail_value is a compact source-stated value for that one role, not a mini-paragraph.",
             "Emit separate rows for separate lots, products, scopes, or critique points instead of combining them into one value.",
+            "If a violation states that required records were not reviewed, not maintained, missing, incomplete, or not checked before release or disposition, emit a separate record_review_subject or missing_record_type row for the record type; do not rely only on affected_lot or violation_category rows.",
             "Do not use this carrier for the controlled violation category or exact citation when fda_violation/5 and fda_violation_citation/4 are available.",
         ],
         "value_domains": {

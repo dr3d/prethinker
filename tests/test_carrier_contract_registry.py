@@ -263,3 +263,12 @@ def test_carrier_contract_prompt_lines_render_value_domains() -> None:
     assert "contamination_control" in text
     assert "scope_kind allowed values" in text
     assert "cited_violations_not_exhaustive" in text
+
+
+def test_fda_violation_detail_contract_names_record_review_subject_trigger() -> None:
+    lines = carrier_contract_prompt_lines(["fda_violation_detail/5"])
+    text = "\n".join(lines)
+
+    assert "record_review_subject" in text
+    assert "If a violation states that required records were not reviewed" in text
+    assert "affected_lot" in text

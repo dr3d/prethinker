@@ -2177,6 +2177,7 @@ def main() -> int:
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
+        _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
@@ -2233,6 +2234,7 @@ def main() -> int:
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
+        _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
@@ -7497,6 +7499,45 @@ def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_fda_violation_number_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize numeric FDA violation-number slots to violation_N atoms."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    reductions: list[dict[str, str]] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_violation" and len(args) == 5:
+                number = str(args[2]).strip().strip("'\"")
+                if re.fullmatch(r"\d+", number):
+                    args[2] = f"violation_{int(number)}"
+                    reduced = f"{predicate}({', '.join(args)})."
+                    if reduced != fact:
+                        reductions.append({"from": fact, "to": reduced})
+                        fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_violation_number_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_violation_number_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_violation_number_atom_reduction_policy"] = {
+        "schema_version": "deterministic_fda_violation_number_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes fda_violation/5 violation_number slots from bare numeric atoms to violation_N. "
+            "It does not create violations or inspect source prose."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
 
 
 def _canonical_fda_date_atom(value: str) -> str:

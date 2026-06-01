@@ -103,6 +103,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_consultant_citation_scope_reduction,
     _apply_fda_office_atom_reduction,
     _apply_fda_violation_detail_subject_integrity,
+    _apply_fda_violation_number_atom_reduction,
     _enforce_fda_correspondence_party_placeholder_contract,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
@@ -7097,6 +7098,26 @@ def test_fda_violation_detail_subject_integrity_drops_letter_level_details() -> 
         "fda_violation_detail(violation_1, affected_lot, lot_a_104, product_release_record_review, src_line_2).",
     ]
     policy = source_compile["deterministic_fda_violation_detail_subject_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_violation_number_atom_reduction_canonicalizes_numeric_numbers() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_1, letter_1, 1, quality_unit_failure, src_line_1).",
+            "fda_violation(violation_2, letter_1, violation_2, contamination_control, src_line_2).",
+        ]
+    }
+
+    report = _apply_fda_violation_number_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_1).",
+        "fda_violation(violation_2, letter_1, violation_2, contamination_control, src_line_2).",
+    ]
+    policy = source_compile["deterministic_fda_violation_number_atom_reduction_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 
