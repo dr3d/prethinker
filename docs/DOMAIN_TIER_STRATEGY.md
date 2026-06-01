@@ -72,6 +72,18 @@ The schema includes:
 The model's compile job becomes "map this source into this known carrier set,"
 not "invent a useful ontology." That is a narrower and more reproducible task.
 
+Within a domain, predicate offering should also be lens-scoped:
+
+```text
+offered_predicates = f(domain_registry, lens)
+```
+
+The wrapper lens, violation lens, response/obligation lens, and conclusion lens
+should not all receive the same writable predicate set. A lens may focus
+attention, but it should only emit its assigned subset of the domain registry.
+This keeps semantic lenses useful without turning them into a new path for
+uncontrolled ontology growth.
+
 The main design test is whether domain predicates cover substance, not only
 scaffolding. A schema that verifies identifiers and dates but leaves findings
 and obligations in Tier 3 is not enough.

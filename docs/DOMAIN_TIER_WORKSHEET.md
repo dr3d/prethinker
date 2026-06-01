@@ -500,6 +500,11 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_r25_explicit_dat
 What this proved:
 
 - closed FDA signatures are usable by the existing compile path;
+- next architectural tightening: offered predicate set should be a function of
+  both domain registry and lens (`offered_predicates = f(domain_registry,
+  lens)`). The current FDA pack is closed at the domain level; future passes
+  should also be lens-scoped so wrapper, violation, response/obligation, and
+  conclusion lenses do not all receive the same writable predicate set.
 - contract guidance must be visible in standard source compiles, not only
   focused pass-ops compiles;
 - value-domain audit is necessary because registered predicates alone do not

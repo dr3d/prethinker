@@ -62,6 +62,51 @@ carrier registry gives deterministic tooling one place to inspect signatures,
 value domains, and contract guidance. The worksheet records experiments and
 decisions.
 
+## Lens-Scoped Predicate Offering
+
+The offered predicate set is a function of both the domain and the semantic
+lens:
+
+```text
+offered_predicates = f(domain_registry, lens)
+```
+
+A domain registry says what language exists at all for the document family. A
+lens allowlist says which subset of that language a particular compile pass may
+emit. This prevents a focused pass from reaching across the whole domain pack
+and creating cross-lens leakage.
+
+Example for FDA warning letters:
+
+```text
+wrapper lens:
+  fda_warning_letter/5
+  fda_facility_identity/5
+  fda_correspondence_party/5
+  domain_omission/5
+
+violation lens:
+  fda_violation/5
+  fda_violation_citation/4
+  fda_violation_detail/5
+  domain_omission/5
+
+response/obligation lens:
+  fda_response_requirement/6
+  fda_consultant_recommendation/4
+  fda_violation_citation/4 only when scoping a consultant citation
+  domain_omission/5
+
+conclusion lens:
+  fda_conclusion_scope/4
+  domain_omission/5
+```
+
+The lens may focus attention and extraction. It may not invent predicates, and
+it should not emit predicates outside its assigned registry subset. If a needed
+fact does not fit the lens subset, the pass should leave it for the proper lens
+or emit an accountable omission only when the omission contract applies.
+
 Validate the registry-to-contract seam with:
 
 ```text
