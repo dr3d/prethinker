@@ -312,6 +312,15 @@ R16 correspondence-party placeholder contract:
   placeholder ordinary party rows rejected: 0
   note: this run did not emit the R15 placeholder row; the new contract and
         audit are retained because the R15 row is a real leakage shape.
+
+R14-R16 mixed-history support summary:
+  compiles: 3
+  support threshold: >=2
+  supported expected facts: 17 / 23
+  unsupported expected facts: 6 / 23
+  artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_r16_series_summary.md
+  note: this is diagnostic only because the runs are mixed-history, not a
+        same-condition N=3 promotion cell.
 ```
 
 Artifacts:
@@ -333,6 +342,7 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r13_registry_notes
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_registry_completion_original_notes
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r15_lot_reduction
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_placeholder_contract
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_r16_series_summary.md
 ```
 
 What this proved:
@@ -370,6 +380,8 @@ What this proved:
   "facility" for prior warning letter and regulatory meeting rows. This is an
   oracle correction, not a compiler repair; current honest R16 micro status is
   17/23 with clean value-domain and omission gates.
+- the mixed-history R14-R16 series gives a provisional target map: 17/23 facts
+  already have support>=2, while six facts are still unstable or absent.
 
 Current blocker:
 
@@ -397,6 +409,8 @@ R16 still misses after expected-file correction:
   the failure-consequence row;
 - documentation-submission response row;
 - recurrence/responsibility conclusion row;
+- wrapper/facility identity completeness is still unstable across runs even
+  when individual runs can land it;
 - a few source/scope and compact-id normalization choices that may need
   expected alternatives rather than code changes.
 - governed atom normalization for lot identifiers and violation categories is
@@ -407,10 +421,13 @@ R16 still misses after expected-file correction:
 
 1. Decide whether strict FDA micro expected facts need controlled alternatives
    for legitimate compact normalizations.
-2. Pressure second-layer detail completeness on the micro without allowing
+2. Run a same-condition N=3 cell only after the current code settles; use
+   `scripts\summarize_typed_micro_series.py` and promote only support>=2 rows
+   with clean gates.
+3. Pressure second-layer detail completeness on the micro without allowing
    prose-shaped values.
-3. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
+4. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
    on the current FDA fixture and promote only rows with support>=2.
-4. If current FDA improves, test on at least one unlike FDA warning letter.
-5. If FDA fails the reject criteria, do not rescue it by row-polishing; choose a
+5. If current FDA improves, test on at least one unlike FDA warning letter.
+6. If FDA fails the reject criteria, do not rescue it by row-polishing; choose a
    different wedge or conclude no wedge is ready.
