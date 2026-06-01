@@ -295,6 +295,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--profile-governed-subject-manifest-pass", action="store_true")
     parser.add_argument("--profile-legal-citation-repair-pass", action="store_true")
     parser.add_argument("--profile-review-outcome-repair-pass", action="store_true")
+    parser.add_argument("--profile-registry-completion-followup", action="store_true")
+    parser.add_argument("--profile-registry-accountability-followup", action="store_true")
     parser.add_argument("--document-metadata-profile-extension", action="store_true")
     parser.add_argument("--role-detail-profile-extension", action="store_true")
     parser.add_argument("--legal-citation-profile-extension", action="store_true")
@@ -492,6 +494,8 @@ def _build_command(
         "profile_governed_subject_manifest_pass",
         "profile_legal_citation_repair_pass",
         "profile_review_outcome_repair_pass",
+        "profile_registry_completion_followup",
+        "profile_registry_accountability_followup",
         "document_metadata_profile_extension",
         "role_detail_profile_extension",
         "legal_citation_profile_extension",

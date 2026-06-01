@@ -210,6 +210,9 @@ The post-backbone support and rule acquisition passes also accept the flag,
 keeping acquisition overlays on the same lens-scoped vocabulary boundary.
 The research integrity gate now includes the batch wrapper and acquisition-pass
 tests, so this boundary is covered by the default code-only governance gate.
+The batch wrapper also forwards the registry completion and accountability
+follow-up flags, so lens-scoped N=3 domain cells can use the same domain-pack
+machinery as single-fixture runs.
 
 ```text
 C:\prethinker_tmp_archive\research_integrity_gate_code_with_lens_wrappers_20260601
