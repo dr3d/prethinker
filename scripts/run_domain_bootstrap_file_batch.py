@@ -275,6 +275,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--profile-registry", type=Path, default=None)
+    parser.add_argument("--profile-registry-lens", default="")
     parser.add_argument("--use-profile-registry-direct", action="store_true")
     parser.add_argument("--profile-registry-palette-prior", action="store_true")
     parser.add_argument("--allow-global-first-profile-registry-palette-prior", action="store_true")
@@ -466,6 +467,9 @@ def _build_command(
         command.extend(["--domain-hint", str(args.domain_hint).strip()])
     if args.profile_registry is not None:
         command.extend(["--profile-registry", str(_abs(args.profile_registry))])
+    profile_registry_lens = str(getattr(args, "profile_registry_lens", "") or "").strip()
+    if profile_registry_lens:
+        command.extend(["--profile-registry-lens", profile_registry_lens])
     if bool(args.use_profile_registry_direct):
         command.append("--use-profile-registry-direct")
     if bool(args.profile_registry_palette_prior):

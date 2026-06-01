@@ -56,6 +56,44 @@ def test_build_command_forwards_profile_delivery_repair_pass() -> None:
     assert "--profile-delivery-repair-pass" in command
 
 
+def test_build_command_forwards_profile_registry_lens() -> None:
+    args = SimpleNamespace(
+        domain_hint="",
+        profile_registry=Path("datasets/domain_profiles/fda_warning_letter_v1/ontology_registry.json"),
+        profile_registry_lens="violation",
+        use_profile_registry_direct=False,
+        profile_registry_palette_prior=False,
+        allow_global_first_profile_registry_palette_prior=False,
+        compile_source=True,
+        compile_plan_passes=False,
+        compile_flat_plus_plan_passes=True,
+        focused_pass_ops_schema=True,
+        source_entity_ledger=False,
+        archival_identifier_ledger=False,
+        source_record_ledger=False,
+        source_record_ledger_facts=False,
+        profile_delivery_repair_pass=False,
+        intake_registry_context=False,
+        review_profile=False,
+        profile_review_retry=False,
+        max_plan_passes=6,
+        extra_compile_context_line=[],
+    )
+    command = _build_command(
+        CompileJob(
+            fixture="fixture_a",
+            text_file=Path("datasets/fixture_a/source.md"),
+            out_dir=Path("tmp/out/fixture_a"),
+        ),
+        args=args,
+        model="model-a",
+        base_url="http://127.0.0.1:1234",
+        timeout=1200,
+    )
+
+    assert command[command.index("--profile-registry-lens") + 1] == "violation"
+
+
 def test_build_command_forwards_profile_identifier_occurrence_repair_pass() -> None:
     args = SimpleNamespace(
         domain_hint="",

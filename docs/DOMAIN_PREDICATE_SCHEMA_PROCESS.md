@@ -131,6 +131,12 @@ registry completion follow-up. This is the executable boundary: a focused lens
 does not merely promise to avoid unrelated predicates; those predicates are not
 offered to that pass.
 
+The batch wrapper forwards the same flag:
+
+```text
+python scripts\run_domain_bootstrap_file_batch.py ... --profile-registry datasets\domain_profiles\fda_warning_letter_v1\ontology_registry.json --profile-registry-lens violation
+```
+
 ## Build Loop
 
 1. Pick the wedge.
