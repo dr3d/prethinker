@@ -105,3 +105,45 @@ def test_domain_omission_accountability_ignores_profiles_without_domain_omission
     report = build_report([compile_json])
 
     assert report["summary"]["status"] == "pass"
+
+
+def test_domain_omission_accountability_respects_lens_without_accountability_requirements(tmp_path: Path) -> None:
+    payload = _compile_payload(
+        facts=["fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_1)."],
+        notes=["Signatory explicitly stated as absent; no domain_omission emitted because wrapper carrier is outside this lens."],
+    )
+    payload["active_profile_registry_lens"] = {
+        "id": "violation",
+        "allowed_signatures": [
+            "fda_violation/5",
+            "fda_violation_detail/5",
+            "domain_omission/5",
+        ],
+        "accountability_requirement_count": 0,
+    }
+    compile_json = _write(tmp_path / "fixture" / "compile.json", payload)
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+
+
+def test_domain_omission_accountability_enforces_lens_accountability_requirements(tmp_path: Path) -> None:
+    payload = _compile_payload(
+        facts=["fda_correspondence_party(letter, party, recipient, firm, src_line_1)."],
+        notes=["Signatory explicitly stated as absent; no domain_omission emitted."],
+    )
+    payload["active_profile_registry_lens"] = {
+        "id": "wrapper",
+        "allowed_signatures": [
+            "fda_correspondence_party/5",
+            "domain_omission/5",
+        ],
+        "accountability_requirement_count": 1,
+    }
+    compile_json = _write(tmp_path / "fixture" / "compile.json", payload)
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "self_check_omission_without_domain_omission_fact"

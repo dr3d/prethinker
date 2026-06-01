@@ -631,6 +631,35 @@ R27-R30 corrected-schema unsupported facts:
 - a few source/scope and compact-id normalization choices that may need
   expected alternatives rather than code changes.
 
+R31 violation-lens probe:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r31_violation_lens_probe
+model: qwen/qwen3.6-35b-a3b-20260415 via OpenRouter
+mode: registry-direct, active lens=violation, source compile plus registry follow-ups
+admitted: 12 facts, 0 skipped
+typed micro match: 8 / 22 overall
+violation/legal-basis subset: 8 / 10 expected rows
+value-domain audit: pass, 12 facts, 18 checked slots, 0 violations
+atom-shape audit: pass, 12 registered facts, 0 blockers
+omission accountability audit: pass after lens-scope audit fix
+```
+
+Reading:
+
+- lens scoping is not just governance theater; the violation-only pass closed
+  two previously unstable detail rows in one run:
+  `fda_violation_detail(... procedure_scope, microbiological_contamination_prevention, ...)`
+  and `fda_violation_citation(Letter, cfr_21_211_34, consultant_qualification, ...)`.
+- remaining violation misses are narrower: `record_review_subject` for
+  violation 1 and violation 2 category drift (`aseptic_processing` vs expected
+  `contamination_control`).
+- a lens-scoped compile can legitimately omit wrapper accountability carriers.
+  `audit_domain_omission_accountability.py` now respects
+  `active_profile_registry_lens.accountability_requirement_count`; a violation
+  lens is not blocked for a missing wrapper signatory omission it was not
+  allowed to emit.
+
 ## Next Moves
 
 1. Build or receive an unlike FDA warning-letter transfer micro using

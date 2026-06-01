@@ -99,20 +99,21 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                         "self_check_omission_notes": [],
                     }
                 )
-        omission_notes = [
-            text
-            for text in _self_check_texts(source_compile.get("self_check"))
-            if OMISSION_TEXT_RE.search(text)
-        ]
-        if omission_notes and not has_domain_omission:
-            rows.append(
-                {
-                    "fixture": path.parent.name,
-                    "compile_json": str(path),
-                    "class": "self_check_omission_without_domain_omission_fact",
-                    "self_check_omission_notes": omission_notes,
-                }
-            )
+        if _self_check_omission_requires_domain_omission(data):
+            omission_notes = [
+                text
+                for text in _self_check_texts(source_compile.get("self_check"))
+                if OMISSION_TEXT_RE.search(text)
+            ]
+            if omission_notes and not has_domain_omission:
+                rows.append(
+                    {
+                        "fixture": path.parent.name,
+                        "compile_json": str(path),
+                        "class": "self_check_omission_without_domain_omission_fact",
+                        "self_check_omission_notes": omission_notes,
+                    }
+                )
     return {
         "schema_version": "domain_omission_accountability_audit_v1",
         "summary": {
@@ -150,6 +151,16 @@ def _domain_omission_available(data: dict[str, Any]) -> bool:
         isinstance(item, dict) and str(item.get("signature", "")).strip() == "domain_omission/5"
         for item in predicates
     )
+
+
+def _self_check_omission_requires_domain_omission(data: dict[str, Any]) -> bool:
+    active_lens = data.get("active_profile_registry_lens")
+    if not isinstance(active_lens, dict) or not active_lens:
+        return True
+    try:
+        return int(active_lens.get("accountability_requirement_count") or 0) > 0
+    except (TypeError, ValueError):
+        return True
 
 
 def _self_check_texts(value: Any) -> list[str]:
