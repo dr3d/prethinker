@@ -153,7 +153,23 @@ role.
 
 ## Current Reality
 
-As of May 28, 2026:
+As of June 1, 2026, Prethinker is in a sign-clean reset. Older 90%+ QA
+scorecards remain useful lab history, but they are not current claim-bearing
+accuracy numbers. The current public floor is the hard-clean measurement:
+
+```text
+Product exact:                  88 / 200 = 44.0%
+Typed-plan exact:               84 / 200 = 42.0%
+Redaction-survived exact:       81 / 200 = 40.5%
+Atom-shape-clean product exact: 84 / 200 = 42.0%
+Hard-clean floor:               73 / 200 = 36.5%
+```
+
+The current product-shaped path is closed domain schemas that can earn Tier 1
+trust only when their answers survive sign-clean, typed-plan, redaction,
+atom-shape, value-domain, omission-accountability, and N>=3 transfer gates.
+
+Current system notes:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
@@ -163,13 +179,8 @@ As of May 28, 2026:
 - [src/semantic_ir.py](https://github.com/dr3d/prethinker/blob/main/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
 - domain profiles are context and validation packages, not domain-product claims
 - post-ingestion document QA is now a first-class research surface: compiled KBs are queried from admitted predicates, deterministic ledgers, selectors, and guards
-- the native direct-surface restamp is `1997 / 46 / 120` over `2163` judged rows (`92.33%` exact), with zero compatibility rows and zero write proposals
-- fresh ugly public 2026-05-28 R1 is `197 / 3 / 0` over `200` rows (`98.5%`
-  exact), with clean QA hygiene and a still-noisy compile gate
-- fresh ugly public Batch 03 latest guarded slices are SEC `75 / 0 / 0` and
-  non-SEC `216 / 6 / 3`, or `291 / 6 / 3` over `300` rows (`97.0%` exact) as
-  a slice-combined current view, with zero compatibility rows, runtime load
-  errors, or write proposals
+- the older native, fresh ugly, and sealed-unseen measurements are retained as
+  historical evidence with caveats, not as current sign-clean claims
 - compile-surface stability, source-fidelity preservation, palette governance, and unlike-document transfer are the active research pressures
 - compile-gate accounting now separates blocking, diagnostic, and advisory
   reason tiers instead of treating every hold as the same kind of failure

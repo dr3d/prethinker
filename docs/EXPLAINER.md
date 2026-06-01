@@ -204,17 +204,13 @@ verdict = records what happened
 Truth lives in the compiled KB. Rows are where the system tests whether that
 truth can be retrieved, selected, and answered under pressure.
 
-Current evidence gives that claim some teeth. The native direct-surface
-instrument has been restamped over `2163` judged rows at `1997 / 46 / 120`
-exact/partial/miss (`92.33%` exact), with zero compatibility rows, zero runtime
-load errors, and zero write proposals. Fresh ugly public 2026-05-28 R1 reached
-`197 / 3 / 0` over `200` rows (`98.5%` exact), again with clean QA hygiene, but
-with a still-noisy compile gate. Batch 03 remains regression evidence at
-`291 / 6 / 3` over `300` rows (`97.0%` exact) as a slice-combined view, not one
-single fresh 300-row rerun. External and unlike-probe work also includes a
-clean four-fixture real-world spotcheck (`160 / 0 / 0`) and sealed unseen
-authored transfer at `152 / 1 / 6` over `160` rows (`95.0%` exact). Those
-numbers are claims with caveats, not a declaration of finished work.
+Current evidence is deliberately harsher after the sign-clean reset. Older
+native, fresh ugly, real-world, and sealed-unseen scorecards remain useful lab
+history, but the current claim-bearing number is the hard-clean floor: `73 /
+200` (`36.5%`) on the current 8-fixture English batch. That floor requires
+product exactness, typed-plan replay, redaction survival, and atom-shape
+cleanliness. The next product-shaped proof is not another broad high score; it
+is a closed domain schema that can earn Tier 1 trust under those gates.
 
 That is not perfection. Compile-surface gaps, source-fidelity preservation,
 hybrid joins, language transfer, and palette stability are still frontier work.
@@ -354,11 +350,16 @@ As of May 28, 2026:
 
 ### Evidence Snapshot
 
-- a historical surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
-- the native direct-surface restamp spans `2163` judged rows and currently sits at `1997 exact / 46 partial / 120 miss` (`92.33%`), with no compatibility rows or write proposals
-- fresh ugly public 2026-05-28 R1 sits at `197 exact / 3 partial / 0 miss` over `200` rows (`98.5%`), with clean QA hygiene and a still-noisy compile gate
-- fresh ugly public Batch 03 latest guarded slices sit at `291 exact / 6 partial / 3 miss` over `300` rows (`97.0%`), with the caveat that this is a slice-combined current view and not a single fresh 300-row rerun
-- the current residual pressure is compile-surface and source-fidelity coverage: answer-bearing distinctions must become admitted predicates, deterministic ledgers, or query-only support surfaces with clear authority boundaries, not hidden query-time archaeology
+- current claim-bearing hard-clean floor: `73 / 200` (`36.5%`) on the current
+  8-fixture English batch
+- product exact on that same batch: `88 / 200` (`44.0%`)
+- typed-plan exact: `84 / 200` (`42.0%`)
+- redaction-survived exact: `81 / 200` (`40.5%`)
+- older 90%+ native, ugly-public, real-world, and sealed-unseen measurements
+  are historical pre-reset evidence and must travel with their caveats
+- the current residual pressure is clean compile recall: answer-bearing
+  distinctions must become governed predicates, deterministic ledgers, or
+  explicitly lower-tier retrieval, not hidden query-time archaeology
 - enterprise-guidance and clarification probes show that safe-surface accumulation and ask/no-ask governance can be measured separately from ordinary QA
 - rule-ingestion transfer now uses separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering
 - the next hard problem is row-level activation: accumulated symbolic surfaces can rescue weak answers, but global activation can perturb rows that were already good

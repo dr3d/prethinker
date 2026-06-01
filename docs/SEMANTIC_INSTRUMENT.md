@@ -192,27 +192,22 @@ These distinctions matter because "I don't know," "the source doesn't say," "the
 
 ## Current Instrument State
 
-The live evidence anchor is the native direct-surface fixed-compile QA restamp:
+The live evidence anchor after the sign-clean reset is the hard-clean floor on
+the current 8-fixture English batch:
 
 ```text
-2163 judged rows
-1997 exact / 46 partial / 120 miss
-92.33% exact
-0 compatibility rows
-0 runtime load errors
-0 write proposal rows
+Product exact:                  88 / 200 = 44.0%
+Typed-plan exact:               84 / 200 = 42.0%
+Redaction-survived exact:       81 / 200 = 40.5%
+Atom-shape-clean product exact: 84 / 200 = 42.0%
+Hard-clean floor:               73 / 200 = 36.5%
 ```
 
-The current measurement note adds transfer context: fresh ugly public
-2026-05-28 R1 at `197 / 3 / 0` over `200` rows (`98.5%` exact), fresh ugly
-public Batch 03 latest guarded slices at `291 / 6 / 3` over `300` rows as a
-slice-combined regression view, a four-fixture real-world spotcheck at
-`160 / 0 / 0`, sealed unseen authored transfer at `152 / 1 / 6`, and an earlier
-cold-transfer baseline at `177 / 10 / 53`. The May 28 QA result has a still
-noisy compile gate, and the Batch 03 view is not one single fresh 300-row rerun.
-Detailed score history belongs in Git history, local cold archive, or the
-current stamp worksheet. This document keeps the instrument vocabulary, not a
-rolling results ledger.
+Older native, fresh ugly, real-world, and sealed-unseen 90%+ scorecards remain
+historical evidence with caveats, not current claim-bearing numbers. Detailed
+score history belongs in Git history, local cold archive, or the active
+worksheets. This document keeps the instrument vocabulary, not a rolling
+results ledger.
 
 Current lessons:
 
