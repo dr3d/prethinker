@@ -95,6 +95,8 @@ from scripts.run_domain_bootstrap_file import (
     _apply_profile_registry_accountability_followup_pass,
     _apply_domain_omission_carrier_signature_reduction,
     _apply_fda_lot_identifier_atom_reduction,
+    _apply_fda_facility_identity_atom_reduction,
+    _apply_fda_consultant_citation_scope_reduction,
     _enforce_fda_correspondence_party_placeholder_contract,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
@@ -6903,19 +6905,57 @@ def test_fda_lot_identifier_atom_reduction_canonicalizes_affected_lot_values() -
         "facts": [
             "fda_violation_detail(violation_1, affected_lot, lot_a104, product_release_record_review, src_line_12).",
             "fda_violation_detail(violation_1, affected_lot, batch_a_105, product_release_record_review, src_line_12).",
+            "fda_violation_detail(violation_1, affected_lot, a106, product_release_record_review, src_line_12).",
             "fda_violation_detail(violation_2, affected_product, batch_a_106, sterile_drug_products, src_line_13).",
         ]
     }
 
     report = _apply_fda_lot_identifier_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 2
+    assert report["reduction_count"] == 3
     assert source_compile["facts"] == [
         "fda_violation_detail(violation_1, affected_lot, lot_a_104, product_release_record_review, src_line_12).",
         "fda_violation_detail(violation_1, affected_lot, lot_a_105, product_release_record_review, src_line_12).",
+        "fda_violation_detail(violation_1, affected_lot, lot_a_106, product_release_record_review, src_line_12).",
         "fda_violation_detail(violation_2, affected_product, batch_a_106, sterile_drug_products, src_line_13).",
     ]
     assert source_compile["deterministic_fda_lot_identifier_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_facility_identity_atom_reduction_canonicalizes_location_and_fei() -> None:
+    source_compile = {
+        "facts": [
+            "fda_facility_identity(facility_1, marigold_sterile_products_inc, camden_new_jersey_08102, 3012345678, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_facility_identity_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_facility_identity(facility_1, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, src_line_4).",
+    ]
+    assert source_compile["deterministic_fda_facility_identity_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_consultant_citation_scope_reduction_uses_typed_violation_letter() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_8).",
+            "fda_violation_citation(violation_1, cfr_21_211_34, consultant_qualification, src_line_20).",
+            "fda_violation_citation(violation_1, cfr_21_211_192, cgmps_requirement, src_line_8).",
+        ]
+    }
+
+    report = _apply_fda_consultant_citation_scope_reduction(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_8).",
+        "fda_violation_citation(letter_1, cfr_21_211_34, consultant_qualification, src_line_20).",
+        "fda_violation_citation(violation_1, cfr_21_211_192, cgmps_requirement, src_line_8).",
+    ]
+    assert source_compile["deterministic_fda_consultant_citation_scope_reduction_policy"]["not_source_interpretation"] is True
 
 
 def test_fda_correspondence_party_placeholder_contract_rejects_omission_substitutes() -> None:

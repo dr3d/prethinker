@@ -334,6 +334,35 @@ R16-R18 same-condition support summary:
   artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_r18_same_condition_summary.md
   note: this is the first current-path N=3 cell for the FDA micro. It confirms
         a 16/23 stable typed core and a seven-fact compile-recall wall.
+
+R19-R21 reducer diagnostic, alias-requested model:
+  compiles: 3
+  support threshold: >=2
+  supported expected facts: 17 / 23
+  unsupported expected facts: 6 / 23
+  per-run strict matches:
+    R19: 19 / 23, value-domain pass, omission audit pass
+    R20: 15 / 23, value-domain pass, omission audit pass
+    R21: 16 / 23, value-domain pass, omission audit pass
+  artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r19_r21_reducer_summary.md
+  note: facility identity reached 3/3 and several substantive rows reached 2/3,
+        but the cell used the model alias and the next run exposed alias
+        availability wobble.
+
+R23-R25 same-condition support summary, explicit dated model:
+  requested model: qwen/qwen3.6-35b-a3b-20260415
+  compiles: 3
+  support threshold: >=2
+  supported expected facts: 18 / 23
+  unsupported expected facts: 5 / 23
+  per-run strict matches:
+    R23: 18 / 23, value-domain pass, omission audit pass
+    R24: 16 / 23, value-domain pass, omission audit pass
+    R25: 18 / 23, value-domain pass, omission audit pass
+  artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_r25_explicit_dated_summary.md
+  note: facility identity and lot identifiers are now stable; the remaining
+        unsupported rows are substantive compile-recall gaps or broad-wrapper
+        specificity gaps, not value-domain/omission leakage.
 ```
 
 Artifacts:
@@ -359,6 +388,14 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_r16_series_summa
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r17_same_condition
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r18_same_condition
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_r18_same_condition_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r19_facility_citation_reducers
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r20_facility_citation_reducers
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r21_facility_citation_reducers
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r19_r21_reducer_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_explicit_dated_model
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r24_explicit_dated_model
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r25_explicit_dated_model
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_r25_explicit_dated_summary.md
 ```
 
 What this proved:
@@ -401,11 +438,19 @@ What this proved:
 - the same-condition R16-R18 series is stricter and should be treated as the
   current FDA micro baseline: 16/23 support>=2, with no value-domain or omission
   audit failures in the three-run cell.
+- explicit dated model requests matter. The alias `qwen/qwen3.6-35b-a3b`
+  failed once with OpenRouter 404 after R22; R23-R25 used
+  `qwen/qwen3.6-35b-a3b-20260415` explicitly and should supersede R19-R22 for
+  this reducer checkpoint.
+- typed value reducers moved the current FDA micro baseline to 18/23
+  support>=2 with clean gates. The gain is narrow and governance-clean:
+  facility FEI/location normalization, affected-lot atom normalization, and
+  consultant-citation scope normalization.
 
 Current blocker:
 
 ```text
-FDA stable compile recall for the seven unsupported facts.
+FDA stable compile recall for the five unsupported facts.
 ```
 
 New accountability contract:
@@ -419,23 +464,16 @@ missing_signatory_role:
        role_missing, signatory_not_stated, SourceOrScope)
 ```
 
-R16-R18 unsupported facts:
+R23-R25 unsupported facts:
 
-- facility identity canonical row;
 - one missing-record detail for violation 1;
-- procedure-scope detail for violation 2;
-- written-response/corrective-actions row when the base compile chooses only
-  the failure-consequence row;
+- procedure-scope detail for violation 2 remains only 1/3;
 - documentation-submission response row;
-- consultant qualification citation scoped to the letter/recommendation;
 - recurrence/responsibility conclusion row;
-- wrapper/facility identity completeness is still unstable across runs even
-  when individual runs can land it;
+- warning-letter issuing office specificity remains only 1/3; the model often
+  emits broad `fda` rather than the named office. Do not normalize this by fiat.
 - a few source/scope and compact-id normalization choices that may need
   expected alternatives rather than code changes.
-- governed atom normalization for lot identifiers and violation categories is
-  now a live blocker: current runs vary between `lot_a_104`, `lot_a104`,
-  `batch_a_104`, and adjacent violation categories.
 
 ## Next Moves
 

@@ -2147,6 +2147,8 @@ def main() -> int:
         _apply_document_subject_atom_convergence(record["source_compile"])
         _attach_governed_companion_subject_health(record["source_compile"])
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
+        _apply_fda_facility_identity_atom_reduction(record["source_compile"])
+        _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
@@ -2193,6 +2195,8 @@ def main() -> int:
                 extra_context=extra_compile_context,
             )
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
+        _apply_fda_facility_identity_atom_reduction(record["source_compile"])
+        _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7231,6 +7235,8 @@ def _canonical_fda_lot_identifier(value: str) -> str:
     text = str(value or "").strip().strip("'\"").casefold()
     match = re.fullmatch(r"(?:lot|batch)_([a-z])_?(\d+)", text)
     if not match:
+        match = re.fullmatch(r"([a-z])_?(\d+)", text)
+    if not match:
         return ""
     return f"lot_{match.group(1)}_{match.group(2)}"
 
@@ -7273,6 +7279,121 @@ def _apply_fda_lot_identifier_atom_reduction(source_compile: dict[str, Any]) -> 
         "description": (
             "Canonicalizes fda_violation_detail/5 affected_lot values such as lot_a104 or batch_a_104 "
             "to lot_a_104. It does not infer affected lots or inspect source prose."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_fda_facility_location(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.fullmatch(r"(.+?)_(?:\d{5})(?:_\d{4})?", text)
+    if match:
+        return match.group(1)
+    return ""
+
+
+def _canonical_fda_facility_identifier(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if re.fullmatch(r"\d{7,12}", text):
+        return f"fei_{text}"
+    return ""
+
+
+def _apply_fda_facility_identity_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize typed FDA facility location and FEI identifier slots."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "fda_facility_identity" and len(args) == 5:
+            location = _canonical_fda_facility_location(args[2])
+            identifier = _canonical_fda_facility_identifier(args[3])
+            if location:
+                args[2] = location
+            if identifier:
+                args[3] = identifier
+            reduced = f"fda_facility_identity({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_facility_identity_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_facility_identity_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_facility_identity_atom_reduction_policy"] = {
+        "schema_version": "deterministic_fda_facility_identity_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes fda_facility_identity/5 location zipcode suffixes and bare numeric FEI identifiers. "
+            "It does not infer facilities or inspect source prose."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_fda_consultant_citation_scope_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Move consultant-qualification citations from violation ids to their letter id."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    violation_to_letter: dict[str, str] = {}
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation" and len(args) == 5:
+            violation_to_letter[str(args[0]).strip()] = str(args[1]).strip()
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_violation_citation"
+            and len(args) == 4
+            and args[2] == "consultant_qualification"
+            and args[0] in violation_to_letter
+        ):
+            args[0] = violation_to_letter[args[0]]
+            reduced = f"fda_violation_citation({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_consultant_citation_scope_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_consultant_citation_scope_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_consultant_citation_scope_reduction_policy"] = {
+        "schema_version": "deterministic_fda_consultant_citation_scope_reduction_v1",
+        "authority": "typed_carrier_contract_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes fda_violation_citation/4 consultant_qualification rows from a numbered violation "
+            "id to the associated warning-letter id using existing fda_violation/5 typed facts."
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
