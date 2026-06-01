@@ -370,6 +370,11 @@ R23-R25 same-condition support summary, explicit dated model:
     missing-record, and recurrence rows have no useful same-position typed
     near miss in the R23-R25 cell, so treat them as missing second-layer
     compile recall, not normalizer candidates.
+  atom inventory:
+    audit_kb_atom_inventory.py --enforce-atom-shape passes on R23-R25:
+    63 typed facts, 15 predicates, 15 signatures, 100% registered facts,
+    0 unregistered signatures, 0 atom-shape blockers.
+    artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_r25_atom_inventory.md
 ```
 
 Artifacts:
@@ -456,6 +461,9 @@ What this proved:
 - the micro-series summarizer now reports same-predicate typed variants for
   unsupported rows. This is a governance aid: it separates near-miss typed atom
   drift from true missing compile recall without re-reading source prose.
+- atom-shape enforcement passed on the latest R23-R25 cell. The current FDA
+  typed core is still incomplete, but it is not getting its 18/23 support by
+  hiding prose-shaped values or unregistered predicates.
 
 Current blocker:
 
