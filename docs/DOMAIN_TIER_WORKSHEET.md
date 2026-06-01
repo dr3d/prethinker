@@ -784,6 +784,41 @@ Reading:
   these by deterministic source-shaped fiat; they need N-pass reconciliation
   policy, an oracle-alternative decision, or unlike-document evidence.
 
+R49-R57 current-condition repeats and chronology repair:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r49_violation_lens_same_condition_or
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r50_violation_lens_same_condition_or
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r55_chronology_lens_prior_scope_guidance_or
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r57_union_facility_suffix_alias
+
+current-condition violation lens repeats: R45/R49/R50
+record_review_subject support: 3 / 3
+consultant citation support: 1 / 3
+violation 2 category emitted: aseptic_processing in 3 / 3, contamination_control in 0 / 3
+chronology guidance: inspecting_body now fda; prior warning scope now firm/recipient rather than facility
+unfiltered current-condition N=3 violation + new chronology union: 21 / 22
+gates: value-domain pass, omission pass, atom-shape pass, runtime load errors 0
+```
+
+Reading:
+
+- record-review detail is stable under the current contract; that row should be
+  treated as a real mechanism win subject to unlike-document transfer.
+- consultant citation is not stable. The unfiltered union can recover it, but a
+  support>=2 promotion rule would not. This points at N-pass reconciliation
+  policy rather than another row-specific prompt tweak.
+- chronology improved after two general contract changes: inspecting body is
+  the agency/body that performed the inspection, and prior-warning scope follows
+  the source-stated firm/facility. A conservative typed facility-alias reducer
+  now maps facility atoms only when they contain a facility token and at least
+  two meaningful tokens that uniquely match one typed `fda_facility_identity/5`
+  row.
+- the final remaining expected miss is the violation 2 category:
+  `aseptic_processing` is consistently emitted while the micro oracle expects
+  `contamination_control`. This should be decided as a domain/oracle alternative
+  question or tested on an unlike FDA warning letter; do not force it by code.
+
 ## Next Moves
 
 1. Build or receive an unlike FDA warning-letter transfer micro using

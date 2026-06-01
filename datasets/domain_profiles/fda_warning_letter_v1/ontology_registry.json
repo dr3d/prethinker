@@ -92,7 +92,7 @@
       "signature": "fda_inspection_event/6",
       "args": ["inspection_id", "facility_id", "start_date", "end_date", "inspecting_body", "source_or_scope"],
       "category": "fda_chronology",
-      "notes": "Preserves one source-stated FDA inspection event with typed start and end dates."
+      "notes": "Preserves one source-stated FDA inspection event with typed start and end dates. The inspecting_body slot is the agency/body that performed the inspection; do not fill it with the warning-letter issuing office header."
     },
     {
       "signature": "fda_form483_response/4",
@@ -104,7 +104,7 @@
       "signature": "fda_prior_warning_letter/5",
       "args": ["prior_letter_id", "entity_or_facility_id", "prior_issue_date", "relation_or_status", "source_or_scope"],
       "category": "fda_chronology",
-      "notes": "Preserves a source-stated prior warning letter and compact relation or status."
+      "notes": "Preserves a source-stated prior warning letter and compact relation or status. Use the source-stated addressee/scope; if the source says the prior letter was issued to the firm, use the firm or recipient entity rather than the inspected facility."
     },
     {
       "signature": "fda_regulatory_meeting/4",

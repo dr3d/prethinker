@@ -7147,15 +7147,19 @@ def test_fda_facility_subject_convergence_uses_typed_facility_identity() -> None
         "facts": [
             "fda_facility_identity(camden_facility, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, src_line_1).",
             "fda_inspection_event(inspection_1, marigold_sterile_products_inc, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+            "fda_inspection_event(inspection_2, facility_marigold_camden, v_2025_02_03, v_2025_02_07, fda, src_line_5).",
+            "fda_inspection_event(inspection_3, marigold_camden_facility, v_2025_02_03, v_2025_02_07, fda, src_line_6).",
         ]
     }
 
     report = _apply_fda_facility_subject_convergence(source_compile)
 
-    assert report["reduction_count"] == 1
+    assert report["reduction_count"] == 3
     assert source_compile["facts"] == [
         "fda_facility_identity(camden_facility, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, src_line_1).",
         "fda_inspection_event(inspection_1, camden_facility, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+        "fda_inspection_event(inspection_2, camden_facility, v_2025_02_03, v_2025_02_07, fda, src_line_5).",
+        "fda_inspection_event(inspection_3, camden_facility, v_2025_02_03, v_2025_02_07, fda, src_line_6).",
     ]
     policy = source_compile["deterministic_fda_facility_subject_convergence_policy"]
     assert policy["not_source_interpretation"] is True
@@ -7168,6 +7172,7 @@ def test_fda_facility_subject_convergence_ignores_ambiguous_names() -> None:
             "fda_facility_identity(facility_a, same_name, place_a, fei_1, src_line_1).",
             "fda_facility_identity(facility_b, same_name, place_b, fei_2, src_line_2).",
             "fda_inspection_event(inspection_1, same_name, v_2025_02_03, v_2025_02_07, fda, src_line_4).",
+            "fda_inspection_event(inspection_2, facility_same_place, v_2025_02_03, v_2025_02_07, fda, src_line_5).",
         ]
     }
 
@@ -7176,6 +7181,9 @@ def test_fda_facility_subject_convergence_ignores_ambiguous_names() -> None:
     assert report["reduction_count"] == 0
     assert source_compile["facts"][2] == (
         "fda_inspection_event(inspection_1, same_name, v_2025_02_03, v_2025_02_07, fda, src_line_4)."
+    )
+    assert source_compile["facts"][3] == (
+        "fda_inspection_event(inspection_2, facility_same_place, v_2025_02_03, v_2025_02_07, fda, src_line_5)."
     )
 
 

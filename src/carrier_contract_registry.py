@@ -189,7 +189,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "contract": [
             "Inspection-event relation: the row preserves one source-stated FDA inspection with facility, start date, end date, inspecting body, and provenance.",
             "start_date and end_date are typed date atoms. Use the same date for both slots only when the source states a single-day inspection.",
-            "inspecting_body is a compact office or agency atom, not a narrative description of what inspectors found.",
+            "inspecting_body is the compact source-stated agency or inspection body that performed the inspection, not the warning-letter issuing office header. If the source says FDA inspected, use fda.",
             "Do not use this row for Form 483 responses, prior letters, meetings, or response deadlines; those have companion carriers.",
         ],
         "forbidden_uses": ["source_excerpt", "finding_summary", "response_deadline", "prior_warning_letter"],
@@ -220,6 +220,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "contract": [
             "Prior warning-letter relation: the row preserves one source-stated prior FDA warning letter and how it relates to the current matter.",
             "prior_issue_date is a typed date atom.",
+            "entity_or_facility_id should follow the source-stated addressee or scope. If the source says a prior warning letter was issued to the firm, use the firm or recipient entity rather than the inspected facility.",
             "relation_or_status is compact, such as prior_letter, repeat_observation_context, or ownership_change_context.",
             "Do not infer recurrence beyond the source-stated relationship.",
         ],

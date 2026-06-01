@@ -272,3 +272,19 @@ def test_fda_violation_detail_contract_names_record_review_subject_trigger() -> 
     assert "record_review_subject" in text
     assert "If a violation states that required records were not reviewed" in text
     assert "affected_lot" in text
+
+
+def test_fda_inspection_event_contract_keeps_agency_separate_from_issuing_office() -> None:
+    lines = carrier_contract_prompt_lines(["fda_inspection_event/6"])
+    text = "\n".join(lines)
+
+    assert "not the warning-letter issuing office header" in text
+    assert "If the source says FDA inspected, use fda" in text
+
+
+def test_fda_prior_warning_contract_prefers_source_stated_firm_scope() -> None:
+    lines = carrier_contract_prompt_lines(["fda_prior_warning_letter/5"])
+    text = "\n".join(lines)
+
+    assert "issued to the firm" in text
+    assert "rather than the inspected facility" in text

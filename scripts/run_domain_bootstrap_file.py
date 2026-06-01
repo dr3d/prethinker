@@ -7605,6 +7605,7 @@ def _apply_fda_facility_subject_convergence(source_compile: dict[str, Any]) -> d
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
     facility_by_name: dict[str, str] = {}
+    facility_rows: list[tuple[str, set[str]]] = []
     ambiguous_names: set[str] = set()
     for fact in facts:
         parsed = _parse_fact_clause(fact)
@@ -7621,8 +7622,14 @@ def _apply_fda_facility_subject_convergence(source_compile: dict[str, Any]) -> d
             ambiguous_names.add(facility_name)
             continue
         facility_by_name[facility_name] = facility_id
+        token_source = " ".join(args[:4])
+        tokens = _fda_facility_alias_tokens(token_source)
+        if tokens:
+            facility_rows.append((facility_id, tokens))
     for facility_name in ambiguous_names:
         facility_by_name.pop(facility_name, None)
+    if ambiguous_names:
+        facility_rows = []
     subject_positions = {
         "fda_inspection_event": {1},
     }
@@ -7641,7 +7648,7 @@ def _apply_fda_facility_subject_convergence(source_compile: dict[str, Any]) -> d
         for index in subject_positions.get(predicate, set()):
             if index >= len(args):
                 continue
-            canonical = facility_by_name.get(args[index], "")
+            canonical = facility_by_name.get(args[index], "") or _fda_facility_alias_match(args[index], facility_rows)
             if canonical and args[index] != canonical:
                 args[index] = canonical
                 changed = True
@@ -7668,6 +7675,42 @@ def _apply_fda_facility_subject_convergence(source_compile: dict[str, Any]) -> d
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+_FDA_FACILITY_ALIAS_STOPWORDS = {
+    "facility",
+    "facilities",
+    "inc",
+    "llc",
+    "ltd",
+    "corp",
+    "corporation",
+    "company",
+    "co",
+    "products",
+    "product",
+}
+
+
+def _fda_facility_alias_tokens(value: str) -> set[str]:
+    tokens = {
+        token
+        for token in re.split(r"[^a-z0-9]+", str(value or "").casefold())
+        if len(token) >= 3 and token not in _FDA_FACILITY_ALIAS_STOPWORDS and not token.isdigit()
+    }
+    return tokens
+
+
+def _fda_facility_alias_match(value: str, facility_rows: list[tuple[str, set[str]]]) -> str:
+    text = str(value or "").strip().casefold()
+    raw_tokens = [token for token in re.split(r"[^a-z0-9]+", text) if token]
+    if "facility" not in raw_tokens:
+        return ""
+    tokens = _fda_facility_alias_tokens(text)
+    if len(tokens) < 2:
+        return ""
+    matches = [facility_id for facility_id, facility_tokens in facility_rows if tokens.issubset(facility_tokens)]
+    return matches[0] if len(set(matches)) == 1 else ""
 
 
 def _apply_fda_lot_identifier_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
