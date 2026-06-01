@@ -139,6 +139,23 @@ scope_kind: conclusion_disclaimer, enforcement_reservation, ownership_change
 Allowed values are not a license to hide prose. Unknown is better than
 inventing a one-off phrase.
 
+Define accountability requirements the same way. If a domain pack treats a
+missing role, missing signature, absent table value, or explicitly unavailable
+detail as meaningful coverage, record that requirement in the registry instead
+of leaving it as prompt prose.
+
+Example:
+
+```json
+{
+  "id": "missing_signatory_role",
+  "carrier_signature": "fda_correspondence_party/5",
+  "omission_kind": "role_missing",
+  "reason_code": "signatory_not_stated",
+  "trigger": "source_explicitly_states_no_signatory_or_signature_block"
+}
+```
+
 6. Build a micro-fixture.
 
 The micro-fixture should pressure the domain anatomy without becoming a copy of

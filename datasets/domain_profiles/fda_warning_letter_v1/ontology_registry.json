@@ -8,6 +8,15 @@
     "draw_count": 1,
     "date": "2026-06-01"
   },
+  "accountability_requirements": [
+    {
+      "id": "missing_signatory_role",
+      "carrier_signature": "fda_correspondence_party/5",
+      "omission_kind": "role_missing",
+      "reason_code": "signatory_not_stated",
+      "trigger": "source_explicitly_states_no_signatory_or_signature_block"
+    }
+  ],
   "predicates": [
     {
       "signature": "fda_warning_letter/5",

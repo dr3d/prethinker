@@ -156,6 +156,7 @@ def _validate_registry(path: Path) -> dict[str, Any]:
         predicates = []
 
     seen: set[str] = set()
+    predicate_signatures: set[str] = set()
     predicate_rows: list[dict[str, Any]] = []
     for index, item in enumerate(predicates):
         row_errors: list[str] = []
@@ -170,6 +171,8 @@ def _validate_registry(path: Path) -> dict[str, Any]:
         if signature in seen:
             row_errors.append("duplicate_signature")
         seen.add(signature)
+        if signature:
+            predicate_signatures.add(signature)
         contract = carrier_contract(signature)
         if contract is None:
             row_errors.append("unregistered_signature")
@@ -207,10 +210,41 @@ def _validate_registry(path: Path) -> dict[str, Any]:
             }
         )
 
+    accountability_requirements = data.get("accountability_requirements", [])
+    if accountability_requirements:
+        if "domain_omission/5" not in predicate_signatures:
+            errors.append("accountability_requires_domain_omission_signature")
+        if not isinstance(accountability_requirements, list):
+            errors.append("accountability_requirements_not_list")
+        else:
+            for index, item in enumerate(accountability_requirements):
+                if not isinstance(item, dict):
+                    errors.append(f"accountability_{index + 1}:not_object")
+                    continue
+                requirement_id = str(item.get("id") or f"accountability_{index + 1}").strip()
+                carrier_signature = str(item.get("carrier_signature") or "").strip()
+                omission_kind = str(item.get("omission_kind") or "").strip()
+                reason_code = str(item.get("reason_code") or "").strip()
+                trigger = str(item.get("trigger") or "").strip()
+                if carrier_contract(carrier_signature) is None:
+                    errors.append(f"{requirement_id}:unregistered_accountability_carrier:{carrier_signature}")
+                for field_name, value in {
+                    "omission_kind": omission_kind,
+                    "reason_code": reason_code,
+                    "trigger": trigger,
+                }.items():
+                    if not value:
+                        errors.append(f"{requirement_id}:missing_{field_name}")
+                    elif not ARG_RE.match(value):
+                        errors.append(f"{requirement_id}:invalid_{field_name}:{value}")
+
     return {
         "registry": str(path),
         "fixture": fixture,
         "predicate_count": len(predicate_rows),
+        "accountability_requirement_count": (
+            len(accountability_requirements) if isinstance(accountability_requirements, list) else 0
+        ),
         "errors": errors,
         "warnings": warnings,
         "predicates": predicate_rows,

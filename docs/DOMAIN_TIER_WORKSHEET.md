@@ -177,7 +177,7 @@ Static validation:
 
 ```text
 typed micro-fixtures: 5 fixtures, 0 blocking errors
-domain predicate registries: 1 registry, 15 predicates, 0 blocking errors, 0 warnings
+domain predicate registries: 1 registry, 15 predicates, 1 accountability requirement, 0 blocking errors, 0 warnings
 FDA micro expected facts: 23
 FDA micro forbidden facts: 6
 focused tests: 24 passed
@@ -251,6 +251,17 @@ Current blocker:
 
 ```text
 Completeness/accountability, not signature or value-domain governance.
+```
+
+New accountability contract:
+
+```text
+datasets\domain_profiles\fda_warning_letter_v1\ontology_registry.json
+
+missing_signatory_role:
+  if source_explicitly_states_no_signatory_or_signature_block
+  emit domain_omission(DomainOrSubjectId, 'fda_correspondence_party/5',
+       role_missing, signatory_not_stated, SourceOrScope)
 ```
 
 R5/R6 still miss:

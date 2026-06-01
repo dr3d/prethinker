@@ -88,6 +88,7 @@ from scripts.run_domain_bootstrap_file import (
     _profile_from_signature_roster,
     _profile_registry_palette_report,
     _profile_registry_palette_prior_context,
+    _profile_registry_accountability_context,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
     _source_compiler_context,
@@ -6650,6 +6651,28 @@ def test_profile_registry_palette_prior_context_is_vocabulary_only() -> None:
     assert "zero-yield" in joined
     assert "entity_assignment/3" in joined
     assert "bad/9" not in joined
+
+
+def test_profile_registry_accountability_context_requires_typed_omission_rows() -> None:
+    context = _profile_registry_accountability_context(
+        {
+            "accountability_requirements": [
+                {
+                    "carrier_signature": "fda_correspondence_party/5",
+                    "omission_kind": "role_missing",
+                    "reason_code": "signatory_not_stated",
+                    "trigger": "source_explicitly_states_no_signatory_or_signature_block",
+                }
+            ]
+        }
+    )
+
+    joined = "\n".join(context)
+    assert "omission contracts, not facts" in joined
+    assert "domain_omission(DomainOrSubjectId, 'fda_correspondence_party/5'" in joined
+    assert "role_missing" in joined
+    assert "signatory_not_stated" in joined
+    assert "Do not leave this only in self_check" in joined
 
 
 def test_global_first_profile_registry_palette_prior_is_unsafe() -> None:

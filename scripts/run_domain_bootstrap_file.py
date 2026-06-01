@@ -1938,6 +1938,8 @@ def main() -> int:
         extra_compile_context.extend(source_record_ledger_context(source_record_ledger))
     if profile_registry and bool(args.profile_registry_palette_prior) and bool(args.compile_source) and isinstance(parsed, dict):
         extra_compile_context.extend(_profile_registry_palette_prior_context(profile_registry))
+    if profile_registry and bool(args.compile_source) and isinstance(parsed, dict):
+        extra_compile_context.extend(_profile_registry_accountability_context(profile_registry))
     extra_compile_context.extend(
         line
         for line in (str(item).strip() for item in getattr(args, "extra_compile_context_line", []) or [])
@@ -2592,12 +2594,28 @@ def _load_profile_registry(path: Path | None) -> dict[str, Any]:
                     "notes": str(item.get("notes", "")).strip(),
                 }
             )
+    accountability_requirements: list[dict[str, str]] = []
+    raw_requirements = parsed.get("accountability_requirements", [])
+    if isinstance(raw_requirements, list):
+        for item in raw_requirements:
+            if not isinstance(item, dict):
+                continue
+            requirement = {
+                "id": str(item.get("id", "")).strip(),
+                "carrier_signature": str(item.get("carrier_signature", "")).strip(),
+                "omission_kind": str(item.get("omission_kind", "")).strip(),
+                "reason_code": str(item.get("reason_code", "")).strip(),
+                "trigger": str(item.get("trigger", "")).strip(),
+            }
+            if requirement["carrier_signature"] and requirement["omission_kind"] and requirement["reason_code"]:
+                accountability_requirements.append(requirement)
     return {
         "schema": str(parsed.get("schema", "")).strip(),
         "fixture": str(parsed.get("fixture", "")).strip(),
         "source": str(parsed.get("source", "")).strip(),
         "purpose": str(parsed.get("purpose", "")).strip(),
         "selection": parsed.get("selection", {}) if isinstance(parsed.get("selection"), dict) else {},
+        "accountability_requirements": accountability_requirements,
         "predicates": compact_predicates,
     }
 
@@ -7652,6 +7670,37 @@ def _list_range_source_key(value: Any) -> str:
     if text.startswith("src_") or text.startswith("source_"):
         return text.replace("source_line_", "src_line_")
     return ""
+
+
+def _profile_registry_accountability_context(profile_registry: dict[str, Any]) -> list[str]:
+    requirements = (
+        profile_registry.get("accountability_requirements")
+        if isinstance(profile_registry.get("accountability_requirements"), list)
+        else []
+    )
+    if not requirements:
+        return []
+    lines = [
+        "Registry accountability requirements are omission contracts, not facts. "
+        "Use them only when the raw source explicitly satisfies the trigger."
+    ]
+    for item in requirements:
+        if not isinstance(item, dict):
+            continue
+        carrier_signature = str(item.get("carrier_signature", "")).strip()
+        omission_kind = str(item.get("omission_kind", "")).strip()
+        reason_code = str(item.get("reason_code", "")).strip()
+        trigger = str(item.get("trigger", "")).strip()
+        if not carrier_signature or not omission_kind or not reason_code:
+            continue
+        lines.append(
+            "Registry accountability requirement: if raw_source_text satisfies "
+            f"{trigger or 'the stated omission trigger'}, emit domain_omission(DomainOrSubjectId, "
+            f"'{carrier_signature}', {omission_kind}, {reason_code}, SourceOrScope). "
+            "Choose DomainOrSubjectId and SourceOrScope from the source-local domain object and source coordinate. "
+            "Do not leave this only in self_check."
+        )
+    return lines
 
 
 def _list_range_interval_overcompresses_segments(
