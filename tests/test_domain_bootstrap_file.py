@@ -104,6 +104,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_office_atom_reduction,
     _apply_fda_violation_detail_subject_integrity,
     _apply_fda_violation_number_atom_reduction,
+    _apply_carrier_value_domain_integrity,
     _apply_source_scope_payload_integrity,
     _enforce_fda_correspondence_party_placeholder_contract,
     _unsafe_profile_registry_palette_prior_reason,
@@ -7265,6 +7266,31 @@ def test_source_scope_payload_integrity_drops_citation_payload_provenance() -> N
         "fda_violation_citation(letter_1, cfr_21_211_34, consultant_qualification, src_line_20).",
     ]
     policy = source_compile["deterministic_source_scope_payload_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation_citation(violation_1, cfr_21_211_22_d, cfr_21_211_22_d, src_line_8).",
+            "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
+            "fda_violation_detail(violation_6, violation_6, missing_records, batch_production_and_control_records, src_line_12).",
+            "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
+        ]
+    }
+
+    report = _apply_carrier_value_domain_integrity(source_compile)
+
+    assert report["dropped_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
+        "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
+    ]
+    dropped = source_compile["deterministic_carrier_value_domain_integrity_dropped_facts"]
+    assert dropped[0]["arg_name"] == "citation_role"
+    assert dropped[1]["arg_name"] == "detail_kind"
+    policy = source_compile["deterministic_carrier_value_domain_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 

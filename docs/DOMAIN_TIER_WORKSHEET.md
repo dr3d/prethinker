@@ -1179,3 +1179,68 @@ omission blockers: 0
 non-promotable diagnostic: category-boundary rerun fixed categories but failed
   value-domain hygiene in one violation run
 ```
+
+R83 value-domain hold for malformed registered carrier rows:
+
+```text
+mechanism:
+- new deterministic_carrier_value_domain_integrity reducer
+- drops registered carrier rows whose closed value-domain slots contain values
+  outside the carrier contract
+- invents no replacement facts
+- reads no source prose, QA questions, or oracle answers
+
+direct regression:
+- fda_violation_citation(..., cfr_21_211_22_d, cfr_21_211_22_d, ...)
+  is dropped because citation_role is not in the closed citation-role domain
+- fda_violation_detail(..., violation_6, ..., batch_production_and_control_records, ...)
+  is dropped because detail_kind and role_or_purpose are not registered values
+- valid sibling rows survive
+
+tests:
+- focused: 294 passed
+- research integrity gate: pass
+- focused governance suite: 432 passed
+```
+
+Diagnostic replay on the prior dirty violation-category rerun:
+
+```text
+input: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_violation_rerun_20260601
+union with value-domain hold:
+- facts after reducers: 40
+- carrier value-domain audit: pass, 40 facts, 56 checked slots, 0 violations
+- matched violation/authority/detail expected rows: 15 / 16
+- forbidden matches: 0
+- category rows now present:
+  - violation 5 -> aseptic_processing
+  - violation 6 -> data_integrity
+- remaining miss: affected-product detail for Tirzepatide
+```
+
+Reading:
+
+- the value-domain hold closes the specific hygiene blocker: malformed
+  citation/detail rows no longer survive typed reduction, so they cannot
+  contaminate a union or support summary.
+- the category-boundary fix remains promising: after the hold, the diagnostic
+  violation union keeps the two repaired category rows and passes value-domain
+  audit.
+- this is still not a claim-bearing 26/26 transfer result. It is a blocker fix
+  plus a replay diagnostic.
+
+Attempted R84 fresh all-lens N=3 with value-domain hold:
+
+```text
+root: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_n3_value_domain_hold_20260601
+status: interrupted by OpenRouter upstream 429 from Ambient provider
+usable completed pieces:
+- run 1 completed all five lenses
+- run 2 wrapper completed but emitted 0 facts
+- remaining requested calls failed 429
+```
+
+Do not score R84 as an N=3 cell. The correct next measurement, once provider
+rate limits clear, is a fresh all-lens N=3 with the value-domain hold active.
+Until that completes, the clean claim-bearing transfer result remains R81:
+24/26 stable expected facts with all governance gates clean.

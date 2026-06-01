@@ -2180,6 +2180,7 @@ def main() -> int:
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _apply_source_scope_payload_integrity(record["source_compile"])
+        _apply_carrier_value_domain_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
@@ -2238,6 +2239,7 @@ def main() -> int:
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _apply_source_scope_payload_integrity(record["source_compile"])
+        _apply_carrier_value_domain_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7883,6 +7885,72 @@ def _source_scope_payload_issue(arg_name: str, value: str) -> str:
     if re.match(r"^(?:cfr_|fdca_|usc_|u_s_c_|us_c_|\d+_cfr_|\d+_usc_)", normalized):
         return "citation_payload_in_source_or_scope"
     return ""
+
+
+def _carrier_value_domain_issue(signature: str, arg_name: str, value: str) -> str:
+    contract = carrier_contract(signature)
+    if not isinstance(contract, dict):
+        return ""
+    domains = contract.get("value_domains")
+    if not isinstance(domains, dict):
+        return ""
+    allowed = {str(item).strip() for item in domains.get(arg_name, []) if str(item).strip()}
+    if not allowed:
+        return ""
+    normalized = str(value or "").strip().strip("'\"")
+    if normalized not in allowed:
+        return "value_not_allowed"
+    return ""
+
+
+def _apply_carrier_value_domain_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop registered carrier rows whose closed value-domain slots are invalid."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    kept: list[str] = []
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            kept.append(fact)
+            continue
+        predicate, args = parsed
+        signature = f"{predicate}/{len(args)}"
+        contract = carrier_contract(signature)
+        if not isinstance(contract, dict):
+            kept.append(fact)
+            continue
+        arg_names = [str(item).strip() for item in contract.get("args", [])]
+        issue = ""
+        issue_arg = ""
+        issue_value = ""
+        for index, arg_name in enumerate(arg_names):
+            if index >= len(args):
+                continue
+            issue = _carrier_value_domain_issue(signature, arg_name, args[index])
+            if issue:
+                issue_arg = arg_name
+                issue_value = args[index]
+                break
+        if issue:
+            dropped.append({"fact": fact, "arg_name": issue_arg, "value": issue_value, "issue": issue})
+            continue
+        kept.append(fact)
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["deterministic_carrier_value_domain_integrity_count"] = len(dropped)
+    source_compile["deterministic_carrier_value_domain_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_carrier_value_domain_integrity_policy"] = {
+        "schema_version": "deterministic_carrier_value_domain_integrity_v1",
+        "authority": "typed_contract_validation_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops registered carrier rows when closed value-domain slots contain values outside the "
+            "registered carrier contract. It does not infer replacement values or create facts."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped": dropped[:100]}
 
 
 def _apply_source_scope_payload_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
