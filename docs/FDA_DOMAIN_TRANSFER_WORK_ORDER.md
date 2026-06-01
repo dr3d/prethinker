@@ -29,6 +29,9 @@ with:
 - Form FDA 483 response date if present;
 - at least two numbered CGMP violations;
 - at least two CFR citations;
+- preferably one sterility, aseptic-processing, contamination-control, or
+  microbiological-control violation so the category boundary can be tested on a
+  source other than the Marigold micro;
 - response deadline or response instruction;
 - consultant recommendation if present;
 - concluding scope/responsibility language;
@@ -102,6 +105,10 @@ Required carrier pressure:
 - `fda_prior_warning_letter/5` only if a prior warning letter is source-stated
 - `fda_regulatory_meeting/4` only if a meeting/teleconference is source-stated
 - `fda_violation/5` for each numbered violation in the excerpt
+  - choose the most compact governed category supported by the source;
+  - if a sterility/microbiological-control violation could reasonably be
+    categorized as either `contamination_control` or `aseptic_processing`, pick
+    one and explain the rationale in `source_notes.md`;
 - `fda_violation_citation/4` for each CFR/statutory citation
 - `fda_violation_detail/5` for atomic details such as affected lot, affected
   product, process area, procedure scope, record-review subject, or response
@@ -134,6 +141,8 @@ Include:
 - source URL and title;
 - why this warning letter was selected;
 - which expected facts were hard to represent;
+- rationale for each `fda_violation/5` category choice, especially any
+  contamination-control versus aseptic-processing boundary;
 - any facts deliberately omitted because the source did not state them clearly;
 - any uncertainty about atom choice.
 
