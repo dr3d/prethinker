@@ -715,6 +715,37 @@ What this proves:
   a value-domain decision, or evidence that the expected oracle should admit an
   alternative.
 
+R41-R43 conclusion-lens cleanup and all-lens union:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r41_conclusion_lens_no_omission_compile_or
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r43_all_lens_union_reduced_compact_date
+
+change: domain_omission/5 is not offered to a lens unless the active lens has a retained accountability requirement
+conclusion lens: emitted 3 fda_conclusion_scope/4 facts, 2 expected conclusion rows present after typed subject convergence
+all-lens reduced union: 19 / 22
+value-domain audit: pass, 32 facts, 43 checked slots, 0 violations
+omission accountability audit: pass
+atom-shape audit: pass, 32 registered facts, 0 blockers
+runtime load errors: 0
+```
+
+Reading:
+
+- the failed conclusion lane was not a reason to give every lens a global
+  omission carrier. Stripping decorative `domain_omission/5` from lenses
+  without accountability requirements made the conclusion probe clean while
+  preserving the declared lens vocabulary for audit visibility.
+- the two conclusion rows were blocked by a typed alias seam, not source
+  interpretation: the conclusion lens used `doc_fda_warning_letter_20250514`,
+  while the wrapper lens established `letter_2025_05_14_marigold`. The
+  existing warning-letter subject convergence reducer now recognizes compact
+  `yyyymmdd` aliases and maps them onto the typed wrapper id.
+- this is a clean deterministic gain: no source prose read, no query text read,
+  no new predicate family, and no fixture vocabulary inserted into Python. The
+  remaining three misses are now the inspection-body value, violation 1
+  record-review subject, and violation 2 category.
+
 ## Next Moves
 
 1. Build or receive an unlike FDA warning-letter transfer micro using

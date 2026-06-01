@@ -7043,17 +7043,19 @@ def test_fda_warning_letter_subject_convergence_uses_typed_wrapper_date() -> Non
             "fda_violation(violation_1, fda_warning_letter_2025_05_14, violation_1, quality_unit_failure, src_line_2).",
             "fda_violation_citation(fda_warning_letter_2025_05_14, cfr_21_211_34, consultant_qualification, src_line_3).",
             "fda_response_requirement(fda_warning_letter_2025_05_14, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, src_line_4).",
+            "fda_conclusion_scope(doc_fda_warning_letter_20250514, recurrence_prevention, responsibility_to_correct, src_line_5).",
         ]
     }
 
     report = _apply_fda_warning_letter_subject_convergence(source_compile)
 
-    assert report["reduction_count"] == 3
+    assert report["reduction_count"] == 4
     assert source_compile["facts"] == [
         "fda_warning_letter(letter_2025_05_14_marigold, office_of_pharmaceutical_quality_operations, marigold_sterile_products_inc, v_2025_05_14, src_line_1).",
         "fda_violation(violation_1, letter_2025_05_14_marigold, violation_1, quality_unit_failure, src_line_2).",
         "fda_violation_citation(letter_2025_05_14_marigold, cfr_21_211_34, consultant_qualification, src_line_3).",
         "fda_response_requirement(letter_2025_05_14_marigold, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, src_line_4).",
+        "fda_conclusion_scope(letter_2025_05_14_marigold, recurrence_prevention, responsibility_to_correct, src_line_5).",
     ]
     policy = source_compile["deterministic_fda_warning_letter_subject_convergence_policy"]
     assert policy["not_source_interpretation"] is True

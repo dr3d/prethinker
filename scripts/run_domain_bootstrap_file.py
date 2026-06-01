@@ -7358,9 +7358,12 @@ def _canonical_fda_lot_identifier(value: str) -> str:
 def _fda_warning_letter_date_key(value: str) -> str:
     text = str(value or "").strip().strip("'\"").casefold()
     match = re.search(r"(20\d{2})[_-](\d{1,2})[_-](\d{1,2})", text)
-    if not match:
-        return ""
-    return f"{int(match.group(1)):04d}_{int(match.group(2)):02d}_{int(match.group(3)):02d}"
+    if match:
+        return f"{int(match.group(1)):04d}_{int(match.group(2)):02d}_{int(match.group(3)):02d}"
+    match = re.search(r"(20\d{2})(\d{2})(\d{2})", text)
+    if match:
+        return f"{int(match.group(1)):04d}_{int(match.group(2)):02d}_{int(match.group(3)):02d}"
+    return ""
 
 
 def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
