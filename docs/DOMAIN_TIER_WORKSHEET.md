@@ -420,6 +420,19 @@ R27-R30 corrected-schema same-condition cell:
         This confirms the remaining blocker is unstable second-layer compile
         recall under clean governed atoms, not atom-shape or value-domain
         leakage.
+
+Research integrity gate:
+  command:
+    python scripts\run_research_integrity_gate.py --compile-root C:\prethinker_tmp_archive --fixture fda_warning_letter_micro_20260601_r27_office_reducer_probe --fixture fda_warning_letter_micro_20260601_r29_corrected_schema_same_condition --fixture fda_warning_letter_micro_20260601_r30_corrected_schema_same_condition --out-dir C:\prethinker_tmp_archive\research_integrity_gate_20260601_fda_r27_r30
+  result:
+    pass, 5/5 steps, 0 failed
+    sign-clean pass
+    atom-shape pass
+    carrier value-domain pass
+    domain omission accountability pass
+    focused governance tests: 308 passed
+  artifact:
+    C:\prethinker_tmp_archive\research_integrity_gate_20260601_fda_r27_r30\research_integrity_gate.md
 ```
 
 Artifacts:
