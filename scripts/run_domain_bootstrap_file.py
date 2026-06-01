@@ -2177,6 +2177,7 @@ def main() -> int:
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
+        _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
@@ -2232,6 +2233,7 @@ def main() -> int:
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
+        _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7453,6 +7455,48 @@ def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop FDA violation-detail rows that are not attached to an emitted violation id."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    violation_ids: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation" and len(args) == 5 and str(args[0]).strip():
+            violation_ids.add(str(args[0]).strip())
+    dropped: list[str] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_violation_detail" and len(args) == 5 and violation_ids and args[0] not in violation_ids:
+                dropped.append(fact)
+                continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_violation_detail_subject_integrity_count"] = len(dropped)
+    source_compile["deterministic_fda_violation_detail_subject_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_violation_detail_subject_integrity_policy"] = {
+        "schema_version": "deterministic_fda_violation_detail_subject_integrity_v1",
+        "authority": "typed_subject_integrity_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops fda_violation_detail/5 rows whose subject is not an emitted fda_violation/5 id. "
+            "It does not infer missing details or inspect source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
 
 
 def _canonical_fda_date_atom(value: str) -> str:

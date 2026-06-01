@@ -720,13 +720,14 @@ R41-R43 conclusion-lens cleanup and all-lens union:
 ```text
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r41_conclusion_lens_no_omission_compile_or
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r43_all_lens_union_reduced_compact_date
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r44_all_lens_union_reduced_detail_integrity
 
 change: domain_omission/5 is not offered to a lens unless the active lens has a retained accountability requirement
 conclusion lens: emitted 3 fda_conclusion_scope/4 facts, 2 expected conclusion rows present after typed subject convergence
-all-lens reduced union: 19 / 22
-value-domain audit: pass, 32 facts, 43 checked slots, 0 violations
+all-lens reduced union: 19 / 22 after removing invalid letter-level violation-detail rows
+value-domain audit: pass, 30 facts, 39 checked slots, 0 violations
 omission accountability audit: pass
-atom-shape audit: pass, 32 registered facts, 0 blockers
+atom-shape audit: pass, 30 registered facts, 0 blockers
 runtime load errors: 0
 ```
 
@@ -745,6 +746,11 @@ Reading:
   no new predicate family, and no fixture vocabulary inserted into Python. The
   remaining three misses are now the inspection-body value, violation 1
   record-review subject, and violation 2 category.
+- R44 also added a typed subject-integrity reducer for
+  `fda_violation_detail/5`: detail rows whose subject is not an emitted
+  `fda_violation/5` id are dropped. This removed two polluted letter-level
+  detail rows without changing the score. That matters because a stable domain
+  pack needs clean extra facts, not only clean expected rows.
 
 ## Next Moves
 
