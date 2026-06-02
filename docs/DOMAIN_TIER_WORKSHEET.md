@@ -2325,3 +2325,44 @@ Reading:
 - The next useful work should either add source-accountability around expected
   detail roles, or test whether the FDA detail pack transfers to a third unlike
   warning letter before spending more effort on this one residue.
+
+R102 transfer_001 R101 safety rerun:
+
+Purpose:
+
+- Check that R101's optional violation-detail bundle followup and atom-shape
+  integrity guard do not regress the first unlike FDA warning-letter transfer
+  fixture.
+
+Fresh local five-lens N=3 with local LM Studio Qwen Q4:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t001_r101_fresh_full
+
+summary:
+C:\prethinker_tmp_archive\fda_t001_r101_fresh_full\summary.md
+
+formal gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_t001_r101_fresh_full_n3
+
+expected facts: 26
+supported facts at support >= 2: 26
+unsupported facts: 0
+forbidden facts: 9
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: pass
+focused governance tests: 450 passed
+```
+
+Reading:
+
+- R101 is transfer-safe on `fda_warning_letter_domain_transfer_001`.
+- The current FDA domain-pack picture is:
+  - transfer_001: 26/26, gate pass
+  - transfer_002: 25/27, integrity pass, gate fail
+- The remaining work should not be more deterministic value normalization. The
+  open issue is whether violation-detail role/kind accountability can stabilize
+  the two remaining transfer_002 rows without becoming a Python-side semantic
+  relabeler.
