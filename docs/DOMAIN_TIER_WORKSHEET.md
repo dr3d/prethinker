@@ -1869,3 +1869,81 @@ Reading:
 - Remaining work is domain recall/accountability, not sign-clean repair:
   contact role extraction, explicit regulatory-meeting omission accountability,
   violation-2 category boundary, and two deeper violation-detail recall rows.
+
+R96 FDA investigation-failure category:
+
+Problem:
+
+- `fda_warning_letter_domain_transfer_002` exposed a bad palette boundary for
+  violation 2. The source states failure to thoroughly investigate unexplained
+  discrepancies, environmental-monitoring excursions, OOS results, and
+  root-cause determinations under 21 CFR 211.192.
+- The prior closed palette forced either `data_integrity` or
+  `other_registered_category`. `data_integrity` overstates the source as a
+  record-integrity/record-completeness issue; `other_registered_category` is too
+  weak for repeated FDA warning-letter anatomy.
+
+Change:
+
+```text
+carrier:
+fda_violation/5
+
+new governed value:
+investigation_failure
+
+contract rule:
+Use violation_category=investigation_failure for source language about failing
+to thoroughly investigate unexplained discrepancies, OOS results, environmental
+monitoring excursions, root causes, or similar required investigations.
+```
+
+Targeted local probe:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_investigation_failure_violation_n3_20260602
+
+result:
+violation lens emitted
+fda_violation(... violation_2, investigation_failure, ...)
+in 3 / 3 runs
+```
+
+Full fresh local N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_n3_investigation_failure_full_20260602
+
+gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_investigation_failure_full_cleanroot_20260602
+
+expected facts: 27
+supported facts: 23
+unsupported facts: 4
+forbidden facts: 7
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+```
+
+Remaining unsupported rows:
+
+- `domain_omission(... 'fda_regulatory_meeting/4', none_found,
+  future_eligibility_only_no_meeting_held, ...)`
+- `fda_correspondence_party(... contact, erika_v_butler, ...)`
+- `fda_violation_detail(... violation_2, record_review_subject,
+  environmental_monitoring_excursion, ...)`
+- `fda_violation_detail(... violation_3, procedure_scope,
+  decontamination_effectiveness_validation, ...)`
+
+Reading:
+
+- This is a legitimate domain-schema expansion, not a row-level helper. It
+  names a recurring FDA warning-letter violation anatomy that the previous
+  palette could not represent honestly.
+- The result improves the second FDA transfer fixture from the stable active
+  22/27 to 23/27 with no supported forbidden facts and no governance regression.
+- Do not claim the fixture passes. The useful claim is narrower: one missing
+  governed value was identified, added, and confirmed on a full fresh local N=3.

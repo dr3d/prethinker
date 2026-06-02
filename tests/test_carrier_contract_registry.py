@@ -261,6 +261,7 @@ def test_carrier_contract_prompt_lines_render_value_domains() -> None:
     assert "violation_category allowed values" in text
     assert "quality_unit_failure" in text
     assert "contamination_control" in text
+    assert "investigation_failure" in text
     assert "scope_kind allowed values" in text
     assert "cited_violations_not_exhaustive" in text
 
@@ -284,6 +285,7 @@ def test_fda_violation_contract_disambiguates_contamination_control_from_aseptic
     assert "explicitly names aseptic processing" in text
     assert "clean, disinfect, maintain, or control rooms/equipment" in text
     assert "batch production/control records" in text
+    assert "failing to thoroughly investigate unexplained discrepancies" in text
 
 
 def test_fda_adulteration_basis_contract_includes_insanitary_conditions() -> None:

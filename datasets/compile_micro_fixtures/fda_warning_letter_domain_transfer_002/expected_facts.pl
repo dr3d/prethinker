@@ -23,7 +23,7 @@ fda_form483_response(Response483, Inspection, v_2024_09_27, SrcResponse483).
 
 % --- numbered CGMP violations ---
 fda_violation(Viol1, Letter, violation_1, contamination_control, SrcViol1).
-fda_violation(Viol2, Letter, violation_2, other_registered_category, SrcViol2).
+fda_violation(Viol2, Letter, violation_2, investigation_failure, SrcViol2).
 fda_violation(Viol3, Letter, violation_3, aseptic_processing, SrcViol3).
 fda_violation(Viol4, Letter, violation_4, facility_equipment_control, SrcViol4).
 

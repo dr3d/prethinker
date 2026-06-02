@@ -69,10 +69,11 @@ corrections:
 
 - Violation 1 uses `contamination_control` because the source headline and
   citation concern procedures designed to prevent microbiological contamination.
-- Violation 2 uses `other_registered_category`. The source pressure is
-  investigation of unexplained discrepancies and OOS results under 21 CFR
-  211.192. The current FDA category palette does not have a dedicated
-  investigation category. Using `data_integrity` would overstate the source.
+- Violation 2 uses `investigation_failure`. The source pressure is failure to
+  thoroughly investigate unexplained discrepancies, environmental monitoring
+  excursions, OOS results, and root-cause determinations under 21 CFR 211.192.
+  Using `data_integrity` would overstate the source as a record-integrity or
+  record-completeness failure.
 - Violation 3 uses `aseptic_processing` because the source frames cleaning and
   disinfection as the system for producing aseptic conditions.
 - Violation 4 uses `facility_equipment_control` because the source describes
