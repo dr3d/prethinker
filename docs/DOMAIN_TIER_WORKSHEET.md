@@ -2366,3 +2366,49 @@ Reading:
   open issue is whether violation-detail role/kind accountability can stabilize
   the two remaining transfer_002 rows without becoming a Python-side semantic
   relabeler.
+
+R103 rejected violation-detail role/kind prompt guidance:
+
+Hypothesis:
+
+- The two remaining `fda_warning_letter_domain_transfer_002` rows might close if
+  the optional detail-bundle followup explicitly distinguished:
+  - `violation_scope` as the underlying cited deficiency;
+  - `corrective_action_evaluation` as FDA's critique of response/CAPA adequacy;
+  - `record_review_subject` as the subject of investigation/discrepancy review;
+  - `procedure_scope` as the process/procedure/validation/control scope.
+
+Probe:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t002_r103_violation_guidance_n3
+
+fixture:
+fda_warning_letter_domain_transfer_002
+
+lens:
+violation only
+
+support threshold:
+2 / 3
+
+summary:
+C:\prethinker_tmp_archive\fda_t002_r103_violation_guidance_n3\summary.md
+```
+
+Result:
+
+- The SOP row remained stable at 3 / 3, as in R101.
+- `environmental_monitoring_excursion` remained unsupported at 0 / 3.
+- `decontamination_effectiveness_validation` remained unsupported at 0 / 3.
+- Supported forbidden facts remained 0.
+
+Decision:
+
+- Rejected. The guidance did not move the hard rows in the cheap violation-lens
+  probe, so it was removed rather than retained as prompt surface area.
+- This strengthens the current diagnosis: the remaining transfer_002 residue is
+  not solved by ordinary role/kind prompt wording. The next serious options are
+  source-accountability for detail families or a third unlike FDA warning letter
+  to decide whether the residue is fixture-specific.
