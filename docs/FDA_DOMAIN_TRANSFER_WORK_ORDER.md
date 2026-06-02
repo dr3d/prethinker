@@ -188,17 +188,13 @@ After a same-condition N=3 compile, summarize expected support and forbidden
 avoidance together:
 
 ```powershell
-python scripts\summarize_typed_micro_series.py `
+python scripts\run_domain_transfer_gate.py `
   --fixture fda_warning_letter_domain_transfer_001 `
-  --support-threshold 2 `
-  --matcher constant_slot `
-  --enforce-supported `
-  --enforce-no-forbidden `
+  --compile-root COMPILE_ROOT `
   --compile-json RUN1_UNION.json `
   --compile-json RUN2_UNION.json `
   --compile-json RUN3_UNION.json `
-  --out-md C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_summary.md `
-  --out-json C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_summary.json
+  --out-dir C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_gate
 ```
 
 A transfer cell is not clean if it supports every expected fact but also emits

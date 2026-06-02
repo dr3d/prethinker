@@ -1687,3 +1687,47 @@ Reading:
 - The support summary remains a typed micro-series tool; it still does not
   replace the broader research integrity wrapper for sign-clean, value-domain,
   omission, atom-shape, registered-signature, and lens-scope checks.
+
+R94 domain transfer gate wrapper:
+
+```text
+new script:
+scripts/run_domain_transfer_gate.py
+
+checks:
+1. summarize_typed_micro_series.py with:
+   - --enforce-supported
+   - --enforce-no-forbidden
+2. run_research_integrity_gate.py with:
+   - sign-clean audit
+   - atom-shape audit
+   - registered-signature audit
+   - lens-scope audit
+   - carrier value-domain audit
+   - omission-accountability audit
+```
+
+Replay:
+
+```text
+fixture:
+fda_warning_letter_domain_transfer_001
+
+compile root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_tirzepatide_scope_n3_20260601
+
+gate output:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_local_q4_scope_n3_20260602
+
+result:
+domain transfer gate: pass
+typed micro-series expected/forbidden: pass
+research integrity gate: pass
+failed steps: 0 / 2
+```
+
+Reading:
+
+- This turns the transfer-cell governance bundle into one repeatable command
+  instead of a hand-remembered sequence.
+- It should be the default post-run check for future domain transfer cells.

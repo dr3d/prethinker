@@ -270,6 +270,12 @@ gate together:
 python scripts\summarize_typed_micro_series.py --fixture FIXTURE_ID --support-threshold 2 --matcher constant_slot --enforce-supported --enforce-no-forbidden --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
 ```
 
+For a domain transfer cell, prefer the bundled gate:
+
+```text
+python scripts\run_domain_transfer_gate.py --fixture FIXTURE_ID --compile-root COMPILE_ROOT --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
+```
+
 8. Tighten the contract, not the row.
 
 If a dry run fails, prefer changes that make the domain language clearer:
@@ -371,6 +377,7 @@ python scripts\summarize_typed_micro_series.py --fixture FIXTURE_ID --support-th
 python scripts\audit_typed_plan_replay.py --qa-json PATH --compile-root PATH
 python scripts\audit_redaction_replay.py --qa-json PATH
 python scripts\audit_reference_judge_null_controls.py --qa-json PATH
+python scripts\run_domain_transfer_gate.py --fixture FIXTURE_ID --compile-root COMPILE_ROOT --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
 ```
 
 The exact command shape depends on the artifact being tested. The principle does
