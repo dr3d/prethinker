@@ -206,6 +206,11 @@ def main() -> int:
     )
     if isinstance(first_compile, dict):
         first["union_source_compile"]["first_compile_mode"] = first_compile.get("mode", "")
+    first.pop("active_profile_registry_lens", None)
+    first["profile_registry_lens"] = ""
+    first["profile_registry_lens_note"] = (
+        "deterministic_compile_union has no single active lens; source lens artifacts are listed in union_source_compile.source_runs"
+    )
 
     out_dir = args.out_dir if args.out_dir.is_absolute() else (REPO_ROOT / args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)

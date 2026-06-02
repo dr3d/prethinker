@@ -1534,3 +1534,63 @@ Reading:
   generation, so the trusted result depends on signature enforcement, value
   domains, omission accountability, and atom-shape auditing, not prompt
   obedience.
+
+R91 lens-scope gate hardening:
+
+```text
+change:
+scripts/audit_kb_atom_inventory.py now supports:
+- --enforce-registered-signatures
+- --enforce-lens-scope
+
+scripts/union_domain_bootstrap_compiles.py now removes single active-lens
+metadata from deterministic union artifacts. A union is not a wrapper,
+violation, chronology, response, or conclusion lens; it is a deterministic
+merge of already-admitted lens artifacts.
+```
+
+Why this mattered:
+
+- Before R91, the atom inventory audit could say a domain transfer was clean
+  with respect to registered signatures and prose-shaped atoms, but it did not
+  hard-fail a registered fact emitted by the wrong active lens.
+- That left a governance blind spot: "registered somewhere in the FDA domain"
+  is weaker than "allowed for this lens." The intended rule is
+  `offered_predicates = f(domain_registry, lens)`.
+- The first strict run exposed a metadata issue rather than an LLM leak:
+  all-lens union artifacts inherited `active_profile_registry_lens=wrapper`
+  from the first input record. The new gate treated valid union facts as
+  wrapper-scope violations. That was a real artifact-governance problem, fixed
+  by stripping active-lens metadata from new deterministic unions and teaching
+  the audit to ignore historical artifacts with `union_source_compile`.
+
+Strict FDA local-root replay:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_tirzepatide_scope_n3_20260601
+
+command:
+python scripts\audit_kb_atom_inventory.py
+  --compile-root <root>
+  --enforce-atom-shape
+  --enforce-registered-signatures
+  --enforce-lens-scope
+
+result:
+typed facts: 262
+registered facts: 262
+unregistered facts: 0
+atom-shape blockers: 0
+lens-scope blockers: 0
+status: pass
+```
+
+Reading:
+
+- R90's local 26/26 result now has a stronger governance reading: every trusted
+  typed fact is registered, prose-shape clean, and either inside its active
+  lens's offered predicate set or part of a deterministic all-lens union.
+- This still does not turn the local lane into an OpenRouter benchmark claim.
+  It does make the local lane a better iteration platform because predicate
+  invention and cross-lens leakage now have a biting gate.

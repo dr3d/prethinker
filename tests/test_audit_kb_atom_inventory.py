@@ -4,16 +4,16 @@ from pathlib import Path
 from scripts.audit_kb_atom_inventory import build_report
 
 
-def _write_compile(path: Path, facts: list[str]) -> None:
+def _write_compile(path: Path, facts: list[str], **metadata) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "source_compile": {
+            "facts": facts,
+        }
+    }
+    payload.update(metadata)
     path.write_text(
-        json.dumps(
-            {
-                "source_compile": {
-                    "facts": facts,
-                }
-            }
-        ),
+        json.dumps(payload),
         encoding="utf-8",
     )
 
@@ -137,3 +137,83 @@ def test_kb_atom_inventory_atom_shape_gate_flags_prose_shaped_typed_atoms(tmp_pa
     assert issue_types["registered_carrier_prose_shaped_value"] >= 1
     assert issue_types["predicate_name_too_long"] >= 1
     assert all(not issue["signature"].startswith("source_record_") for issue in report["atom_shape"]["examples"])
+
+
+def test_kb_atom_inventory_reports_active_lens_scope_violations(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    _write_compile(
+        compile_root / "violation_lens" / "run.json",
+        [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, source_1).",
+            "fda_response_requirement(letter_1, written_response, fifteen_working_days, issuing_office, corrective_actions, source_2).",
+        ],
+        active_profile_registry_lens={
+            "id": "violation",
+            "allowed_signatures": ["fda_violation/5"],
+        },
+    )
+
+    report = build_report(
+        compile_root=compile_root,
+        fixtures=None,
+        include_source_record=False,
+        include_prose_like=False,
+        max_examples=5,
+    )
+
+    assert report["lens_scope"]["status"] == "fail"
+    assert report["summary"]["lens_scope_blocker_count"] == 1
+    assert report["lens_scope"]["examples"][0]["signature"] == "fda_response_requirement/6"
+    assert report["fixtures_detail"][0]["lens_scope_blocker_count"] == 1
+
+
+def test_kb_atom_inventory_lens_scope_ignores_artifacts_without_active_lens(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    _write_compile(
+        compile_root / "all_lenses_union" / "run.json",
+        [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, source_1).",
+            "fda_response_requirement(letter_1, written_response, fifteen_working_days, issuing_office, corrective_actions, source_2).",
+        ],
+    )
+
+    report = build_report(
+        compile_root=compile_root,
+        fixtures=None,
+        include_source_record=False,
+        include_prose_like=False,
+        max_examples=5,
+    )
+
+    assert report["lens_scope"]["status"] == "pass"
+    assert report["summary"]["lens_scope_blocker_count"] == 0
+
+
+def test_kb_atom_inventory_lens_scope_ignores_deterministic_unions_with_stale_lens_metadata(
+    tmp_path: Path,
+) -> None:
+    compile_root = tmp_path / "compile"
+    _write_compile(
+        compile_root / "all_lenses_union" / "run.json",
+        [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, source_1).",
+            "fda_response_requirement(letter_1, written_response, fifteen_working_days, issuing_office, corrective_actions, source_2).",
+        ],
+        mode="deterministic_compile_union",
+        union_source_compile={"source_runs": ["wrapper.json", "violation.json"]},
+        active_profile_registry_lens={
+            "id": "wrapper",
+            "allowed_signatures": ["fda_warning_letter/5"],
+        },
+    )
+
+    report = build_report(
+        compile_root=compile_root,
+        fixtures=None,
+        include_source_record=False,
+        include_prose_like=False,
+        max_examples=5,
+    )
+
+    assert report["lens_scope"]["status"] == "pass"
+    assert report["summary"]["lens_scope_blocker_count"] == 0

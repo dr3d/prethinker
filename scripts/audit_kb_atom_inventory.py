@@ -138,9 +138,22 @@ def parse_args() -> argparse.Namespace:
         help="Fail when compiled typed atoms or predicate names look prose-shaped.",
     )
     parser.add_argument(
+        "--enforce-registered-signatures",
+        action="store_true",
+        help="Fail when trusted typed facts use predicate signatures without carrier contracts.",
+    )
+    parser.add_argument(
+        "--enforce-lens-scope",
+        action="store_true",
+        help=(
+            "Fail when a compile artifact with active_profile_registry_lens emits trusted typed facts "
+            "outside that lens's allowed_signatures."
+        ),
+    )
+    parser.add_argument(
         "--exit-zero",
         action="store_true",
-        help="Write the report but return 0 even when --enforce-atom-shape fails.",
+        help="Write the report but return 0 even when an enforcement option fails.",
     )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
@@ -168,8 +181,13 @@ def main() -> int:
         args.out_md.write_text(render_markdown(report), encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    if args.enforce_atom_shape and report.get("atom_shape", {}).get("status") == "fail" and not args.exit_zero:
-        return 1
+    if not args.exit_zero:
+        if args.enforce_atom_shape and report.get("atom_shape", {}).get("status") == "fail":
+            return 1
+        if args.enforce_registered_signatures and report.get("summary", {}).get("unregistered_fact_count", 0):
+            return 1
+        if args.enforce_lens_scope and report.get("lens_scope", {}).get("status") == "fail":
+            return 1
     return 0
 
 
@@ -196,10 +214,13 @@ def build_report(
     rejected_counts: Counter[str] = Counter()
     global_shape_issues: list[dict[str, Any]] = []
     global_shape_issue_counts: Counter[str] = Counter()
+    global_lens_scope_issues: list[dict[str, Any]] = []
+    global_lens_scope_issue_counts: Counter[str] = Counter()
 
     fixture_dirs = _fixture_dirs(compile_root, fixtures=fixtures)
     for fixture_dir in fixture_dirs:
         compile_json = _latest_compile_json(fixture_dir)
+        data = _load_compile_json(compile_json)
         facts, rejected, shape_issues = _typed_facts(
             compile_json,
             include_source_record=include_source_record,
@@ -210,6 +231,16 @@ def build_report(
             max_atom_tokens=max_atom_tokens,
         )
         rejected_counts.update(rejected)
+        lens_scope = _lens_scope_for_compile(data)
+        lens_scope_issues = _lens_scope_issues(
+            facts,
+            fixture=fixture_dir.name,
+            compile_json=compile_json,
+            lens_scope=lens_scope,
+        )
+        for issue in lens_scope_issues:
+            global_lens_scope_issues.append(issue)
+            global_lens_scope_issue_counts[str(issue.get("signature", "unknown"))] += 1
         for issue in shape_issues:
             issue = {"fixture": fixture_dir.name, **issue}
             global_shape_issues.append(issue)
@@ -265,6 +296,11 @@ def build_report(
                 "atom_shape_blocker_count": len(shape_issues),
                 "atom_shape_issue_counts": dict(
                     sorted(Counter(str(issue.get("issue_type", "unknown")) for issue in shape_issues).items())
+                ),
+                "active_profile_registry_lens": lens_scope,
+                "lens_scope_blocker_count": len(lens_scope_issues),
+                "lens_scope_blocker_signatures": dict(
+                    sorted(Counter(str(issue.get("signature", "unknown")) for issue in lens_scope_issues).items())
                 ),
             }
         )
@@ -324,6 +360,7 @@ def build_report(
             "unregistered_signature_count": len(global_unregistered_signatures),
             "rejected_counts": dict(sorted(rejected_counts.items())),
             "atom_shape_blocker_count": len(shape_blockers),
+            "lens_scope_blocker_count": len(global_lens_scope_issues),
         },
         "atom_shape": {
             "schema_version": "kb_atom_shape_audit_v1",
@@ -331,6 +368,13 @@ def build_report(
             "blocker_count": len(shape_blockers),
             "issue_type_counts": dict(sorted(global_shape_issue_counts.items())),
             "examples": global_shape_issues[:max_examples],
+        },
+        "lens_scope": {
+            "schema_version": "kb_lens_scope_audit_v1",
+            "status": "fail" if global_lens_scope_issues else "pass",
+            "blocker_count": len(global_lens_scope_issues),
+            "signature_counts": dict(sorted(global_lens_scope_issue_counts.items())),
+            "examples": global_lens_scope_issues[:max_examples],
         },
         "top_predicates": dict(global_predicates.most_common(50)),
         "top_signatures": dict(global_signatures.most_common(50)),
@@ -364,6 +408,11 @@ def _latest_compile_json(path: Path) -> Path:
     return candidates[-1]
 
 
+def _load_compile_json(path: Path) -> dict[str, Any]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
+
+
 def _typed_facts(
     path: Path,
     *,
@@ -374,7 +423,7 @@ def _typed_facts(
     max_atom_chars: int = DEFAULT_MAX_ATOM_CHARS,
     max_atom_tokens: int = DEFAULT_MAX_ATOM_TOKENS,
 ) -> tuple[list[ParsedFact], Counter[str], list[dict[str, Any]]]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = _load_compile_json(path)
     facts = data.get("source_compile", {}).get("facts", [])
     out: list[ParsedFact] = []
     rejected: Counter[str] = Counter()
@@ -402,6 +451,62 @@ def _typed_facts(
             continue
         out.append(fact)
     return out, rejected, shape_issues
+
+
+def _lens_scope_for_compile(data: dict[str, Any]) -> dict[str, Any] | None:
+    if isinstance(data.get("union_source_compile"), dict):
+        return None
+    if str(data.get("mode", "")).strip() == "deterministic_compile_union":
+        return None
+    active_lens = data.get("active_profile_registry_lens")
+    if not isinstance(active_lens, dict):
+        return None
+    lens_id = str(active_lens.get("id", "")).strip()
+    allowed = {
+        str(signature).strip()
+        for signature in active_lens.get("allowed_signatures", [])
+        if str(signature).strip()
+    }
+    if not lens_id or not allowed:
+        return None
+    return {
+        "id": lens_id,
+        "allowed_signatures": sorted(allowed),
+    }
+
+
+def _lens_scope_issues(
+    facts: list[ParsedFact],
+    *,
+    fixture: str,
+    compile_json: Path,
+    lens_scope: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if not lens_scope:
+        return []
+    allowed = {
+        str(signature).strip()
+        for signature in lens_scope.get("allowed_signatures", [])
+        if str(signature).strip()
+    }
+    if not allowed:
+        return []
+    out: list[dict[str, Any]] = []
+    for fact in facts:
+        if fact.signature in allowed:
+            continue
+        out.append(
+            {
+                "severity": "blocker",
+                "fixture": fixture,
+                "compile_json": str(compile_json),
+                "lens_id": str(lens_scope.get("id", "")),
+                "signature": fact.signature,
+                "allowed_signatures": sorted(allowed),
+                "clause": fact.clause,
+            }
+        )
+    return out
 
 
 def _parse_fact(clause: str) -> ParsedFact | None:
@@ -669,6 +774,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Unregistered signatures: `{summary['unregistered_signature_count']}`",
         f"- Rejected: `{summary['rejected_counts']}`",
         f"- Atom-shape status: `{report['atom_shape']['status']}` blockers=`{report['atom_shape']['blocker_count']}`",
+        f"- Lens-scope status: `{report['lens_scope']['status']}` blockers=`{report['lens_scope']['blocker_count']}`",
         "",
         "## Atom Shape",
         "",
@@ -690,6 +796,31 @@ def render_markdown(report: dict[str, Any]) -> str:
                 issue.get("field", ""),
                 issue.get("issue_type", ""),
                 value.replace("|", "\\|"),
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "## Lens Scope",
+            "",
+            f"- Status: `{report['lens_scope']['status']}`",
+            f"- Blockers: `{report['lens_scope']['blocker_count']}`",
+            f"- Signatures: `{report['lens_scope']['signature_counts']}`",
+            "",
+            "| Fixture | Lens | Signature | Clause |",
+            "| --- | --- | --- | --- |",
+        ]
+    )
+    for issue in report["lens_scope"].get("examples", []):
+        clause = str(issue.get("clause", ""))
+        if len(clause) > 120:
+            clause = clause[:117] + "..."
+        lines.append(
+            "| `{}` | `{}` | `{}` | `{}` |".format(
+                issue.get("fixture", ""),
+                issue.get("lens_id", ""),
+                issue.get("signature", ""),
+                clause.replace("|", "\\|"),
             )
         )
     lines.extend(
