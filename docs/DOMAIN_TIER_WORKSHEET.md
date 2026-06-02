@@ -1635,3 +1635,55 @@ Reading:
   instead of remembering separate governance commands by hand.
 - The wrapper now checks the exact leakage class raised in R91: registered
   facts emitted outside the active lens's offered predicate set.
+
+R93 typed-series summary now accounts for forbidden facts:
+
+```text
+change:
+scripts/summarize_typed_micro_series.py now reports:
+- forbidden_fact_count
+- supported_forbidden_fact_count
+- forbidden_rows
+
+new optional bite flags:
+- --enforce-supported
+- --enforce-no-forbidden
+```
+
+Replay:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_tirzepatide_scope_n3_20260601
+
+summary artifact:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_tirzepatide_scope_n3_20260601\local_q4_scope_n3_constant_slot_support2_strict.md
+
+command shape:
+python scripts\summarize_typed_micro_series.py
+  --fixture fda_warning_letter_domain_transfer_001
+  --support-threshold 2
+  --matcher constant_slot
+  --enforce-supported
+  --enforce-no-forbidden
+  --compile-json <run1 union>
+  --compile-json <run2 union>
+  --compile-json <run3 union>
+
+result:
+expected facts: 26
+supported facts: 26
+unsupported facts: 0
+forbidden facts: 9
+supported forbidden facts: 0
+```
+
+Reading:
+
+- The local FDA transfer lane is now guarded not only against missing expected
+  facts but also against tempting forbidden rows. This closes another reporting
+  hole where a run could look perfect on expected recall while also emitting a
+  known bad fact.
+- The support summary remains a typed micro-series tool; it still does not
+  replace the broader research integrity wrapper for sign-clean, value-domain,
+  omission, atom-shape, registered-signature, and lens-scope checks.

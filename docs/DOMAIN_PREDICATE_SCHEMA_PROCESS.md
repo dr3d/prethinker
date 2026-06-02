@@ -263,6 +263,13 @@ Compile the micro-fixture and measure:
 The first dry run is allowed to be bad. Its job is to show whether the schema is
 under-specified, too broad, too prose-shaped, or missing a value domain.
 
+For N-cycle transfer or micro-series summaries, use the expected/forbidden
+gate together:
+
+```text
+python scripts\summarize_typed_micro_series.py --fixture FIXTURE_ID --support-threshold 2 --matcher constant_slot --enforce-supported --enforce-no-forbidden --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
+```
+
 8. Tighten the contract, not the row.
 
 If a dry run fails, prefer changes that make the domain language clearer:
@@ -360,6 +367,7 @@ Use these checks as the domain pack matures:
 python scripts\audit_carrier_value_domains.py --compile-json PATH --fixture FIXTURE_ID
 python scripts\audit_domain_omission_accountability.py --compile-json PATH --fixture FIXTURE_ID
 python scripts\audit_kb_atom_inventory.py --compile-root PATH --enforce-atom-shape --enforce-registered-signatures --enforce-lens-scope
+python scripts\summarize_typed_micro_series.py --fixture FIXTURE_ID --support-threshold 2 --matcher constant_slot --enforce-supported --enforce-no-forbidden --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
 python scripts\audit_typed_plan_replay.py --qa-json PATH --compile-root PATH
 python scripts\audit_redaction_replay.py --qa-json PATH
 python scripts\audit_reference_judge_null_controls.py --qa-json PATH

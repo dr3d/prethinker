@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from scripts.summarize_typed_micro_series import build_report, render_markdown
+from scripts.summarize_typed_micro_series import build_report, main, render_markdown
 
 
 def _write(path: Path, text: str) -> Path:
@@ -173,3 +173,87 @@ def test_typed_micro_series_can_apply_domain_reducers_before_support(tmp_path: P
     assert without_rows[expected]["support_count"] == 0
     assert with_rows[expected]["support_count"] == 1
     assert with_reducers["domain_reducers_applied"] is True
+
+
+def test_typed_micro_series_reports_supported_forbidden_facts(tmp_path: Path) -> None:
+    root = tmp_path / "micro"
+    fixture = root / "demo_fixture"
+    _write(
+        fixture / "expected_facts.pl",
+        "\n".join(
+            [
+                "demo_fact(Entity, allowed_value, Src).",
+            ]
+        ),
+    )
+    _write(
+        fixture / "forbidden_facts.pl",
+        "\n".join(
+            [
+                "demo_fact(Entity, prose_shaped_value, Src).",
+            ]
+        ),
+    )
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        [
+            "demo_fact(row_1, allowed_value, source_1).",
+            "demo_fact(row_1, prose_shaped_value, source_1).",
+        ],
+    )
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        root=root,
+        compile_paths=[run1],
+        support_threshold=1,
+        matcher="constant_slot",
+    )
+
+    assert report["summary"]["supported_fact_count"] == 1
+    assert report["summary"]["forbidden_fact_count"] == 1
+    assert report["summary"]["supported_forbidden_fact_count"] == 1
+    assert report["forbidden_rows"] == [
+        {
+            "forbidden_fact": "demo_fact(Entity, prose_shaped_value, Src).",
+            "support_count": 1,
+            "support_runs": ["run1"],
+            "supported": True,
+        }
+    ]
+    assert "Supported Forbidden Facts" in render_markdown(report)
+
+
+def test_typed_micro_series_cli_enforce_no_forbidden_bites(tmp_path: Path, monkeypatch) -> None:
+    root = tmp_path / "micro"
+    fixture = root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "demo_fact(Entity, allowed_value, Src).\n")
+    _write(fixture / "forbidden_facts.pl", "demo_fact(Entity, prose_shaped_value, Src).\n")
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        [
+            "demo_fact(row_1, allowed_value, source_1).",
+            "demo_fact(row_1, prose_shaped_value, source_1).",
+        ],
+    )
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "summarize_typed_micro_series.py",
+            "--fixture",
+            "demo_fixture",
+            "--root",
+            str(root),
+            "--compile-json",
+            str(run1),
+            "--support-threshold",
+            "1",
+            "--matcher",
+            "constant_slot",
+            "--enforce-supported",
+            "--enforce-no-forbidden",
+        ],
+    )
+
+    assert main() == 1

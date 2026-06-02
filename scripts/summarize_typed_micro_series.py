@@ -59,6 +59,16 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Apply deterministic typed-domain reducers to each compile before measuring support.",
     )
+    parser.add_argument(
+        "--enforce-supported",
+        action="store_true",
+        help="Fail when any expected fact does not meet the support threshold.",
+    )
+    parser.add_argument(
+        "--enforce-no-forbidden",
+        action="store_true",
+        help="Fail when any forbidden fact is supported by one or more compiles.",
+    )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument("--exit-zero", action="store_true")
@@ -83,7 +93,15 @@ def main() -> int:
         args.out_md.write_text(render_markdown(report), encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if args.exit_zero or report["summary"]["compile_count"] else 1
+    if args.exit_zero:
+        return 0
+    if not report["summary"]["compile_count"]:
+        return 1
+    if args.enforce_supported and report["summary"]["unsupported_fact_count"]:
+        return 1
+    if args.enforce_no_forbidden and report["summary"]["supported_forbidden_fact_count"]:
+        return 1
+    return 0
 
 
 def build_report(
@@ -97,10 +115,13 @@ def build_report(
 ) -> dict[str, Any]:
     fixture_dir = root / fixture_id
     expected_path = fixture_dir / "expected_facts.pl"
+    forbidden_path = fixture_dir / "forbidden_facts.pl"
     expected_facts = _load_fact_lines(expected_path)
+    forbidden_facts = _load_fact_lines(forbidden_path) if forbidden_path.exists() else []
     runs: list[dict[str, Any]] = []
     support: dict[str, list[str]] = {fact: [] for fact in expected_facts}
     variants: dict[str, dict[str, list[str]]] = {fact: {} for fact in expected_facts}
+    forbidden_support: dict[str, list[str]] = {fact: [] for fact in forbidden_facts}
     for index, path in enumerate(compile_paths, start=1):
         run_id = path.parent.name or f"run_{index}"
         compile_facts = _facts_from_compile_json(path)
@@ -117,6 +138,9 @@ def build_report(
         matched = [fact for fact in expected_facts if fact not in missing]
         for fact in matched:
             support.setdefault(fact, []).append(run_id)
+        for fact in forbidden_facts:
+            if _fact_supported(fact, compile_facts, matcher=matcher):
+                forbidden_support.setdefault(fact, []).append(run_id)
         for fact in missing:
             for variant in _same_predicate_variants(fact, compile_facts):
                 variants.setdefault(fact, {}).setdefault(variant["fact"], []).append(run_id)
@@ -127,6 +151,9 @@ def build_report(
                 "matched_fact_count": len(matched),
                 "expected_fact_count": len(expected_facts),
                 "missing_fact_count": len(missing),
+                "forbidden_match_count": sum(
+                    1 for fact in forbidden_facts if run_id in forbidden_support.get(fact, [])
+                ),
                 "domain_reducer_reports": reducer_report,
             }
         )
@@ -148,10 +175,22 @@ def build_report(
     ]
     rows.sort(key=lambda item: (not bool(item["meets_threshold"]), -int(item["support_count"]), item["expected_fact"]))
     supported = [row for row in rows if row["meets_threshold"]]
+    forbidden_rows = [
+        {
+            "forbidden_fact": fact,
+            "support_count": len(run_ids),
+            "support_runs": run_ids,
+            "supported": bool(run_ids),
+        }
+        for fact, run_ids in forbidden_support.items()
+    ]
+    forbidden_rows.sort(key=lambda item: (not bool(item["supported"]), -int(item["support_count"]), item["forbidden_fact"]))
+    supported_forbidden = [row for row in forbidden_rows if row["supported"]]
     return {
         "schema_version": "typed_micro_series_summary_v1",
         "fixture_id": fixture_id,
         "expected_facts": str(expected_path),
+        "forbidden_facts": str(forbidden_path) if forbidden_path.exists() else "",
         "support_threshold": support_threshold,
         "matcher": matcher,
         "domain_reducers_applied": bool(apply_domain_reducers),
@@ -160,9 +199,12 @@ def build_report(
             "expected_fact_count": len(expected_facts),
             "supported_fact_count": len(supported),
             "unsupported_fact_count": len(rows) - len(supported),
+            "forbidden_fact_count": len(forbidden_facts),
+            "supported_forbidden_fact_count": len(supported_forbidden),
         },
         "runs": runs,
         "rows": rows,
+        "forbidden_rows": forbidden_rows,
     }
 
 
@@ -179,6 +221,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Domain reducers applied: `{report.get('domain_reducers_applied', False)}`",
         f"- Supported facts: `{summary['supported_fact_count']}`",
         f"- Unsupported facts: `{summary['unsupported_fact_count']}`",
+        f"- Forbidden facts: `{summary.get('forbidden_fact_count', 0)}`",
+        f"- Supported forbidden facts: `{summary.get('supported_forbidden_fact_count', 0)}`",
         "",
         "| Support | Meets | Expected fact |",
         "| ---: | --- | --- |",
@@ -202,6 +246,12 @@ def render_markdown(report: dict[str, Any]) -> str:
             for variant in row.get("same_predicate_variants", [])[:8]:
                 runs = ", ".join(variant.get("runs", []))
                 lines.append(f"  - {variant.get('run_count', 0)} run(s): `{variant.get('fact')}` [{runs}]")
+    supported_forbidden = [row for row in report.get("forbidden_rows", []) if row.get("supported")]
+    if supported_forbidden:
+        lines.extend(["", "## Supported Forbidden Facts", ""])
+        for row in supported_forbidden:
+            runs = ", ".join(row.get("support_runs", []))
+            lines.append(f"- {row.get('support_count', 0)} run(s): `{row.get('forbidden_fact')}` [{runs}]")
     return "\n".join(lines) + "\n"
 
 
@@ -257,6 +307,12 @@ def _constant_slot_supported(expected_fact: str, compile_facts: list[str]) -> bo
         ):
             return True
     return False
+
+
+def _fact_supported(fact: str, compile_facts: list[str], *, matcher: str) -> bool:
+    if matcher == "constant_slot":
+        return _constant_slot_supported(fact, compile_facts)
+    return fact not in set(_match_expected_facts([fact], compile_facts)["missing_expected_facts"])
 
 
 def _same_position_constant_overlap(expected_args: list[str], candidate_args: list[str]) -> int:

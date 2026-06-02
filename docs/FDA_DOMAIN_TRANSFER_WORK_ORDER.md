@@ -183,3 +183,23 @@ python scripts\validate_domain_transfer_package.py `
 If this preflight fails, fix the fixture package before compiling. Do not spend
 inference budget on a package with missing source citation, out-of-registry
 expected facts, or prose-shaped expected atoms.
+
+After a same-condition N=3 compile, summarize expected support and forbidden
+avoidance together:
+
+```powershell
+python scripts\summarize_typed_micro_series.py `
+  --fixture fda_warning_letter_domain_transfer_001 `
+  --support-threshold 2 `
+  --matcher constant_slot `
+  --enforce-supported `
+  --enforce-no-forbidden `
+  --compile-json RUN1_UNION.json `
+  --compile-json RUN2_UNION.json `
+  --compile-json RUN3_UNION.json `
+  --out-md C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_summary.md `
+  --out-json C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_summary.json
+```
+
+A transfer cell is not clean if it supports every expected fact but also emits
+one of the fixture's forbidden facts.
