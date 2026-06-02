@@ -2013,3 +2013,238 @@ Reading:
   should address detail-bundle composition or accountability: required detail
   families per numbered violation, with explicit coverage accounting, so adding
   EM/OOS/decontamination detail does not crowd out SOP/process-area detail.
+
+R98 audit-discovery correction for nested N-run roots:
+
+Problem:
+
+- Local/domain transfer cells are often archived as nested directories:
+  `runN_lens/fixture/domain_bootstrap_file_*.json`, with batch summaries one
+  level above.
+- The research-integrity audits for atom inventory, carrier value domains, and
+  domain omission accountability previously looked only one directory deep.
+  On a nested root, the gate could report pass while inspecting zero compile
+  artifacts.
+- This affected the meaning of earlier "research integrity gate: pass" notes
+  for nested roots. It does not create a known score inflation by itself, but it
+  means the governance evidence was incomplete unless the audit was pointed at
+  flat compile directories or explicit JSONs.
+
+Change:
+
+- `audit_kb_atom_inventory.py`, `audit_carrier_value_domains.py`, and
+  `audit_domain_omission_accountability.py` now recursively discover JSON files
+  that actually contain `source_compile`, ignore `batch.json` summaries, and
+  filter by fixture name anywhere in the relative path.
+- `audit_kb_atom_inventory.py` now fails under enforcement if a compile root
+  yields zero discovered compile artifacts. Empty-air passes are no longer
+  possible for claim-bearing gate runs.
+- Regression tests cover nested run/fixture discovery for all three affected
+  audits and the enforced-empty-root failure.
+
+Verification:
+
+```text
+focused tests:
+22 passed
+
+fixed integrity gate on targeted chronology N=3:
+C:\prethinker_tmp_archive\research_integrity_meeting_omission_chronology_n3_fixeddiscovery_20260602
+
+fixed integrity gate on full local N=3:
+C:\prethinker_tmp_archive\research_integrity_fda_transfer_002_local_q4_n3_meeting_omission_full_20260602
+
+result:
+sign clean: pass
+atom shape / registered signatures / lens scope: pass
+carrier value domains: pass
+domain omission accountability: pass
+focused governance tests: 444 passed
+```
+
+Reading:
+
+- This is a governance repair, not a score repair.
+- Treat pre-R98 nested-root integrity passes as advisory unless rerun with the
+  fixed discovery path.
+- The fix strengthens the current FDA transfer evidence because the latest
+  full cell was rechecked with real compile artifacts discovered.
+
+R99 FDA regulatory-meeting omission accountability:
+
+Problem:
+
+- `fda_warning_letter_domain_transfer_002` expects:
+
+```prolog
+domain_omission(Letter, 'fda_regulatory_meeting/4', none_found,
+  future_eligibility_only_no_meeting_held, SrcOmit1).
+```
+
+- The source states future eligibility for a Post-Warning Letter Meeting, not
+  that a meeting or teleconference occurred.
+- The FDA domain pack had `domain_omission/5`, but only the wrapper/signatory
+  absence case was registered as an accountable omission requirement. Chronology
+  therefore did not have to make the meeting absence visible.
+
+Change:
+
+- Added a chronology-scoped accountability requirement:
+
+```text
+id: meeting_future_eligibility_only
+carrier_signature: fda_regulatory_meeting/4
+omission_kind: none_found
+reason_code: future_eligibility_only_no_meeting_held
+trigger:
+source_mentions_future_post_warning_letter_meeting_eligibility_but_does_not_state_a_meeting_or_teleconference_occurred
+```
+
+- Lens filtering keeps this requirement inside the chronology lens only.
+- The followup pass remains bounded: it may emit `domain_omission/5` only and
+  cannot emit ordinary answer-bearing facts.
+
+Targeted local chronology N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_meeting_omission_chronology_n3_20260602
+
+summary:
+C:\prethinker_tmp_archive\meeting_omission_chronology_n3_summary_20260602.md
+
+result:
+domain_omission(... 'fda_regulatory_meeting/4', none_found,
+future_eligibility_only_no_meeting_held, ...)
+supported in 3 / 3 runs
+
+supported forbidden facts: 0
+fixed research integrity gate: pass
+```
+
+Full local five-lens N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_n3_meeting_omission_full_20260602
+
+gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_meeting_omission_full_20260602
+
+expected facts: 27
+supported facts: 23
+unsupported facts: 4
+forbidden facts: 7
+supported forbidden facts: 0
+research integrity gate: pass with fixed nested discovery
+domain transfer gate: fail
+```
+
+Supported changes relative to the prior active full cell:
+
+- Meeting omission row: now stable 3 / 3.
+- Contact row for `erika_v_butler`: present 3 / 3 in this local full cell, but
+  this was not caused by the omitted ATTN/contact prompt guidance candidate,
+  which remains rejected.
+
+Current unsupported rows:
+
+- `fda_violation_detail(... violation_1, procedure_scope, sop_0870_3_0, ...)`
+- `fda_violation_detail(... violation_2, record_review_subject,
+  environmental_monitoring_excursion, ...)` (1 / 3 only)
+- `fda_violation_detail(... violation_3, procedure_scope,
+  decontamination_effectiveness_validation, ...)`
+- `fda_violation_detail(... violation_4, process_area, iso_7, ...)`
+
+Reading:
+
+- The meeting omission accountability mechanism is real and governance-clean.
+- The full transfer score did not improve because the residue moved into
+  `fda_violation_detail/5`. This confirms the current blocker is violation
+  detail bundle composition/stability, not more wrapper or chronology guidance.
+- Do not claim 24/27 or 26/27 from this. The honest active transfer_002 state is
+  still 23/27, 0 supported forbidden facts, fixed integrity gate pass, transfer
+  gate fail.
+
+R100 conservative FDA violation-detail atom reducer:
+
+Problem:
+
+- The R99 residue showed two different failure classes inside
+  `fda_violation_detail/5`:
+  - spelling/over-specificity inside the same typed slot, such as
+    `iso_7_room_ceiling_and_door` where the expected domain atom is `iso_7`;
+  - deeper bundle/classification drift, such as decontamination validation
+    appearing as `missing_record_type` or `process_area` instead of the expected
+    `procedure_scope`.
+- Only the first class is safe for a deterministic reducer. Reclassifying
+  detail kind or role from Python would be a semantic shortcut in typed clothing.
+
+Change:
+
+- Added `fda_violation_detail_atom_reduction`, a typed-value-only reducer.
+- It operates only inside the same registered carrier and same slot:
+  - `process_area=iso_N_<surface/location>` -> `process_area=iso_N`
+  - `record_review_subject=*_results` -> `record_review_subject=*`
+- It does not read source prose, does not inspect questions, does not infer
+  missing rows, and does not change `detail_kind` or `role_or_purpose`.
+- A broader draft that reduced all `iso_N_*` process-area values was rejected
+  after it regressed `fda_warning_letter_domain_transfer_001` by collapsing
+  `iso_5_aseptic_processing_area` to `iso_5`. The active reducer is narrowed to
+  surface/location suffixes such as room, ceiling, door, wall, floor, paint, or
+  rust.
+
+Verification:
+
+```text
+unit/focused tests:
+446 passed
+
+reduced-union root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_n3_narrow_detail_atom_reduced_union_20260602
+
+formal gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_narrow_detail_atom_reduced_union_20260602
+
+expected facts: 27
+supported facts: 24
+unsupported facts: 3
+forbidden facts: 7
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+
+transfer-safety check:
+C:\prethinker_tmp_archive\fda_transfer_001_tirzepatide_with_narrow_detail_reducer_summary_20260602.md
+
+fda_warning_letter_domain_transfer_001:
+26 / 26 supported
+0 supported forbidden facts
+```
+
+Rows recovered by the conservative reducer:
+
+- `fda_violation_detail(... violation_4, process_area, iso_7, ...)`
+
+Rows still unsupported:
+
+- `fda_violation_detail(... violation_2, record_review_subject,
+  environmental_monitoring_excursion, violation_scope, ...)`
+- `fda_violation_detail(... violation_1, procedure_scope, sop_0870_3_0, ...)`
+- `fda_violation_detail(... violation_3, procedure_scope,
+  decontamination_effectiveness_validation, ...)`
+
+Reading:
+
+- The conservative reducer is a legitimate atom-governance improvement, not a
+  broad prompt repair.
+- It moves the second FDA transfer fixture to 24/27 under reduced artifacts with
+  all governance gates clean.
+- The remaining three rows are not safe spelling reductions:
+  - EM has role drift (`corrective_action_evaluation` vs `violation_scope`) in
+    the second supporting run.
+  - SOP is not emitted often enough in this local Q4 N=3.
+  - Decontamination validation requires detail-kind/role stability, not value
+    canonicalization.
+- The next blocker is therefore detail-family coverage/accountability for
+  numbered FDA violations, not more atom spelling normalization.

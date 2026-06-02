@@ -257,16 +257,35 @@ def _compile_paths(*, compile_root: Path | None, compile_jsons: list[Path], fixt
     paths: list[Path] = [path.resolve() for path in compile_jsons]
     if compile_root is not None:
         root = compile_root.resolve()
-        for fixture_dir in sorted(path for path in root.iterdir() if path.is_dir()):
-            if fixtures and fixture_dir.name not in fixtures:
+        by_dir: dict[str, list[Path]] = {}
+        for candidate in root.rglob("*.json"):
+            if fixtures and not _path_matches_fixture(candidate, root=root, fixtures=fixtures):
                 continue
-            candidates = sorted(fixture_dir.glob("*.json"), key=lambda item: item.stat().st_mtime)
-            if candidates:
-                paths.append(candidates[-1].resolve())
+            if not _has_source_compile(candidate):
+                continue
+            by_dir.setdefault(str(candidate.parent.resolve()), []).append(candidate)
+        for candidates in by_dir.values():
+            paths.append(sorted(candidates, key=lambda item: item.stat().st_mtime)[-1].resolve())
     unique: dict[str, Path] = {}
     for path in paths:
         unique[str(path)] = path
     return list(unique.values())
+
+
+def _path_matches_fixture(path: Path, *, root: Path, fixtures: set[str]) -> bool:
+    try:
+        parts = set(path.relative_to(root).parts)
+    except ValueError:
+        parts = set(path.parts)
+    return bool(parts & fixtures)
+
+
+def _has_source_compile(path: Path) -> bool:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return isinstance(data, dict) and isinstance(data.get("source_compile"), dict)
 
 
 if __name__ == "__main__":

@@ -182,6 +182,10 @@ def main() -> int:
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
     if not args.exit_zero:
+        if report.get("summary", {}).get("fixture_count", 0) == 0 and (
+            args.enforce_atom_shape or args.enforce_registered_signatures or args.enforce_lens_scope
+        ):
+            return 1
         if args.enforce_atom_shape and report.get("atom_shape", {}).get("status") == "fail":
             return 1
         if args.enforce_registered_signatures and report.get("summary", {}).get("unregistered_fact_count", 0):
@@ -387,10 +391,19 @@ def build_report(
 
 
 def _fixture_dirs(compile_root: Path, *, fixtures: set[str] | None = None) -> list[Path]:
-    dirs = [path for path in compile_root.iterdir() if path.is_dir()]
+    dirs = [
+        path
+        for path in compile_root.rglob("*")
+        if path.is_dir() and _latest_compile_json_or_none(path) is not None
+    ]
     if fixtures:
-        dirs = [path for path in dirs if path.name in fixtures]
-    return sorted(dirs, key=lambda path: path.name)
+        dirs = [
+            path
+            for path in dirs
+            if path.name in fixtures
+            or any(part in fixtures for part in path.relative_to(compile_root).parts)
+        ]
+    return sorted(dirs, key=lambda path: str(path.relative_to(compile_root)))
 
 
 def _is_registered_signature(signature: str) -> bool:
@@ -402,10 +415,30 @@ def _ratio(numerator: int, denominator: int) -> float:
 
 
 def _latest_compile_json(path: Path) -> Path:
-    candidates = sorted(path.glob("*.json"), key=lambda item: item.stat().st_mtime)
+    candidates = _compile_json_candidates(path)
     if not candidates:
         raise FileNotFoundError(f"No compile JSON found under {path}")
     return candidates[-1]
+
+
+def _latest_compile_json_or_none(path: Path) -> Path | None:
+    candidates = _compile_json_candidates(path)
+    return candidates[-1] if candidates else None
+
+
+def _compile_json_candidates(path: Path) -> list[Path]:
+    return sorted(
+        (item for item in path.glob("*.json") if _has_source_compile(item)),
+        key=lambda item: item.stat().st_mtime,
+    )
+
+
+def _has_source_compile(path: Path) -> bool:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return isinstance(data, dict) and isinstance(data.get("source_compile"), dict)
 
 
 def _load_compile_json(path: Path) -> dict[str, Any]:

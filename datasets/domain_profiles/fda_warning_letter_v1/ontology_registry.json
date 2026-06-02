@@ -15,6 +15,13 @@
       "omission_kind": "role_missing",
       "reason_code": "signatory_not_stated",
       "trigger": "source_explicitly_states_no_signatory_or_signature_block"
+    },
+    {
+      "id": "meeting_future_eligibility_only",
+      "carrier_signature": "fda_regulatory_meeting/4",
+      "omission_kind": "none_found",
+      "reason_code": "future_eligibility_only_no_meeting_held",
+      "trigger": "source_mentions_future_post_warning_letter_meeting_eligibility_but_does_not_state_a_meeting_or_teleconference_occurred"
     }
   ],
   "lenses": [

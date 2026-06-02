@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from scripts.audit_domain_omission_accountability import build_report
+from scripts.audit_domain_omission_accountability import _compile_paths
 
 
 def _compile_payload(*, facts: list[str], notes: list[str]) -> dict:
@@ -36,6 +37,39 @@ def test_domain_omission_accountability_flags_self_check_only_omission(tmp_path:
     report = build_report([compile_json])
 
     assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "self_check_omission_without_domain_omission_fact"
+
+
+def test_domain_omission_accountability_discovers_nested_run_fixture_compile_jsons(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    (compile_root / "run1_chronology").mkdir(parents=True)
+    (compile_root / "run1_chronology" / "batch.json").write_text(
+        json.dumps({"rows": [{"fixture": "fixture_a"}]}),
+        encoding="utf-8",
+    )
+    compile_json = compile_root / "run1_chronology" / "fixture_a" / "run.json"
+    _write(
+        compile_json,
+        {
+            **_compile_payload(
+                facts=[],
+                notes=["Meeting explicitly not held; no domain_omission emitted."],
+            ),
+            "active_profile_registry_lens": {
+                "allowed_signatures": [
+                    "fda_regulatory_meeting/4",
+                    "domain_omission/5",
+                ],
+                "accountability_requirement_count": 1,
+            },
+        },
+    )
+
+    paths = _compile_paths(compile_root=compile_root, compile_jsons=[], fixtures={"fixture_a"})
+    report = build_report(paths)
+
+    assert len(paths) == 1
+    assert report["summary"]["blocker_count"] == 1
     assert report["rows"][0]["class"] == "self_check_omission_without_domain_omission_fact"
 
 

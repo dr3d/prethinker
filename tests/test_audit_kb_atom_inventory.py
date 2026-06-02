@@ -1,7 +1,9 @@
+import argparse
 import json
 from pathlib import Path
 
 from scripts.audit_kb_atom_inventory import build_report
+from scripts.audit_kb_atom_inventory import main
 
 
 def _write_compile(path: Path, facts: list[str], **metadata) -> None:
@@ -74,6 +76,64 @@ def test_kb_atom_inventory_excludes_source_record_and_prose_like_atoms(tmp_path:
     assert not next(item for item in report["signatures"] if item["signature"] == "party_role/3")[
         "registered"
     ]
+
+
+def test_kb_atom_inventory_discovers_nested_run_fixture_compile_jsons(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    (compile_root / "run1_wrapper").mkdir(parents=True)
+    (compile_root / "run1_wrapper" / "batch.json").write_text(
+        json.dumps({"rows": [{"fixture": "fixture_a"}]}),
+        encoding="utf-8",
+    )
+    _write_compile(
+        compile_root / "run1_wrapper" / "fixture_a" / "run.json",
+        ["fda_warning_letter(letter_1, cder, acme_inc, v_2026_05_30, src_line_1)."],
+        active_profile_registry_lens={
+            "id": "wrapper",
+            "allowed_signatures": ["fda_warning_letter/5"],
+        },
+    )
+
+    report = build_report(
+        compile_root=compile_root,
+        fixtures={"fixture_a"},
+        include_source_record=False,
+        include_prose_like=False,
+        max_examples=2,
+    )
+
+    assert report["summary"]["fixture_count"] == 1
+    assert report["summary"]["typed_fact_count"] == 1
+    assert report["top_registered_signatures"]["fda_warning_letter/5"] == 1
+
+
+def test_kb_atom_inventory_enforced_empty_compile_root_fails(tmp_path: Path, monkeypatch) -> None:
+    out_json = tmp_path / "report.json"
+    monkeypatch.setattr(
+        "scripts.audit_kb_atom_inventory.parse_args",
+        lambda: argparse.Namespace(
+            compile_root=tmp_path / "empty",
+            fixture=[],
+            include_source_record=False,
+            include_prose_like=False,
+            max_examples=5,
+            max_predicate_chars=48,
+            max_predicate_tokens=7,
+            max_atom_chars=96,
+            max_atom_tokens=14,
+            enforce_atom_shape=True,
+            enforce_registered_signatures=True,
+            enforce_lens_scope=True,
+            exit_zero=False,
+            out_json=out_json,
+            out_md=None,
+        ),
+    )
+    (tmp_path / "empty").mkdir()
+
+    assert main() == 1
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+    assert report["summary"]["fixture_count"] == 0
 
 
 def test_kb_atom_inventory_reports_signature_overlap(tmp_path: Path) -> None:

@@ -2182,6 +2182,7 @@ def main() -> int:
         _apply_fda_date_atom_reduction(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
+        _apply_fda_violation_detail_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
@@ -2238,6 +2239,7 @@ def main() -> int:
                 extra_context=extra_compile_context,
             )
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
+        _apply_fda_violation_detail_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_date_atom_reduction(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
@@ -7779,6 +7781,70 @@ def _apply_fda_lot_identifier_atom_reduction(source_compile: dict[str, Any]) -> 
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_fda_violation_detail_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize compact FDA violation-detail values inside the same typed slot."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation_detail" and len(args) == 5:
+            canonical = _canonical_fda_violation_detail_value(args[1], args[2])
+            if canonical:
+                args[2] = canonical
+                reduced = f"fda_violation_detail({', '.join(args)})."
+                if reduced != fact:
+                    reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_violation_detail_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_violation_detail_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_violation_detail_atom_reduction_policy"] = {
+        "schema_version": "deterministic_fda_violation_detail_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes compact fda_violation_detail/5 values inside the same detail_kind slot, "
+            "such as iso_7_room_ceiling -> iso_7 or environmental_monitoring_excursion_results -> "
+            "environmental_monitoring_excursion. It does not infer missing details, read source prose, "
+            "or reclassify detail_kind/role slots."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_fda_violation_detail_value(detail_kind: str, value: str) -> str:
+    kind = str(detail_kind or "").strip().strip("'\"").casefold()
+    text = str(value or "").strip().strip("'\"").casefold()
+    if kind == "process_area":
+        match = re.fullmatch(r"(iso_\d+)_(.+)", text)
+        if match and _fda_cleanroom_surface_suffix(match.group(2)):
+            return match.group(1)
+    if kind == "record_review_subject" and text.endswith("_results"):
+        stem = text.removesuffix("_results")
+        if stem:
+            return stem
+    return ""
+
+
+def _fda_cleanroom_surface_suffix(value: str) -> bool:
+    tokens = {token for token in re.split(r"[^a-z0-9]+", str(value or "").casefold()) if token}
+    return bool(tokens & {"room", "rooms", "ceiling", "ceilings", "door", "doors", "wall", "walls", "floor", "floors", "paint", "rust"})
 
 
 def _canonical_fda_facility_location(value: str) -> str:

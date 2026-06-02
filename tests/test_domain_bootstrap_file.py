@@ -99,6 +99,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_date_atom_reduction,
     _apply_fda_facility_subject_convergence,
     _apply_fda_lot_identifier_atom_reduction,
+    _apply_fda_violation_detail_atom_reduction,
     _apply_fda_facility_identity_atom_reduction,
     _apply_fda_consultant_citation_scope_reduction,
     _apply_fda_office_atom_reduction,
@@ -6728,6 +6729,58 @@ def test_profile_registry_for_lens_filters_predicates_and_requirements() -> None
     assert filtered["active_lens"]["predicate_count"] == 3
 
 
+def test_profile_registry_for_lens_filters_chronology_omission_requirement() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "chronology",
+                    "allowed_signatures": [
+                        "fda_regulatory_meeting/4",
+                        "domain_omission/5",
+                    ],
+                },
+                {
+                    "id": "wrapper",
+                    "allowed_signatures": [
+                        "fda_correspondence_party/5",
+                        "domain_omission/5",
+                    ],
+                },
+            ],
+            "predicates": [
+                {"signature": "fda_regulatory_meeting/4"},
+                {"signature": "fda_correspondence_party/5"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [
+                {
+                    "id": "missing_signatory_role",
+                    "carrier_signature": "fda_correspondence_party/5",
+                    "omission_kind": "role_missing",
+                    "reason_code": "signatory_not_stated",
+                },
+                {
+                    "id": "meeting_future_eligibility_only",
+                    "carrier_signature": "fda_regulatory_meeting/4",
+                    "omission_kind": "none_found",
+                    "reason_code": "future_eligibility_only_no_meeting_held",
+                },
+            ],
+        },
+        "chronology",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_regulatory_meeting/4",
+        "domain_omission/5",
+    ]
+    assert [item["id"] for item in filtered["accountability_requirements"]] == [
+        "meeting_future_eligibility_only"
+    ]
+    assert filtered["active_lens"]["accountability_requirement_count"] == 1
+
+
 def test_profile_registry_for_lens_requires_known_lens() -> None:
     try:
         _profile_registry_for_lens({"lenses": [{"id": "wrapper"}], "predicates": []}, "chronology")
@@ -7232,6 +7285,32 @@ def test_fda_lot_identifier_atom_reduction_canonicalizes_affected_lot_values() -
         "fda_violation_detail(violation_2, affected_product, batch_a_106, sterile_drug_products, src_line_13).",
     ]
     assert source_compile["deterministic_fda_lot_identifier_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_violation_detail_atom_reduction_keeps_same_detail_slot() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion_results, violation_scope, src_line_12).",
+            "fda_violation_detail(violation_4, process_area, iso_7_room_ceiling_and_door, violation_scope, src_line_13).",
+            "fda_violation_detail(violation_4, process_area, iso_5_aseptic_processing_area, violation_scope, src_line_13).",
+            "fda_violation_detail(violation_3, process_area, b4_decontamination_validation, violation_scope, src_line_14).",
+            "fda_violation_detail(violation_3, missing_record_type, validation_of_decontamination_effectiveness_distribution_reproducibility, corrective_action_evaluation, src_line_15).",
+        ]
+    }
+
+    report = _apply_fda_violation_detail_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_12).",
+        "fda_violation_detail(violation_4, process_area, iso_7, violation_scope, src_line_13).",
+        "fda_violation_detail(violation_4, process_area, iso_5_aseptic_processing_area, violation_scope, src_line_13).",
+        "fda_violation_detail(violation_3, process_area, b4_decontamination_validation, violation_scope, src_line_14).",
+        "fda_violation_detail(violation_3, missing_record_type, validation_of_decontamination_effectiveness_distribution_reproducibility, corrective_action_evaluation, src_line_15).",
+    ]
+    policy = source_compile["deterministic_fda_violation_detail_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
 
 
 def test_fda_facility_identity_atom_reduction_canonicalizes_location_and_fei() -> None:

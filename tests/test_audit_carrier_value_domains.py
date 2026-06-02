@@ -31,6 +31,28 @@ def test_carrier_value_domain_audit_passes_allowed_fda_values(tmp_path: Path) ->
     assert report["summary"]["checked_slot_count"] >= 5
 
 
+def test_carrier_value_domain_audit_discovers_nested_run_fixture_compile_jsons(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    (compile_root / "run1_violation").mkdir(parents=True)
+    (compile_root / "run1_violation" / "batch.json").write_text(
+        json.dumps({"rows": [{"fixture": "fixture_a"}]}),
+        encoding="utf-8",
+    )
+    _write_compile(
+        compile_root / "run1_violation" / "fixture_a" / "run.json",
+        ["fda_violation(v1, letter, violation_1, quality_unit_review_failure, src_line_1)."],
+    )
+
+    from scripts.audit_carrier_value_domains import _compile_paths
+
+    paths = _compile_paths(compile_root=compile_root, compile_jsons=[], fixtures={"fixture_a"})
+    report = build_report(paths)
+
+    assert len(paths) == 1
+    assert report["summary"]["status"] == "fail"
+    assert report["violations"][0]["value"] == "quality_unit_review_failure"
+
+
 def test_carrier_value_domain_audit_blocks_off_palette_fda_values(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "fda" / "compile.json",
