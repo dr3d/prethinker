@@ -1405,3 +1405,55 @@ Reading:
   N=3 cell with all 15 lens artifacts source_compile.ok=true, then union, score,
   and run governance gates. Until that exists, the claim-bearing transfer result
   remains R85: 25/26 stable expected facts with all governance gates clean.
+
+R89 local LM Studio Q4 diagnostic lane:
+
+```text
+root: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_n1_20260601
+provider: local LM Studio
+model id: qwen/qwen3.6-35b-a3b
+loaded quant/config: user-reported Q4_K_M, seed set in LM Studio UI
+base URL: http://127.0.0.1:1234/v1
+mode: all-lens N=3 with --require-source-compile-ok
+valid source_compile.ok=true lens artifacts: 15 / 15
+union facts per run after reducers: 44 / 46 / 45
+runtime load errors: 0 / 0 / 0
+constant-slot support>=2: 25 / 26
+single-run support in run1: 25 / 26
+carrier value-domain audit on reduced unions: pass, 135 facts, 165 checked slots, 0 violations
+domain omission accountability on reduced unions: pass, 0 blockers
+atom inventory and shape audit over full root: pass, 270 typed facts, 14 registered signatures, 0 unregistered, 0 atom-shape blockers
+```
+
+Stable unsupported row:
+
+```text
+expected:
+fda_violation_detail(Viol2, affected_product,
+  tirzepatide_injection_10_mg_ml, product_release_record_review, SrcDetail2).
+
+observed variants:
+- 3/3: fda_violation_detail(violation_2, affected_product,
+    tirzepatide_injection_10_mg_ml, violation_scope, source_1).
+- 2/3: fda_violation_detail(violation_2, affected_lot,
+    tirzepatide_injection_10_mg_ml, product_release_record_review, source_1).
+- 1/3: fda_violation_detail(violation_2, affected_lot,
+    tirzepatide_injection_10_mg_ml_batches, product_release_record_review, source_1).
+- 1/3: fda_violation_detail(violation_6, record_review_subject,
+    batch_production_and_control_records, product_release_record_review, source_1).
+```
+
+Reading:
+
+- local Q4 is viable for this FDA transfer lane: it completed the full N=3
+  without provider failures and matched the current OR claim-bearing score of
+  25/26, with governance clean.
+- this is not directly comparable to the OpenRouter R85 cell because provider,
+  quantization, and serving path changed. Treat it as a separate local-provider
+  diagnostic baseline unless a full local rebaseline is declared.
+- the local miss is different from the OR 25/26 miss. OR's remaining stable miss
+  was recipient organization vs named addressee before the contract boundary
+  fix; local Q4 now gets recipient/conclusion but has a stable
+  violation-detail role split around Tirzepatide. That is useful evidence that
+  local Q4 can unblock provider availability while surfacing a different
+  carrier-boundary pressure point.
