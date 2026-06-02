@@ -1346,9 +1346,11 @@ R87 attempted full all-lens N=3 after recipient-boundary contract:
 root: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_n3_recipient_boundary_20260601
 status: invalid claim cell
 reason: multiple source compiles returned source_compile.ok=false with
-  zero-yield/pass_not_ok, while the script process still exited 0
+  zero-yield/pass_not_ok after OpenRouter HTTP 521 errors from Ambient, while
+  the script process still exited 0
 examples:
-- run2_wrapper: ok=false, admitted=0, lens health poor, zero_yield
+- run2_wrapper: ok=false, admitted=0, lens health poor, zero_yield,
+  source_pass_ops_failed: HTTP 521 provider_name=Ambient
 - run2_chronology: ok=false, admitted=0
 - run2_violation: ok=false, admitted=0
 - run3_wrapper: ok=false, admitted=0
@@ -1367,5 +1369,7 @@ Reading:
 - the failure is itself useful: process-level success is not enough for
   research claims. Claim cells must fail fast on semantic compile failure, not
   just on provider exceptions.
+- do not diagnose R87 as semantic regression. The bad rows are provider-failure
+  artifacts that the runner previously allowed to exit 0.
 - current claim-bearing transfer remains R85: 25/26 stable expected facts with
   all governance gates clean.
