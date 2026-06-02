@@ -115,9 +115,11 @@ from scripts.run_domain_bootstrap_file import (
     _source_pass_ops_to_semantic_ir,
     _source_pass_self_check_missing_slots,
     _list_range_inventory_existing_fact_context,
+    _source_compile_required_failure,
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
 import json
+import argparse
 from pathlib import Path
 
 
@@ -132,6 +134,27 @@ def test_narrative_context_guards_attributes_and_official_duties() -> None:
     assert "choice-by-contrast" in context
     assert "comic-consequence" in context
     assert "explicit-moral" in context
+
+
+def test_source_compile_required_failure_bites_only_when_requested() -> None:
+    record = {"source_compile": {"ok": False}}
+
+    assert _source_compile_required_failure(
+        record=record,
+        args=argparse.Namespace(require_source_compile_ok=True, compile_source=True),
+    )
+    assert not _source_compile_required_failure(
+        record=record,
+        args=argparse.Namespace(require_source_compile_ok=False, compile_source=True),
+    )
+    assert not _source_compile_required_failure(
+        record=record,
+        args=argparse.Namespace(require_source_compile_ok=True, compile_source=False),
+    )
+    assert not _source_compile_required_failure(
+        record={"source_compile": {"ok": True}},
+        args=argparse.Namespace(require_source_compile_ok=True, compile_source=True),
+    )
 
 
 def test_financial_report_context_preserves_named_contributions() -> None:

@@ -54,6 +54,42 @@ def test_typed_micro_series_counts_support_across_runs(tmp_path: Path) -> None:
     assert rows["demo_fact(A, gamma)."]["support_count"] == 1
 
 
+def test_typed_micro_series_constant_slot_matcher_floats_ids(tmp_path: Path) -> None:
+    root = tmp_path / "micro"
+    fixture = root / "demo_fixture"
+    _write(
+        fixture / "expected_facts.pl",
+        "\n".join(
+            [
+                "demo_fact(Entity, alpha, Src).",
+                "demo_fact(Entity, beta, Src).",
+            ]
+        ),
+    )
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        ["demo_fact(item_1, alpha, source_a).", "demo_fact(item_2, beta, source_b)."],
+    )
+
+    unification_report = build_report(
+        fixture_id="demo_fixture",
+        root=root,
+        compile_paths=[run1],
+        support_threshold=1,
+    )
+    constant_slot_report = build_report(
+        fixture_id="demo_fixture",
+        root=root,
+        compile_paths=[run1],
+        support_threshold=1,
+        matcher="constant_slot",
+    )
+
+    assert unification_report["summary"]["supported_fact_count"] == 1
+    assert constant_slot_report["summary"]["supported_fact_count"] == 2
+    assert constant_slot_report["matcher"] == "constant_slot"
+
+
 def test_typed_micro_series_reports_same_predicate_variants_for_unsupported_rows(tmp_path: Path) -> None:
     root = tmp_path / "micro"
     fixture = root / "demo_fixture"

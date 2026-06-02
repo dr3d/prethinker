@@ -277,7 +277,29 @@ If a dry run fails, prefer changes that make the domain language clearer:
 Do not add a carrier because one row wants one answer. Do not add source phrases
 to the predicate vocabulary.
 
-9. Require omission/accountability.
+9. Adjudicate oracles blind to model output.
+
+Domain work can expose wrong or under-specified expected facts. Correcting an
+oracle is allowed, but it is also a measurement risk: the easiest new cheat is
+letting the test bend toward the model's miss.
+
+The adjudication rule is:
+
+- decide from the source and carrier contract alone;
+- record the source/contract rationale in the fixture notes or worksheet;
+- name whether the change is a schema correction, value-domain correction,
+  source-faithfulness correction, or fixture-authoring error;
+- add a forbidden fact when the old or tempting value represents a real leak;
+- never count a changed oracle retroactively as a win;
+- rerun a fresh same-condition cell before the changed row becomes
+  claim-bearing.
+
+The reviewer test: a reviewer who has not seen the model output should be able
+to defend the oracle change from the source and registered domain contract. If
+the correction only makes sense because the model emitted that value, leave it
+as a miss and treat it as a compile or schema blocker.
+
+10. Require omission/accountability.
 
 When a carrier is common for the domain but absent or uncertain in the source,
 the compile should emit a typed omission where the domain contract requires it.
@@ -289,7 +311,7 @@ Current audit:
 python scripts\audit_domain_omission_accountability.py --compile-json PATH --fixture FIXTURE_ID
 ```
 
-10. Test reproducibility before promotion.
+11. Test reproducibility before promotion.
 
 A domain carrier does not promote because it works once. The promotion bar is:
 

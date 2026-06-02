@@ -86,7 +86,7 @@
       "signature": "fda_correspondence_party/5",
       "args": ["letter_id", "party_id", "party_role", "party_name", "source_or_scope"],
       "category": "fda_correspondence_party",
-      "notes": "Links a letter to recipient, issuing office, signatory, contact, or responsible official roles without inferring responsibility."
+      "notes": "Links a letter to recipient, issuing office, signatory, contact, or responsible official roles without inferring responsibility. For FDA warning letters, recipient should prefer the regulated firm/entity named as the letter recipient or addressee when one is stated; do not replace that organization with an individual salutation/contact name. Use responsible_official or contact for a named person only when the source states that role or no organization recipient is stated."
     },
     {
       "signature": "fda_inspection_event/6",

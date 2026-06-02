@@ -1095,6 +1095,11 @@ Reading:
 - the initial transfer oracle had four less-faithful value choices and one
   unsafe facility expectation. These were adjudicated from the source and
   carrier contracts, not counted retroactively as wins.
+- these adjudications are governed by the blind-oracle rule now recorded in
+  `docs\DOMAIN_PREDICATE_SCHEMA_PROCESS.md`: a reviewer should be able to
+  defend each change from the source and current carrier contract without
+  seeing the model output, and the rows only became claim-bearing after the
+  fresh R81 same-condition rerun.
 - the dangerous wrapper failure was fixed by contract boundary, not by prose
   parsing: `fda_facility_identity/5` now explicitly forbids warning-letter,
   WL, MARCS-CMS, CMS, and registration-class values as facility identifiers and
@@ -1244,3 +1249,123 @@ Do not score R84 as an N=3 cell. The correct next measurement, once provider
 rate limits clear, is a fresh all-lens N=3 with the value-domain hold active.
 Until that completes, the clean claim-bearing transfer result remains R81:
 24/26 stable expected facts with all governance gates clean.
+
+R85 fresh all-lens N=3 after value-domain hold:
+
+```text
+root: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_n3_value_domain_hold_rerun_20260601
+model: qwen/qwen3.6-35b-a3b-20260415
+provider: OpenRouter
+routing: allow_fallbacks=false, require_parameters=true
+lenses per run: wrapper, chronology, violation, response_obligation, conclusion
+union facts per run after reducers: 38 / 38 / 39
+runtime load errors: 0 / 0 / 0
+constant-slot support>=2: 25 / 26
+per-run expected matches: 25 / 26, 22 / 26, 23 / 26
+forbidden matches: 0
+carrier value-domain audit on reduced unions: pass, 115 facts, 142 checked slots, 0 violations
+carrier value-domain audit on full raw root: pass, 230 facts, 284 checked slots, 0 violations
+domain omission accountability on reduced unions: pass, 0 blockers
+atom inventory and shape audit over full root: pass, 230 typed facts, 14 registered signatures, 0 unregistered, 0 atom-shape blockers
+```
+
+Tooling note:
+
+- `scripts\summarize_typed_micro_series.py` now has
+  `--matcher constant_slot`. The default unification matcher remains available,
+  but the transfer support measurement uses constant-slot matching because FDA
+  subject IDs and source coordinates are intentionally variable across same-
+  condition compiles while governed constants must remain in the same argument
+  positions.
+
+Reading:
+
+- the value-domain hold plus category-boundary contract improved the honest
+  transfer cell from 24/26 to 25/26. This is claim-bearing because it was a fresh
+  same-condition N=3 rerun, not retroactive adjudication or replay on the old
+  dirty cell.
+- the two prior violation-category misses are now stable at 3/3:
+  `violation_5 -> aseptic_processing` and `violation_6 -> data_integrity`.
+- governance remained clean across the claim surface and the raw root. This is
+  an important distinction from R82, where category pressure fixed the named
+  rows but produced value-domain-invalid citation/detail rows in one run.
+- do not claim 26/26. The remaining unsupported row is the recipient party:
+  expected `apothecary_pharma_llc` has support 1/3; one reduced union instead
+  emitted `priyanka_rana` as the recipient. This is a correspondence-party
+  boundary/schema pressure point, not a scorekeeping error.
+
+Current FDA-transfer status:
+
+```text
+claim-bearing clean transfer: 25 / 26 stable expected facts
+forbidden facts: 0
+runtime errors: 0
+unregistered signatures: 0
+atom-shape blockers: 0
+value-domain violations: 0
+omission blockers: 0
+remaining blocker: recipient organization vs named addressee boundary in
+  fda_correspondence_party/5
+```
+
+R86 recipient-boundary contract and wrapper diagnostic:
+
+```text
+contract change:
+- fda_correspondence_party/5 now states that FDA warning-letter recipient
+  should prefer the regulated firm/entity when one is stated, and should not
+  replace that organization with an individual salutation/contact name.
+- the FDA profile registry mirrors this lens-visible guidance.
+
+wrapper-only diagnostic root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_wrapper_recipient_boundary_n3_20260601
+
+wrapper expected subset:
+- run 1: 4 / 4
+- run 2: 4 / 4
+- run 3: 2 / 4
+- support>=2: 4 / 4
+
+recipient row:
+- apothecary_pharma_llc as recipient: 3 / 3
+- priyanka_rana appears as responsible_official, not as recipient, in all three
+  wrapper diagnostic runs
+```
+
+Reading:
+
+- this is a real contract-boundary improvement, not a row reducer. It does not
+  read source prose after compile and it does not rewrite emitted facts.
+- the wrapper-only cell suggests the final 25/26 recipient miss is closeable,
+  but this is not a full transfer claim. It only tests the lens that owns the
+  remaining row.
+
+R87 attempted full all-lens N=3 after recipient-boundary contract:
+
+```text
+root: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_n3_recipient_boundary_20260601
+status: invalid claim cell
+reason: multiple source compiles returned source_compile.ok=false with
+  zero-yield/pass_not_ok, while the script process still exited 0
+examples:
+- run2_wrapper: ok=false, admitted=0, lens health poor, zero_yield
+- run2_chronology: ok=false, admitted=0
+- run2_violation: ok=false, admitted=0
+- run3_wrapper: ok=false, admitted=0
+```
+
+Tooling repair:
+
+- `scripts\run_domain_bootstrap_file.py` now supports
+  `--require-source-compile-ok`. Claim-bearing loops should use this flag so
+  `source_compile.ok=false` produces a nonzero process exit. Exploratory
+  diagnostics keep the old behavior unless the flag is set.
+
+Reading:
+
+- do not score R87 and do not claim 26/26 from it.
+- the failure is itself useful: process-level success is not enough for
+  research claims. Claim cells must fail fast on semantic compile failure, not
+  just on provider exceptions.
+- current claim-bearing transfer remains R85: 25/26 stable expected facts with
+  all governance gates clean.

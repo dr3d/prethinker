@@ -45,6 +45,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile-json", action="append", default=[], type=Path, required=True)
     parser.add_argument("--support-threshold", type=int, default=2)
     parser.add_argument(
+        "--matcher",
+        choices=("unification", "constant_slot"),
+        default="unification",
+        help=(
+            "Support matcher. unification preserves the normal variable-binding "
+            "matcher; constant_slot treats expected variables as floating IDs/source "
+            "coordinates and requires only same-position expected constants."
+        ),
+    )
+    parser.add_argument(
         "--apply-domain-reducers",
         action="store_true",
         help="Apply deterministic typed-domain reducers to each compile before measuring support.",
@@ -62,6 +72,7 @@ def main() -> int:
         root=args.root,
         compile_paths=[path.resolve() for path in args.compile_json],
         support_threshold=int(args.support_threshold),
+        matcher=str(args.matcher),
         apply_domain_reducers=bool(args.apply_domain_reducers),
     )
     if args.out_json:
@@ -81,6 +92,7 @@ def build_report(
     root: Path = DEFAULT_ROOT,
     compile_paths: list[Path],
     support_threshold: int = 2,
+    matcher: str = "unification",
     apply_domain_reducers: bool = False,
 ) -> dict[str, Any]:
     fixture_dir = root / fixture_id
@@ -97,8 +109,11 @@ def build_report(
             reduced_compile = {"facts": compile_facts, "rules": [], "queries": []}
             reducer_report = _apply_domain_reducers(reduced_compile)
             compile_facts = [str(item).strip() for item in reduced_compile.get("facts", []) if str(item).strip()]
-        match_report = _match_expected_facts(expected_facts, compile_facts)
-        missing = set(match_report["missing_expected_facts"])
+        if matcher == "constant_slot":
+            missing = {fact for fact in expected_facts if not _constant_slot_supported(fact, compile_facts)}
+        else:
+            match_report = _match_expected_facts(expected_facts, compile_facts)
+            missing = set(match_report["missing_expected_facts"])
         matched = [fact for fact in expected_facts if fact not in missing]
         for fact in matched:
             support.setdefault(fact, []).append(run_id)
@@ -138,6 +153,7 @@ def build_report(
         "fixture_id": fixture_id,
         "expected_facts": str(expected_path),
         "support_threshold": support_threshold,
+        "matcher": matcher,
         "domain_reducers_applied": bool(apply_domain_reducers),
         "summary": {
             "compile_count": len(compile_paths),
@@ -159,6 +175,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Compiles: `{summary['compile_count']}`",
         f"- Expected facts: `{summary['expected_fact_count']}`",
         f"- Support threshold: `{report['support_threshold']}`",
+        f"- Matcher: `{report.get('matcher', 'unification')}`",
         f"- Domain reducers applied: `{report.get('domain_reducers_applied', False)}`",
         f"- Supported facts: `{summary['supported_fact_count']}`",
         f"- Unsupported facts: `{summary['unsupported_fact_count']}`",
@@ -216,6 +233,30 @@ def _same_predicate_variants(expected_fact: str, compile_facts: list[str]) -> li
             seen.add(fact)
     variants.sort(key=lambda item: (-int(item["overlap"]), str(item["fact"])))
     return variants
+
+
+def _constant_slot_supported(expected_fact: str, compile_facts: list[str]) -> bool:
+    expected = _parse_fact(expected_fact)
+    if expected is None:
+        return False
+    predicate = str(expected.get("predicate") or "")
+    expected_args = [str(arg).strip() for arg in expected.get("args") or []]
+    arity = len(expected_args)
+    for fact in compile_facts:
+        parsed = _parse_fact(fact)
+        if parsed is None:
+            continue
+        if str(parsed.get("predicate") or "") != predicate:
+            continue
+        candidate_args = [str(arg).strip() for arg in parsed.get("args") or []]
+        if len(candidate_args) != arity:
+            continue
+        if all(
+            _is_expected_variable(expected_arg) or expected_arg == candidate_arg
+            for expected_arg, candidate_arg in zip(expected_args, candidate_args)
+        ):
+            return True
+    return False
 
 
 def _same_position_constant_overlap(expected_args: list[str], candidate_args: list[str]) -> int:

@@ -1152,6 +1152,14 @@ def parse_args() -> argparse.Namespace:
         help="After profile bootstrap, run the same raw source through Semantic IR using the draft profile.",
     )
     parser.add_argument(
+        "--require-source-compile-ok",
+        action="store_true",
+        help=(
+            "Exit nonzero when --compile-source produces a source_compile record whose ok field is false. "
+            "Use this for claim-bearing cells so zero-yield/pass-not-ok compiles cannot be mistaken for successful runs."
+        ),
+    )
+    parser.add_argument(
         "--compile-plan-passes",
         action="store_true",
         help="When an intake plan exists, compile once per LLM-authored pass_plan item instead of one flat source compile.",
@@ -2297,6 +2305,9 @@ def main() -> int:
             api_key=str(getattr(args, "api_key", "") or ""),
             timeout=min(int(args.timeout), 30),
         )
+    source_compile_required_failed = _source_compile_required_failure(record=record, args=args)
+    if bool(getattr(args, "require_source_compile_ok", False)):
+        record["source_compile_required_ok"] = not source_compile_required_failed
 
     out_dir = args.out_dir if args.out_dir.is_absolute() else (REPO_ROOT / args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -2315,13 +2326,23 @@ def main() -> int:
                 "candidate_predicates": score.get("predicate_count", 0),
                 "compile_admitted": (record.get("source_compile") or {}).get("admitted_count"),
                 "compile_skipped": (record.get("source_compile") or {}).get("skipped_count"),
+                "source_compile_required_ok": record.get("source_compile_required_ok"),
                 "expected_signature_recall": (record.get("expected_prolog") or {}).get("signature_recall"),
             },
             ensure_ascii=False,
             sort_keys=True,
         )
     )
-    return 0
+    return 1 if source_compile_required_failed else 0
+
+
+def _source_compile_required_failure(*, record: dict[str, Any], args: argparse.Namespace) -> bool:
+    return (
+        bool(getattr(args, "require_source_compile_ok", False))
+        and bool(getattr(args, "compile_source", False))
+        and isinstance(record.get("source_compile"), dict)
+        and not bool(record["source_compile"].get("ok"))
+    )
 
 
 def _invalid_profile_retry_context(*, parse_error: str, raw_content: str, max_predicates: int = 40) -> list[str]:

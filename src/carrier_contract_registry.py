@@ -172,12 +172,20 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "Correspondence-party relation: the row links a warning letter to one source-stated sender, recipient, signatory, contact, or addressed party.",
             "party_role is a compact structural role such as recipient, issuing_office, signatory, contact, or responsible_official.",
             "party_name is the source-stated person, entity, or office name normalized as an atom.",
+            "For FDA warning letters, recipient should prefer the regulated firm/entity named as the letter recipient or addressee when one is stated; do not replace that organization with an individual salutation/contact name.",
+            "Use responsible_official or contact for a source-stated named person only when the source states that role or no organization recipient is stated.",
             "This row proves correspondence role only; it does not prove violation responsibility unless another typed carrier states that relation.",
         ],
         "value_domains": {
             "party_role": ["recipient", "issuing_office", "signatory", "contact", "responsible_official"],
         },
-        "forbidden_uses": ["source_excerpt", "unstated_responsibility", "full_address_blob", "signature_block_blob"],
+        "forbidden_uses": [
+            "source_excerpt",
+            "unstated_responsibility",
+            "full_address_blob",
+            "signature_block_blob",
+            "individual_addressee_as_recipient_when_firm_stated",
+        ],
         "micro_fixtures": ["fda_warning_letter_domain_v1"],
     },
     "fda_inspection_event/6": {
