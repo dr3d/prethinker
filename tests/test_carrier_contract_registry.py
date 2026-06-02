@@ -272,6 +272,11 @@ def test_fda_violation_detail_contract_names_record_review_subject_trigger() -> 
 
     assert "record_review_subject" in text
     assert "If a violation states that required records were not reviewed" in text
+    assert "OOS results" in text
+    assert "environmental-monitoring results" in text
+    assert "Do not encode those investigation subjects as affected_product" in text
+    assert "Use procedure_scope for source-stated validation" in text
+    assert "Do not encode a validation or qualification scope as missing_record_type" in text
     assert "affected_lot" in text
 
 

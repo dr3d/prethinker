@@ -325,6 +325,8 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "detail_value is a compact source-stated value for that one role, not a mini-paragraph.",
             "Emit separate rows for separate lots, products, scopes, or critique points instead of combining them into one value.",
             "If a violation states that required records were not reviewed, not maintained, missing, incomplete, or not checked before release or disposition, emit a separate record_review_subject or missing_record_type row for the record type; do not rely only on affected_lot or violation_category rows.",
+            "For investigation-failure violations, classify the subject being investigated as record_review_subject when the source discusses excursions, discrepancies, OOS results, environmental-monitoring results, microbial/bioburden/endotoxin results, or similar investigation subjects. Do not encode those investigation subjects as affected_product or affected_lot unless the source states a specific product or lot/batch identifier.",
+            "Use procedure_scope for source-stated validation, qualification, assessment, SOP, cleaning, sterilization, decontamination, or process scope. Do not encode a validation or qualification scope as missing_record_type unless the source specifically says a record type was missing.",
             "Do not use this carrier for the controlled violation category or exact citation when fda_violation/5 and fda_violation_citation/4 are available.",
         ],
         "value_domains": {

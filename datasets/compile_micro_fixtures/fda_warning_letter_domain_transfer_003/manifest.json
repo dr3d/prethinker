@@ -1,0 +1,11 @@
+{
+  "fixture_id": "fda_warning_letter_domain_transfer_003",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/liebel-flarsheim-company-llc-711508-10172025",
+  "fda_center": "CDER",
+  "company": "Liebel-Flarsheim Company LLC",
+  "warning_letter_date": "2025-10-17",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Third unlike real FDA warning letter (Liebel-Flarsheim / Guerbet, CDER) to test whether the fda_warning_letter_v1 domain pack transfers, and whether transfer_002's two residue families (record_review_subject=environmental_monitoring_excursion role drift; procedure_scope=*_validation kind drift) are fixture-specific."
+}

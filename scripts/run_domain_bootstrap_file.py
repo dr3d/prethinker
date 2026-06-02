@@ -8045,6 +8045,25 @@ def _canonical_fda_violation_detail_value(detail_kind: str, value: str) -> str:
         match = re.fullmatch(r"(iso_\d+)_(.+)", text)
         if match and _fda_cleanroom_surface_suffix(match.group(2)):
             return match.group(1)
+    if kind == "procedure_scope":
+        procedure_synonyms = {
+            "terminal_sterilization_validation": "terminal_sterilization_process_validation",
+            "terminal_sterilization_process_qualification_status": "terminal_sterilization_process_validation",
+        }
+        if text in procedure_synonyms:
+            return procedure_synonyms[text]
+    if kind == "record_review_subject":
+        record_subject_synonyms = {
+            "environmental_monitoring_excursions": "environmental_monitoring_excursion",
+            "in_process_bioburden_excursions": "in_process_bioburden_excursion",
+            "oos_endotoxin": "oos_endotoxin_result",
+            "oos_endotoxin_failures": "oos_endotoxin_result",
+            "oos_endotoxin_results": "oos_endotoxin_result",
+            "out_of_specification_endotoxin": "oos_endotoxin_result",
+            "out_of_specification_oos_endotoxin": "oos_endotoxin_result",
+        }
+        if text in record_subject_synonyms:
+            return record_subject_synonyms[text]
     if kind == "record_review_subject" and text.endswith("_results"):
         stem = text.removesuffix("_results")
         if stem:

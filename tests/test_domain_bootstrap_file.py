@@ -7362,21 +7362,30 @@ def test_fda_violation_detail_atom_reduction_keeps_same_detail_slot() -> None:
     source_compile = {
         "facts": [
             "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion_results, violation_scope, src_line_12).",
+            "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursions, violation_scope, src_line_12).",
+            "fda_violation_detail(violation_1, record_review_subject, in_process_bioburden_excursions, violation_scope, src_line_13).",
+            "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin, violation_scope, src_line_14).",
+            "fda_violation_detail(violation_1, procedure_scope, terminal_sterilization_process_qualification_status, violation_scope, src_line_15).",
             "fda_violation_detail(violation_4, process_area, iso_7_room_ceiling_and_door, violation_scope, src_line_13).",
             "fda_violation_detail(violation_4, process_area, iso_5_aseptic_processing_area, violation_scope, src_line_13).",
             "fda_violation_detail(violation_3, process_area, b4_decontamination_validation, violation_scope, src_line_14).",
+            "fda_violation_detail(violation_3, affected_product, in_process_bioburden_excursions, violation_scope, src_line_15).",
             "fda_violation_detail(violation_3, missing_record_type, validation_of_decontamination_effectiveness_distribution_reproducibility, corrective_action_evaluation, src_line_15).",
         ]
     }
 
     report = _apply_fda_violation_detail_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 2
+    assert report["reduction_count"] == 6
     assert source_compile["facts"] == [
         "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_12).",
+        "fda_violation_detail(violation_1, record_review_subject, in_process_bioburden_excursion, violation_scope, src_line_13).",
+        "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_14).",
+        "fda_violation_detail(violation_1, procedure_scope, terminal_sterilization_process_validation, violation_scope, src_line_15).",
         "fda_violation_detail(violation_4, process_area, iso_7, violation_scope, src_line_13).",
         "fda_violation_detail(violation_4, process_area, iso_5_aseptic_processing_area, violation_scope, src_line_13).",
         "fda_violation_detail(violation_3, process_area, b4_decontamination_validation, violation_scope, src_line_14).",
+        "fda_violation_detail(violation_3, affected_product, in_process_bioburden_excursions, violation_scope, src_line_15).",
         "fda_violation_detail(violation_3, missing_record_type, validation_of_decontamination_effectiveness_distribution_reproducibility, corrective_action_evaluation, src_line_15).",
     ]
     policy = source_compile["deterministic_fda_violation_detail_atom_reduction_policy"]

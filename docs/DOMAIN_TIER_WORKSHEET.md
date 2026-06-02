@@ -2412,3 +2412,226 @@ Decision:
   not solved by ordinary role/kind prompt wording. The next serious options are
   source-accountability for detail families or a third unlike FDA warning letter
   to decide whether the residue is fixture-specific.
+
+R104 transfer_003 intake and first local full cell:
+
+Fixture:
+
+```text
+datasets\compile_micro_fixtures\fda_warning_letter_domain_transfer_003
+```
+
+Incoming package issues caught before inference:
+
+- `fda_violation_detail/6` was used in expected/forbidden facts, but the live
+  FDA registry uses `fda_violation_detail/5`.
+- Several expected facts used older/raw value conventions instead of the FDA
+  domain-pack conventions:
+  - quoted dates instead of `v_YYYY_MM_DD`;
+  - raw CFR/statute strings instead of compact citation atoms;
+  - raw FEI/reference numbers instead of `fei_*` atoms;
+  - correspondence-party argument order inconsistent with the live registry;
+  - unregistered detail kinds such as `corrective_action` and
+    `facility_defect`.
+- The generated `source_notes.md` also carried stale carrier-shape assumptions,
+  so it was replaced with a clean ASCII note aligned to the live registry.
+
+Preflight after normalization:
+
+```text
+package validation:
+C:\prethinker_tmp_archive\package_validation_fda_t003\validation.md
+
+status: pass
+expected facts: 26
+forbidden facts: 9
+registered signatures: 13
+focused validation tests: 18 passed
+```
+
+Fresh local five-lens N=3 with local LM Studio Qwen Q4:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r104_fresh_full_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r104_fresh_full_local\summary.md
+
+formal gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_t003_r104_fresh_full_local_n3
+
+expected facts: 26
+supported facts at support >= 2: 21
+unsupported facts: 5
+forbidden facts: 9
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+focused governance tests: 450 passed
+```
+
+Unsupported rows:
+
+- `fda_warning_letter(... cder, liebel_flarsheim_company_llc,
+  v_2025_10_17, ...)`
+- `fda_violation_detail(... record_review_subject,
+  in_process_bioburden_excursion, violation_scope, ...)`
+- `fda_violation_detail(... record_review_subject, oos_endotoxin_result,
+  violation_scope, ...)`
+- `fda_violation_detail(... procedure_scope,
+  terminal_sterilization_process_validation, violation_scope, ...)`
+- `fda_violation_detail(... record_review_subject,
+  environmental_monitoring_excursion, violation_scope, ...)`
+
+Reading:
+
+- transfer_003 confirms the FDA pack remains governance-clean on another unlike
+  letter, but the transfer gate fails at 21/26.
+- The residue is concentrated in `fda_violation_detail/5` subject/scope
+  construction, not broad FDA wrapper/chronology/citation/response coverage.
+- The two transfer_002 residue families recur:
+  `record_review_subject=environmental_monitoring_excursion` and
+  `procedure_scope=*_validation`.
+
+R105 FDA violation-detail contract and typed-value reducer probe:
+
+Hypothesis:
+
+- R104 showed that the compiler was often emitting the right typed carrier and
+  detail kind, but with compact value variants such as
+  `in_process_bioburden_excursions` and `oos_endotoxin`.
+- This is a typed-atom normalization problem when the detail kind and role are
+  already correct; it is not a license to reclassify detail kinds or roles in
+  Python.
+
+Changes:
+
+- Strengthened the `fda_violation_detail/5` carrier contract with domain-level
+  guidance:
+  - investigation-failure subjects such as excursions, discrepancies, OOS
+    results, environmental-monitoring results, microbial/bioburden/endotoxin
+    results should be `record_review_subject`;
+  - validation/qualification/SOP/process scopes should be `procedure_scope`;
+  - investigation subjects should not be encoded as `affected_product` or
+    `affected_lot` unless the source states a product or lot/batch identifier.
+- Extended `_apply_fda_violation_detail_atom_reduction` with same-slot
+  canonicalizations only:
+  - `in_process_bioburden_excursions` ->
+    `in_process_bioburden_excursion`;
+  - `oos_endotoxin` / close OOS endotoxin variants ->
+    `oos_endotoxin_result`;
+  - `environmental_monitoring_excursions` ->
+    `environmental_monitoring_excursion`;
+  - terminal sterilization validation/qualification variants ->
+    `terminal_sterilization_process_validation`.
+- Added tests proving the reducer keeps the same `detail_kind` slot and does
+  not turn an `affected_product` row into a `record_review_subject` row.
+
+Focused tests:
+
+```text
+tests:
+308 passed
+schema validation: pass
+package validation: pass
+```
+
+Narrow transfer_003 violation-lens N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r105_detail_contract_violation_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r105_detail_contract_violation_local\summary_after_reducer.md
+```
+
+Result:
+
+- The narrow violation lens supports 13/26 total facts, as expected because
+  non-violation lenses are absent.
+- Within the violation/detail subset, it newly supports:
+  - `record_review_subject=in_process_bioburden_excursion`;
+  - `record_review_subject=oos_endotoxin_result`;
+  - `procedure_scope=terminal_sterilization_process_validation`.
+- The EM row remains weak at 1/3.
+- Supported forbidden facts remain 0.
+
+Mixed-cell estimate, not a claim:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r105_mixed_r104_nonviol_r105_viol
+
+result:
+24/26 supported, 0 forbidden
+```
+
+This was useful as a diagnostic only. It combined R104 non-violation lenses with
+R105 violation lenses, so it is not verdict-bearing.
+
+R106 transfer_003 verdict-bearing rerun after R105 changes:
+
+Fresh local five-lens N=3 with local LM Studio Qwen Q4:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r106_fresh_full_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r106_fresh_full_local\summary.md
+
+formal gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_t003_r106_fresh_full_local_n3
+
+expected facts: 26
+supported facts at support >= 2: 23
+unsupported facts: 3
+forbidden facts: 9
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+focused governance tests: 450 passed
+```
+
+Rows recovered relative to R104:
+
+- `fda_warning_letter(... cder, liebel_flarsheim_company_llc,
+  v_2025_10_17, ...)`
+- `fda_violation_detail(... record_review_subject,
+  in_process_bioburden_excursion, violation_scope, ...)`
+- `fda_violation_detail(... record_review_subject, oos_endotoxin_result,
+  violation_scope, ...)`
+- `fda_violation_detail(... process_area, iso_5_filling_line,
+  violation_scope, ...)` became fully stable at 3/3.
+
+Rows still unsupported:
+
+- `fda_violation(... violation_2, facility_equipment_control, ...)`
+  - two runs preferred `contamination_control`;
+  - this is a source-category ambiguity in a two-CFR violation, not a
+    governance failure, but it remains a strict expected-row miss.
+- `fda_violation_detail(... procedure_scope,
+  terminal_sterilization_process_validation, violation_scope, ...)`
+  - still only 1/3 in the full fresh cell despite closing in the narrow
+    violation-lens probe.
+- `fda_violation_detail(... record_review_subject,
+  environmental_monitoring_excursion, violation_scope, ...)`
+  - remains 0/3 and is now the clearest recurring FDA detail-family blocker.
+
+Reading:
+
+- R106 is a real, governance-clean improvement over R104: 21/26 -> 23/26 on a
+  fresh full local N=3, with 0 supported forbidden facts and the research
+  integrity gate passing.
+- The detail contract/reducer work is promotable as typed normalization and
+  prompt-domain clarification, not as Python semantic relabeling.
+- The FDA domain transfer picture is now:
+  - transfer_001: 26/26, gate pass
+  - transfer_002: 25/27, integrity pass, gate fail
+  - transfer_003: 23/26, integrity pass, gate fail
+- The next blocker is not broad FDA pack viability. It is stable
+  `fda_violation_detail/5` role/kind/category construction for overlapping
+  FDA violation-detail families, especially environmental-monitoring excursion
+  and validation/procedure-scope rows.
