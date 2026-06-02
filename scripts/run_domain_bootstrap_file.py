@@ -8219,6 +8219,25 @@ def _carrier_value_domain_issue(signature: str, arg_name: str, value: str) -> st
     return ""
 
 
+def _carrier_value_tuple_issue(signature: str, args: list[str], arg_names: list[str]) -> tuple[str, str, str]:
+    if signature == "fda_violation_detail/5":
+        values = {
+            arg_name: args[index]
+            for index, arg_name in enumerate(arg_names)
+            if index < len(args)
+        }
+        if (
+            values.get("detail_kind") == "record_review_subject"
+            and values.get("role_or_purpose") == "corrective_action_evaluation"
+        ):
+            return (
+                "role_or_purpose",
+                values["role_or_purpose"],
+                "detail_kind_role_mismatch",
+            )
+    return "", "", ""
+
+
 def _apply_carrier_value_domain_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
     """Drop registered carrier rows whose closed value-domain slots are invalid."""
 
@@ -8248,6 +8267,8 @@ def _apply_carrier_value_domain_integrity(source_compile: dict[str, Any]) -> dic
                 issue_arg = arg_name
                 issue_value = args[index]
                 break
+        if not issue:
+            issue_arg, issue_value, issue = _carrier_value_tuple_issue(signature, args, arg_names)
         if issue:
             dropped.append({"fact": fact, "arg_name": issue_arg, "value": issue_value, "issue": issue})
             continue
@@ -8263,7 +8284,8 @@ def _apply_carrier_value_domain_integrity(source_compile: dict[str, Any]) -> dic
         "not_query_interpretation": True,
         "description": (
             "Drops registered carrier rows when closed value-domain slots contain values outside the "
-            "registered carrier contract. It does not infer replacement values or create facts."
+            "registered carrier contract or an explicitly invalid closed-slot combination. It does not "
+            "infer replacement values or create facts."
         ),
     }
     return {"dropped_count": len(dropped), "dropped": dropped[:100]}

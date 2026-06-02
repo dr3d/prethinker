@@ -80,6 +80,9 @@ def test_fda_warning_letter_contracts_keep_domain_slots_compact() -> None:
     assert detail is not None
     detail_text = " ".join(detail["contract"] + detail["forbidden_uses"])
     assert "one atomic detail" in detail_text
+    assert "observation_subject" in detail["value_domains"]["detail_kind"]
+    assert "facility/equipment/control-style violation" in detail_text
+    assert "Do not use observation_subject for investigation_failure" in detail_text
     assert "mini-paragraph" in detail_text
     assert "multi_detail_summary" in detail_text
 

@@ -48,7 +48,7 @@ fda_violation_detail(ViolRefD5, response_status, inadequate, corrective_action_e
 
 % --- violation 2 details (211.42(c)/211.63 facility & equipment) ---
 fda_violation_detail(ViolRefD6, process_area, iso_5_filling_line, violation_scope, SrcDet6).
-fda_violation_detail(ViolRefD7, record_review_subject, environmental_monitoring_excursion, violation_scope, SrcDet7).
+fda_violation_detail(ViolRefD7, observation_subject, environmental_monitoring_excursion, violation_scope, SrcDet7).
 fda_violation_detail(ViolRefD9, response_status, inadequate, corrective_action_evaluation, SrcDet9).
 
 % --- adulteration basis ---

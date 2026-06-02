@@ -27,6 +27,10 @@ fda_correspondence_party(_, _, signatory, bryce_hammer, _).
 % Overbroad violation detail (whole-facility scope instead of the specific area).
 fda_violation_detail(_, process_area, entire_facility, _, _).
 
+% Wrong detail kind for violation 2: environmental-monitoring excursion is
+% observed facility/control evidence here, not an investigation/review subject.
+fda_violation_detail(_, record_review_subject, environmental_monitoring_excursion, violation_scope, _).
+
 % Wrong role: the cited OOS subject belongs to violation_scope, not
 % corrective_action_evaluation.
 fda_violation_detail(_, record_review_subject, oos_endotoxin_result, corrective_action_evaluation, _).

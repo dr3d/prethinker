@@ -2635,3 +2635,232 @@ Reading:
   `fda_violation_detail/5` role/kind/category construction for overlapping
   FDA violation-detail families, especially environmental-monitoring excursion
   and validation/procedure-scope rows.
+
+R107 rejected detail-composition prompt excursion:
+
+R107 tried a stronger bounded `fda_violation_detail/5` bundle-composition
+instruction: account violation-by-violation across detail families and avoid
+letting one family crowd out another.
+
+Narrow local violation-lens N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r107_detail_composition_violation_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r107_detail_composition_violation_local\summary.md
+
+expected facts: 26
+supported facts at support >= 2: 12
+forbidden facts: 9
+supported forbidden facts: 1
+```
+
+The supported forbidden fact was:
+
+```prolog
+fda_violation_detail(_, record_review_subject, oos_endotoxin_result,
+                     corrective_action_evaluation, _).
+```
+
+After adding the typed compatibility hygiene described in R108 below, the same
+artifacts resummarized to 12/26 with 0 supported forbidden facts, but still
+underperformed R105's 13/26 narrow result.
+
+Reading:
+
+- The composition wording is rejected. It did not stabilize
+  `environmental_monitoring_excursion` and introduced a role/kind confusion.
+- This is the same old R97 lesson in a new shape: broader detail guidance can
+  move residue between adjacent detail rows instead of improving stable support.
+- Do not promote this wording or use it as a score claim.
+
+R108 accepted tuple-domain hygiene, no climb claim:
+
+Implemented a typed closed-slot compatibility gate for the one invalid
+combination exposed by R107:
+
+```text
+fda_violation_detail/5:
+  detail_kind=record_review_subject
+  role_or_purpose=corrective_action_evaluation
+  => drop as detail_kind_role_mismatch
+```
+
+This is not source interpretation. It reads only registered carrier slots and
+drops internally inconsistent typed rows. It does not rewrite the row to a
+correct answer or create replacement facts.
+
+Verification:
+
+```text
+focused governance tests:
+316 passed
+
+research integrity gate on R108:
+C:\prethinker_tmp_archive\research_integrity_fda_t003_r108_tuple_hygiene
+
+result:
+pass, 450 focused tests
+```
+
+Narrow local violation-lens N=3 after backing out R107 wording and keeping only
+the tuple hygiene:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r108_tuple_hygiene_violation_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r108_tuple_hygiene_violation_local\summary.md
+
+expected facts: 26
+supported facts at support >= 2: 13
+forbidden facts: 9
+supported forbidden facts: 0
+```
+
+Additional check against existing transfer_002 artifacts under the stricter
+summarizer:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t002_r101_fresh_full
+
+summary:
+C:\prethinker_tmp_archive\fda_t002_r101_fresh_full\summary_after_tuple_hygiene.md
+
+expected facts: 27
+supported facts at support >= 2: 25
+supported forbidden facts: 0
+```
+
+Reading:
+
+- R108 is a governance improvement only. It prevents a newly observed
+  kind/role leak without improving the FDA transfer score.
+- `environmental_monitoring_excursion` remains unsupported in transfer_003
+  and transfer_002 under the strict support threshold.
+- The next real compile-recall blocker is not another broad detail prompt. It
+  is stable source-to-typed construction for FDA environmental-monitoring
+  investigation subjects without broad reducers, prose peeking, or row-shaped
+  fixture language.
+
+R109 environmental-monitoring detail micro-fixture:
+
+Added `fda_warning_letter_em_detail_micro_v1` as an internal diagnostic fixture,
+not a transfer claim. The fixture isolates investigation-failure rows where the
+source explicitly frames environmental-monitoring excursions and OOS endotoxin
+results as investigation subjects.
+
+Validation:
+
+```text
+C:\prethinker_tmp_archive\validate_micro_after_em_fixture.md
+
+fixtures: 9
+blocking errors: 0
+```
+
+Narrow local violation-lens N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_em_micro_r109_violation_local
+
+summary:
+C:\prethinker_tmp_archive\fda_em_micro_r109_violation_local\summary.md
+
+expected facts: 14
+supported facts at support >= 2: 7
+supported forbidden facts: 0
+```
+
+Important row-level result:
+
+- `fda_violation_detail(... record_review_subject,
+  environmental_monitoring_excursion, violation_scope, ...)`: 3/3
+- `fda_violation_detail(... record_review_subject,
+  oos_endotoxin_result, violation_scope, ...)`: 3/3
+
+Reading:
+
+- The carrier contract can represent environmental-monitoring and OOS subjects
+  cleanly when the source frames them as investigation/review subjects.
+- Transfer_003's remaining environmental-monitoring row is probably not the
+  same failure. In that document, the source places the environmental-monitoring
+  program sentence under a facility/equipment-control violation, not an
+  investigation-failure section.
+
+R110/R111 observation-subject schema experiment:
+
+Because transfer_003 violation 2 is a facility/equipment-control section, the
+old expected row was adjudicated as the wrong detail kind:
+
+```prolog
+% old
+fda_violation_detail(_, record_review_subject,
+                     environmental_monitoring_excursion, violation_scope, _).
+
+% revised
+fda_violation_detail(_, observation_subject,
+                     environmental_monitoring_excursion, violation_scope, _).
+```
+
+The domain pack added `observation_subject` as an experimental
+`fda_violation_detail/5` detail kind for observed condition/program-result
+evidence supporting facility/equipment/control-style violations. The contract
+explicitly says not to use it for `investigation_failure` violations.
+
+R110 first attempt:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r110_observation_subject_violation_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r110_observation_subject_violation_local\summary.md
+
+supported facts at support >= 2: 11/26
+supported forbidden facts: 0
+```
+
+R110 was rejected as too broad: the compiler overused `observation_subject`
+inside violation 1 and still did not recover the violation 2 environmental row.
+
+R111 refined contract:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t003_r111_observation_subject_refined_violation_local
+
+summary:
+C:\prethinker_tmp_archive\fda_t003_r111_observation_subject_refined_violation_local\summary.md
+
+research integrity:
+C:\prethinker_tmp_archive\research_integrity_fda_t003_r111_observation_subject_refined
+
+supported facts at support >= 2: 13/26
+supported forbidden facts: 0
+research integrity gate: pass
+focused governance tests: 450 passed
+```
+
+R111 stopped the violation-1 overuse, but the revised environmental row is still
+0/3. The compiler emits plausible violation-2 observation variants instead:
+
+- `observation_subject, excessive_microbial_contamination`
+- `observation_subject, inadequately_designed_cleanrooms`
+- `observation_subject, excessive_caulking_and_tape`
+- `observation_subject, iso_5_filling_line`
+
+Reading:
+
+- `observation_subject` is governance-clean after refinement but not yet a
+  promoted support gain.
+- The remaining transfer_003 environmental row is now better understood as
+  controlled value normalization / schema granularity for facility-control
+  observations, not as a record-review subject failure.
+- Do not claim R111 as a climb. Treat it as a successful diagnosis and a
+  candidate schema surface awaiting further transfer evidence.

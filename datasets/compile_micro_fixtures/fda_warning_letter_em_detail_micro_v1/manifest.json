@@ -1,0 +1,7 @@
+{
+  "fixture_id": "fda_warning_letter_em_detail_micro_v1",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Isolate FDA warning-letter violation-detail construction for environmental-monitoring excursion and related investigation subjects without using source-record prose routing."
+}

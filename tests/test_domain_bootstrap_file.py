@@ -7458,20 +7458,25 @@ def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None
             "fda_violation_citation(violation_1, cfr_21_211_22_d, cfr_21_211_22_d, src_line_8).",
             "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
             "fda_violation_detail(violation_6, violation_6, missing_records, batch_production_and_control_records, src_line_12).",
+            "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, corrective_action_evaluation, src_line_13).",
+            "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_13).",
             "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
         ]
     }
 
     report = _apply_carrier_value_domain_integrity(source_compile)
 
-    assert report["dropped_count"] == 2
+    assert report["dropped_count"] == 3
     assert source_compile["facts"] == [
         "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
+        "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_13).",
         "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
     ]
     dropped = source_compile["deterministic_carrier_value_domain_integrity_dropped_facts"]
     assert dropped[0]["arg_name"] == "citation_role"
     assert dropped[1]["arg_name"] == "detail_kind"
+    assert dropped[2]["arg_name"] == "role_or_purpose"
+    assert dropped[2]["issue"] == "detail_kind_role_mismatch"
     policy = source_compile["deterministic_carrier_value_domain_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True

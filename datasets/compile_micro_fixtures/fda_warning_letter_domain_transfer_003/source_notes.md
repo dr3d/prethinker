@@ -14,10 +14,10 @@ Oracle notes only. Not consumed by compile.
 
 The primary purpose is to give the two transfer_002 residue families a second unlike data point:
 
-1. `record_review_subject = environmental_monitoring_excursion` with role `violation_scope`.
+1. `observation_subject = environmental_monitoring_excursion` with role `violation_scope`.
 2. `procedure_scope = *_validation`.
 
-Liebel-Flarsheim is on-point for both. Violation 1 is an investigation-failure violation built on in-process bioburden excursions and OOS endotoxin invalidations, with clear response-inadequacy critiques. Violation 1 also raises terminal sterilization validation adequacy. Violation 2 carries the environmental-monitoring-excursion subject and facility/equipment-control pressure.
+Liebel-Flarsheim is on-point for both. Violation 1 is an investigation-failure violation built on in-process bioburden excursions and OOS endotoxin invalidations, with clear response-inadequacy critiques. Violation 1 also raises terminal sterilization validation adequacy. Violation 2 carries environmental-monitoring-excursion evidence and facility/equipment-control pressure.
 
 The letter also adds a real consultant recommendation and a response contact.
 
@@ -50,7 +50,7 @@ Forbidden facts catch the tempting role swaps, including OOS subject tagged as `
 
 ## Residue-Family Second Data Points
 
-- EM family: `fda_violation_detail(V2, record_review_subject, environmental_monitoring_excursion, violation_scope, _)`, supported by the environmental monitoring program discussion under violation 2.
+- EM family: `fda_violation_detail(V2, observation_subject, environmental_monitoring_excursion, violation_scope, _)`, supported by the environmental monitoring program discussion under violation 2. This is not a `record_review_subject` row because violation 2 is framed as a facility/equipment-control violation, not an investigation or record-review failure.
 - Validation family: `fda_violation_detail(V1, procedure_scope, terminal_sterilization_process_validation, violation_scope, _)`, supported by the terminal sterilization validation discussion under violation 1.
 
 Both reuse governed value/kind/role atoms from transfer_002 so the gate can measure whether those families transfer rather than introducing fresh incomparable vocabulary.
