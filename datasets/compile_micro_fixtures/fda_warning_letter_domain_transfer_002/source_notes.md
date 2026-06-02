@@ -43,6 +43,28 @@ Key corrections:
 - `domain_omission/5` quotes the carrier signature as `'fda_regulatory_meeting/4'`
   and uses a registered omission kind.
 
+Second-pass adjudication after the local Q4 N=3 run kept only contract/source
+corrections:
+
+- Facility identity now leaves the normalized facility-location atom open while
+  still requiring the Rechon facility name and FEI. The source gives both a
+  street address and city/county/country components, and the contract allows a
+  compact source-local location without prescribing one exact atom.
+- Response-status detail uses `inadequate`, the compact source word, rather
+  than the longer `response_inadequate`; the row already carries
+  `detail_kind=response_status`.
+- The ISO 7 area detail uses `iso_7`, the compact area atom, rather than
+  `iso_7_room`.
+- The recurrence conclusion uses `responsibility_to_correct`, matching the
+  registered contract rule for source language assigning responsibility to the
+  firm to investigate, correct, and prevent recurrence.
+- The response requirement is represented as one written-response obligation
+  with the electronic-submission channel. The source does not state a separate
+  no-deadline documentation-submission obligation.
+- The `ATTN: Erika V. Butler` row remains a contact pressure row. A prompt
+  guidance candidate for ATTN/contact mapping closed this row but churned a
+  responsible-official row in the same N=3, so it was not promoted.
+
 ## Violation Category Rationale
 
 - Violation 1 uses `contamination_control` because the source headline and
@@ -60,13 +82,13 @@ Key corrections:
 
 - `sop_0870_3_0` captures the named filling/sealing SOP scope without copying
   the source paragraph.
-- `response_inadequate` captures source-stated response inadequacy for the
+- `inadequate` captures source-stated response inadequacy for the
   contamination-control and investigation failures.
 - `environmental_monitoring_excursion` captures the investigation subject
   without turning the environmental-monitoring paragraph into prose.
 - `decontamination_effectiveness_validation` captures the validation/assessment
   scope for the aseptic-room cleaning/disinfection issue.
-- `iso_7_room` captures the facility area with peeling/bubbled paint and rust.
+- `iso_7` captures the facility area with peeling/bubbled paint and rust.
 
 ## Deliberately Omitted
 

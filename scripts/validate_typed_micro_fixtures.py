@@ -487,7 +487,7 @@ def _unify_fact_pattern(
 
 
 def _is_expected_variable(value: str) -> bool:
-    return bool(re.fullmatch(r"[A-Z][A-Za-z0-9_]*", str(value or "").strip()))
+    return bool(re.fullmatch(r"(?:[A-Z][A-Za-z0-9_]*|_[A-Za-z0-9_]*)", str(value or "").strip()))
 
 
 def _split_args(raw: str) -> list[str]:

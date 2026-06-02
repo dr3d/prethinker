@@ -327,7 +327,7 @@ def _same_position_constant_overlap(expected_args: list[str], candidate_args: li
 
 def _is_expected_variable(value: str) -> bool:
     text = str(value or "").strip()
-    return bool(text) and text[0].isupper()
+    return bool(text) and (text[0].isupper() or text.startswith("_"))
 
 
 def _apply_domain_reducers(source_compile: dict[str, Any]) -> dict[str, Any]:

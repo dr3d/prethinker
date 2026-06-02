@@ -257,3 +257,25 @@ def test_typed_micro_series_cli_enforce_no_forbidden_bites(tmp_path: Path, monke
     )
 
     assert main() == 1
+
+
+def test_typed_micro_series_constant_slot_treats_anonymous_underscore_as_variable(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "micro"
+    fixture = root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "demo_fact(_, governed_value, _Src).\n")
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        ["demo_fact(row_1, governed_value, source_1)."],
+    )
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        root=root,
+        compile_paths=[run1],
+        support_threshold=1,
+        matcher="constant_slot",
+    )
+
+    assert report["summary"]["supported_fact_count"] == 1

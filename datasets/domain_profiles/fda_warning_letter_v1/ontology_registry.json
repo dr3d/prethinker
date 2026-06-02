@@ -104,7 +104,7 @@
       "signature": "fda_prior_warning_letter/5",
       "args": ["prior_letter_id", "entity_or_facility_id", "prior_issue_date", "relation_or_status", "source_or_scope"],
       "category": "fda_chronology",
-      "notes": "Preserves a source-stated prior warning letter and compact relation or status. Use the source-stated addressee/scope; if the source says the prior letter was issued to the firm, use the firm or recipient entity rather than the inspected facility."
+      "notes": "Preserves a source-stated prior warning letter and compact relation or status. Use the source-stated addressee/scope; if the source says the prior letter was issued to the firm, use the firm or recipient entity rather than the inspected facility. Do not emit this carrier for a prior inspection, prior inspection finding, prior citation, trend, deficiency, or repeated observation unless the source explicitly states a prior warning letter."
     },
     {
       "signature": "fda_regulatory_meeting/4",

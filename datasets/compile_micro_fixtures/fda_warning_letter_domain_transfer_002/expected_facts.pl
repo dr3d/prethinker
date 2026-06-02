@@ -9,7 +9,7 @@
 
 % --- wrapper and facility ---
 fda_warning_letter(Letter, cder, rechon_life_science_ab, v_2025_04_30, SrcLetter).
-fda_facility_identity(Facility, rechon_life_science_ab, limhamn_skane_lan_sweden, fei_3002806978, SrcFacility).
+fda_facility_identity(Facility, rechon_life_science_ab, FacilityLocation, fei_3002806978, SrcFacility).
 
 % --- correspondence parties ---
 fda_correspondence_party(Letter, Recipient, recipient, rechon_life_science_ab, SrcRecipient).
@@ -35,22 +35,21 @@ fda_violation_citation(Viol4, cfr_21_211_58, cgmps_requirement, SrcCite4).
 
 % --- atomic violation details ---
 fda_violation_detail(Viol1, procedure_scope, sop_0870_3_0, violation_scope, SrcDetail1).
-fda_violation_detail(Viol1, response_status, response_inadequate, corrective_action_evaluation, SrcDetail2).
+fda_violation_detail(Viol1, response_status, inadequate, ResponseRole1, SrcDetail2).
 fda_violation_detail(Viol2, record_review_subject, environmental_monitoring_excursion, violation_scope, SrcDetail3).
-fda_violation_detail(Viol2, response_status, response_inadequate, corrective_action_evaluation, SrcDetail4).
+fda_violation_detail(Viol2, response_status, inadequate, ResponseRole2, SrcDetail4).
 fda_violation_detail(Viol3, procedure_scope, decontamination_effectiveness_validation, violation_scope, SrcDetail5).
-fda_violation_detail(Viol4, process_area, iso_7_room, violation_scope, SrcDetail6).
+fda_violation_detail(Viol4, process_area, iso_7, violation_scope, SrcDetail6).
 
 % --- adulteration basis ---
 fda_adulteration_basis(Letter, adulteration_cgmp, fdca_501_a_2_b, drug_products, SrcBasis).
 
 % --- response requirements ---
-fda_response_requirement(Letter, written_response, fifteen_working_days, issuing_office, corrective_actions_and_documentation, SrcReq1).
-fda_response_requirement(Letter, documentation_submission, no_deadline, electronic_submission, supporting_documentation, SrcReq2).
+fda_response_requirement(Letter, written_response, fifteen_working_days, electronic_submission, corrective_actions_and_documentation, SrcReq1).
 
 % --- conclusion scope ---
 fda_conclusion_scope(Letter, cited_violations_not_exhaustive, not_all_inclusive, SrcConcl1).
-fda_conclusion_scope(Letter, recurrence_prevention, prevent_recurrence, SrcConcl2).
+fda_conclusion_scope(Letter, recurrence_prevention, responsibility_to_correct, SrcConcl2).
 
 % --- omission accountability ---
 domain_omission(Letter, 'fda_regulatory_meeting/4', none_found, future_eligibility_only_no_meeting_held, SrcOmit1).

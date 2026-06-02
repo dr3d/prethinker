@@ -228,6 +228,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "Prior warning-letter relation: the row preserves one source-stated prior FDA warning letter and how it relates to the current matter.",
+            "Emit this carrier only when the source explicitly states a prior warning letter. A prior inspection, prior inspection finding, prior citation, trend, deficiency, or repeated observation is not a prior warning letter by itself.",
             "prior_issue_date is a typed date atom.",
             "entity_or_facility_id should follow the source-stated addressee or scope. If the source says a prior warning letter was issued to the firm, use the firm or recipient entity rather than the inspected facility.",
             "relation_or_status is compact, such as prior_letter, repeat_observation_context, or ownership_change_context.",
@@ -236,7 +237,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "value_domains": {
             "relation_or_status": ["prior_letter", "repeat_observation_context", "ownership_change_context"],
         },
-        "forbidden_uses": ["source_excerpt", "full_prior_letter_summary", "unstated_repeat_violation"],
+        "forbidden_uses": ["source_excerpt", "full_prior_letter_summary", "prior_inspection_only", "prior_finding_only", "unstated_repeat_violation"],
         "micro_fixtures": ["fda_warning_letter_domain_v1"],
     },
     "fda_regulatory_meeting/4": {

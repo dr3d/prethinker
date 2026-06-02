@@ -1731,3 +1731,141 @@ Reading:
 - This turns the transfer-cell governance bundle into one repeatable command
   instead of a hand-remembered sequence.
 - It should be the default post-run check for future domain transfer cells.
+
+R95 second FDA transfer fixture, wildcard forbidden fix, and stable active result:
+
+```text
+fixture:
+datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002
+
+source:
+Rechon Life Science AB FDA warning letter, 2025-04-30
+
+preflight:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_preflight_stable_active_20260602.md
+
+stable active compile root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_n3_prior_contract_20260602
+
+stable active gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_stable_active_20260602
+
+local model:
+LM Studio qwen/qwen3.6-35b-a3b, local Q4 quant, one lens at a time
+
+runtime:
+about 5.2 minutes for 3 runs x 5 lenses
+```
+
+Initial finding:
+
+- The package originally landed under `datasets/real_world_transfer` with the
+  same `fda_warning_letter_domain_transfer_001` id as the Apothecary transfer
+  fixture. It was moved/renamed to
+  `datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002`
+  before claim-bearing runs.
+- The fixture preflight passes after correcting predicate argument order,
+  value-domain choices, and source notes.
+
+Wildcard matcher correction:
+
+```text
+changed:
+scripts/summarize_typed_micro_series.py
+scripts/validate_typed_micro_fixtures.py
+
+reason:
+Prolog `_` and `_Name` variables in expected/forbidden facts must behave like
+variables under constant-slot matching.
+```
+
+Why it matters:
+
+- Before the fix, the typed-series gate reported 0 supported forbidden facts.
+- After the fix, the earlier local N=3 showed a supported forbidden row:
+  `fda_prior_warning_letter(_, rechon_life_science_ab, _, _, _)`.
+- The source states a previous inspection finding, not a prior warning letter.
+  This was a real contract-boundary failure, not a harmless matcher detail.
+
+Prior-warning contract boundary:
+
+```text
+change:
+fda_prior_warning_letter/5 now explicitly says:
+- emit only when the source states a prior warning letter
+- do not emit for prior inspection, prior finding, prior citation, trend,
+  deficiency, or repeated observation by itself
+```
+
+Fresh local N=3 after that boundary:
+
+```text
+gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_prior_contract_20260602
+
+result:
+supported facts: 17 / 28
+supported forbidden facts: 0
+research integrity gate: pass
+```
+
+Source/contract oracle normalization:
+
+- Facility identity now leaves the normalized location atom open while still
+  requiring Rechon and FEI 3002806978. The source gives a street/city/county
+  address and the contract does not require one exact location atom.
+- Conclusion recurrence uses `responsibility_to_correct`, matching the carrier
+  contract's rule for source language assigning responsibility to investigate,
+  correct, and prevent recurrence.
+- Response-status detail uses `inadequate`, because `detail_kind=response_status`
+  already carries the status context.
+- The ISO 7 process-area detail uses `iso_7`, the compact area atom.
+- The response requirement is one written-response obligation with an electronic
+  submission channel; a separate no-deadline `documentation_submission` row was
+  over-split and removed.
+
+Stable active gate after these corrections:
+
+```text
+gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_stable_active_20260602
+
+expected facts: 27
+supported facts: 22
+unsupported facts: 5
+forbidden facts: 7
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+```
+
+Unsupported rows:
+
+- `domain_omission(... 'fda_regulatory_meeting/4', none_found,
+  future_eligibility_only_no_meeting_held, ...)`
+- `fda_correspondence_party(... contact, erika_v_butler, ...)`
+- `fda_violation(... violation_2, other_registered_category, ...)`
+- `fda_violation_detail(... violation_2, record_review_subject,
+  environmental_monitoring_excursion, ...)`
+- `fda_violation_detail(... violation_3, procedure_scope,
+  decontamination_effectiveness_validation, ...)`
+
+Rejected candidate:
+
+- A correspondence-party prompt change treating FDA `ATTN:` response lines as
+  contact roles closed `erika_v_butler` in a fresh local N=3, but the same run
+  lost the `responsible_official` row and the ISO 7 detail. It is recorded as a
+  churny candidate, not promoted into the active contract.
+- Candidate gate:
+  `C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_contact_response_20260602`
+
+Reading:
+
+- The second FDA transfer cell is not a pass. It is a clean, useful fail:
+  22/27 stable supported facts, 0 supported forbidden facts, and all research
+  integrity gates passing.
+- The prior-warning false-positive was caught only because forbidden facts now
+  treat Prolog `_` as a wildcard. That gate needs to stay biting.
+- Remaining work is domain recall/accountability, not sign-clean repair:
+  contact role extraction, explicit regulatory-meeting omission accountability,
+  violation-2 category boundary, and two deeper violation-detail recall rows.

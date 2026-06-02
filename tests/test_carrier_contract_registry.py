@@ -330,6 +330,8 @@ def test_fda_prior_warning_contract_prefers_source_stated_firm_scope() -> None:
     lines = carrier_contract_prompt_lines(["fda_prior_warning_letter/5"])
     text = "\n".join(lines)
 
+    assert "only when the source explicitly states a prior warning letter" in text
+    assert "prior inspection finding" in text
     assert "issued to the firm" in text
     assert "rather than the inspected facility" in text
 
