@@ -359,7 +359,7 @@ Use these checks as the domain pack matures:
 ```text
 python scripts\audit_carrier_value_domains.py --compile-json PATH --fixture FIXTURE_ID
 python scripts\audit_domain_omission_accountability.py --compile-json PATH --fixture FIXTURE_ID
-python scripts\audit_kb_atom_inventory.py --compile-root PATH
+python scripts\audit_kb_atom_inventory.py --compile-root PATH --enforce-atom-shape --enforce-registered-signatures --enforce-lens-scope
 python scripts\audit_typed_plan_replay.py --qa-json PATH --compile-root PATH
 python scripts\audit_redaction_replay.py --qa-json PATH
 python scripts\audit_reference_judge_null_controls.py --qa-json PATH

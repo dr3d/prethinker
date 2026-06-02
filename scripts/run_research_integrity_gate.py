@@ -118,6 +118,8 @@ def build_steps(
                         str(compile_root),
                         *fixture_args,
                         "--enforce-atom-shape",
+                        "--enforce-registered-signatures",
+                        "--enforce-lens-scope",
                         "--max-examples",
                         str(max_atom_shape_examples),
                         "--out-json",

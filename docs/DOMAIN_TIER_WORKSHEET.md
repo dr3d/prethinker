@@ -1594,3 +1594,44 @@ Reading:
 - This still does not turn the local lane into an OpenRouter benchmark claim.
   It does make the local lane a better iteration platform because predicate
   invention and cross-lens leakage now have a biting gate.
+
+R92 research-integrity wrapper now includes lens/register gates:
+
+```text
+change:
+scripts/run_research_integrity_gate.py now runs atom inventory with:
+- --enforce-atom-shape
+- --enforce-registered-signatures
+- --enforce-lens-scope
+
+process note:
+docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md guardrails now use the same strict
+atom-inventory command.
+```
+
+Replay:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_tirzepatide_scope_n3_20260601
+
+gate output:
+C:\prethinker_tmp_archive\research_integrity_gate_fda_local_q4_scope_n3_20260602
+
+steps:
+sign_clean_audit: pass
+atom_shape_audit: pass
+carrier_value_domain_audit: pass
+domain_omission_accountability_audit: pass
+
+summary:
+status: pass
+failed steps: 0 / 4
+```
+
+Reading:
+
+- Future claim-bearing compile roots can use the research integrity wrapper
+  instead of remembering separate governance commands by hand.
+- The wrapper now checks the exact leakage class raised in R91: registered
+  facts emitted outside the active lens's offered predicate set.

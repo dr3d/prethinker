@@ -20,6 +20,8 @@ def test_research_integrity_gate_builds_artifact_audits_when_compile_root_presen
     ]
     atom_cmd = steps[1]["cmd"]
     assert "--enforce-atom-shape" in atom_cmd
+    assert "--enforce-registered-signatures" in atom_cmd
+    assert "--enforce-lens-scope" in atom_cmd
     assert atom_cmd[atom_cmd.index("--max-examples") + 1] == "1000"
     assert atom_cmd.count("--fixture") == 2
 
