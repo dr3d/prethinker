@@ -1947,3 +1947,69 @@ Reading:
   22/27 to 23/27 with no supported forbidden facts and no governance regression.
 - Do not claim the fixture passes. The useful claim is narrower: one missing
   governed value was identified, added, and confirmed on a full fresh local N=3.
+
+R97 rejected FDA violation-detail guidance candidate:
+
+Candidate:
+
+```text
+carrier:
+fda_violation_detail/5
+
+guidance idea:
+- classify EM/OOS investigation subjects as record_review_subject, not
+  affected_product
+- classify validation/effectiveness/distribution/reproducibility scopes as
+  procedure_scope, not process_area
+- canonicalize decontamination validation scope as
+  decontamination_effectiveness_validation
+```
+
+Targeted local probe:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_decon_canonical_violation_n3_20260602
+
+result:
+- violation 2 environmental_monitoring_excursion detail: 3 / 3
+- violation 3 decontamination_effectiveness_validation detail: 3 / 3
+- atom inventory: pass
+```
+
+Full fresh local N=3:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_002_local_q4_n3_detail_kind_full_20260602
+
+gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_transfer_002_local_q4_n3_detail_kind_full_20260602
+
+expected facts: 27
+supported facts: 23
+unsupported facts: 4
+forbidden facts: 7
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+```
+
+Why rejected:
+
+- The candidate closed the two deeper detail rows in the full run:
+  `environmental_monitoring_excursion` and
+  `decontamination_effectiveness_validation`.
+- It simultaneously lost simpler detail rows that were previously stable:
+  `sop_0870_3_0` and `iso_7`.
+- Net stable support stayed 23/27. This is not a clean promotion; it is evidence
+  of detail-slot competition inside the violation lens.
+
+Reading:
+
+- The candidate is semantically plausible but active promotion would trade one
+  support shape for another.
+- The next real intervention should not be another sentence of guidance. It
+  should address detail-bundle composition or accountability: required detail
+  families per numbered violation, with explicit coverage accounting, so adding
+  EM/OOS/decontamination detail does not crowd out SOP/process-area detail.
