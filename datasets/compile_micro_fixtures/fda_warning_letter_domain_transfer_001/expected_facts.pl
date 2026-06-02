@@ -37,7 +37,7 @@ fda_violation_citation(Viol6, cfr_21_211_188, cgmps_requirement, SrcCite6).
 
 % --- second-layer violation details ---
 fda_violation_detail(Viol4, process_area, iso_5_aseptic_processing_area, violation_scope, SrcDetail1).
-fda_violation_detail(Viol2, affected_product, tirzepatide_injection_10_mg_ml, product_release_record_review, SrcDetail2).
+fda_violation_detail(Viol2, affected_product, tirzepatide_injection_10_mg_ml, violation_scope, SrcDetail2).
 
 % --- response and consultant ---
 fda_response_requirement(Letter, written_response, fifteen_working_days, issuing_office, corrective_actions_and_documentation, SrcReq).

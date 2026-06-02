@@ -83,8 +83,11 @@ are concrete governed atoms.
   from a real FDA warning-letter source, not a new predicate family.
 - The response requirement uses `issuing_office` rather than broad `fda`
   because the source asks the recipient to notify "this office" in writing.
-- The second-layer detail rows use `product_release_record_review` for the
-  Tirzepatide released-batches detail and `violation_scope` for the ISO 5
-  process-area detail. These are source/contract adjudications made after the
-  first transfer run exposed that the original roles were less faithful to the
-  current carrier value domains.
+- The second-layer detail rows use `violation_scope` for both the Tirzepatide
+  affected-product detail and the ISO 5 process-area detail. The Tirzepatide
+  sentence appears in an "Affected products and areas" scope paragraph and does
+  not state a record-review failure for that product. `product_release_record_review`
+  remains appropriate for lot/record-review rows when the source states a
+  review/release-record failure, but not for this affected-product scope row.
+  This is a source/contract oracle correction, not a model-output concession;
+  it should become claim-bearing only after a fresh same-condition rerun.

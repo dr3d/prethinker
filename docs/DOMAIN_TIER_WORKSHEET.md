@@ -1457,3 +1457,80 @@ Reading:
   violation-detail role split around Tirzepatide. That is useful evidence that
   local Q4 can unblock provider availability while surfacing a different
   carrier-boundary pressure point.
+
+R90 Tirzepatide affected-product oracle correction and local confirmation:
+
+```text
+changed fixture:
+datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_001
+
+source/contract adjudication:
+The source paragraph says "Affected products and areas referenced in the
+inspection findings include Tirzepatide Injection 10 mg/mL batches released
+without validated airflow studies, and operations conducted within the ISO 5
+aseptic processing area." That sentence is an affected-products-and-areas scope
+statement. It does not state that Tirzepatide itself is the record-review
+subject.
+
+expected fact changed from:
+fda_violation_detail(Viol2, affected_product,
+  tirzepatide_injection_10_mg_ml, product_release_record_review, SrcDetail2).
+
+to:
+fda_violation_detail(Viol2, affected_product,
+  tirzepatide_injection_10_mg_ml, violation_scope, SrcDetail2).
+```
+
+Preflight:
+
+```text
+package validator:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_preflight_tirzepatide_scope_20260601.md
+status: pass
+
+focused tests:
+tests\test_validate_domain_transfer_package.py
+tests\test_carrier_contract_registry.py
+tests\test_validate_typed_micro_fixtures.py
+result: 31 passed
+```
+
+Fresh local same-condition rerun:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_local_q4_tirzepatide_scope_n3_20260601
+
+provider: local LM Studio
+model id: qwen/qwen3.6-35b-a3b
+loaded quant/config: user-reported Q4_K_M, seed set in LM Studio UI
+base URL: http://127.0.0.1:1234/v1
+mode: all-lens N=3 with --require-source-compile-ok
+valid source_compile.ok=true lens artifacts: 15 / 15
+union facts per run after reducers: 42 / 44 / 44
+runtime load errors: 0 / 0 / 0
+constant-slot support>=2: 26 / 26
+unsupported facts: 0
+carrier value-domain audit on reduced unions: pass, 130 facts, 160 checked slots, 0 violations
+domain omission accountability on reduced unions: pass, 0 blockers
+atom inventory and shape audit over full root: pass, 262 typed facts, 13 registered signatures, 0 unregistered, 0 atom-shape blockers
+```
+
+Reading:
+
+- This closes the local Q4 diagnostic lane for
+  `fda_warning_letter_domain_transfer_001`: after a source/contract oracle
+  correction and fresh same-condition local N=3, the transfer fixture is 26/26
+  with governance clean.
+- This does not retroactively change R89 and does not replace the current
+  OpenRouter claim-bearing result. It is a separate local-provider lane because
+  provider path, quantization, seed behavior, and serving stack differ.
+- The result is still useful: local LM Studio did not merely "kind of work"; it
+  completed all 15 lens compiles, produced registered atoms only, and matched
+  the corrected transfer oracle at support>=2.
+- Predicate/lens governance for this cell was lens-scoped. Each pass received
+  only its active lens's allowed signatures from the FDA registry, not the full
+  domain vocabulary. The model may still propose off-contract facts during
+  generation, so the trusted result depends on signature enforcement, value
+  domains, omission accountability, and atom-shape auditing, not prompt
+  obedience.
