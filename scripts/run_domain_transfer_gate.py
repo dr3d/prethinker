@@ -22,6 +22,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile-json", action="append", type=Path, required=True)
     parser.add_argument("--support-threshold", type=int, default=2)
     parser.add_argument("--matcher", choices=("unification", "constant_slot"), default="constant_slot")
+    parser.add_argument(
+        "--apply-domain-reducers",
+        action="store_true",
+        help="Apply deterministic typed-domain reducers before measuring expected/forbidden support.",
+    )
     parser.add_argument("--out-dir", type=Path, default=None)
     parser.add_argument("--skip-tests", action="store_true")
     parser.add_argument("--exit-zero", action="store_true")
@@ -46,6 +51,7 @@ def main() -> int:
         compile_paths=compile_paths,
         support_threshold=max(1, int(args.support_threshold)),
         matcher=str(args.matcher),
+        apply_domain_reducers=bool(args.apply_domain_reducers),
         out_dir=out_dir,
         include_tests=not bool(args.skip_tests),
     )
@@ -84,6 +90,7 @@ def build_steps(
     compile_paths: list[Path],
     support_threshold: int,
     matcher: str,
+    apply_domain_reducers: bool,
     out_dir: Path,
     include_tests: bool,
 ) -> list[dict[str, Any]]:
@@ -103,6 +110,8 @@ def build_steps(
         "--out-md",
         str(out_dir / "typed_micro_series.md"),
     ]
+    if apply_domain_reducers:
+        summary_cmd.append("--apply-domain-reducers")
     for path in compile_paths:
         summary_cmd.extend(["--compile-json", str(path)])
 

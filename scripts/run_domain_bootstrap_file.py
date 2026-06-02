@@ -36,6 +36,52 @@ PROFILE_ADMISSION_FULL_DATE_ATOM_RE = re.compile(r"(?:^|[_\-\s])(?:v_)?(?:19|20)
 PROFILE_ADMISSION_COMPACT_DATE_RE = re.compile(r"(?:^|[_\-\s])(?:19|20)\d{6}(?:[_\-\s]|$)")
 FACT_CLAUSE_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 ENTITY_ID_ATOM_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+ATOM_SHAPE_MAX_CHARS = 96
+ATOM_SHAPE_MAX_TOKENS = 14
+ATOM_SHAPE_STOPWORD_DENSITY = 0.35
+ATOM_SHAPE_STOPWORD_MIN_TOKENS = 8
+ATOM_SHAPE_STOPWORD_MIN_COUNT = 3
+ATOM_SHAPE_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "been",
+    "before",
+    "being",
+    "by",
+    "for",
+    "from",
+    "had",
+    "has",
+    "have",
+    "if",
+    "in",
+    "is",
+    "may",
+    "must",
+    "of",
+    "on",
+    "or",
+    "shall",
+    "should",
+    "that",
+    "the",
+    "then",
+    "to",
+    "under",
+    "was",
+    "were",
+    "when",
+    "which",
+    "will",
+    "with",
+    "within",
+    "without",
+}
 PROFILE_ADMISSION_DATE_SLOTS = {"date", "dated", "timestamp", "time", "turn", "source"}
 PROFILE_ADMISSION_SUBJECT_SLOTS = {
     "application",
@@ -1231,6 +1277,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--fda-violation-detail-bundle-followup",
+        action="store_true",
+        help=(
+            "Experimental: after an FDA warning-letter profile compile, run one bounded source-grounded pass "
+            "that may emit fda_violation_detail/5 rows only for numbered violation detail bundles."
+        ),
+    )
+    parser.add_argument(
         "--focused-pass-ops-schema",
         action="store_true",
         help=(
@@ -2190,6 +2244,7 @@ def main() -> int:
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _apply_source_scope_payload_integrity(record["source_compile"])
         _apply_carrier_value_domain_integrity(record["source_compile"])
+        _apply_atom_shape_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
@@ -2238,6 +2293,19 @@ def main() -> int:
                 args=args,
                 extra_context=extra_compile_context,
             )
+        if (
+            bool(getattr(args, "fda_violation_detail_bundle_followup", False))
+            and isinstance(parsed, dict)
+            and _fda_violation_detail_offered(parsed)
+        ):
+            _apply_fda_violation_detail_bundle_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+            )
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
@@ -2250,6 +2318,7 @@ def main() -> int:
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
         _apply_source_scope_payload_integrity(record["source_compile"])
         _apply_carrier_value_domain_integrity(record["source_compile"])
+        _apply_atom_shape_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7068,6 +7137,147 @@ def _profile_registry_completion_context_lines(
     return lines
 
 
+def _fda_violation_detail_offered(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    return any(
+        isinstance(item, dict)
+        and str(item.get("signature", "")).strip() == "fda_violation_detail/5"
+        for item in candidates
+    )
+
+
+def _fda_violation_detail_bundle_context_lines(source_compile: dict[str, Any]) -> list[str]:
+    violation_ids: list[str] = []
+    seen: set[str] = set()
+    for fact in source_compile.get("facts", []) if isinstance(source_compile.get("facts"), list) else []:
+        parsed = _parse_fact_clause(str(fact).strip())
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation" and len(args) == 5 and args[0] not in seen:
+            seen.add(args[0])
+            violation_ids.append(args[0])
+    lines = [
+        (
+            "FDA VIOLATION DETAIL BUNDLE FOLLOWUP: this is a bounded FDA warning-letter detail pass. "
+            "Emit fda_violation_detail/5 rows only. Do not emit source_record_* rows, wrapper facts, "
+            "citations, response requirements, or new predicate names."
+        ),
+        (
+            "FDA VIOLATION DETAIL BUNDLE FOLLOWUP: preserve atomic details for each numbered violation when "
+            "source-stated: named SOP/procedure identifiers, record-review subjects, missing record types, "
+            "cleanroom/process areas, affected products/lots, and response_status. Do not collapse several "
+            "details into one paragraph-like value."
+        ),
+        (
+            "FDA VIOLATION DETAIL BUNDLE FOLLOWUP: reuse existing fda_violation/5 subject IDs when they are "
+            "listed. If the source does not support a detail for a violation, emit no row for that detail."
+        ),
+    ]
+    if violation_ids:
+        lines.append(
+            "FDA VIOLATION DETAIL BUNDLE FOLLOWUP existing violation IDs: "
+            + ", ".join(violation_ids[:20])
+        )
+    lines.extend(carrier_contract_prompt_lines(["fda_violation_detail/5"]))
+    return lines
+
+
+def _apply_fda_violation_detail_bundle_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    context_lines = _fda_violation_detail_bundle_context_lines(source_compile)
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(8, min(32, int(getattr(args, "focused_pass_operation_target", 16) or 16)))
+    metadata: dict[str, Any] = {
+        "schema_version": "fda_violation_detail_bundle_followup_pass_v1",
+        "attempted": True,
+        "allowed_signatures": ["fda_violation_detail/5"],
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=_profile_with_only_signatures(parsed_profile, {"fda_violation_detail/5"}),
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="fda_violation_detail_bundle_followup",
+        purpose="complete FDA numbered-violation detail bundles only",
+        focus="source-stated atomic details for numbered FDA warning-letter violations",
+        completion=(
+            "Emit fda_violation_detail/5 rows only. Add source-grounded atomic details that are missing from "
+            "the current detail bundle; emit no row when the source does not support the detail."
+        ),
+        predicates="fda_violation_detail/5",
+        coverage_goals=(
+            "For each numbered violation, preserve separately stated SOP/procedure identifiers, record-review "
+            "subjects, missing record types, cleanroom/process areas, affected products or lots, and response "
+            "status. Keep detail_kind and role_or_purpose inside their registered value domains."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "fda_violation_detail_bundle_followup"
+    compiled["purpose"] = "complete FDA numbered-violation detail bundles only"
+    compiled["focus"] = "source-stated atomic details for numbered FDA warning-letter violations"
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="fda_violation_detail_bundle_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures={"fda_violation_detail/5"},
+        metadata_prefix="fda_violation_detail_bundle_followup",
+        pass_record=compiled,
+    )
+    _apply_fda_violation_detail_subject_integrity(source_compile)
+    _apply_fda_violation_detail_atom_reduction(source_compile)
+    _apply_carrier_value_domain_integrity(source_compile)
+    _apply_atom_shape_integrity(source_compile)
+    new_facts = (
+        compiled.get("_fda_violation_detail_bundle_followup_new_facts", [])
+        if isinstance(compiled.get("_fda_violation_detail_bundle_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["fda_violation_detail_bundle_followup"] = metadata
+    return metadata
+
+
+def _profile_with_only_signatures(parsed_profile: dict[str, Any], allowed_signatures: set[str]) -> dict[str, Any]:
+    allowed = {str(signature).strip() for signature in allowed_signatures if str(signature).strip()}
+    out = dict(parsed_profile)
+    candidates = parsed_profile.get("candidate_predicates")
+    if isinstance(candidates, list):
+        out["candidate_predicates"] = [
+            item
+            for item in candidates
+            if isinstance(item, dict) and str(item.get("signature", "")).strip() in allowed
+        ]
+    return out
+
+
 def _apply_profile_registry_completion_followup_pass(
     *,
     source_compile: dict[str, Any],
@@ -8038,6 +8248,91 @@ def _apply_carrier_value_domain_integrity(source_compile: dict[str, Any]) -> dic
         ),
     }
     return {"dropped_count": len(dropped), "dropped": dropped[:100]}
+
+
+def _apply_atom_shape_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop registered carrier rows whose typed values are prose-shaped."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    kept: list[str] = []
+    dropped: list[dict[str, Any]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            kept.append(fact)
+            continue
+        predicate, args = parsed
+        signature = f"{predicate}/{len(args)}"
+        if not isinstance(carrier_contract(signature), dict):
+            kept.append(fact)
+            continue
+        issue = ""
+        issue_arg = ""
+        issue_value = ""
+        for index, value in enumerate(args, start=1):
+            issue = _atom_shape_issue(value)
+            if issue:
+                issue_arg = f"arg{index}"
+                issue_value = value
+                break
+        if issue:
+            dropped.append({"fact": fact, "arg": issue_arg, "value": issue_value, "issue": issue})
+            continue
+        kept.append(fact)
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["deterministic_atom_shape_integrity_count"] = len(dropped)
+    source_compile["deterministic_atom_shape_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_atom_shape_integrity_policy"] = {
+        "schema_version": "deterministic_atom_shape_integrity_v1",
+        "authority": "typed_atom_shape_validation_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops registered carrier rows whose atom values are too long, too token-heavy, "
+            "or sentence-like. It does not infer replacement values or create facts."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped": dropped[:100]}
+
+
+def _atom_shape_issue(value: str) -> str:
+    text = str(value or "").strip().strip("'\"")
+    if not text:
+        return ""
+    if _atom_shape_exempt(text):
+        return ""
+    tokens = _atom_shape_tokens(text)
+    if len(text) > ATOM_SHAPE_MAX_CHARS:
+        return "too_long"
+    if len(tokens) > ATOM_SHAPE_MAX_TOKENS:
+        return "too_many_tokens"
+    if _atom_shape_sentence_like(tokens):
+        return "sentence_like_stopwords"
+    return ""
+
+
+def _atom_shape_exempt(value: str) -> bool:
+    text = str(value or "").strip().strip("'\"")
+    if re.fullmatch(r"-?\d+(?:\.\d+)?", text):
+        return True
+    if re.fullmatch(r"(?:v_)?\d{4}(?:[_-]\d{1,2}){0,2}", text):
+        return True
+    if re.search(r"^src_(?:line|row)_\d+$|^source_", text, flags=re.IGNORECASE):
+        return True
+    return text in {"true", "false", "yes", "no"}
+
+
+def _atom_shape_tokens(value: str) -> list[str]:
+    return [token for token in re.split(r"[^A-Za-z0-9]+", str(value or "").casefold()) if token]
+
+
+def _atom_shape_sentence_like(tokens: list[str]) -> bool:
+    if len(tokens) < ATOM_SHAPE_STOPWORD_MIN_TOKENS:
+        return False
+    stopword_count = sum(1 for token in tokens if token in ATOM_SHAPE_STOPWORDS)
+    density = stopword_count / len(tokens) if tokens else 0.0
+    return stopword_count >= ATOM_SHAPE_STOPWORD_MIN_COUNT and density >= ATOM_SHAPE_STOPWORD_DENSITY
 
 
 def _apply_source_scope_payload_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:

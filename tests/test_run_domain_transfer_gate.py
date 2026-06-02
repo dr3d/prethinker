@@ -17,6 +17,7 @@ def test_domain_transfer_gate_builds_expected_forbidden_and_integrity_steps(tmp_
         compile_paths=compile_paths,
         support_threshold=2,
         matcher="constant_slot",
+        apply_domain_reducers=True,
         out_dir=tmp_path / "out",
         include_tests=False,
     )
@@ -28,6 +29,7 @@ def test_domain_transfer_gate_builds_expected_forbidden_and_integrity_steps(tmp_
     summary_cmd = steps[0]["cmd"]
     assert "--enforce-supported" in summary_cmd
     assert "--enforce-no-forbidden" in summary_cmd
+    assert "--apply-domain-reducers" in summary_cmd
     assert summary_cmd.count("--compile-json") == 3
     assert summary_cmd[summary_cmd.index("--matcher") + 1] == "constant_slot"
 

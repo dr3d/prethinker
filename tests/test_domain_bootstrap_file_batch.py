@@ -113,6 +113,7 @@ def test_build_command_forwards_profile_registry_followups() -> None:
         profile_delivery_repair_pass=False,
         profile_registry_completion_followup=True,
         profile_registry_accountability_followup=True,
+        fda_violation_detail_bundle_followup=True,
         intake_registry_context=False,
         review_profile=False,
         profile_review_retry=False,
@@ -133,6 +134,7 @@ def test_build_command_forwards_profile_registry_followups() -> None:
 
     assert "--profile-registry-completion-followup" in command
     assert "--profile-registry-accountability-followup" in command
+    assert "--fda-violation-detail-bundle-followup" in command
 
 
 def test_build_command_forwards_profile_identifier_occurrence_repair_pass() -> None:

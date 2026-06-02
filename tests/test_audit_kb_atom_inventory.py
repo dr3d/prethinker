@@ -107,6 +107,27 @@ def test_kb_atom_inventory_discovers_nested_run_fixture_compile_jsons(tmp_path: 
     assert report["top_registered_signatures"]["fda_warning_letter/5"] == 1
 
 
+def test_kb_atom_inventory_discovers_flat_root_compile_json_by_fixture_metadata(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    _write_compile(
+        compile_root / "union.json",
+        ["fda_warning_letter(letter_1, cder, acme_inc, v_2026_05_30, src_line_1)."],
+        fixture="fixture_a",
+    )
+
+    report = build_report(
+        compile_root=compile_root,
+        fixtures={"fixture_a"},
+        include_source_record=False,
+        include_prose_like=False,
+        max_examples=2,
+    )
+
+    assert report["summary"]["fixture_count"] == 1
+    assert report["summary"]["typed_fact_count"] == 1
+    assert report["fixtures_detail"][0]["fixture"] == "compile"
+
+
 def test_kb_atom_inventory_enforced_empty_compile_root_fails(tmp_path: Path, monkeypatch) -> None:
     out_json = tmp_path / "report.json"
     monkeypatch.setattr(

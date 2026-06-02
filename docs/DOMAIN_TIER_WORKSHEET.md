@@ -2248,3 +2248,80 @@ Reading:
     canonicalization.
 - The next blocker is therefore detail-family coverage/accountability for
   numbered FDA violations, not more atom spelling normalization.
+
+R101 FDA violation-detail bundle followup plus atom-shape integrity:
+
+Problem:
+
+- R100 left three `fda_violation_detail/5` rows unsupported.
+- A narrow violation-lens probe showed that an additional LLM compile-side
+  detail-bundle followup can stabilize the SOP row without Python relabeling:
+  `fda_violation_detail(... violation_1, procedure_scope, sop_0870_3_0,
+  violation_scope, ...)` reached 3 / 3.
+- The same probe did not close the two harder detail rows:
+  environmental-monitoring excursion still drifted into adjacent roles, and
+  decontamination validation still drifted into adjacent detail kinds.
+
+Changes:
+
+- Added optional `--fda-violation-detail-bundle-followup`.
+- The pass is bounded to `fda_violation_detail/5` only, uses a profile restricted
+  to that signature, and enforces the allowed-signature contract after merge.
+- It is compile-side only: the LLM reads source and emits typed facts; Python
+  only enforces signatures, subject integrity, value domains, atom reductions,
+  and atom-shape integrity.
+- Added `deterministic_atom_shape_integrity`, a reject-only guard that drops
+  registered carrier rows whose typed values are too long, too token-heavy, or
+  sentence-like. It does not rewrite or infer replacement values.
+- Fixed `audit_kb_atom_inventory.py` so flat union artifacts at `compile_root`
+  are discovered instead of silently reporting zero artifacts.
+- Added `--apply-domain-reducers` to `run_domain_transfer_gate.py` so formal
+  N-run gates can match the reduced support measurements.
+
+Fresh local five-lens N=3 with local LM Studio Qwen Q4:
+
+```text
+root:
+C:\prethinker_tmp_archive\fda_t002_r101_fresh_full
+
+summary:
+C:\prethinker_tmp_archive\fda_t002_r101_fresh_full\summary.md
+
+formal gate:
+C:\prethinker_tmp_archive\domain_transfer_gate_fda_t002_r101_fresh_full_n3
+
+expected facts: 27
+supported facts at support >= 2: 25
+unsupported facts: 2
+forbidden facts: 7
+supported forbidden facts: 0
+research integrity gate: pass
+domain transfer gate: fail
+focused governance tests: 450 passed
+```
+
+Rows recovered relative to R100:
+
+- `fda_violation_detail(... violation_1, procedure_scope, sop_0870_3_0,
+  violation_scope, ...)`
+
+Rows still unsupported:
+
+- `fda_violation_detail(... violation_2, record_review_subject,
+  environmental_monitoring_excursion, violation_scope, ...)`
+- `fda_violation_detail(... violation_3, procedure_scope,
+  decontamination_effectiveness_validation, violation_scope, ...)`
+
+Reading:
+
+- The optional detail-bundle followup is a legitimate local improvement: 24/27
+  -> 25/27 on a fresh full N=3, with 0 supported forbidden facts and the fixed
+  research integrity gate passing.
+- The transfer gate still fails because the target remains 27/27. Do not claim
+  the FDA transfer fixture is solved.
+- The remaining blocker is not spelling normalization. It is stable role/kind
+  assignment inside violation-detail families. A Python-side role/kind reducer
+  would be a typed-language shortcut and is not allowed.
+- The next useful work should either add source-accountability around expected
+  detail roles, or test whether the FDA detail pack transfers to a third unlike
+  warning letter before spending more effort on this one residue.

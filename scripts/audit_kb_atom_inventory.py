@@ -396,14 +396,20 @@ def _fixture_dirs(compile_root: Path, *, fixtures: set[str] | None = None) -> li
         for path in compile_root.rglob("*")
         if path.is_dir() and _latest_compile_json_or_none(path) is not None
     ]
+    if _latest_compile_json_or_none(compile_root) is not None:
+        dirs.append(compile_root)
     if fixtures:
         dirs = [
             path
             for path in dirs
             if path.name in fixtures
             or any(part in fixtures for part in path.relative_to(compile_root).parts)
+            or _latest_compile_json_matches_fixture(path, fixtures)
         ]
-    return sorted(dirs, key=lambda path: str(path.relative_to(compile_root)))
+    unique: dict[str, Path] = {}
+    for path in dirs:
+        unique[str(path.resolve())] = path
+    return sorted(unique.values(), key=lambda path: str(path.relative_to(compile_root)))
 
 
 def _is_registered_signature(signature: str) -> bool:
@@ -424,6 +430,18 @@ def _latest_compile_json(path: Path) -> Path:
 def _latest_compile_json_or_none(path: Path) -> Path | None:
     candidates = _compile_json_candidates(path)
     return candidates[-1] if candidates else None
+
+
+def _latest_compile_json_matches_fixture(path: Path, fixtures: set[str]) -> bool:
+    candidate = _latest_compile_json_or_none(path)
+    if candidate is None:
+        return False
+    try:
+        data = json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    fixture = str(data.get("fixture", "")).strip() if isinstance(data, dict) else ""
+    return fixture in fixtures
 
 
 def _compile_json_candidates(path: Path) -> list[Path]:

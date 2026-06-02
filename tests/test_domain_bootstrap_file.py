@@ -94,6 +94,8 @@ from scripts.run_domain_bootstrap_file import (
     _apply_profile_registry_completion_followup_pass,
     _profile_registry_accountability_followup_context_lines,
     _apply_profile_registry_accountability_followup_pass,
+    _fda_violation_detail_bundle_context_lines,
+    _apply_fda_violation_detail_bundle_followup_pass,
     _apply_domain_omission_carrier_signature_reduction,
     _apply_fda_warning_letter_subject_convergence,
     _apply_fda_date_atom_reduction,
@@ -105,6 +107,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_office_atom_reduction,
     _apply_fda_violation_detail_subject_integrity,
     _apply_fda_violation_number_atom_reduction,
+    _apply_atom_shape_integrity,
     _apply_carrier_value_domain_integrity,
     _apply_source_scope_payload_integrity,
     _enforce_fda_correspondence_party_placeholder_contract,
@@ -7094,6 +7097,74 @@ def test_profile_registry_accountability_followup_no_requirements_is_noop() -> N
     assert source_compile["facts"] == ["document_title(doc_1, warning_letter)."]
 
 
+def test_fda_violation_detail_bundle_context_is_detail_only() -> None:
+    context = _fda_violation_detail_bundle_context_lines(
+        {
+            "facts": [
+                "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+                "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_2).",
+            ]
+        }
+    )
+
+    joined = "\n".join(context)
+    assert "fda_violation_detail/5 rows only" in joined
+    assert "Do not emit source_record_* rows" in joined
+    assert "violation_1" in joined
+    assert "CARRIER CONTRACT fda_violation_detail/5" in joined
+
+
+def test_fda_violation_detail_bundle_followup_rejects_non_detail_rows(monkeypatch) -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+        ],
+        "rules": [],
+        "queries": [],
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "fda_violation_detail/5"},
+            {"signature": "fda_warning_letter/5"},
+        ]
+    }
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "fda_violation_detail_bundle_followup"
+        assert kwargs["predicates"] == "fda_violation_detail/5"
+        assert "fda_violation_detail/5 rows only" in "\n".join(kwargs["extra_context"])
+        assert kwargs["parsed_profile"]["candidate_predicates"] == [{"signature": "fda_violation_detail/5"}]
+        return {
+            "ok": True,
+            "admitted_count": 2,
+            "skipped_count": 0,
+            "facts": [
+                "fda_violation_detail(violation_1, procedure_scope, sop_100, violation_scope, src_line_12).",
+                "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_2).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = _apply_fda_violation_detail_bundle_followup_pass(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        source_text="The source states a procedure scope.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        extra_context=[],
+    )
+
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+        "fda_violation_detail(violation_1, procedure_scope, sop_100, violation_scope, src_line_12).",
+    ]
+
+
 def test_domain_omission_carrier_signature_reduction_canonicalizes_registered_references() -> None:
     source_compile = {
         "facts": [
@@ -7393,6 +7464,34 @@ def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None
     assert dropped[0]["arg_name"] == "citation_role"
     assert dropped[1]["arg_name"] == "detail_kind"
     policy = source_compile["deterministic_carrier_value_domain_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_atom_shape_integrity_drops_prose_shaped_registered_carrier_values() -> None:
+    source_compile = {
+        "facts": [
+            (
+                "fda_violation_detail(violation_2, process_area, "
+                "persistent_recovery_of_gram_negative_organisms_and_spore_formers_in_iso_5_7_and_personnel_since_2022, "
+                "violation_scope, src_line_12)."
+            ),
+            "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_13).",
+            "source_record_text(row_1, 'Persistent recovery of organisms in ISO areas.').",
+        ]
+    }
+
+    report = _apply_atom_shape_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_13).",
+        "source_record_text(row_1, 'Persistent recovery of organisms in ISO areas.').",
+    ]
+    dropped = source_compile["deterministic_atom_shape_integrity_dropped_facts"]
+    assert dropped[0]["arg"] == "arg3"
+    assert dropped[0]["issue"] in {"too_long", "too_many_tokens", "sentence_like_stopwords"}
+    policy = source_compile["deterministic_atom_shape_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 
