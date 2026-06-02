@@ -1373,3 +1373,31 @@ Reading:
   artifacts that the runner previously allowed to exit 0.
 - current claim-bearing transfer remains R85: 25/26 stable expected facts with
   all governance gates clean.
+
+R88 fail-fast full-cell retry:
+
+```text
+root: C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_n3_recipient_boundary_require_ok_20260601
+mode: same-condition all-lens N=3 with --require-source-compile-ok
+status: incomplete / not scored
+valid source_compile.ok=true lens artifacts: 14 / 15
+invalid artifacts:
+- run3_conclusion: HTTP 429 from Ambient, admitted=0
+- run3_conclusion_retry1: HTTP 429 from Ambient, admitted=0
+- run3_conclusion_retry2: HTTP 429 from Ambient, admitted=0
+one invalid mixed-health artifact discarded:
+- run3_response_obligation: admitted 10 facts but source_compile.ok=false due
+  Ambient HTTP 429; rerun as run3_response_obligation_retry1 succeeded
+```
+
+Reading:
+
+- `--require-source-compile-ok` worked: provider-contaminated artifacts now stop
+  the cell instead of silently entering a support summary.
+- the measurement is blocked by OpenRouter/Ambient availability, not by a known
+  semantic regression. Do not score the 14/15 partial cell and do not use a
+  prior conclusion-lens artifact to complete it.
+- the next verdict-bearing action is still the same: complete a fresh full
+  N=3 cell with all 15 lens artifacts source_compile.ok=true, then union, score,
+  and run governance gates. Until that exists, the claim-bearing transfer result
+  remains R85: 25/26 stable expected facts with all governance gates clean.
