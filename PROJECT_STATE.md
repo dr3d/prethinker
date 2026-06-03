@@ -192,6 +192,7 @@ pytest -q
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
+python scripts\validate_domain_predicate_proposals.py
 ```
 
 Before a public/docs cleanup commit, also run stale-claim greps over

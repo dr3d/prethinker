@@ -203,6 +203,21 @@ fda_failure_to_do_exact_phrase_from_fixture(...)
 Carrier arguments should have fixed roles, compact value domains where possible,
 and explicit source-coordinate requirements.
 
+Before adding a new carrier to the central registry or a domain profile, write
+it as a proposal and validate the proposal shape:
+
+```text
+python scripts\validate_domain_predicate_proposals.py --print-template
+python scripts\validate_domain_predicate_proposals.py --proposal PATH_TO_PROPOSAL.json
+```
+
+The proposal validator is intentionally stricter than ordinary brainstorming.
+It blocks missing lens ownership, missing anti-leak guards, prose-shaped slot
+names, weak N/support transfer plans, missing forbidden examples, and promoted
+signatures that are not actually registered and lens-allowed. A candidate may
+be unregistered while it is still a draft, but it cannot be promoted until the
+central carrier registry, domain registry, and lens allowlist all agree.
+
 5. Define allowed value domains.
 
 For enum-like slots, declare compact allowed values before running broad
