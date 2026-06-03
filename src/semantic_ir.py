@@ -3320,6 +3320,13 @@ def _looks_like_date_atom(value: str) -> bool:
 
 def _looks_like_temporal_atom(value: str) -> bool:
     atom = str(value or "").strip().lower()
+    if atom in {"not_stated", "unknown", "not_applicable"}:
+        return True
+    if re.fullmatch(
+        r"t_(?:(?:\d{4}_?\d{2}_?\d{2})_)?\d{3,4}(?:_?\d{2})?(?:_[a-z]+(?:_[a-z]+)*)?",
+        atom,
+    ):
+        return True
     if _looks_like_date_atom(atom):
         return True
     if re.fullmatch(r"\d{1,2}_\d{2}", atom):

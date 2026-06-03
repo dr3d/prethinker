@@ -15,6 +15,7 @@ def test_builtin_typed_micro_fixtures_are_structurally_valid() -> None:
     assert "claim_ground_set_relation_v1" in fixture_ids
     assert "party_role_context_v1" in fixture_ids
     assert "fda_warning_letter_domain_v1" in fixture_ids
+    assert "ntsb_investigation_domain_v1" in fixture_ids
 
 
 def test_typed_micro_fixture_compile_comparison_reports_missing_facts(tmp_path: Path) -> None:
@@ -185,6 +186,34 @@ def test_typed_micro_fixture_compile_matching_handles_duplicate_heavy_artifacts(
 
 def test_fda_micro_expected_facts_are_atom_shape_clean(tmp_path: Path) -> None:
     fixture_id = "fda_warning_letter_domain_v1"
+    expected_path = DEFAULT_ROOT / fixture_id / "expected_facts.pl"
+    facts = [
+        line.strip()
+        for line in expected_path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.strip().startswith("%")
+    ]
+    compile_dir = tmp_path / fixture_id
+    compile_dir.mkdir(parents=True)
+    (compile_dir / "compile.json").write_text(
+        json.dumps({"source_compile": {"facts": facts}}, indent=2),
+        encoding="utf-8",
+    )
+
+    report = build_atom_inventory_report(
+        compile_root=tmp_path,
+        fixtures={fixture_id},
+        include_source_record=False,
+        include_prose_like=False,
+    )
+
+    assert report["summary"]["registered_signature_count"] > 0
+    assert report["summary"]["registered_fact_count"] == len(facts)
+    assert report["summary"]["unregistered_fact_count"] == 0
+    assert report["atom_shape"]["status"] == "pass"
+
+
+def test_ntsb_micro_expected_facts_are_atom_shape_clean(tmp_path: Path) -> None:
+    fixture_id = "ntsb_investigation_domain_v1"
     expected_path = DEFAULT_ROOT / fixture_id / "expected_facts.pl"
     facts = [
         line.strip()

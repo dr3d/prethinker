@@ -1,0 +1,147 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "sec_form_8k_v1",
+  "source": "Closed SEC Form 8-K skeleton carrier pack drafted from retained public 8-K fixtures under datasets/real_world_transfer.",
+  "purpose": "Constrain SEC Form 8-K compiles to recurring cover-page, item-heading, exhibit, and signature anatomy before attempting event-specific disclosure substance.",
+  "selection": {
+    "mode": "fixture_bank_internal_pack",
+    "date": "2026-06-03",
+    "source_families": [
+      "datasets/real_world_transfer/20260523_wild_01/sec_8k_material_event_001",
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_01/sec_material_event_ugly_001",
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_01/sec_material_event_ugly_002",
+      "datasets/real_world_transfer/fresh_ugly_public_20260528_01/sec_material_event_ugly_006"
+    ]
+  },
+  "accountability_requirements": [
+    {
+      "id": "missing_signature_block",
+      "carrier_signature": "sec_signatory/5",
+      "omission_kind": "role_missing",
+      "reason_code": "signature_block_not_stated",
+      "trigger": "source_is_form_8_k_but_no_signature_block_is_stated"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "Filing wrapper, registrant, and cover-page identifiers.",
+      "allowed_signatures": [
+        "sec_filing/6",
+        "sec_registrant/4",
+        "sec_registrant_identifier/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "items",
+      "purpose": "Form 8-K item headings and their structural roles.",
+      "allowed_signatures": [
+        "sec_filing_item/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "exhibits",
+      "purpose": "Exhibit table rows and attachment roles.",
+      "allowed_signatures": [
+        "sec_exhibit/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "signature",
+      "purpose": "Signature-block signer, title, and date.",
+      "allowed_signatures": [
+        "sec_signatory/5",
+        "domain_omission/5"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "sec_filing/6",
+      "args": [
+        "filing_id",
+        "form_type",
+        "report_kind",
+        "event_date",
+        "filing_date",
+        "source_or_scope"
+      ],
+      "category": "sec_filing_wrapper",
+      "notes": "Identifies one Form 8-K or Form 8-K/A current report. event_date is the cover-page Date of Report or Date of Earliest Event Reported when stated. filing_date is only an explicitly labeled filed/submitted/accession date; use not_stated when no separate filing date is stated. Use companion carriers for items, registrant identifiers, exhibits, and signature."
+    },
+    {
+      "signature": "sec_registrant/4",
+      "args": [
+        "filing_id",
+        "registrant_id",
+        "jurisdiction",
+        "source_or_scope"
+      ],
+      "category": "sec_registrant_identity",
+      "notes": "Links the filing to the source-stated registrant and jurisdiction. Does not carry address or identifier bundles."
+    },
+    {
+      "signature": "sec_registrant_identifier/5",
+      "args": [
+        "filing_id",
+        "registrant_id",
+        "identifier_kind",
+        "identifier_value",
+        "source_or_scope"
+      ],
+      "category": "sec_registrant_identifier",
+      "notes": "Preserves one source-stated registrant identifier at a time, such as CIK, commission file number, EIN, ticker, exchange, or telephone; CIK is emitted only when explicitly stated in source."
+    },
+    {
+      "signature": "sec_filing_item/5",
+      "args": [
+        "filing_id",
+        "item_code",
+        "item_kind",
+        "item_role",
+        "source_or_scope"
+      ],
+      "category": "sec_filing_item",
+      "notes": "Preserves one Form 8-K item heading as compact structural anatomy, not the body text. Item roles and allowed item kinds are governed by the carrier contract."
+    },
+    {
+      "signature": "sec_exhibit/5",
+      "args": [
+        "filing_id",
+        "exhibit_number",
+        "exhibit_kind",
+        "exhibit_role",
+        "source_or_scope"
+      ],
+      "category": "sec_exhibit",
+      "notes": "Preserves one exhibit table row with compact number, kind, and role; policy/plan rows use other_exhibit unless a narrower closed kind exists."
+    },
+    {
+      "signature": "sec_signatory/5",
+      "args": [
+        "filing_id",
+        "signatory_id",
+        "signatory_title",
+        "signature_date",
+        "source_or_scope"
+      ],
+      "category": "sec_signature_block",
+      "notes": "Preserves one signature-block signer, compact title, and typed signature date."
+    },
+    {
+      "signature": "domain_omission/5",
+      "args": [
+        "domain_or_subject_id",
+        "carrier_signature",
+        "omission_kind",
+        "reason_code",
+        "source_or_scope"
+      ],
+      "category": "compile_accountability",
+      "notes": "Records accountable omissions for expected SEC carrier families. It is not an answer substitute."
+    }
+  ]
+}

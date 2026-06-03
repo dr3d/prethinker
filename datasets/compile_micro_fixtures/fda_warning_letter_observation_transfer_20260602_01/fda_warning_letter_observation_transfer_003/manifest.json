@@ -1,0 +1,11 @@
+{
+  "fixture_id": "fda_warning_letter_observation_transfer_003",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/osrx-inc-701889-04232025",
+  "fda_center": "CDER",
+  "company": "OSRX, Inc.",
+  "warning_letter_date": "2025-04-23",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Purest observation-vs-record-review contrast in the batch (503B CDER letter): ISO 5 aseptic-area microbial contamination cited as facility/control evidence (observation_subject) in the 211.42 EM-system violation vs ISO 5 viable-air microbial recovery left uninvestigated as the 211.192 review subject (record_review_subject), with aseptic/smoke/in-process validation (procedure_scope) and a no-FEI negative control."
+}

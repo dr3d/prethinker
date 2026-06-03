@@ -3,12 +3,11 @@
 Last updated: 2026-05-28
 
 > Status: historical pre-reset context. Do not cite the score claims in this
-> document as current. After the May 29 to June 1 sign-clean reset, the current
-> claim-bearing hard-clean floor is `73 / 200` (`36.5%`) on the 8-fixture
-> English batch. Current direction is documented in
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> document as current. The current phase-close claim is the closed-domain
+> predicate-pack transfer result, documented in
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 > and
-> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+> [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md).
 
 This is the public technical note for Prethinker's current measurement method.
 It explains what the audit grammar measures, why the discipline metrics matter,

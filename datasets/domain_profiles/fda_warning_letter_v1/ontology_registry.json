@@ -33,6 +33,11 @@
         "fda_facility_identity/5",
         "fda_correspondence_party/5",
         "domain_omission/5"
+      ],
+      "accountability_signatures": [
+        "fda_warning_letter/5",
+        "fda_facility_identity/5",
+        "fda_correspondence_party/5"
       ]
     },
     {
@@ -44,26 +49,98 @@
         "fda_prior_warning_letter/5",
         "fda_regulatory_meeting/4",
         "domain_omission/5"
+      ],
+      "accountability_signatures": [
+        "fda_inspection_event/6",
+        "fda_form483_response/4"
       ]
     },
     {
       "id": "violation",
       "purpose": "Numbered violations, CFR citations, and atomic violation details.",
       "allowed_signatures": [
+        "fda_cgmp_violation_item/5",
         "fda_violation/5",
         "fda_violation_citation/4",
         "fda_violation_detail/5",
+        "fda_violation_detail_slot/4",
+        "fda_response_assessment_item/6",
+        "fda_response_assessment/5",
         "fda_adulteration_basis/5",
         "domain_omission/5"
       ]
     },
     {
+      "id": "insanitary_condition",
+      "purpose": "Source-stated 501(a)(2)(A) insanitary-condition observations or examples distinct from CGMP violation lists.",
+      "allowed_signatures": [
+        "fda_adulteration_basis/5",
+        "fda_insanitary_condition/5",
+        "domain_omission/5"
+      ]
+    },
+    {
       "id": "response_obligation",
-      "purpose": "Response requirements, consultant recommendation, and consultant citation scoping.",
+      "purpose": "Response requirements and consultant recommendations. Consultant qualification citations require a narrower citation-specific lens.",
       "allowed_signatures": [
         "fda_response_requirement/6",
         "fda_consultant_recommendation/4",
-        "fda_violation_citation/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "response_assessment",
+      "purpose": "FDA critique of firm responses or corrective actions attached to numbered CGMP items.",
+      "allowed_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_response_assessment_item/6",
+        "fda_response_documentation_gap/5",
+        "fda_response_investigation_gap/5",
+        "fda_response_assessment/5",
+        "domain_omission/5"
+      ],
+      "candidate_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_response_assessment_item/6",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "response_documentation_gap",
+      "purpose": "FDA critique that submitted response documentation, protocol, record, evidence, or validation material was not provided.",
+      "allowed_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_response_documentation_gap/5",
+        "fda_response_assessment/5",
+        "domain_omission/5"
+      ],
+      "candidate_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_response_documentation_gap/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "response_investigation_gap",
+      "purpose": "FDA critique that a response failed to investigate, failed to ensure a thorough investigation, or left a CGMP discrepancy uninvestigated.",
+      "allowed_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_response_investigation_gap/5",
+        "fda_response_assessment/5",
+        "domain_omission/5"
+      ],
+      "candidate_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_response_investigation_gap/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "violation_detail_slot",
+      "purpose": "Tier 1 structural slots for numbered CGMP violation details without open detail values.",
+      "allowed_signatures": [
+        "fda_cgmp_violation_item/5",
+        "fda_violation_detail_slot/4",
         "domain_omission/5"
       ]
     },
@@ -93,7 +170,7 @@
       "signature": "fda_correspondence_party/5",
       "args": ["letter_id", "party_id", "party_role", "party_name", "source_or_scope"],
       "category": "fda_correspondence_party",
-      "notes": "Links a letter to recipient, issuing office, signatory, contact, or responsible official roles without inferring responsibility. For FDA warning letters, recipient should prefer the regulated firm/entity named as the letter recipient or addressee when one is stated; do not replace that organization with an individual salutation/contact name. Use responsible_official or contact for a named person only when the source states that role or no organization recipient is stated."
+      "notes": "Links a letter to recipient, issuing office, signatory, contact, or responsible official roles without inferring responsibility. Prefer the regulated firm/entity as recipient when stated; use named people only for stated roles. For contact, prefer a source-stated correspondence email/mailbox when no named contact person is stated for that channel."
     },
     {
       "signature": "fda_inspection_event/6",
@@ -111,7 +188,7 @@
       "signature": "fda_prior_warning_letter/5",
       "args": ["prior_letter_id", "entity_or_facility_id", "prior_issue_date", "relation_or_status", "source_or_scope"],
       "category": "fda_chronology",
-      "notes": "Preserves a source-stated prior warning letter and compact relation or status. Use the source-stated addressee/scope; if the source says the prior letter was issued to the firm, use the firm or recipient entity rather than the inspected facility. Do not emit this carrier for a prior inspection, prior inspection finding, prior citation, trend, deficiency, or repeated observation unless the source explicitly states a prior warning letter."
+      "notes": "Preserves a source-stated prior warning letter and compact relation or status. Use the stated addressee/scope. Do not use this for prior inspections, citations, trends, deficiencies, or repeated observations."
     },
     {
       "signature": "fda_regulatory_meeting/4",
@@ -126,6 +203,12 @@
       "notes": "Preserves one numbered violation with a controlled compact category, never a paragraph summary."
     },
     {
+      "signature": "fda_cgmp_violation_item/5",
+      "args": ["violation_id", "letter_id", "violation_number", "cgmps_citation", "source_or_scope"],
+      "category": "fda_violation_bundle",
+      "notes": "Preserves one numbered 501(a)(2)(B) CGMP violation item and its exact CGMP requirement citation before deterministic category population."
+    },
+    {
       "signature": "fda_violation_citation/4",
       "args": ["violation_id", "citation", "citation_role", "source_or_scope"],
       "category": "fda_violation_citation",
@@ -135,19 +218,55 @@
       "signature": "fda_violation_detail/5",
       "args": ["violation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
       "category": "fda_violation_detail",
-      "notes": "Preserves one atomic violation detail such as affected_lot, record_review_subject, observation_subject, missing_record_type, process_area, response_status, or procedure_scope. Record-review failures should emit a record_review_subject or missing_record_type row in addition to any affected lot rows. Use observation_subject only for observed contamination, program-result, or excursion evidence supporting facility/equipment/control-style violations when the source does not frame the item as an investigation or record-review subject; do not use observation_subject for investigation_failure violations."
+      "notes": "Preserves one atomic violation detail. Record-review failures should use record_review_subject or missing_record_type, not observation_subject. Observation subjects are for observed evidence supporting facility/equipment/control violations."
+    },
+    {
+      "signature": "fda_violation_detail_slot/4",
+      "args": ["violation_id", "detail_kind", "role_or_purpose", "source_or_scope"],
+      "category": "fda_violation_detail_slot",
+      "notes": "Preserves the governed structural slot of a violation detail without claiming the open detail_value. This is useful as Tier 1 structural coverage when detail values are unstable; it is not an answer substitute for value-level questions."
+    },
+    {
+      "signature": "fda_response_assessment/5",
+      "args": ["assessment_id", "violation_id", "assessment_kind", "assessment_scope", "source_or_scope"],
+      "category": "fda_response_assessment",
+      "notes": "Preserves a compact FDA critique of a firm's response, corrective action, CAPA, investigation, or submitted documentation for a numbered CGMP violation. Attach to the existing violation_N atom; do not encode the full critique paragraph or underlying detail value."
+    },
+    {
+      "signature": "fda_response_assessment_item/6",
+      "args": ["assessment_id", "violation_id", "cgmps_citation", "assessment_kind", "assessment_scope", "source_or_scope"],
+      "category": "fda_response_assessment_bundle",
+      "notes": "Preserves a response/CAPA critique with its numbered CGMP violation and CGMP citation family before deterministic projection to fda_response_assessment/5. Projection is valid only when cgmps_citation agrees with the typed fda_cgmp_violation_item/5 bundle."
+    },
+    {
+      "signature": "fda_response_documentation_gap/5",
+      "args": ["gap_id", "violation_id", "cgmps_citation", "gap_kind", "source_or_scope"],
+      "category": "fda_response_documentation_gap",
+      "notes": "Preserves source-stated missing response documentation, protocol, record, evidence, or validation material before deterministic projection to fda_response_assessment/5 with documentation_not_provided."
+    },
+    {
+      "signature": "fda_response_investigation_gap/5",
+      "args": ["gap_id", "violation_id", "cgmps_citation", "investigation_gap_kind", "source_or_scope"],
+      "category": "fda_response_investigation_gap",
+      "notes": "Preserves source-stated failure-to-investigate response critiques before deterministic projection to fda_response_assessment/5 with not_investigated."
+    },
+    {
+      "signature": "fda_insanitary_condition/5",
+      "args": ["condition_id", "letter_id", "condition_number", "condition_category", "source_or_scope"],
+      "category": "fda_insanitary_condition",
+      "notes": "Preserves one numbered insanitary-condition observation, distinct from the CGMP violation list. Use compact categories only: sterility_assurance for aseptic/contact practices; airflow_control for first-air, smoke-study, or airflow failures."
     },
     {
       "signature": "fda_adulteration_basis/5",
       "args": ["letter_id", "basis_kind", "authority_or_scope", "product_scope", "source_or_scope"],
       "category": "fda_legal_basis",
-      "notes": "States a compact source-stated adulteration basis and authority without explanatory prose."
+      "notes": "States a compact source-stated adulteration basis and authority without explanatory prose. authority_or_scope is closed to FDCA adulteration authority atoms such as fdca_501_a_2_a or fdca_501_a_2_b."
     },
     {
       "signature": "fda_response_requirement/6",
       "args": ["letter_id", "action_kind", "deadline_value", "recipient_or_channel", "consequence_or_purpose", "source_or_scope"],
       "category": "fda_response_requirement",
-      "notes": "Preserves one response action, deadline, channel, and compact consequence or purpose."
+      "notes": "Preserves one response action, deadline, channel, and compact consequence or purpose. Use electronic_submission for source-stated email/mailbox/portal response channels; use issuing_office only when no electronic destination is stated."
     },
     {
       "signature": "fda_consultant_recommendation/4",

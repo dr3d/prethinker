@@ -1,0 +1,168 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "ntsb_investigation_v1",
+  "source": "Closed NTSB incident-investigation carrier pack drafted from the existing fixture bank; vocabulary only, not facts.",
+  "purpose": "Constrain NTSB report compiles to a small governed carrier set for report wrapper, occurrence identity, vehicle and party identity, casualties, chronology, conditions, safety actions, findings, and omission accountability.",
+  "selection": {
+    "mode": "fixture_bank_internal_pack",
+    "draw_count": 16,
+    "date": "2026-06-03",
+    "source_families": [
+      "datasets/real_world_transfer/20260521/ntsb_marine_carol_jean_2023",
+      "datasets/real_world_transfer/20260523/ntsb_aviation_001",
+      "datasets/real_world_transfer/20260523_ntsb_pilot_2doc",
+      "datasets/real_world_transfer/20260523_wild_01",
+      "datasets/real_world_transfer/fresh_ach_stress_public_20260528_01",
+      "datasets/real_world_transfer/fresh_ach_stress_public_20260528_02",
+      "datasets/real_world_transfer/fresh_ach_stress_public_20260528_03",
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_01",
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_02",
+      "datasets/real_world_transfer/fresh_ugly_public_20260526_01"
+    ]
+  },
+  "accountability_requirements": [
+    {
+      "id": "missing_report_identifier",
+      "carrier_signature": "ntsb_report/5",
+      "omission_kind": "role_missing",
+      "reason_code": "report_identifier_not_stated",
+      "trigger": "source_states_an_ntsb_report_or_investigation_but_no_report_accident_or_investigation_identifier_is_stated"
+    },
+    {
+      "id": "finding_not_stated",
+      "carrier_signature": "ntsb_finding/5",
+      "omission_kind": "none_found",
+      "reason_code": "probable_cause_or_finding_not_stated",
+      "trigger": "source_is_preliminary_or_factual_and_does_not_state_probable_cause_contributing_factor_or_final_findings"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "Report wrapper and investigated occurrence identity.",
+      "allowed_signatures": [
+        "ntsb_report/5",
+        "ntsb_occurrence/6",
+        "ntsb_occurrence_time/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "asset_party",
+      "purpose": "Aircraft, vessel, vehicle, party, operator, owner, crew, and investigation participant identity.",
+      "allowed_signatures": [
+        "ntsb_vehicle/6",
+        "ntsb_party/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "casualty",
+      "purpose": "Casualty table rows and injury-count partitions.",
+      "allowed_signatures": [
+        "ntsb_injury_count/6",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "timeline",
+      "purpose": "Source-stated sequence, event times, response times, report dates, and safety-action dates.",
+      "allowed_signatures": [
+        "ntsb_timeline_event/6",
+        "ntsb_occurrence_time/5",
+        "ntsb_safety_action/6",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "conditions",
+      "purpose": "Weather, roadway, visibility, cargo, hazmat, equipment, recorder, and explicit negative-condition findings.",
+      "allowed_signatures": [
+        "ntsb_condition/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "findings",
+      "purpose": "Final or explicit findings, probable cause, contributing factors, and source-stated negative findings.",
+      "allowed_signatures": [
+        "ntsb_finding/5",
+        "domain_omission/5"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "ntsb_report/5",
+      "args": ["report_id", "report_kind", "report_status", "issue_date", "source_or_scope"],
+      "category": "ntsb_report_wrapper",
+      "notes": "Identifies one source-stated NTSB report, investigation, preliminary report, safety report, or final report. Do not hide occurrence, vehicle, casualty, or finding detail in wrapper slots."
+    },
+    {
+      "signature": "ntsb_occurrence/6",
+      "args": ["occurrence_id", "report_id", "occurrence_kind", "occurrence_date", "location_id", "source_or_scope"],
+      "category": "ntsb_occurrence_identity",
+      "notes": "Links a report to the accident, crash, casualty, release, or incident it investigates. Do not use for every timeline event."
+    },
+    {
+      "signature": "ntsb_occurrence_time/5",
+      "args": ["occurrence_id", "time_value", "time_basis", "time_role", "source_or_scope"],
+      "category": "ntsb_occurrence_time",
+      "notes": "Preserves one source-stated time or timestamp for the investigated occurrence itself using a valid t_ atom. Use timeline events for later response, warning, inspection, report-issue, and safety-action sequence events."
+    },
+    {
+      "signature": "ntsb_vehicle/6",
+      "args": ["vehicle_id", "occurrence_id", "vehicle_role", "vehicle_type", "identifier_value", "source_or_scope"],
+      "category": "ntsb_vehicle_identity",
+      "notes": "Preserves one source-stated involved aircraft, vessel, barge, vehicle, train, cargo tank, or equivalent asset with compact role, type, and identifier."
+    },
+    {
+      "signature": "ntsb_party/5",
+      "args": ["occurrence_id", "party_id", "party_role", "party_name", "source_or_scope"],
+      "category": "ntsb_party_role",
+      "notes": "Links an occurrence to one source-stated operator, owner, crew, regulator, investigator, responder, manufacturer, or participating party without inferring fault."
+    },
+    {
+      "signature": "ntsb_injury_count/6",
+      "args": ["occurrence_id", "subject_scope", "fatal_count", "serious_count", "minor_count", "source_or_scope"],
+      "category": "ntsb_casualty_summary",
+      "notes": "Casualty table/count partition. Use separate fatal, serious, and minor integer slots; never pack the count triple into one atom. If the source states scope, use that scope rather than duplicate not_stated. No injury narratives or named-victim enumeration."
+    },
+    {
+      "signature": "ntsb_timeline_event/6",
+      "args": ["occurrence_id", "event_id", "event_kind", "event_time_or_date", "sequence_role", "source_or_scope"],
+      "category": "ntsb_chronology",
+      "notes": "Preserves one source-stated dated, timed, or ordered event. event_time_or_date must be a typed t_... or v_... atom or not_stated. sequence_role should be start, intermediate, end, update, superseding, or not_stated. If the source distinguishes a closure order from closure completion, emit separate road_closure_ordered and road_closure_completed rows."
+    },
+    {
+      "signature": "ntsb_condition/5",
+      "args": ["occurrence_id", "condition_kind", "condition_value", "condition_scope", "source_or_scope"],
+      "category": "ntsb_condition",
+      "notes": "Preserves one source-stated weather, roadway, visibility, cargo, hazmat, equipment, recorder, or explicit negative-condition value. Use separate condition_kind rows for speed_limit, hazmat_material, hazmat_un_number, hazmat_classification, roadway, weather, visibility, wind, equipment_state, recorder_state, or negative_finding when the source separates them."
+    },
+    {
+      "signature": "ntsb_safety_action/6",
+      "args": ["action_id", "occurrence_id", "actor_id", "action_kind", "action_date", "source_or_scope"],
+      "category": "ntsb_safety_action",
+      "notes": "Preserves one source-stated safety action, directive, inspection, recommendation, response, operational restriction, after-action review, training, roadway improvement, or corrective action. action_date must be a typed v_... date when stated, otherwise not_stated."
+    },
+    {
+      "signature": "ntsb_finding/5",
+      "args": ["occurrence_id", "finding_id", "finding_kind", "finding_value", "source_or_scope"],
+      "category": "ntsb_finding",
+      "notes": "Preserves compact source-stated NTSB findings, probable cause, contributing factors, factual findings, or explicit negative findings. Abstain rather than stuffing full causal prose into finding_value."
+    },
+    {
+      "signature": "domain_omission/5",
+      "args": [
+        "domain_or_subject_id",
+        "carrier_signature",
+        "omission_kind",
+        "reason_code",
+        "source_or_scope"
+      ],
+      "category": "compile_accountability",
+      "notes": "Records accountable omissions for expected NTSB carrier families. It is not an answer substitute."
+    }
+  ]
+}

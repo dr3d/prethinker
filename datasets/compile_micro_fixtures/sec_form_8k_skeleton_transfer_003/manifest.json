@@ -1,0 +1,15 @@
+{
+  "fixture_id": "sec_form_8k_skeleton_transfer_003",
+  "source_family": "sec_form_8k",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_02/sec_material_event_ugly_004",
+  "purpose": "Third unlike retained SEC Form 8-K skeleton transfer fixture. Pressures amended 8-K form type, Item 2.02, NYSE listing, press-release exhibit, cover-page Inline XBRL exhibit, and signature block without event-substance carriers.",
+  "profile_registry": "datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "governance": {
+    "claim_gate": "N>=3/support>=2",
+    "source_record_prose_allowed": false,
+    "query_text_allowed": false,
+    "lens_scoped": true
+  }
+}

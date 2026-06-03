@@ -3,15 +3,15 @@
 Last updated: 2026-05-28
 
 > Status: historical pre-reset orientation. Use
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md),
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md),
 > [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md),
 > and
-> [Domain Tier Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_WORKSHEET.md)
-> for current score posture
-> and operating direction.
+> [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+> for current score posture and operating direction.
 
-This is the fastest orientation for a new high-context collaborator. Read it
-as the current operating doctrine, not as a research diary.
+This was the fastest orientation for a high-context collaborator before the
+domain-pack phase close. Read it as historical architecture context, not as the
+current claim-bearing research note.
 
 ## Invariant
 
@@ -150,53 +150,22 @@ lanes completed QA over successful compiles, but the compile phase hit provider
 429s and one incomplete read; treat that as provider evidence, not architecture
 failure.
 
-## Next CTO Job
+## Current CTO Job
 
-The next CTO job is to preserve the publishable measurement claim while
-continuing the next investigation cycle.
+This brief is historical; use the closed-domain technical note for current
+score posture. The current CTO job is to preserve the narrow research result
+without drifting back into old scoreboard behavior:
 
-Current native fixed-compile direct-surface anchor:
-
-- `2163` judged rows;
-- `1997 exact / 46 partial / 120 miss`;
-- `92.33%` exact;
-- `0` compatibility rows;
-- `0` runtime load errors;
-- `0` write proposal rows.
-
-Current transfer anchors:
-
-- fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`
-  exact), with `0` compatibility rows, `0` runtime load errors, and `0` write
-  proposal rows; compile gate still held at `2 / 6` old pass/hold and
-  `4 / 6 / 0` blocking/diagnostic/advisory holds;
-- fresh ugly public Batch 03 latest guarded slices: SEC `75 / 0 / 0`, non-SEC
-  `216 / 6 / 3`, slice-combined current view `291 / 6 / 3` over `300` rows
-  (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
-  `0` write proposal rows; not a single fresh 300-row rerun;
-- four externally sourced real-world fixtures: latest fixture-level
-  `160 / 0 / 0`, with `4 / 4` compile gates clean;
-- sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`
-  exact);
-- earlier cold transfer baseline: `177 / 10 / 53` over `240` rows (`73.75%`
-  exact).
-
-Recent cleanup retired compatibility-era public artifacts, stale guard-rollup
-surfaces, old selector mode labels, and prompt-facing terminology that made
-retired compatibility adapters look like active architecture.
-
-Continue only if you find one of these:
-
-1. stale public docs or dead links;
-2. fixture-shaped vocabulary in active prompt/config surfaces;
-3. fresh stamp artifacts that still expose retired compatibility-adapter terms;
-4. active code paths that would re-enable compatibility adapters by default.
-
-The next-cycle investigation is May 28 R1 residue, source-record/query surface
-boundaries, and native compile-gate tiering. The old native gate
-headline shifted `26 / 30 -> 9 / 47` pass/hold; current tooling also separates
-blocking, diagnostic, and advisory reasons. Do not hide those caveats; they are
-part of the audit discipline that makes the measurement credible.
+1. keep public docs explicit that old 90%+ QA scorecards are historical;
+2. keep SEC as the clean methods example for closed skeleton transfer;
+3. keep FDA as the richer case study with both positive transfer and boundary
+   evidence;
+4. keep NTSB as corroborating boundary evidence, not as a new row-grinding
+   target;
+5. keep fixture-shaped vocabulary, prose-shaped atoms, source-record prose
+   routing, and query-text routing out of active prompts/config/code;
+6. treat any next experiment as a named research-gap test, not as an attempt to
+   recover an old headline number.
 
 ## Repo Hygiene
 

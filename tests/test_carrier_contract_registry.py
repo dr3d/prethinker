@@ -49,7 +49,15 @@ def test_legal_citation_contract_preserves_future_amendment_scope() -> None:
 def test_fda_warning_letter_contracts_keep_domain_slots_compact() -> None:
     warning_letter = carrier_contract("fda_warning_letter/5")
     violation = carrier_contract("fda_violation/5")
+    cgmp_item = carrier_contract("fda_cgmp_violation_item/5")
+    citation = carrier_contract("fda_violation_citation/4")
     detail = carrier_contract("fda_violation_detail/5")
+    detail_slot = carrier_contract("fda_violation_detail_slot/4")
+    response_assessment = carrier_contract("fda_response_assessment/5")
+    response_assessment_item = carrier_contract("fda_response_assessment_item/6")
+    response_documentation_gap = carrier_contract("fda_response_documentation_gap/5")
+    response_investigation_gap = carrier_contract("fda_response_investigation_gap/5")
+    insanitary_condition = carrier_contract("fda_insanitary_condition/5")
     response = carrier_contract("fda_response_requirement/6")
     omission = carrier_contract("domain_omission/5")
 
@@ -75,7 +83,37 @@ def test_fda_warning_letter_contracts_keep_domain_slots_compact() -> None:
     ]
     violation_text = " ".join(violation["contract"] + violation["forbidden_uses"])
     assert "controlled FDA warning-letter category palette" in violation_text
+    assert "501(a)(2)(B) CGMP violations" in violation_text
+    assert "501(a)(2)(A) insanitary-condition observations" in violation_text
+    assert "same local violation_N atom in violation_id and violation_number" in violation_text
+    assert "Do not use the warning-letter id" in violation_text
+    assert "Do not create an fda_violation/5 row from an FDCA 501(a)(2)(A)" in violation_text
+    assert "do not renumber the modeled subset" in violation_text
+    assert "Do not merge several numbered CGMP bullets" in violation_text
     assert "paragraph_summary_as_category" in violation_text
+    assert "insanitary_condition_duplicate" in violation_text
+
+    assert cgmp_item is not None
+    assert cgmp_item["args"] == [
+        "violation_id",
+        "letter_id",
+        "violation_number",
+        "cgmps_citation",
+        "source_or_scope",
+    ]
+    cgmp_item_text = " ".join(cgmp_item["contract"] + cgmp_item["forbidden_uses"])
+    assert "Use this bundle before category population" in cgmp_item_text
+    assert "same local violation_N atom" in cgmp_item_text
+    assert "only CGMP requirement citations" in cgmp_item_text
+    assert "adulteration_authority" in cgmp_item_text
+
+    assert citation is not None
+    citation_text = " ".join(citation["contract"] + citation["forbidden_uses"])
+    assert "specific numbered fda_violation/5 subject" in citation_text
+    assert "same violation_N atom used as both violation_id and violation_number" in citation_text
+    assert "Do not reuse the same cgmps_requirement citation" in citation_text
+    assert "adulteration-authority citations" in citation_text
+    assert "Do not collect citations from several numbered violations" in citation_text
 
     assert detail is not None
     detail_text = " ".join(detail["contract"] + detail["forbidden_uses"])
@@ -85,6 +123,109 @@ def test_fda_warning_letter_contracts_keep_domain_slots_compact() -> None:
     assert "Do not use observation_subject for investigation_failure" in detail_text
     assert "mini-paragraph" in detail_text
     assert "multi_detail_summary" in detail_text
+
+    assert detail_slot is not None
+    assert detail_slot["args"] == ["violation_id", "detail_kind", "role_or_purpose", "source_or_scope"]
+    detail_slot_text = " ".join(detail_slot["contract"] + detail_slot["forbidden_uses"])
+    assert "intentionally does not claim the open detail_value" in detail_slot_text
+    assert "answer substitute" in detail_slot_text
+    assert "detail_value_claim" in detail_slot_text
+
+    assert response_assessment is not None
+    assert response_assessment["args"] == [
+        "assessment_id",
+        "violation_id",
+        "assessment_kind",
+        "assessment_scope",
+        "source_or_scope",
+    ]
+    response_assessment_text = " ".join(
+        response_assessment["contract"] + response_assessment["forbidden_uses"]
+    )
+    assert "corrective action" in response_assessment_text
+    assert "same local violation_N atom" in response_assessment_text
+    assert "attach by the source-stated critique topic and citation family" in response_assessment_text
+    assert "did not provide sufficient supporting documentation" in response_assessment_text
+    assert "documentation_not_provided has priority" in response_assessment_text
+    assert "failed to investigate" in response_assessment_text
+    assert "failing to implement an interim corrective action" in response_assessment_text
+    assert "unable to assess" in response_assessment_text
+    assert "response_inadequate" in response_assessment["value_domains"]["assessment_kind"]
+    assert "corrective_action_evaluation" in response_assessment["value_domains"]["assessment_scope"]
+    assert "full_response_paragraph" in response_assessment_text
+
+    assert response_assessment_item is not None
+    assert response_assessment_item["args"] == [
+        "assessment_id",
+        "violation_id",
+        "cgmps_citation",
+        "assessment_kind",
+        "assessment_scope",
+        "source_or_scope",
+    ]
+    response_assessment_item_text = " ".join(
+        response_assessment_item["contract"] + response_assessment_item["forbidden_uses"]
+    )
+    assert "Use this bundle before response-assessment projection" in response_assessment_item_text
+    assert "citation agrees with the existing fda_cgmp_violation_item/5 bundle" in response_assessment_item_text
+    assert "not by paragraph order" in response_assessment_item_text
+    assert "environmental-monitoring/action-limit" in response_assessment_item_text
+    assert "documentation_not_provided has priority" in response_assessment_item_text
+    assert "cfr_21_211_113_b" in response_assessment_item["value_domains"]["cgmps_citation"]
+    assert "documentation_not_provided" in response_assessment_item["value_domains"]["assessment_kind"]
+    assert "corrective_action_evaluation" in response_assessment_item["value_domains"]["assessment_scope"]
+    assert "citation_not_in_numbered_item_map" in response_assessment_item_text
+
+    assert response_documentation_gap is not None
+    assert response_documentation_gap["args"] == [
+        "gap_id",
+        "violation_id",
+        "cgmps_citation",
+        "gap_kind",
+        "source_or_scope",
+    ]
+    response_documentation_gap_text = " ".join(
+        response_documentation_gap["contract"] + response_documentation_gap["forbidden_uses"]
+    )
+    assert "missing submitted material" in response_documentation_gap_text
+    assert "documentation_not_provided" in response_documentation_gap_text
+    assert "citation will be dropped before projection" in response_documentation_gap_text
+    assert "supporting_documentation" in response_documentation_gap["value_domains"]["gap_kind"]
+    assert "cfr_21_211_113_b" in response_documentation_gap["value_domains"]["cgmps_citation"]
+    assert "missing_document_title" in response_documentation_gap_text
+
+    assert response_investigation_gap is not None
+    assert response_investigation_gap["args"] == [
+        "gap_id",
+        "violation_id",
+        "cgmps_citation",
+        "investigation_gap_kind",
+        "source_or_scope",
+    ]
+    response_investigation_gap_text = " ".join(
+        response_investigation_gap["contract"] + response_investigation_gap["forbidden_uses"]
+    )
+    assert "failed to investigate" in response_investigation_gap_text
+    assert "not_investigated" in response_investigation_gap_text
+    assert "only for the investigation-failure citation family cfr_21_211_192" in response_investigation_gap_text
+    assert "thorough_investigation_not_ensured" in response_investigation_gap["value_domains"]["investigation_gap_kind"]
+    assert "cfr_21_211_192" in response_investigation_gap["value_domains"]["cgmps_citation"]
+    assert "organism_name" in response_investigation_gap_text
+
+    assert insanitary_condition is not None
+    assert insanitary_condition["args"] == [
+        "condition_id",
+        "letter_id",
+        "condition_number",
+        "condition_category",
+        "source_or_scope",
+    ]
+    condition_text = " ".join(insanitary_condition["contract"] + insanitary_condition["forbidden_uses"])
+    assert "501(a)(2)(A)" in condition_text
+    assert "separate CGMP violation list" in condition_text
+    assert "contact with a critical surface" in condition_text
+    assert "first-air disruption" in condition_text
+    assert "full_observation_sentence" in condition_text
 
     assert response is not None
     response_text = " ".join(response["contract"] + response["forbidden_uses"])
@@ -104,6 +245,247 @@ def test_fda_domain_profile_registry_matches_registered_contracts() -> None:
     predicates = registry["predicates"]
 
     assert len(predicates) >= 10
+    for item in predicates:
+        contract = carrier_contract(item["signature"])
+        assert contract is not None
+        assert item["args"] == contract["args"]
+
+
+def test_ntsb_investigation_contracts_keep_skeleton_and_prose_separate() -> None:
+    report = carrier_contract("ntsb_report/5")
+    occurrence = carrier_contract("ntsb_occurrence/6")
+    occurrence_time = carrier_contract("ntsb_occurrence_time/5")
+    vehicle = carrier_contract("ntsb_vehicle/6")
+    party = carrier_contract("ntsb_party/5")
+    injuries = carrier_contract("ntsb_injury_count/6")
+    timeline = carrier_contract("ntsb_timeline_event/6")
+    condition = carrier_contract("ntsb_condition/5")
+    safety_action = carrier_contract("ntsb_safety_action/6")
+    finding = carrier_contract("ntsb_finding/5")
+
+    assert report is not None
+    assert report["args"] == ["report_id", "report_kind", "report_status", "issue_date", "source_or_scope"]
+    report_text = " ".join(report["contract"] + report["forbidden_uses"])
+    assert "Use companion NTSB carriers" in report_text
+    assert "full_report_title" in report_text
+    assert "aviation_accident" in report["value_domains"]["report_kind"]
+
+    assert occurrence is not None
+    assert occurrence["args"] == [
+        "occurrence_id",
+        "report_id",
+        "occurrence_kind",
+        "occurrence_date",
+        "location_id",
+        "source_or_scope",
+    ]
+    occurrence_text = " ".join(occurrence["contract"] + occurrence["forbidden_uses"])
+    assert "Do not use this row for every timeline event" in occurrence_text
+    assert "occurrence_<report_id>" in occurrence_text
+    assert "event_kind=occurrence_time" in occurrence_text
+    assert "location_prefix_atom" in occurrence_text
+    assert "full_event_summary" in occurrence_text
+
+    assert occurrence_time is not None
+    assert occurrence_time["args"] == [
+        "occurrence_id",
+        "time_value",
+        "time_basis",
+        "time_role",
+        "source_or_scope",
+    ]
+    occurrence_time_text = " ".join(occurrence_time["contract"] + occurrence_time["forbidden_uses"])
+    assert "Occurrence-time relation" in occurrence_time_text
+    assert "t_1713_30_est" in occurrence_time_text
+    assert "t_2025_11_05_1713_30_est" in occurrence_time_text
+    assert "bare_numeric_time_atom" in occurrence_time_text
+    assert "eastern_standard_time" in occurrence_time["value_domains"]["time_basis"]
+
+    assert vehicle is not None
+    assert vehicle["args"] == [
+        "vehicle_id",
+        "occurrence_id",
+        "vehicle_role",
+        "vehicle_type",
+        "identifier_value",
+        "source_or_scope",
+    ]
+    vehicle_text = " ".join(vehicle["contract"] + vehicle["forbidden_uses"])
+    assert "document_id_as_identifier" in vehicle_text
+    assert "identifier_value=not_stated" in vehicle_text
+    assert "crowd out the accident_vehicle" in vehicle_text
+    assert "vehicle_type=combination_vehicle" in vehicle_text
+    assert "Passing or oncoming vehicles" in vehicle_text
+    assert "Parked struck objects" in vehicle_text
+    assert "tow_vessel" in vehicle["value_domains"]["vehicle_role"]
+
+    assert party is not None
+    assert party["args"] == ["occurrence_id", "party_id", "party_role", "party_name", "source_or_scope"]
+    party_text = " ".join(party["contract"] + party["forbidden_uses"])
+    assert "does not itself assert fault" in party_text
+    assert "generic_role_as_name" in party_text
+
+    assert injuries is not None
+    assert injuries["args"] == [
+        "occurrence_id",
+        "subject_scope",
+        "fatal_count",
+        "serious_count",
+        "minor_count",
+        "source_or_scope",
+    ]
+    injuries_text = " ".join(injuries["contract"] + injuries["forbidden_uses"])
+    assert "one source-stated casualty table row" in injuries_text
+    assert "full six-slot shape" in injuries_text
+    assert "5_8_3" in injuries_text
+    assert "duplicate not_stated partition" in injuries_text
+    assert "victim_narrative" in injuries_text
+
+    assert timeline is not None
+    assert timeline["args"] == [
+        "occurrence_id",
+        "event_id",
+        "event_kind",
+        "event_time_or_date",
+        "sequence_role",
+        "source_or_scope",
+    ]
+    timeline_text = " ".join(timeline["contract"] + timeline["forbidden_uses"])
+    assert "full_event_sentence" in timeline_text
+    assert "warning_issued" in timeline["value_domains"]["event_kind"]
+    assert "mutual_aid_request" in timeline["value_domains"]["event_kind"]
+    assert "hazmat_entry" in timeline["value_domains"]["event_kind"]
+    assert "road_closure_ordered" in timeline["value_domains"]["event_kind"]
+    assert "road_closure_completed" in timeline["value_domains"]["event_kind"]
+    assert "response_sequence" in timeline_text
+    assert "do not encode postcrash reviews" in timeline_text
+
+    assert condition is not None
+    condition_text = " ".join(condition["contract"] + condition["forbidden_uses"])
+    assert "one atomic source-stated value" in condition_text
+    assert "condition_kind=visibility" in condition_text
+    assert "degrees_310_knots_4" in condition_text
+    assert "condition_kind=speed_limit" in condition_text
+    assert "rural_unlit_undivided_highway" in condition_text
+    assert "cvr_not_recovered" in condition_text
+    assert "bare_recorder_state" in condition_text
+    assert "probable_cause_text" in condition_text
+    assert "hazmat_classification" in condition["value_domains"]["condition_kind"]
+    assert "hazmat_material" in condition["value_domains"]["condition_kind"]
+    assert "hazmat_un_number" in condition["value_domains"]["condition_kind"]
+    assert "speed_limit" in condition["value_domains"]["condition_kind"]
+
+    assert safety_action is not None
+    safety_text = " ".join(safety_action["contract"] + safety_action["forbidden_uses"])
+    assert "one source-stated safety action" in safety_text
+    assert "unexplained initials-only atom" in safety_text
+    assert "first-class safety-action rows" in safety_text
+    assert "full_directive_text" in safety_text
+    assert "after_action_review" in safety_action["value_domains"]["action_kind"]
+    assert "hazmat_training" in safety_action["value_domains"]["action_kind"]
+    assert "roadway_improvement" in safety_action["value_domains"]["action_kind"]
+
+    assert finding is not None
+    finding_text = " ".join(finding["contract"] + finding["forbidden_uses"])
+    assert "abstain with domain_omission/5" in finding_text
+    assert "no final probable cause" in finding_text
+    assert "not_stated is not a valid finding_kind" in finding_text
+    assert "not_stated" not in finding["value_domains"]["finding_kind"]
+    assert "no impairment" in finding_text
+    assert "full_probable_cause_paragraph" in finding_text
+
+
+def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
+    filing = carrier_contract("sec_filing/6")
+    registrant = carrier_contract("sec_registrant/4")
+    identifier = carrier_contract("sec_registrant_identifier/5")
+    item = carrier_contract("sec_filing_item/5")
+    exhibit = carrier_contract("sec_exhibit/5")
+    signatory = carrier_contract("sec_signatory/5")
+
+    assert filing is not None
+    assert filing["args"] == [
+        "filing_id",
+        "form_type",
+        "report_kind",
+        "event_date",
+        "filing_date",
+        "source_or_scope",
+    ]
+    filing_text = " ".join(filing["contract"] + filing["forbidden_uses"])
+    assert "companion SEC carriers" in filing_text
+    assert "cover-page Date of Report" in filing_text
+    assert "do not substitute item-body event dates" in filing_text
+    assert "Use not_stated when no separate filing date is stated" in filing_text
+    assert "signature_date_as_filing_date" in filing_text
+    assert "report_date_as_filing_date" in filing_text
+    assert "agreement_terms" in filing_text
+    assert "form_8_k" in filing["value_domains"]["form_type"]
+    assert "form_8_k_a" in filing["value_domains"]["form_type"]
+
+    assert registrant is not None
+    assert registrant["args"] == ["filing_id", "registrant_id", "jurisdiction", "source_or_scope"]
+    registrant_text = " ".join(registrant["contract"] + registrant["forbidden_uses"])
+    assert "sec_registrant_identifier/5" in registrant_text
+    assert "full_cover_table" in registrant_text
+
+    assert identifier is not None
+    assert identifier["args"] == [
+        "filing_id",
+        "registrant_id",
+        "identifier_kind",
+        "identifier_value",
+        "source_or_scope",
+    ]
+    identifier_text = " ".join(identifier["contract"] + identifier["forbidden_uses"])
+    assert "numeric-leading" in identifier_text
+    assert "do not infer CIK" in identifier_text
+    assert "unstated_cik" in identifier_text
+    assert "exchange_nasdaq_stock_market_llc" in identifier_text
+    assert "commission_file_number" in identifier["value_domains"]["identifier_kind"]
+
+    assert item is not None
+    assert item["args"] == ["filing_id", "item_code", "item_kind", "item_role", "source_or_scope"]
+    item_text = " ".join(item["contract"] + item["forbidden_uses"])
+    assert "heading, not the paragraph body" in item_text
+    assert "Item 9.01" in item_text
+    assert "item_role=exhibit" in item_text
+    assert "not the registrant/company name" in item_text
+    assert "numeric_leading_filing_id" in item_text
+    assert "item_2_02" in item_text
+    assert "item_4_02" in item_text
+    assert "results_of_operations_financial_condition" in item["value_domains"]["item_kind"]
+    assert "non_reliance" in item["value_domains"]["item_kind"]
+    assert "officer_departure_appointment" in item["value_domains"]["item_kind"]
+    assert "substantive" in item["value_domains"]["item_role"]
+
+    assert exhibit is not None
+    assert exhibit["args"] == ["filing_id", "exhibit_number", "exhibit_kind", "exhibit_role", "source_or_scope"]
+    exhibit_text = " ".join(exhibit["contract"] + exhibit["forbidden_uses"])
+    assert "full exhibit description" in exhibit_text
+    assert "one row for each exhibit table row" in exhibit_text
+    assert "exhibit_table_row_10_1" in exhibit_text
+    assert "policy/plan exhibits use exhibit_kind=other_exhibit" in exhibit_text
+    assert "cover_page_ixbrl" in exhibit["value_domains"]["exhibit_kind"]
+
+    assert signatory is not None
+    assert signatory["args"] == [
+        "filing_id",
+        "signatory_id",
+        "signatory_title",
+        "signature_date",
+        "source_or_scope",
+    ]
+    signatory_text = " ".join(signatory["contract"] + signatory["forbidden_uses"])
+    assert "full_signature_block" in signatory_text
+
+
+def test_ntsb_domain_profile_registry_matches_registered_contracts() -> None:
+    registry_path = REPO_ROOT / "datasets" / "domain_profiles" / "ntsb_investigation_v1" / "ontology_registry.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    predicates = registry["predicates"]
+
+    assert len(predicates) == 11
     for item in predicates:
         contract = carrier_contract(item["signature"])
         assert contract is not None
@@ -301,6 +683,9 @@ def test_fda_adulteration_basis_contract_includes_insanitary_conditions() -> Non
     text = "\n".join(lines)
 
     assert "adulteration_insanitary_conditions" in text
+    assert "authority_or_scope" in text
+    assert "fdca_501_a_2_a" in text
+    assert "fdca_501_a_2_b" in text
 
 
 def test_fda_facility_identity_contract_blocks_document_ids_as_facility_ids() -> None:
@@ -309,6 +694,15 @@ def test_fda_facility_identity_contract_blocks_document_ids_as_facility_ids() ->
 
     assert "MARCS-CMS" in text
     assert "not_stated" in text
+
+
+def test_fda_correspondence_party_contract_prefers_mailbox_contact_when_no_person_stated() -> None:
+    lines = carrier_contract_prompt_lines(["fda_correspondence_party/5"])
+    text = "\n".join(lines)
+
+    assert "party_role=contact" in text
+    assert "correspondence email address or mailbox" in text
+    assert "rather than a salutation" in text
 
 
 def test_fda_violation_citation_contract_allows_letter_level_consultant_citation() -> None:
@@ -326,6 +720,38 @@ def test_fda_consultant_recommendation_contract_rejects_citation_as_provenance()
 
     assert "Do not put a citation atom such as cfr_21_211_34 in source_or_scope" in text
     assert "separate consultant qualification citation row" in text
+
+
+def test_fda_response_requirement_contract_defines_electronic_channel_boundary() -> None:
+    lines = carrier_contract_prompt_lines(["fda_response_requirement/6"])
+    text = "\n".join(lines)
+
+    assert "email address, mailbox, portal, or electronic submission destination" in text
+    assert "use issuing_office only" in text
+    assert "no electronic destination is stated" in text
+
+
+def test_fda_response_assessment_contract_prioritizes_documentation_and_topic_attachment() -> None:
+    lines = carrier_contract_prompt_lines(["fda_response_assessment/5"])
+    text = "\n".join(lines)
+
+    assert "attach by the source-stated critique topic and citation family" in text
+    assert "cfr_21_211_113_b" in text
+    assert "cfr_21_211_192" in text
+    assert "documentation_not_provided has priority" in text
+    assert "APS/media-fill documentation" in text
+
+
+def test_fda_response_assessment_item_contract_renders_projection_cage() -> None:
+    lines = carrier_contract_prompt_lines(["fda_response_assessment_item/6"])
+    text = "\n".join(lines)
+
+    assert "Use this bundle before response-assessment projection" in text
+    assert "cgmps_citation allowed values" in text
+    assert "cfr_21_211_42_c_10_iv" in text
+    assert "assessment_kind allowed values" in text
+    assert "documentation_not_provided" in text
+    assert "citation_not_in_numbered_item_map" in text
 
 
 def test_fda_inspection_event_contract_keeps_agency_separate_from_issuing_office() -> None:

@@ -4,10 +4,10 @@ Last updated: 2026-05-28
 
 > Status: historical pre-reset public explainer. The core metaphor is still
 > useful, but the measurement figures below are not current claims. Current
-> strategy and score posture live in
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> phase-close status lives in
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 > and
-> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+> [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md).
 
 How Prethinker treats ordinary English as compilable input and turns it into a
 queryable, auditable knowledge program.
@@ -91,26 +91,15 @@ not get to decide what becomes durable truth. Deterministic code owns schema
 validation, predicate contracts, source ledgers, Prolog execution, write
 blocking, and cleanliness counters.
 
-The current public measurement anchor is:
+The current public measurement anchor is no longer the old general QA
+scoreboard. Later sign-clean audits showed that some older high exact-rate
+measurements depended on paths that cannot carry the technical thesis. The
+current claim-bearing result is narrower: closed, lens-scoped predicate domains
+can stabilize recurring official-document skeleton anatomy under strict gates.
 
-- native restamp: `1997 exact / 46 partial / 120 miss` over `2163` rows
-  (`92.33%` exact);
-- fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`
-  exact), with the caveat that compile gate tiering still held;
-- fresh ugly public Batch 03: latest guarded SEC and non-SEC slices read as
-  `291 / 6 / 3` over `300` rows (`97.0%` exact), with the caveat that this is
-  not one single fresh 300-row rerun and the batch is now partly a regression
-  guard;
-- real-world external spotcheck: `160 / 0 / 0`, with `4 / 4` compile gates
-  clean;
-- sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`
-  exact);
-- all current measurement classes: `0` compatibility rows, `0` runtime load
-  errors, and `0` QA write proposals.
-
-Those numbers are not the point of this document. They are here to ground the
-claim that "compiling language" is being measured as an instrument, not merely
-described as an analogy.
+Those current numbers are summarized in the closed-domain technical note. This
+document keeps the core mental model: "compiling language" is being measured as
+an instrument, not merely described as an analogy.
 
 ## Why This Is Hard
 

@@ -1,0 +1,11 @@
+{
+  "fixture_id": "fda_warning_letter_insanitary_002",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/us-specialty-formulations-llc-659142-07262023",
+  "fda_center": "ORA - Division of Pharmaceutical Quality Operations I",
+  "company": "US Specialty Formulations, LLC",
+  "warning_letter_date": "2023-07-26",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "503B outsourcing-facility letter with a numbered Adulterated Drug Products / insanitary-conditions section (fda_insanitary_condition rows, including ISO 5 microbial recovery); exercises observation_subject (EM system) vs record_review_subject (211.192 microbial-recovery investigation) with the microbial-recovery observation/record-review forbidden swap, procedure_scope (aseptic + cleaning/disinfection validation), a corrective-action critique tied to the 211.192 violation, and a stated FEI (contrast with the no-FEI fixture 001)."
+}

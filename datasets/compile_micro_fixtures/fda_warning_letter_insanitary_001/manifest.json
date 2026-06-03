@@ -1,0 +1,11 @@
+{
+  "fixture_id": "fda_warning_letter_insanitary_001",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/pq-pharmacy-llc-715795-10102025",
+  "fda_center": "CDER",
+  "company": "PQ Pharmacy, LLC",
+  "warning_letter_date": "2025-10-10",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "503B outsourcing-facility letter with a numbered Adulterated Drug Products / insanitary-conditions section (fda_insanitary_condition rows) plus CGMP violations; exercises observation_subject (aseptic technique, EM system) vs record_review_subject (211.192 particulate investigation), a corrective-action critique that clearly belongs to the 211.192 violation, a legitimate affected_lot with a real lot id, and a no-FEI negative control."
+}

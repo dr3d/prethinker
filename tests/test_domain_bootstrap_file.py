@@ -87,6 +87,7 @@ from scripts.run_domain_bootstrap_file import (
     _pass_surface_contribution,
     _profile_from_signature_roster,
     _profile_registry_for_lens,
+    _profile_registry_lens_intake_plan,
     _profile_registry_palette_report,
     _profile_registry_palette_prior_context,
     _profile_registry_accountability_context,
@@ -96,16 +97,46 @@ from scripts.run_domain_bootstrap_file import (
     _apply_profile_registry_accountability_followup_pass,
     _fda_violation_detail_bundle_context_lines,
     _apply_fda_violation_detail_bundle_followup_pass,
+    _fda_violation_detail_slot_context_lines,
+    _apply_fda_violation_detail_slot_followup_pass,
+    _fda_response_assessment_context_lines,
+    _apply_fda_response_assessment_followup_pass,
     _apply_domain_omission_carrier_signature_reduction,
     _apply_fda_warning_letter_subject_convergence,
     _apply_fda_date_atom_reduction,
+    _apply_registered_date_slot_atom_reduction,
+    _apply_sec_exhibit_number_atom_reduction,
+    _apply_sec_filing_id_atom_reduction,
+    _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_typed_slot_prefix_reduction,
+    _apply_ntsb_actor_id_atom_reduction,
+    _apply_ntsb_condition_atom_reduction,
+    _apply_ntsb_injury_count_scope_specificity,
+    _apply_ntsb_timestamp_atom_reduction,
     _apply_fda_facility_subject_convergence,
     _apply_fda_lot_identifier_atom_reduction,
+    _apply_fda_no_fei_omission_reduction,
+    _apply_fda_adulteration_basis_authority_reduction,
     _apply_fda_violation_detail_atom_reduction,
+    _apply_fda_violation_detail_value_kind_integrity,
+    _apply_fda_violation_detail_slot_projection,
+    _apply_fda_response_assessment_slot_projection,
+    _apply_fda_response_assessment_scope_reduction,
+    _apply_fda_response_documentation_gap_projection,
+    _apply_fda_response_investigation_gap_projection,
+    _apply_fda_response_assessment_item_projection,
+    _apply_fda_response_assessment_id_canonicalization,
+    _apply_fda_response_assessment_kind_citation_reduction,
+    _apply_fda_response_assessment_specificity_reduction,
+    _apply_fda_response_assessment_subject_integrity,
     _apply_fda_facility_identity_atom_reduction,
     _apply_fda_consultant_citation_scope_reduction,
     _apply_fda_office_atom_reduction,
+    _apply_fda_correspondence_party_name_reduction,
+    _apply_fda_cgmp_violation_item_projection,
+    _apply_fda_cgmp_bundle_subject_integrity,
     _apply_fda_violation_detail_subject_integrity,
+    _apply_fda_violation_category_from_unique_citation_reduction,
     _apply_fda_violation_number_atom_reduction,
     _apply_atom_shape_integrity,
     _apply_carrier_value_domain_integrity,
@@ -120,6 +151,7 @@ from scripts.run_domain_bootstrap_file import (
     _source_pass_self_check_missing_slots,
     _list_range_inventory_existing_fact_context,
     _source_compile_required_failure,
+    _apply_active_lens_scope_integrity,
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
 import json
@@ -552,6 +584,57 @@ def test_registered_carrier_delivery_keeps_non_accountable_extensions_report_onl
     assert report["accountable_signatures"] == []
     assert report["findings"] == []
     assert source_compile["compile_health"]["verdict"] == "healthy"
+
+
+def test_registered_carrier_delivery_reports_active_lens_accountability() -> None:
+    source_compile = {
+        "facts": ["fda_facility_identity(facility_1, firm_1, city_state, fei_123, source)."],
+        "active_profile_registry_lens": {
+            "id": "wrapper",
+            "accountability_signatures": [
+                "fda_warning_letter/5",
+                "fda_facility_identity/5",
+            ],
+        },
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "fda_warning_letter/5", "args": []},
+            {"signature": "fda_facility_identity/5", "args": []},
+        ]
+    }
+
+    report = _attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=profile,
+    )
+
+    assert report["offered_signatures"] == ["fda_warning_letter/5", "fda_facility_identity/5"]
+    assert report["accountable_signatures"] == ["fda_warning_letter/5", "fda_facility_identity/5"]
+    assert report["findings"] == [
+        {
+            "class": "registered_carrier_offered_but_undelivered",
+            "signature": "fda_warning_letter/5",
+            "delivered_carrier_row_count": 0,
+            "reason": (
+                "registered carrier signature was accountability-required by active profile-registry lens "
+                "but no typed rows were emitted"
+            ),
+        }
+    ]
+    assert source_compile["compile_health"]["flag_counts"]["registered_carrier_offered_but_undelivered"] == 1
 
 
 def test_registered_carrier_omission_context_uses_contract_registry() -> None:
@@ -2710,6 +2793,103 @@ def test_source_pass_ops_wraps_for_normal_mapper() -> None:
     assert ir["candidate_operations"][0]["predicate"] == "person_role"
     assert ir["truth_maintenance"]["support_links"] == []
     assert ir["self_check"]["notes"] == ["compact pass"]
+
+
+def test_source_pass_ops_canonicalizes_fda_letter_id_and_date_slots() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "pass_id": "fda_wrapper",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_letter",
+                    "predicate": "fda_warning_letter",
+                    "args": ["320_25_68", "cder", "rechon_life_science_ab", "2025_04_30", "source_document"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_party",
+                    "predicate": "fda_correspondence_party",
+                    "args": ["320_25_68", "francis_godwin", "signatory", "francis_godwin", "source_document"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "fda_warning_letter/5",
+                "args": ["letter_id", "issuing_office", "recipient_entity", "issue_date", "source_or_scope"],
+            },
+            {
+                "signature": "fda_correspondence_party/5",
+                "args": ["letter_id", "party_id", "party_role", "party_name", "source_or_scope"],
+            },
+        ],
+    )
+
+    assert ir["candidate_operations"][0]["args"] == [
+        "fda_warning_letter_320_25_68",
+        "cder",
+        "rechon_life_science_ab",
+        "v_2025_04_30",
+        "source_document",
+    ]
+    assert ir["candidate_operations"][1]["args"][0] == "fda_warning_letter_320_25_68"
+
+
+def test_source_pass_ops_canonicalizes_registered_chronology_date_slots() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "pass_id": "fda_chronology",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_inspection",
+                    "predicate": "fda_inspection_event",
+                    "args": ["320-25-68", "rechon_life_science_ab", "2024_08_26", "2024_09_06", "fda", "source_document"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_483",
+                    "predicate": "fda_form483_response",
+                    "args": ["response_2024-09-27", "320-25-68", "2024_09_27", "source_document"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "fda_inspection_event/6",
+                "args": ["inspection_id", "facility_id", "start_date", "end_date", "inspecting_body", "source_or_scope"],
+            },
+            {
+                "signature": "fda_form483_response/4",
+                "args": ["response_id", "inspection_id", "response_date", "source_or_scope"],
+            },
+        ],
+    )
+
+    assert ir["candidate_operations"][0]["args"][0] == "inspection_320_25_68"
+    assert ir["candidate_operations"][1]["args"][0] == "response_2024_09_27"
+    assert ir["candidate_operations"][1]["args"][1] == "inspection_320_25_68"
+    assert ir["candidate_operations"][0]["args"][2:4] == ["v_2024_08_26", "v_2024_09_06"]
+    assert ir["candidate_operations"][1]["args"][2] == "v_2024_09_27"
 
 
 def test_source_pass_ops_reduces_review_atoms_to_governed_carrier() -> None:
@@ -6821,6 +7001,337 @@ def test_profile_registry_for_lens_strips_omission_without_requirement() -> None
     assert filtered["active_lens"]["accountability_requirement_count"] == 0
 
 
+def test_profile_registry_response_obligation_lens_can_exclude_shared_violation_citation() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "response_obligation",
+                    "allowed_signatures": [
+                        "fda_response_requirement/6",
+                        "fda_consultant_recommendation/4",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_response_requirement/6"},
+                {"signature": "fda_consultant_recommendation/4"},
+                {"signature": "fda_violation_citation/4"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "response_obligation",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_response_requirement/6",
+        "fda_consultant_recommendation/4",
+    ]
+    assert "fda_violation_citation/4" not in filtered["active_lens"]["allowed_signatures"]
+
+
+def test_profile_registry_response_assessment_lens_excludes_detail_carriers() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "response_assessment",
+                    "allowed_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_response_assessment_item/6",
+                        "fda_response_documentation_gap/5",
+                        "fda_response_investigation_gap/5",
+                        "fda_response_assessment/5",
+                        "domain_omission/5",
+                    ],
+                    "candidate_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_response_assessment_item/6",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_cgmp_violation_item/5"},
+                {"signature": "fda_response_assessment_item/6"},
+                {"signature": "fda_response_documentation_gap/5"},
+                {"signature": "fda_response_investigation_gap/5"},
+                {"signature": "fda_response_assessment/5"},
+                {"signature": "fda_violation_detail/5"},
+                {"signature": "fda_violation_detail_slot/4"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "response_assessment",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_cgmp_violation_item/5",
+        "fda_response_assessment_item/6",
+    ]
+    assert "fda_response_assessment/5" in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_response_assessment/5" not in filtered["active_lens"]["candidate_signatures"]
+    assert "fda_response_documentation_gap/5" not in filtered["active_lens"]["candidate_signatures"]
+    assert "fda_response_investigation_gap/5" not in filtered["active_lens"]["candidate_signatures"]
+    assert "fda_violation_detail/5" not in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_violation_detail_slot/4" not in filtered["active_lens"]["allowed_signatures"]
+
+
+def test_profile_registry_response_documentation_gap_lens_is_separate_from_assessment_item() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "response_documentation_gap",
+                    "allowed_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_response_documentation_gap/5",
+                        "fda_response_assessment/5",
+                        "domain_omission/5",
+                    ],
+                    "candidate_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_response_documentation_gap/5",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_cgmp_violation_item/5"},
+                {"signature": "fda_response_documentation_gap/5"},
+                {"signature": "fda_response_assessment_item/6"},
+                {"signature": "fda_response_assessment/5"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "response_documentation_gap",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_cgmp_violation_item/5",
+        "fda_response_documentation_gap/5",
+    ]
+    assert "fda_response_assessment/5" in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_response_assessment/5" not in filtered["active_lens"]["candidate_signatures"]
+    assert "fda_response_assessment_item/6" not in filtered["active_lens"]["allowed_signatures"]
+
+
+def test_profile_registry_response_investigation_gap_lens_is_separate_from_assessment_item() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "response_investigation_gap",
+                    "allowed_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_response_investigation_gap/5",
+                        "fda_response_assessment/5",
+                        "domain_omission/5",
+                    ],
+                    "candidate_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_response_investigation_gap/5",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_cgmp_violation_item/5"},
+                {"signature": "fda_response_investigation_gap/5"},
+                {"signature": "fda_response_documentation_gap/5"},
+                {"signature": "fda_response_assessment_item/6"},
+                {"signature": "fda_response_assessment/5"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "response_investigation_gap",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_cgmp_violation_item/5",
+        "fda_response_investigation_gap/5",
+    ]
+    assert "fda_response_assessment/5" in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_response_assessment/5" not in filtered["active_lens"]["candidate_signatures"]
+    assert "fda_response_assessment_item/6" not in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_response_documentation_gap/5" not in filtered["active_lens"]["allowed_signatures"]
+
+
+def test_profile_registry_loader_preserves_lens_candidate_signatures(tmp_path: Path) -> None:
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(
+        json.dumps(
+            {
+                "schema": "domain_profile_registry_v1",
+                "lenses": [
+                    {
+                        "id": "response_assessment",
+                        "allowed_signatures": [
+                            "fda_cgmp_violation_item/5",
+                            "fda_response_assessment_item/6",
+                            "fda_response_assessment/5",
+                        ],
+                        "candidate_signatures": [
+                            "fda_cgmp_violation_item/5",
+                            "fda_response_assessment_item/6",
+                        ],
+                    }
+                ],
+                "predicates": [
+                    {"signature": "fda_cgmp_violation_item/5"},
+                    {"signature": "fda_response_assessment_item/6"},
+                    {"signature": "fda_response_assessment/5"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    loaded = domain_bootstrap_file._load_profile_registry(registry_path)
+    filtered = _profile_registry_for_lens(loaded, "response_assessment")
+
+    assert filtered["active_lens"]["allowed_signatures"] == [
+        "fda_cgmp_violation_item/5",
+        "fda_response_assessment/5",
+        "fda_response_assessment_item/6",
+    ]
+    assert filtered["active_lens"]["candidate_signatures"] == [
+        "fda_cgmp_violation_item/5",
+        "fda_response_assessment_item/6",
+    ]
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_cgmp_violation_item/5",
+        "fda_response_assessment_item/6",
+    ]
+
+
+def test_profile_registry_loader_preserves_lens_accountability_signatures(tmp_path: Path) -> None:
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(
+        json.dumps(
+            {
+                "schema": "domain_profile_registry_v1",
+                "lenses": [
+                    {
+                        "id": "wrapper",
+                        "allowed_signatures": [
+                            "fda_warning_letter/5",
+                            "fda_facility_identity/5",
+                            "fda_correspondence_party/5",
+                            "domain_omission/5",
+                        ],
+                        "accountability_signatures": [
+                            "fda_warning_letter/5",
+                            "fda_facility_identity/5",
+                            "fda_correspondence_party/5",
+                        ],
+                    }
+                ],
+                "predicates": [
+                    {"signature": "fda_warning_letter/5"},
+                    {"signature": "fda_facility_identity/5"},
+                    {"signature": "fda_correspondence_party/5"},
+                    {"signature": "domain_omission/5"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    loaded = domain_bootstrap_file._load_profile_registry(registry_path)
+    filtered = _profile_registry_for_lens(loaded, "wrapper")
+
+    assert filtered["active_lens"]["accountability_signatures"] == [
+        "fda_correspondence_party/5",
+        "fda_facility_identity/5",
+        "fda_warning_letter/5",
+    ]
+    assert filtered["active_lens"]["declared_accountability_signatures"] == [
+        "fda_correspondence_party/5",
+        "fda_facility_identity/5",
+        "fda_warning_letter/5",
+    ]
+
+
+def test_profile_registry_lens_intake_plan_uses_active_lens_only() -> None:
+    plan = _profile_registry_lens_intake_plan(
+        {
+            "fixture": "fda_warning_letter_v1",
+            "active_lens": {
+                "id": "wrapper",
+                "purpose": "Document wrapper facts.",
+                "candidate_signatures": ["fda_warning_letter/5", "fda_facility_identity/5"],
+                "accountability_signatures": ["fda_warning_letter/5"],
+            },
+            "predicates": [
+                {
+                    "signature": "fda_warning_letter/5",
+                    "args": ["letter_id", "issuing_office", "recipient_entity", "issue_date", "source_or_scope"],
+                    "category": "fda_document_wrapper",
+                },
+                {
+                    "signature": "fda_facility_identity/5",
+                    "args": ["facility_id", "facility_name", "facility_location", "identifier_value", "source_or_scope"],
+                    "category": "fda_facility_identity",
+                },
+                {
+                    "signature": "fda_violation/5",
+                    "args": ["violation_id", "letter_id", "violation_number", "violation_category", "source_or_scope"],
+                    "category": "fda_violation",
+                },
+            ],
+        }
+    )
+
+    assert plan["schema_version"] == "intake_plan_v1"
+    pass_plan = plan["pass_plan"][0]
+    assert pass_plan["pass_id"] == "wrapper_pass_1"
+    assert pass_plan["recommended_predicates"] == ["fda_warning_letter/5", "fda_facility_identity/5"]
+    assert "fda_violation/5" not in "\n".join(pass_plan["coverage_goals"])
+    assert "fda_warning_letter/5" in "\n".join(pass_plan["coverage_goals"])
+    assert "source prose" in "\n".join(plan["self_check"]["notes"])
+
+
+def test_profile_registry_violation_detail_slot_lens_excludes_open_detail_values() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "violation_detail_slot",
+                    "allowed_signatures": [
+                        "fda_cgmp_violation_item/5",
+                        "fda_violation_detail_slot/4",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_cgmp_violation_item/5"},
+                {"signature": "fda_violation_detail_slot/4"},
+                {"signature": "fda_violation_detail/5"},
+                {"signature": "fda_response_assessment_item/6"},
+                {"signature": "fda_response_assessment/5"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "violation_detail_slot",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_cgmp_violation_item/5",
+        "fda_violation_detail_slot/4",
+    ]
+    assert "fda_violation_detail/5" not in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_response_assessment_item/6" not in filtered["active_lens"]["allowed_signatures"]
+    assert "fda_response_assessment/5" not in filtered["active_lens"]["allowed_signatures"]
+
+
 def test_profile_registry_lens_limits_direct_profile_and_completion_context() -> None:
     registry = _profile_registry_for_lens(
         {
@@ -7102,6 +7613,7 @@ def test_fda_violation_detail_bundle_context_is_detail_only() -> None:
         {
             "facts": [
                 "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+                "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_2).",
                 "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_2).",
             ]
         }
@@ -7111,7 +7623,27 @@ def test_fda_violation_detail_bundle_context_is_detail_only() -> None:
     assert "fda_violation_detail/5 rows only" in joined
     assert "Do not emit source_record_* rows" in joined
     assert "violation_1" in joined
+    assert "existing numbered CGMP item map" not in joined
+    assert "violation_1 -> cfr_21_211_113_b / contamination_control" not in joined
     assert "CARRIER CONTRACT fda_violation_detail/5" in joined
+
+
+def test_fda_violation_detail_bundle_context_can_include_typed_item_map() -> None:
+    context = _fda_violation_detail_bundle_context_lines(
+        {
+            "facts": [
+                "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+                "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_2).",
+                "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_2).",
+            ]
+        },
+        include_item_map=True,
+    )
+
+    joined = "\n".join(context)
+    assert "existing numbered CGMP item map" in joined
+    assert "violation_1 -> cfr_21_211_113_b / contamination_control" in joined
+    assert "source_record_*" in joined
 
 
 def test_fda_violation_detail_bundle_followup_rejects_non_detail_rows(monkeypatch) -> None:
@@ -7165,6 +7697,209 @@ def test_fda_violation_detail_bundle_followup_rejects_non_detail_rows(monkeypatc
     ]
 
 
+def test_fda_violation_detail_slot_context_is_slot_only() -> None:
+    context = _fda_violation_detail_slot_context_lines(
+        {
+            "facts": [
+                "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+                "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_2).",
+            ]
+        }
+    )
+
+    joined = "\n".join(context)
+    assert "fda_violation_detail_slot/4 rows only" in joined
+    assert "Do not emit fda_violation_detail/5 rows" in joined
+    assert "violation_1" in joined
+    assert "CARRIER CONTRACT fda_violation_detail_slot/4" in joined
+
+
+def test_fda_violation_detail_slot_followup_rejects_value_and_wrapper_rows(monkeypatch) -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+        ],
+        "rules": [],
+        "queries": [],
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "fda_violation_detail_slot/4"},
+            {"signature": "fda_violation_detail/5"},
+            {"signature": "fda_warning_letter/5"},
+        ]
+    }
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "fda_violation_detail_slot_followup"
+        assert kwargs["predicates"] == "fda_violation_detail_slot/4"
+        assert "fda_violation_detail_slot/4 rows only" in "\n".join(kwargs["extra_context"])
+        assert kwargs["parsed_profile"]["candidate_predicates"] == [
+            {"signature": "fda_violation_detail_slot/4"}
+        ]
+        return {
+            "ok": True,
+            "admitted_count": 3,
+            "skipped_count": 0,
+            "facts": [
+                "fda_violation_detail_slot(violation_1, procedure_scope, violation_scope, src_line_12).",
+                "fda_violation_detail(violation_1, procedure_scope, sop_100, violation_scope, src_line_12).",
+                "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_2).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = _apply_fda_violation_detail_slot_followup_pass(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        source_text="The source states a procedure slot.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        extra_context=[],
+    )
+
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+        "fda_violation_detail_slot(violation_1, procedure_scope, violation_scope, src_line_12).",
+    ]
+
+
+def test_fda_response_assessment_context_uses_typed_item_map() -> None:
+    context = _fda_response_assessment_context_lines(
+        {
+            "facts": [
+                "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+                "fda_cgmp_violation_item(bundle_1, letter_1, violation_1, cfr_21_211_113_b, src_line_2).",
+                "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_3).",
+                "fda_warning_letter(letter_1, cder, firm_a, v_2026_01_01, src_line_4).",
+            ]
+        }
+    )
+
+    joined = "\n".join(context)
+    assert "fda_response_assessment/5 rows only" in joined
+    assert "Do not emit fda_violation_detail/5" in joined
+    assert "existing numbered CGMP item map" in joined
+    assert "violation_1 -> cfr_21_211_113_b / contamination_control" in joined
+    assert "CARRIER CONTRACT fda_response_assessment/5" in joined
+
+
+def test_fda_response_assessment_followup_rejects_other_rows(monkeypatch) -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+            "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_2).",
+        ],
+        "rules": [],
+        "queries": [],
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "fda_response_assessment/5"},
+            {"signature": "fda_violation_detail/5"},
+        ]
+    }
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "fda_response_assessment_followup"
+        assert kwargs["predicates"] == "fda_response_assessment/5"
+        assert "fda_response_assessment/5 rows only" in "\n".join(kwargs["extra_context"])
+        assert kwargs["parsed_profile"]["candidate_predicates"] == [
+            {"signature": "fda_response_assessment/5"}
+        ]
+        return {
+            "ok": True,
+            "admitted_count": 2,
+            "skipped_count": 0,
+            "facts": [
+                "fda_response_assessment(assessment_1, violation_1, response_inadequate, corrective_action_evaluation, src_line_12).",
+                "fda_violation_detail(violation_1, response_status, response_inadequate, corrective_action_evaluation, src_line_12).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = _apply_fda_response_assessment_followup_pass(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        source_text="The source states that the response is inadequate.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        extra_context=[],
+    )
+
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_1).",
+        "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_2).",
+        "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, src_line_12).",
+    ]
+
+
+def test_fda_response_assessment_followup_prefers_item_bundle_when_offered(monkeypatch) -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        ],
+        "rules": [],
+        "queries": [],
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "fda_response_assessment_item/6"},
+            {"signature": "fda_response_assessment/5"},
+        ]
+    }
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "fda_response_assessment_followup"
+        assert kwargs["predicates"] == "fda_response_assessment_item/6"
+        context = "\n".join(kwargs["extra_context"])
+        assert "fda_response_assessment_item/6 rows only" in context
+        assert "Do not emit fda_response_assessment/5 rows directly" in context
+        assert kwargs["parsed_profile"]["candidate_predicates"] == [
+            {"signature": "fda_response_assessment_item/6"}
+        ]
+        return {
+            "ok": True,
+            "admitted_count": 1,
+            "skipped_count": 0,
+            "facts": [
+                "fda_response_assessment_item(assessment_1, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_line_12).",
+                "fda_response_assessment(assessment_2, violation_1, response_inadequate, corrective_action_evaluation, src_line_13).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = _apply_fda_response_assessment_followup_pass(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        source_text="The source states that supporting documentation was not provided.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        extra_context=[],
+    )
+
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_12).",
+        "fda_response_assessment_item(assessment_1, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_line_12).",
+    ]
+
+
 def test_domain_omission_carrier_signature_reduction_canonicalizes_registered_references() -> None:
     source_compile = {
         "facts": [
@@ -7185,6 +7920,32 @@ def test_domain_omission_carrier_signature_reduction_canonicalizes_registered_re
     ]
     assert source_compile["deterministic_domain_omission_signature_invalid_count"] == 1
     assert source_compile["deterministic_domain_omission_signature_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_no_fei_omission_reduction_uses_typed_identity_only() -> None:
+    source_compile = {
+        "facts": [
+            "fda_facility_identity(facility_1, acme_pharmacy_llc, springfield_il, not_stated, src_line_1).",
+            "fda_facility_identity(facility_2, beta_pharmacy_llc, charleston_sc, not_stated, src_line_4).",
+            "domain_omission(acme_pharmacy_llc, 'fda_facility_identity/5', carrier_missing, identifier_not_stated, src_line_2).",
+            "domain_omission(other_facility, 'fda_facility_identity/5', carrier_missing, identifier_not_stated, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_no_fei_omission_reduction(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert report["projection_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_facility_identity(facility_1, acme_pharmacy_llc, springfield_il, not_stated, src_line_1).",
+        "fda_facility_identity(facility_2, beta_pharmacy_llc, charleston_sc, not_stated, src_line_4).",
+        "domain_omission(acme_pharmacy_llc, 'fda_facility_identity/5', none_found, no_fei_shown_in_letter, src_line_2).",
+        "domain_omission(other_facility, 'fda_facility_identity/5', carrier_missing, identifier_not_stated, src_line_3).",
+        "domain_omission(facility_2, 'fda_facility_identity/5', none_found, no_fei_shown_in_letter, src_line_4).",
+    ]
+    policy = source_compile["deterministic_fda_no_fei_omission_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
 
 
 def test_fda_warning_letter_subject_convergence_uses_typed_wrapper_date() -> None:
@@ -7213,6 +7974,30 @@ def test_fda_warning_letter_subject_convergence_uses_typed_wrapper_date() -> Non
     assert policy["not_query_interpretation"] is True
 
 
+def test_fda_warning_letter_subject_convergence_uses_typed_reference_id() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(fda_warning_letter_320_25_68, cder, rechon_life_science_ab, v_2025_04_30, src_line_1).",
+            "fda_cgmp_violation_item(violation_1, letter_320_25_68, violation_1, cfr_21_211_113_b, src_line_2).",
+            "fda_correspondence_party(warning_letter_320_25_68, roland_holmqvist, recipient, roland_holmqvist, src_line_3).",
+            "fda_insanitary_condition(condition_1, fda_warning_letter_320_25_68, condition_1, sterility_assurance, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_warning_letter_subject_convergence(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_warning_letter(fda_warning_letter_320_25_68, cder, rechon_life_science_ab, v_2025_04_30, src_line_1).",
+        "fda_cgmp_violation_item(violation_1, fda_warning_letter_320_25_68, violation_1, cfr_21_211_113_b, src_line_2).",
+        "fda_correspondence_party(fda_warning_letter_320_25_68, roland_holmqvist, recipient, roland_holmqvist, src_line_3).",
+        "fda_insanitary_condition(condition_1, fda_warning_letter_320_25_68, condition_1, sterility_assurance, src_line_4).",
+    ]
+    policy = source_compile["deterministic_fda_warning_letter_subject_convergence_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
 def test_fda_warning_letter_subject_convergence_ignores_ambiguous_dates() -> None:
     source_compile = {
         "facts": [
@@ -7230,18 +8015,36 @@ def test_fda_warning_letter_subject_convergence_ignores_ambiguous_dates() -> Non
     )
 
 
+def test_fda_warning_letter_subject_convergence_ignores_ambiguous_reference_ids() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(fda_warning_letter_320_25_68, cder, firm_a, v_2025_04_30, src_line_1).",
+            "fda_warning_letter(letter_320_25_68_other, cder, firm_b, v_2025_05_01, src_line_2).",
+            "fda_cgmp_violation_item(violation_1, warning_letter_320_25_68, violation_1, cfr_21_211_113_b, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_warning_letter_subject_convergence(source_compile)
+
+    assert report["reduction_count"] == 0
+    assert source_compile["facts"][2] == (
+        "fda_cgmp_violation_item(violation_1, warning_letter_320_25_68, violation_1, cfr_21_211_113_b, src_line_3)."
+    )
+
+
 def test_fda_violation_detail_subject_integrity_drops_letter_level_details() -> None:
     source_compile = {
         "facts": [
             "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_1).",
             "fda_violation_detail(violation_1, affected_lot, lot_a_104, product_release_record_review, src_line_2).",
             "fda_violation_detail(letter_1, response_status, written_response_required, corrective_action_evaluation, src_line_3).",
+            "fda_violation_detail_slot(letter_1, response_status, corrective_action_evaluation, src_line_4).",
         ]
     }
 
     report = _apply_fda_violation_detail_subject_integrity(source_compile)
 
-    assert report["dropped_count"] == 1
+    assert report["dropped_count"] == 2
     assert source_compile["facts"] == [
         "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_1).",
         "fda_violation_detail(violation_1, affected_lot, lot_a_104, product_release_record_review, src_line_2).",
@@ -7271,6 +8074,338 @@ def test_fda_violation_number_atom_reduction_canonicalizes_numeric_numbers() -> 
     assert policy["not_query_interpretation"] is True
 
 
+def test_fda_violation_category_from_unique_citation_reduction_aligns_stable_key() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_3, letter_1, violation_3, aseptic_processing, src_line_1).",
+            "fda_violation_citation(violation_3, cfr_21_211_42_c_10_iv, cgmps_requirement, src_line_2).",
+        ]
+    }
+
+    report = _apply_fda_violation_category_from_unique_citation_reduction(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation(violation_3, letter_1, violation_3, facility_equipment_control, src_line_1).",
+        "fda_violation_citation(violation_3, cfr_21_211_42_c_10_iv, cgmps_requirement, src_line_2).",
+    ]
+    policy = source_compile["deterministic_fda_violation_category_from_unique_citation_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["requires_stable_numbered_key"] is True
+
+
+def test_fda_violation_category_from_unique_citation_reduction_ignores_mixed_or_unstable_keys() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_2, letter_1, violation_2, contamination_control, src_line_1).",
+            "fda_violation_citation(violation_2, cfr_21_211_113_b, cgmps_requirement, src_line_2).",
+            "fda_violation_citation(violation_2, cfr_21_211_192, cgmps_requirement, src_line_3).",
+            "fda_violation(wl_715795, letter_1, violation_3, aseptic_processing, src_line_4).",
+            "fda_violation_citation(wl_715795, cfr_21_211_42_c_10_iv, cgmps_requirement, src_line_5).",
+        ]
+    }
+
+    report = _apply_fda_violation_category_from_unique_citation_reduction(source_compile)
+
+    assert report["reduction_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_violation(violation_2, letter_1, violation_2, contamination_control, src_line_1).",
+        "fda_violation_citation(violation_2, cfr_21_211_113_b, cgmps_requirement, src_line_2).",
+        "fda_violation_citation(violation_2, cfr_21_211_192, cgmps_requirement, src_line_3).",
+        "fda_violation(wl_715795, letter_1, violation_3, aseptic_processing, src_line_4).",
+        "fda_violation_citation(wl_715795, cfr_21_211_42_c_10_iv, cgmps_requirement, src_line_5).",
+    ]
+
+
+def test_fda_violation_category_reduction_does_not_rewrite_context_dependent_citation() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_5, letter_1, violation_5, aseptic_processing, src_line_1).",
+            "fda_violation_citation(violation_5, cfr_21_211_42_c_10_v, cgmps_requirement, src_line_2).",
+        ]
+    }
+
+    report = _apply_fda_violation_category_from_unique_citation_reduction(source_compile)
+
+    assert report["reduction_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_violation(violation_5, letter_1, violation_5, aseptic_processing, src_line_1).",
+        "fda_violation_citation(violation_5, cfr_21_211_42_c_10_v, cgmps_requirement, src_line_2).",
+    ]
+
+
+def test_fda_cgmp_violation_item_projection_emits_category_and_citation_from_bundle() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_3, letter_1, violation_3, cfr_21_211_42_c_10_iv, src_line_9).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_violation_item_projection(source_compile)
+
+    assert report["projection_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_3, letter_1, violation_3, cfr_21_211_42_c_10_iv, src_line_9).",
+        "fda_violation(violation_3, letter_1, violation_3, facility_equipment_control, src_line_9).",
+        "fda_violation_citation(violation_3, cfr_21_211_42_c_10_iv, cgmps_requirement, src_line_9).",
+    ]
+    policy = source_compile["deterministic_fda_cgmp_violation_item_projection_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["requires_stable_numbered_key"] is True
+
+
+def test_fda_cgmp_violation_item_projection_uses_closed_extended_citation_map() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_4, letter_1, violation_4, cfr_21_211_68_b, src_line_12).",
+            "fda_cgmp_violation_item(violation_5, letter_1, violation_5, cfr_21_211_110_a, src_line_13).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_violation_item_projection(source_compile)
+
+    assert report["projection_count"] == 4
+    assert "fda_violation(violation_4, letter_1, violation_4, data_integrity, src_line_12)." in source_compile["facts"]
+    assert "fda_violation_citation(violation_4, cfr_21_211_68_b, cgmps_requirement, src_line_12)." in source_compile["facts"]
+    assert "fda_violation(violation_5, letter_1, violation_5, process_validation, src_line_13)." in source_compile["facts"]
+    assert "fda_violation_citation(violation_5, cfr_21_211_110_a, cgmps_requirement, src_line_13)." in source_compile["facts"]
+
+
+def test_fda_cgmp_violation_item_projection_keeps_ambiguous_citation_citation_only() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_5, letter_1, violation_5, cfr_21_211_42_c_10_v, src_line_14).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_violation_item_projection(source_compile)
+
+    assert report["projection_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_5, letter_1, violation_5, cfr_21_211_42_c_10_v, src_line_14).",
+        "fda_violation_citation(violation_5, cfr_21_211_42_c_10_v, cgmps_requirement, src_line_14).",
+    ]
+
+
+def test_fda_cgmp_violation_item_projection_reduces_existing_category_from_bundle() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_8, letter_1, violation_8, cfr_21_211_192, src_line_9).",
+            "fda_violation(violation_8, letter_1, violation_8, aseptic_processing, src_line_10).",
+            "fda_violation_citation(violation_8, cfr_21_211_192, cgmps_requirement, src_line_11).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_violation_item_projection(source_compile)
+
+    assert report["projection_count"] == 0
+    assert report["reduction_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_8, letter_1, violation_8, cfr_21_211_192, src_line_9).",
+        "fda_violation(violation_8, letter_1, violation_8, investigation_failure, src_line_10).",
+        "fda_violation_citation(violation_8, cfr_21_211_192, cgmps_requirement, src_line_11).",
+    ]
+
+
+def test_fda_cgmp_violation_item_projection_ignores_ambiguous_or_unstable_bundles() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(wl_715795, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_113_b, src_line_2).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_violation_item_projection(source_compile)
+
+    assert report["projection_count"] == 0
+    assert report["reduction_count"] == 0
+    assert report["skipped_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(wl_715795, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_113_b, src_line_2).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_3).",
+    ]
+
+
+def test_fda_violation_number_atom_reduction_normalizes_cgmp_bundle_keys_only_when_stable() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, 1, cfr_21_211_192, src_line_1).",
+            "fda_cgmp_violation_item(bundle_2, letter_1, violation_2, cfr_21_211_113_b, src_line_2).",
+            "fda_cgmp_violation_item(violation_3, letter_1, 4, cfr_21_211_68_b, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_violation_number_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_192, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_113_b, src_line_2).",
+        "fda_cgmp_violation_item(violation_3, letter_1, 4, cfr_21_211_68_b, src_line_3).",
+    ]
+    policy = source_compile["deterministic_fda_violation_number_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_cgmp_bundle_subject_integrity_drops_orphan_numbered_violations() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_2).",
+            "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_3).",
+            "fda_violation(violation_5, letter_1, violation_5, aseptic_processing, src_line_4).",
+            "fda_violation_citation(violation_5, cfr_21_211_100_a, cgmps_requirement, src_line_5).",
+            "fda_violation_citation(letter_1, fdca_501_a_2_b, adulteration_authority, src_line_6).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_bundle_subject_integrity(source_compile)
+
+    assert report["dropped_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_2).",
+        "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_3).",
+        "fda_violation_citation(letter_1, fdca_501_a_2_b, adulteration_authority, src_line_6).",
+    ]
+    policy = source_compile["deterministic_fda_cgmp_bundle_subject_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_cgmp_bundle_subject_integrity_leaves_legacy_direct_rows_without_bundles() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_2).",
+            "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_cgmp_bundle_subject_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_line_2).",
+        "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_line_3).",
+    ]
+
+
+def test_fda_response_assessment_subject_integrity_drops_orphan_assessments() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+            "fda_response_assessment(assessment_1, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_3).",
+            "fda_response_assessment(assessment_9, violation_9, corrective_action_inadequate, corrective_action_evaluation, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_response_assessment_subject_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+        "fda_response_assessment(assessment_1, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_3).",
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_subject_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_subject_integrity_leaves_rows_without_bundles() -> None:
+    source_compile = {
+        "facts": [
+            "fda_response_assessment(assessment_9, violation_9, corrective_action_inadequate, corrective_action_evaluation, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_response_assessment_subject_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_response_assessment(assessment_9, violation_9, corrective_action_inadequate, corrective_action_evaluation, src_line_4).",
+    ]
+
+
+def test_active_lens_scope_integrity_drops_out_of_lens_facts() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "response_assessment",
+            "allowed_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment/5",
+            ],
+        },
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_response_assessment(assessment_1, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_2).",
+            "fda_violation_detail_slot(violation_1, response_status, corrective_action_evaluation, src_line_3).",
+        ],
+    }
+
+    report = _apply_active_lens_scope_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_response_assessment(assessment_1, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_2).",
+    ]
+    assert report["dropped_facts"] == [
+        {
+            "fact": "fda_violation_detail_slot(violation_1, response_status, corrective_action_evaluation, src_line_3).",
+            "signature": "fda_violation_detail_slot/4",
+        }
+    ]
+    policy = source_compile["deterministic_active_lens_scope_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_active_lens_scope_integrity_noops_without_active_lens() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation_detail_slot(violation_1, response_status, corrective_action_evaluation, src_line_3).",
+        ],
+    }
+
+    report = _apply_active_lens_scope_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_violation_detail_slot(violation_1, response_status, corrective_action_evaluation, src_line_3).",
+    ]
+
+
+def test_active_lens_scope_integrity_noops_for_deterministic_union_with_stale_lens_metadata() -> None:
+    source_compile = {
+        "mode": "deterministic_compile_union",
+        "union_source_compile": {"source_runs": ["wrapper.json", "violation.json"]},
+        "active_profile_registry_lens": {
+            "id": "wrapper",
+            "allowed_signatures": ["fda_warning_letter/5"],
+        },
+        "facts": [
+            "fda_warning_letter(letter_1, cder, firm_1, v_2025_01_02, src_line_1).",
+            "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_2).",
+        ],
+    }
+
+    report = _apply_active_lens_scope_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_1, cder, firm_1, v_2025_01_02, src_line_1).",
+        "fda_violation(violation_1, letter_1, violation_1, quality_unit_failure, src_line_2).",
+    ]
+    policy = source_compile["deterministic_active_lens_scope_integrity_policy"]
+    assert "union" in policy["description"]
+    assert policy["not_source_interpretation"] is True
+
+
 def test_fda_date_atom_reduction_canonicalizes_registered_date_slots() -> None:
     source_compile = {
         "facts": [
@@ -7289,6 +8424,259 @@ def test_fda_date_atom_reduction_canonicalizes_registered_date_slots() -> None:
         "fda_regulatory_meeting(meeting_1, firm_1, v_2025_04_03, src_line_6).",
     ]
     assert source_compile["deterministic_fda_date_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_registered_date_slot_atom_reduction_canonicalizes_date_slots_only() -> None:
+    source_compile = {
+        "facts": [
+            "sec_filing(filing_sec_8k_20251001, form_8_k, current_report, 2025_10_01, 2025_10_06, src_filing).",
+            "sec_signatory(sec_8k_material_event_001, lydia_a_gavalis, general_counsel_and_secretary, 2025_10_06, src_signature).",
+            "sec_registrant_identifier(filing_sec_8k_20251001, hamilton_lane_incorporated, cik, cik_1433642, src_cik).",
+        ]
+    }
+
+    report = _apply_registered_date_slot_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "sec_filing(filing_sec_8k_20251001, form_8_k, current_report, v_2025_10_01, v_2025_10_06, src_filing).",
+        "sec_signatory(sec_8k_material_event_001, lydia_a_gavalis, general_counsel_and_secretary, v_2025_10_06, src_signature).",
+        "sec_registrant_identifier(filing_sec_8k_20251001, hamilton_lane_incorporated, cik, cik_1433642, src_cik).",
+    ]
+    policy = source_compile["deterministic_registered_date_slot_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_exhibit_number_atom_reduction_canonicalizes_typed_exhibit_slots_only() -> None:
+    source_compile = {
+        "facts": [
+            "sec_exhibit(filing_1, 10.1, agreement, filed, exhibit_table_row_10_1).",
+            "sec_exhibit(filing_1, 104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_104).",
+            "sec_exhibit(filing_1, exhibit_99_1, press_release, furnished, exhibit_table_row_99_1).",
+            "sec_filing_item(filing_1, item_9_01, financial_statements_exhibits, exhibit, source).",
+        ]
+    }
+
+    report = _apply_sec_exhibit_number_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "sec_exhibit(filing_1, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).",
+        "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_104).",
+        "sec_exhibit(filing_1, exhibit_99_1, press_release, furnished, exhibit_table_row_99_1).",
+        "sec_filing_item(filing_1, item_9_01, financial_statements_exhibits, exhibit, source).",
+    ]
+    policy = source_compile["deterministic_sec_exhibit_number_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_typed_slot_prefix_reduction_canonicalizes_role_prefixed_slots_only() -> None:
+    source_compile = {
+        "facts": [
+            "sec_registrant(filing_1, registrant_servicenow_inc, jurisdiction_delaware, source_cover_page).",
+            "sec_registrant_identifier(filing_1, registrant_servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
+            "sec_registrant_identifier(filing_1, service_now_inc, ticker_symbol, ticker_now, source_cover_page).",
+            "sec_signatory(filing_1, registrant_russell_s_elmer, general_counsel, v_2025_12_23, source_signature).",
+        ]
+    }
+
+    report = _apply_sec_typed_slot_prefix_reduction(source_compile)
+
+    assert report["reduction_count"] == 3
+    assert source_compile["facts"] == [
+        "sec_registrant(filing_1, servicenow_inc, delaware, source_cover_page).",
+        "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
+        "sec_registrant_identifier(filing_1, service_now_inc, ticker_symbol, ticker_now, source_cover_page).",
+        "sec_signatory(filing_1, registrant_russell_s_elmer, general_counsel, v_2025_12_23, source_signature).",
+    ]
+    policy = source_compile["deterministic_sec_typed_slot_prefix_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_identifier_value_atom_reduction_canonicalizes_typed_phone_values_only() -> None:
+    source_compile = {
+        "facts": [
+            "sec_registrant_identifier(filing_1, servicenow_inc, telephone, phone__408__501_8550, source_cover_page).",
+            "sec_registrant_identifier(filing_1, servicenow_inc, telephone, 408_501_8550, source_cover_page).",
+            "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
+            "sec_registrant_identifier(filing_1, servicenow_inc, commission_file_number, file_001_35580, source_cover_page).",
+        ]
+    }
+
+    report = _apply_sec_identifier_value_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "sec_registrant_identifier(filing_1, servicenow_inc, telephone, phone_408_501_8550, source_cover_page).",
+        "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
+        "sec_registrant_identifier(filing_1, servicenow_inc, commission_file_number, file_001_35580, source_cover_page).",
+    ]
+    policy = source_compile["deterministic_sec_identifier_value_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_filing_id_atom_reduction_canonicalizes_numeric_leading_ids_only() -> None:
+    source_compile = {
+        "facts": [
+            "sec_filing_item(001_39898, item_4_02, non_reliance, substantive, item_heading_4_02).",
+            "sec_exhibit(10.2, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_104).",
+            "sec_signatory(sec_form_8k_007, scott_o_melia, chief_legal_officer, v_2026_02_25, source_signature).",
+            "fda_violation(001_39898, cfr_21_211_192, data_integrity, observation, src).",
+        ]
+    }
+
+    report = _apply_sec_filing_id_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "sec_filing_item(filing_001_39898, item_4_02, non_reliance, substantive, item_heading_4_02).",
+        "sec_exhibit(filing_10_2, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_104).",
+        "sec_signatory(sec_form_8k_007, scott_o_melia, chief_legal_officer, v_2026_02_25, source_signature).",
+        "fda_violation(001_39898, cfr_21_211_192, data_integrity, observation, src).",
+    ]
+    policy = source_compile["deterministic_sec_filing_id_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_ntsb_timestamp_atom_reduction_removes_redundant_zero_seconds() -> None:
+    source_compile = {
+        "facts": [
+            "ntsb_occurrence_time(occurrence_1, t_2023_09_29_204100_cdt, central_daylight_time, occurrence_time, src_line_1).",
+            "ntsb_timeline_event(occurrence_1, event_1, road_reopen, t_2023_09_30_202000_cdt, end, src_line_2).",
+            "ntsb_safety_action(action_1, occurrence_1, idot, roadway_improvement, t_2023_09_30_202000_cdt, src_line_3).",
+            "ntsb_timeline_event(occurrence_1, event_3, distress_call, t_20230929_2043_cdt, start, src_line_5).",
+            "ntsb_timeline_event(occurrence_1, event_4, hazmat_entry, t_2023_09_29_2317_00_cdt, intermediate, src_line_6).",
+            "ntsb_timeline_event(occurrence_1, event_2, road_closure, t_2023_09_29_2106_cdt, intermediate, src_line_4).",
+        ]
+    }
+
+    report = _apply_ntsb_timestamp_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 5
+    assert source_compile["facts"] == [
+        "ntsb_occurrence_time(occurrence_1, t_2023_09_29_2041_cdt, central_daylight_time, occurrence_time, src_line_1).",
+        "ntsb_timeline_event(occurrence_1, event_1, road_reopen, t_2023_09_30_2020_cdt, end, src_line_2).",
+        "ntsb_safety_action(action_1, occurrence_1, idot, roadway_improvement, t_2023_09_30_2020_cdt, src_line_3).",
+        "ntsb_timeline_event(occurrence_1, event_3, distress_call, t_2023_09_29_2043_cdt, start, src_line_5).",
+        "ntsb_timeline_event(occurrence_1, event_4, hazmat_entry, t_2023_09_29_2317_cdt, intermediate, src_line_6).",
+        "ntsb_timeline_event(occurrence_1, event_2, road_closure, t_2023_09_29_2106_cdt, intermediate, src_line_4).",
+    ]
+    policy = source_compile["deterministic_ntsb_timestamp_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_ntsb_actor_id_atom_reduction_canonicalizes_fire_department_aliases() -> None:
+    source_compile = {
+        "facts": [
+            "ntsb_safety_action(action_1, occurrence_1, org_teutopolis_fd, hazmat_training, not_stated, src_line_1).",
+            "ntsb_safety_action(action_2, occurrence_1, org_teutopolis_fire, hazmat_training, not_stated, src_line_2).",
+            "ntsb_safety_action(action_3, occurrence_1, teutopolis_fire_department, hazmat_training, not_stated, src_line_3).",
+            "ntsb_party(occurrence_1, org_teutopolis_fd, responder, teutopolis_fire_department, src_line_4).",
+        ]
+    }
+
+    report = _apply_ntsb_actor_id_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 3
+    assert source_compile["facts"] == [
+        "ntsb_safety_action(action_1, occurrence_1, org_teutopolis_fire_dept, hazmat_training, not_stated, src_line_1).",
+        "ntsb_safety_action(action_2, occurrence_1, org_teutopolis_fire_dept, hazmat_training, not_stated, src_line_2).",
+        "ntsb_safety_action(action_3, occurrence_1, org_teutopolis_fire_dept, hazmat_training, not_stated, src_line_3).",
+        "ntsb_party(occurrence_1, org_teutopolis_fd, responder, teutopolis_fire_department, src_line_4).",
+    ]
+    policy = source_compile["deterministic_ntsb_actor_id_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_ntsb_condition_atom_reduction_canonicalizes_typed_condition_values() -> None:
+    source_compile = {
+        "facts": [
+            "ntsb_condition(occurrence_1, weather, weather_dry_clear_night, weather, src_line_1).",
+            "ntsb_condition(occurrence_1, weather, dry_clear_night, weather, src_line_2).",
+            "ntsb_condition(occurrence_1, roadway, roadway_rural_unlit_undivided, roadway, src_line_3).",
+            "ntsb_condition(occurrence_1, speed_limit, speed_limit_55_mph, roadway, src_line_4).",
+            "ntsb_condition(occurrence_1, hazmat_un_number, un_1005, cargo, src_line_5).",
+            "ntsb_condition(occurrence_1, hazmat_material, anhydrous_ammonia, cargo, src_line_6).",
+            "ntsb_party(occurrence_1, party_1, operator, carrier_a, src_line_7).",
+        ]
+    }
+
+    report = _apply_ntsb_condition_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 5
+    assert source_compile["facts"] == [
+        "ntsb_condition(occurrence_1, weather, dry_clear_nighttime, weather, src_line_1).",
+        "ntsb_condition(occurrence_1, weather, dry_clear_nighttime, weather, src_line_2).",
+        "ntsb_condition(occurrence_1, roadway, rural_unlit_undivided_highway, roadway, src_line_3).",
+        "ntsb_condition(occurrence_1, speed_limit, mph_55, roadway, src_line_4).",
+        "ntsb_condition(occurrence_1, hazmat_un_number, un1005, cargo, src_line_5).",
+        "ntsb_condition(occurrence_1, hazmat_material, anhydrous_ammonia, cargo, src_line_6).",
+        "ntsb_party(occurrence_1, party_1, operator, carrier_a, src_line_7).",
+    ]
+    policy = source_compile["deterministic_ntsb_condition_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_ntsb_injury_count_scope_specificity_drops_duplicate_not_stated_rows() -> None:
+    source_compile = {
+        "facts": [
+            "ntsb_injury_count(occurrence_1, first_responder, 0, 0, 1, casualty_summary_table).",
+            "ntsb_injury_count(occurrence_1, not_stated, 0, 0, 1, hazmat_response_section).",
+            "ntsb_injury_count(occurrence_1, not_stated, 2, 0, 0, other_summary_table).",
+            "ntsb_condition(occurrence_1, weather, clear, weather, src_weather).",
+        ]
+    }
+
+    report = _apply_ntsb_injury_count_scope_specificity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "ntsb_injury_count(occurrence_1, first_responder, 0, 0, 1, casualty_summary_table).",
+        "ntsb_injury_count(occurrence_1, not_stated, 2, 0, 0, other_summary_table).",
+        "ntsb_condition(occurrence_1, weather, clear, weather, src_weather).",
+    ]
+    policy = source_compile["deterministic_ntsb_injury_count_scope_specificity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_adulteration_basis_authority_reduction_and_integrity_are_closed_slot() -> None:
+    source_compile = {
+        "facts": [
+            "fda_adulteration_basis(letter_1, adulteration_cgmp, 21_usc_351_a_2_b, drug_products, src_line_1).",
+            "fda_adulteration_basis(letter_1, adulteration_cgmp, fd_c_act_501a2b, drug_products, src_line_2).",
+            "fda_adulteration_basis(letter_1, adulteration_cgmp, mammalian_hair_contamination, drug_products, src_line_3).",
+        ]
+    }
+
+    report = _apply_fda_adulteration_basis_authority_reduction(source_compile)
+    _apply_carrier_value_domain_integrity(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_adulteration_basis(letter_1, adulteration_cgmp, fdca_501_a_2_b, drug_products, src_line_1).",
+        "fda_adulteration_basis(letter_1, adulteration_cgmp, fdca_501_a_2_b, drug_products, src_line_2).",
+    ]
+    dropped = source_compile["deterministic_carrier_value_domain_integrity_dropped_facts"]
+    assert dropped == [
+        {
+            "arg_name": "authority_or_scope",
+            "fact": "fda_adulteration_basis(letter_1, adulteration_cgmp, mammalian_hair_contamination, drug_products, src_line_3).",
+            "issue": "value_not_allowed",
+            "value": "mammalian_hair_contamination",
+        }
+    ]
+    policy = source_compile["deterministic_fda_adulteration_basis_authority_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
 
 
 def test_fda_facility_subject_convergence_uses_typed_facility_identity() -> None:
@@ -7363,9 +8751,13 @@ def test_fda_violation_detail_atom_reduction_keeps_same_detail_slot() -> None:
         "facts": [
             "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion_results, violation_scope, src_line_12).",
             "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursions, violation_scope, src_line_12).",
+            "fda_violation_detail(violation_2, procedure_scope, aseptic_and_sterilization_processes, violation_scope, src_line_12).",
+            "fda_violation_detail(violation_2, procedure_scope, validation_of_all_aseptic_and_sterilization_processes, violation_scope, src_line_13).",
+            "fda_violation_detail(violation_3, procedure_scope, cleaning_and_disinfecting_room_and_equipment, violation_scope, src_line_14).",
             "fda_violation_detail(violation_1, record_review_subject, in_process_bioburden_excursions, violation_scope, src_line_13).",
             "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin, violation_scope, src_line_14).",
             "fda_violation_detail(violation_1, procedure_scope, terminal_sterilization_process_qualification_status, violation_scope, src_line_15).",
+            "fda_violation_detail(violation_2, observation_subject, positive_growth_media_fill, violation_scope, src_line_16).",
             "fda_violation_detail(violation_4, process_area, iso_7_room_ceiling_and_door, violation_scope, src_line_13).",
             "fda_violation_detail(violation_4, process_area, iso_5_aseptic_processing_area, violation_scope, src_line_13).",
             "fda_violation_detail(violation_3, process_area, b4_decontamination_validation, violation_scope, src_line_14).",
@@ -7376,12 +8768,16 @@ def test_fda_violation_detail_atom_reduction_keeps_same_detail_slot() -> None:
 
     report = _apply_fda_violation_detail_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 6
+    assert report["reduction_count"] == 10
     assert source_compile["facts"] == [
         "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_12).",
+        "fda_violation_detail(violation_2, procedure_scope, aseptic_process_validation, violation_scope, src_line_12).",
+        "fda_violation_detail(violation_2, procedure_scope, aseptic_process_validation, violation_scope, src_line_13).",
+        "fda_violation_detail(violation_3, procedure_scope, cleaning_disinfection_validation, violation_scope, src_line_14).",
         "fda_violation_detail(violation_1, record_review_subject, in_process_bioburden_excursion, violation_scope, src_line_13).",
         "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_14).",
         "fda_violation_detail(violation_1, procedure_scope, terminal_sterilization_process_validation, violation_scope, src_line_15).",
+        "fda_violation_detail(violation_2, observation_subject, media_fill_positive_growth, violation_scope, src_line_16).",
         "fda_violation_detail(violation_4, process_area, iso_7, violation_scope, src_line_13).",
         "fda_violation_detail(violation_4, process_area, iso_5_aseptic_processing_area, violation_scope, src_line_13).",
         "fda_violation_detail(violation_3, process_area, b4_decontamination_validation, violation_scope, src_line_14).",
@@ -7389,6 +8785,504 @@ def test_fda_violation_detail_atom_reduction_keeps_same_detail_slot() -> None:
         "fda_violation_detail(violation_3, missing_record_type, validation_of_decontamination_effectiveness_distribution_reproducibility, corrective_action_evaluation, src_line_15).",
     ]
     policy = source_compile["deterministic_fda_violation_detail_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_violation_detail_value_kind_integrity_drops_wrong_closed_slot() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation_detail(violation_1, observation_subject, media_fill_positive_growth, violation_scope, src_line_1).",
+            "fda_violation_detail(violation_1, observation_subject, positive_growth_media_fill, violation_scope, src_line_1a).",
+            "fda_violation_detail(violation_2, record_review_subject, media_fill_positive_growth, violation_scope, src_line_2).",
+            "fda_violation_detail(violation_3, observation_subject, locally_named_unmapped_finding, violation_scope, src_line_3).",
+        ]
+    }
+
+    assert _apply_fda_violation_detail_atom_reduction(source_compile)["reduction_count"] == 1
+    report = _apply_fda_violation_detail_value_kind_integrity(source_compile)
+
+    assert report["dropped_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_violation_detail(violation_2, record_review_subject, media_fill_positive_growth, violation_scope, src_line_2).",
+        "fda_violation_detail(violation_3, observation_subject, locally_named_unmapped_finding, violation_scope, src_line_3).",
+    ]
+    dropped = source_compile["deterministic_fda_violation_detail_value_kind_integrity_dropped_facts"]
+    assert dropped[0]["expected_detail_kind"] == "record_review_subject"
+    policy = source_compile["deterministic_fda_violation_detail_value_kind_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_violation_detail_slot_projection_drops_open_value_only() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_2, letter_1, violation_2, investigation_failure, src_line_1).",
+            "fda_violation_detail(violation_2, record_review_subject, media_fill_positive_growth, violation_scope, src_line_12).",
+            "fda_violation_detail(violation_2, response_status, contamination_discarded_not_investigated, corrective_action_evaluation, src_line_13).",
+        ]
+    }
+
+    report = _apply_fda_violation_detail_slot_projection(source_compile)
+
+    assert report["projected_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_violation(violation_2, letter_1, violation_2, investigation_failure, src_line_1).",
+        "fda_violation_detail(violation_2, record_review_subject, media_fill_positive_growth, violation_scope, src_line_12).",
+        "fda_violation_detail_slot(violation_2, record_review_subject, violation_scope, src_line_12).",
+        "fda_violation_detail(violation_2, response_status, contamination_discarded_not_investigated, corrective_action_evaluation, src_line_13).",
+        "fda_violation_detail_slot(violation_2, response_status, corrective_action_evaluation, src_line_13).",
+    ]
+    policy = source_compile["deterministic_fda_violation_detail_slot_projection_policy"]
+    assert policy["authority"] == "typed_projection_only"
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_projects_response_status_slot_only() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_1).",
+            "fda_response_assessment(assessment_2, violation_2, not_investigated, corrective_action_evaluation, src_line_12).",
+            "fda_response_assessment(assessment_3, violation_3, response_inadequate, response_review, src_line_13).",
+        ]
+    }
+
+    report = _apply_fda_response_assessment_slot_projection(source_compile)
+
+    assert report["projected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_1).",
+        "fda_response_assessment(assessment_2, violation_2, not_investigated, corrective_action_evaluation, src_line_12).",
+        "fda_violation_detail_slot(violation_2, response_status, corrective_action_evaluation, src_line_12).",
+        "fda_response_assessment(assessment_3, violation_3, response_inadequate, response_review, src_line_13).",
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_slot_projection_policy"]
+    assert policy["authority"] == "typed_projection_only"
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_scope_reduction_canonicalizes_response_review_inside_lens() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "response_assessment",
+            "allowed_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+                "fda_response_assessment/5",
+            ],
+            "candidate_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+            ],
+        },
+        "facts": [
+            "fda_response_assessment(assessment_1, violation_1, not_investigated, response_review, src_line_8).",
+            "fda_response_assessment_item(assessment_2, violation_2, cfr_21_211_192, response_inadequate, response_review, src_line_9).",
+        ],
+    }
+
+    report = _apply_fda_response_assessment_scope_reduction(source_compile)
+
+    assert report["changed_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_response_assessment(assessment_1, violation_1, not_investigated, corrective_action_evaluation, src_line_8).",
+        "fda_response_assessment_item(assessment_2, violation_2, cfr_21_211_192, response_inadequate, corrective_action_evaluation, src_line_9).",
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_scope_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_scope_reduction_noops_outside_response_lens() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "violation",
+            "allowed_signatures": ["fda_response_assessment/5"],
+        },
+        "facts": [
+            "fda_response_assessment(assessment_1, violation_1, not_investigated, response_review, src_line_8).",
+        ],
+    }
+
+    report = _apply_fda_response_assessment_scope_reduction(source_compile)
+
+    assert report["changed_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_response_assessment(assessment_1, violation_1, not_investigated, response_review, src_line_8).",
+    ]
+
+
+def test_fda_response_assessment_item_projection_requires_matching_cgmp_bundle() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+            "fda_cgmp_violation_item(violation_3, letter_1, violation_3, cfr_21_211_192, src_line_3).",
+            "fda_cgmp_violation_item(violation_3, letter_1, violation_3, cfr_21_211_68_b, src_line_4).",
+            "fda_response_assessment_item(assessment_1, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+            "fda_response_assessment_item(assessment_2, violation_2, cfr_21_211_113_b, not_investigated, corrective_action_evaluation, src_line_11).",
+            "fda_response_assessment_item(assessment_3, violation_3, cfr_21_211_192, response_inadequate, corrective_action_evaluation, src_line_12).",
+        ]
+    }
+
+    report = _apply_fda_response_assessment_item_projection(source_compile)
+
+    assert report["projected_count"] == 1
+    assert report["dropped_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+        "fda_cgmp_violation_item(violation_3, letter_1, violation_3, cfr_21_211_192, src_line_3).",
+        "fda_cgmp_violation_item(violation_3, letter_1, violation_3, cfr_21_211_68_b, src_line_4).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+        "fda_response_assessment_item(assessment_1, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+    ]
+    assert report["dropped_facts"] == [
+        {
+            "fact": "fda_response_assessment_item(assessment_2, violation_2, cfr_21_211_113_b, not_investigated, corrective_action_evaluation, src_line_11).",
+            "reason": "citation_mismatch",
+            "expected_citation": "cfr_21_211_192",
+            "actual_citation": "cfr_21_211_113_b",
+        },
+        {
+            "fact": "fda_response_assessment_item(assessment_3, violation_3, cfr_21_211_192, response_inadequate, corrective_action_evaluation, src_line_12).",
+            "reason": "no_matching_cgmp_bundle",
+        },
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_item_projection_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_item_projection_drops_raw_direct_rows_in_projection_only_lens() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "response_assessment",
+            "allowed_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+                "fda_response_assessment/5",
+            ],
+            "candidate_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+            ],
+        },
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_response_assessment(raw_assessment_1, violation_1, response_inadequate, corrective_action_evaluation, src_line_8).",
+            "fda_response_assessment_item(assessment_1, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+        ],
+    }
+
+    report = _apply_fda_response_assessment_item_projection(source_compile)
+
+    assert report["projected_count"] == 1
+    assert report["dropped_direct_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+        "fda_response_assessment_item(assessment_1, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_item_projection_policy"]
+    assert policy["projection_only_mode"] is True
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_documentation_gap_projection_requires_matching_cgmp_bundle() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+            "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, supporting_documentation, src_line_10).",
+            "fda_response_documentation_gap(gap_2, violation_2, cfr_21_211_113_b, protocol_or_record, src_line_11).",
+        ]
+    }
+
+    report = _apply_fda_response_documentation_gap_projection(source_compile)
+
+    assert report["projected_count"] == 1
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+        "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, supporting_documentation, src_line_10).",
+    ]
+    assert report["dropped_facts"] == [
+        {
+            "fact": "fda_response_documentation_gap(gap_2, violation_2, cfr_21_211_113_b, protocol_or_record, src_line_11).",
+            "reason": "citation_mismatch",
+            "expected_citation": "cfr_21_211_192",
+            "actual_citation": "cfr_21_211_113_b",
+        }
+    ]
+    policy = source_compile["deterministic_fda_response_documentation_gap_projection_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_documentation_gap_projection_drops_raw_direct_rows_in_projection_only_lens() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "response_documentation_gap",
+            "allowed_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_documentation_gap/5",
+                "fda_response_assessment/5",
+            ],
+            "candidate_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_documentation_gap/5",
+            ],
+        },
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_response_assessment(raw_1, violation_1, response_inadequate, corrective_action_evaluation, src_raw).",
+            "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, supporting_documentation, src_line_10).",
+        ],
+    }
+
+    report = _apply_fda_response_documentation_gap_projection(source_compile)
+
+    assert report["projected_count"] == 1
+    assert report["dropped_direct_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_line_10).",
+        "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, supporting_documentation, src_line_10).",
+    ]
+    policy = source_compile["deterministic_fda_response_documentation_gap_projection_policy"]
+    assert policy["projection_only_mode"] is True
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_documentation_gap_projection_preserves_item_projected_rows_in_composed_lens() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "response_assessment",
+            "allowed_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+                "fda_response_documentation_gap/5",
+                "fda_response_assessment/5",
+            ],
+            "candidate_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+                "fda_response_documentation_gap/5",
+            ],
+        },
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_response_assessment(raw_1, violation_1, response_inadequate, corrective_action_evaluation, src_raw).",
+            "fda_response_assessment_item(item_1, violation_1, cfr_21_211_113_b, response_inadequate, corrective_action_evaluation, src_item).",
+            "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, supporting_documentation, src_gap).",
+        ],
+    }
+
+    item_report = _apply_fda_response_assessment_item_projection(source_compile)
+    gap_report = _apply_fda_response_documentation_gap_projection(source_compile)
+
+    assert item_report["projected_count"] == 1
+    assert item_report["dropped_direct_count"] == 1
+    assert gap_report["projected_count"] == 1
+    assert gap_report["dropped_direct_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, src_item).",
+        "fda_response_assessment_item(item_1, violation_1, cfr_21_211_113_b, response_inadequate, corrective_action_evaluation, src_item).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_gap).",
+        "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, supporting_documentation, src_gap).",
+    ]
+
+
+def test_fda_response_investigation_gap_projection_requires_matching_cgmp_bundle() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_192, src_line_1).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_113_b, src_line_2).",
+            "fda_response_investigation_gap(gap_1, violation_1, cfr_21_211_192, thorough_investigation_not_ensured, src_line_10).",
+            "fda_response_investigation_gap(gap_2, violation_2, cfr_21_211_192, inadequate_investigation, src_line_11).",
+        ]
+    }
+
+    report = _apply_fda_response_investigation_gap_projection(source_compile)
+
+    assert report["projected_count"] == 1
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_192, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_113_b, src_line_2).",
+        "fda_response_assessment(assessment_violation_1_not_investigated, violation_1, not_investigated, corrective_action_evaluation, src_line_10).",
+        "fda_response_investigation_gap(gap_1, violation_1, cfr_21_211_192, thorough_investigation_not_ensured, src_line_10).",
+    ]
+    assert report["dropped_facts"] == [
+        {
+            "fact": "fda_response_investigation_gap(gap_2, violation_2, cfr_21_211_192, inadequate_investigation, src_line_11).",
+            "reason": "citation_mismatch",
+            "expected_citation": "cfr_21_211_113_b",
+            "actual_citation": "cfr_21_211_192",
+        }
+    ]
+    policy = source_compile["deterministic_fda_response_investigation_gap_projection_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_investigation_gap_projection_requires_investigation_citation_family() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_response_investigation_gap(gap_1, violation_1, cfr_21_211_113_b, inadequate_investigation, src_line_10).",
+        ]
+    }
+
+    report = _apply_fda_response_investigation_gap_projection(source_compile)
+
+    assert report["projected_count"] == 0
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+    ]
+    assert report["dropped_facts"] == [
+        {
+            "fact": "fda_response_investigation_gap(gap_1, violation_1, cfr_21_211_113_b, inadequate_investigation, src_line_10).",
+            "reason": "investigation_gap_requires_investigation_failure_citation",
+            "required_citation": "cfr_21_211_192",
+            "actual_citation": "cfr_21_211_113_b",
+        }
+    ]
+    policy = source_compile["deterministic_fda_response_investigation_gap_projection_policy"]
+    assert "cfr_21_211_192" in policy["description"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_investigation_gap_projection_preserves_prior_projected_rows_in_composed_lens() -> None:
+    source_compile = {
+        "active_profile_registry_lens": {
+            "id": "response_assessment",
+            "allowed_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+                "fda_response_documentation_gap/5",
+                "fda_response_investigation_gap/5",
+                "fda_response_assessment/5",
+            ],
+            "candidate_signatures": [
+                "fda_cgmp_violation_item/5",
+                "fda_response_assessment_item/6",
+                "fda_response_documentation_gap/5",
+                "fda_response_investigation_gap/5",
+            ],
+        },
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_192, src_line_1).",
+            "fda_response_assessment(raw_1, violation_1, response_inadequate, corrective_action_evaluation, src_raw).",
+            "fda_response_assessment_item(item_1, violation_1, cfr_21_211_192, response_inadequate, corrective_action_evaluation, src_item).",
+            "fda_response_documentation_gap(doc_gap_1, violation_1, cfr_21_211_192, supporting_documentation, src_doc_gap).",
+            "fda_response_investigation_gap(inv_gap_1, violation_1, cfr_21_211_192, thorough_investigation_not_ensured, src_inv_gap).",
+        ],
+    }
+
+    item_report = _apply_fda_response_assessment_item_projection(source_compile)
+    doc_report = _apply_fda_response_documentation_gap_projection(source_compile)
+    inv_report = _apply_fda_response_investigation_gap_projection(source_compile)
+
+    assert item_report["dropped_direct_count"] == 1
+    assert doc_report["dropped_direct_count"] == 0
+    assert inv_report["dropped_direct_count"] == 0
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_192, src_line_1).",
+        "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, src_item).",
+        "fda_response_assessment_item(item_1, violation_1, cfr_21_211_192, response_inadequate, corrective_action_evaluation, src_item).",
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, src_doc_gap).",
+        "fda_response_documentation_gap(doc_gap_1, violation_1, cfr_21_211_192, supporting_documentation, src_doc_gap).",
+        "fda_response_assessment(assessment_violation_1_not_investigated, violation_1, not_investigated, corrective_action_evaluation, src_inv_gap).",
+        "fda_response_investigation_gap(inv_gap_1, violation_1, cfr_21_211_192, thorough_investigation_not_ensured, src_inv_gap).",
+    ]
+
+
+def test_fda_response_assessment_id_canonicalization_dedupes_final_rows() -> None:
+    source_compile = {
+        "facts": [
+            "fda_response_assessment(gap_1, violation_1, documentation_not_provided, corrective_action_evaluation, direct).",
+            "fda_response_assessment(gap_2, violation_1, documentation_not_provided, corrective_action_evaluation, direct).",
+            "fda_response_assessment(item_1, violation_1, response_inadequate, corrective_action_evaluation, direct).",
+            "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, validation_evidence, direct).",
+        ],
+    }
+
+    report = _apply_fda_response_assessment_id_canonicalization(source_compile)
+
+    assert report["changed_count"] == 3
+    assert source_compile["facts"] == [
+        "fda_response_assessment(assessment_violation_1_documentation_not_provided, violation_1, documentation_not_provided, corrective_action_evaluation, direct).",
+        "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, direct).",
+        "fda_response_documentation_gap(gap_1, violation_1, cfr_21_211_113_b, validation_evidence, direct).",
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_id_canonicalization_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_specificity_reduction_drops_broad_fallback() -> None:
+    source_compile = {
+        "facts": [
+            "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, direct).",
+            "fda_response_assessment(assessment_violation_1_not_investigated, violation_1, not_investigated, corrective_action_evaluation, direct).",
+            "fda_response_assessment(assessment_violation_2_response_inadequate, violation_2, response_inadequate, corrective_action_evaluation, direct).",
+            "fda_response_assessment(assessment_violation_1_response_inadequate_review, violation_1, response_inadequate, response_review, direct).",
+        ],
+    }
+
+    report = _apply_fda_response_assessment_specificity_reduction(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_response_assessment(assessment_violation_1_not_investigated, violation_1, not_investigated, corrective_action_evaluation, direct).",
+        "fda_response_assessment(assessment_violation_2_response_inadequate, violation_2, response_inadequate, corrective_action_evaluation, direct).",
+        "fda_response_assessment(assessment_violation_1_response_inadequate_review, violation_1, response_inadequate, response_review, direct).",
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_specificity_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_response_assessment_kind_citation_reduction_drops_not_investigated_outside_211_192() -> None:
+    source_compile = {
+        "facts": [
+            "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+            "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+            "fda_response_assessment(assessment_violation_1_not_investigated, violation_1, not_investigated, corrective_action_evaluation, src_line_10).",
+            "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, src_line_11).",
+            "fda_response_assessment(assessment_violation_2_not_investigated, violation_2, not_investigated, corrective_action_evaluation, src_line_12).",
+        ],
+    }
+
+    report = _apply_fda_response_assessment_kind_citation_reduction(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_cgmp_violation_item(violation_1, letter_1, violation_1, cfr_21_211_113_b, src_line_1).",
+        "fda_cgmp_violation_item(violation_2, letter_1, violation_2, cfr_21_211_192, src_line_2).",
+        "fda_response_assessment(assessment_violation_1_response_inadequate, violation_1, response_inadequate, corrective_action_evaluation, src_line_11).",
+        "fda_response_assessment(assessment_violation_2_not_investigated, violation_2, not_investigated, corrective_action_evaluation, src_line_12).",
+    ]
+    assert report["dropped_facts"] == [
+        {
+            "fact": "fda_response_assessment(assessment_violation_1_not_investigated, violation_1, not_investigated, corrective_action_evaluation, src_line_10).",
+            "reason": "not_investigated_requires_investigation_failure_citation",
+            "required_citation": "cfr_21_211_192",
+            "actual_citation": "cfr_21_211_113_b",
+        }
+    ]
+    policy = source_compile["deterministic_fda_response_assessment_kind_citation_reduction_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 
@@ -7431,22 +9325,34 @@ def test_fda_consultant_citation_scope_reduction_uses_typed_violation_letter() -
     assert source_compile["deterministic_fda_consultant_citation_scope_reduction_policy"]["not_source_interpretation"] is True
 
 
-def test_source_scope_payload_integrity_drops_citation_payload_provenance() -> None:
+def test_source_scope_payload_integrity_drops_payload_shaped_provenance() -> None:
     source_compile = {
         "facts": [
             "fda_consultant_recommendation(letter_1, qualified_cgmp_consultant, consultant_engagement, cfr_21_211_34).",
             "fda_consultant_recommendation(letter_1, qualified_cgmp_consultant, consultant_engagement, src_line_20).",
             "fda_violation_citation(letter_1, cfr_21_211_34, consultant_qualification, src_line_20).",
+            "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, embedded_ixbrl, cover_page_interactive_data_file_embedded_within_the_inline_xbrl_document).",
+            "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_2).",
+            "sec_registrant_identifier(filing_1, hamilton_lane_incorporated, cik, cik_1433642, cik_1433642).",
+            "sec_registrant_identifier(filing_1, hamilton_lane_incorporated, cik, cik_1433642, source_cover_page).",
         ]
     }
 
     report = _apply_source_scope_payload_integrity(source_compile)
 
-    assert report["dropped_count"] == 1
+    assert report["dropped_count"] == 3
     assert source_compile["facts"] == [
         "fda_consultant_recommendation(letter_1, qualified_cgmp_consultant, consultant_engagement, src_line_20).",
         "fda_violation_citation(letter_1, cfr_21_211_34, consultant_qualification, src_line_20).",
+        "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_2).",
+        "sec_registrant_identifier(filing_1, hamilton_lane_incorporated, cik, cik_1433642, source_cover_page).",
     ]
+    issues = {item["issue"] for item in source_compile["deterministic_source_scope_payload_integrity_dropped_facts"]}
+    assert issues == {
+        "citation_payload_in_source_or_scope",
+        "identifier_payload_in_source_or_scope",
+        "semantic_payload_in_source_or_scope",
+    }
     policy = source_compile["deterministic_source_scope_payload_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
@@ -7455,28 +9361,60 @@ def test_source_scope_payload_integrity_drops_citation_payload_provenance() -> N
 def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None:
     source_compile = {
         "facts": [
+            "ntsb_finding(occurrence_1, finding_not_stated, not_stated, not_stated, src_line_3).",
+            "ntsb_finding(occurrence_1, finding_1, probable_cause, pilot_loss_of_control, src_line_4).",
+            "ntsb_injury_count(occurrence_1, crew, zero, zero, zero, src_line_5).",
+            "ntsb_injury_count(occurrence_1, passenger, 0, 0, 0, src_line_6).",
+            "ntsb_vehicle(vehicle_1, occurrence_1, aircraft, boeing_md_11f, 2005_international_9900ix, src_line_7).",
+            "ntsb_vehicle(vehicle_2, occurrence_1, aircraft, boeing_md_11f, n259up, src_line_8).",
             "fda_violation_citation(violation_1, cfr_21_211_22_d, cfr_21_211_22_d, src_line_8).",
             "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
             "fda_violation_detail(violation_6, violation_6, missing_records, batch_production_and_control_records, src_line_12).",
             "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, corrective_action_evaluation, src_line_13).",
             "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_13).",
             "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
+            "fda_violation_detail_slot(violation_6, violation_6, batch_production_and_control_records, src_line_12).",
+            "fda_violation_detail_slot(violation_6, missing_record_type, batch_production_and_control_records, src_line_12).",
+            "fda_violation_detail_slot(violation_6, missing_record_type, product_release_record_review, src_line_12).",
+            "fda_violation_detail_slot(violation_1, procedure_scope, sterile_drug_products, src_line_12).",
+            "fda_violation_detail_slot(violation_1, affected_product, sterile_drug_products, src_line_12).",
         ]
     }
 
     report = _apply_carrier_value_domain_integrity(source_compile)
 
-    assert report["dropped_count"] == 3
+    assert report["dropped_count"] == 9
     assert source_compile["facts"] == [
+        "ntsb_finding(occurrence_1, finding_1, probable_cause, pilot_loss_of_control, src_line_4).",
+        "ntsb_injury_count(occurrence_1, passenger, 0, 0, 0, src_line_6).",
+        "ntsb_vehicle(vehicle_2, occurrence_1, aircraft, boeing_md_11f, n259up, src_line_8).",
         "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
         "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_13).",
         "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
+        "fda_violation_detail_slot(violation_6, missing_record_type, product_release_record_review, src_line_12).",
+        "fda_violation_detail_slot(violation_1, affected_product, sterile_drug_products, src_line_12).",
     ]
     dropped = source_compile["deterministic_carrier_value_domain_integrity_dropped_facts"]
-    assert dropped[0]["arg_name"] == "citation_role"
-    assert dropped[1]["arg_name"] == "detail_kind"
-    assert dropped[2]["arg_name"] == "role_or_purpose"
-    assert dropped[2]["issue"] == "detail_kind_role_mismatch"
+    assert dropped[0]["fact"].startswith("ntsb_finding(")
+    assert dropped[0]["arg_name"] == "finding_kind"
+    assert dropped[0]["issue"] == "value_not_allowed"
+    assert dropped[1]["fact"].startswith("ntsb_injury_count(")
+    assert dropped[1]["arg_name"] == "fatal_count"
+    assert dropped[1]["issue"] == "count_not_integer"
+    assert dropped[2]["fact"].startswith("ntsb_vehicle(")
+    assert dropped[2]["arg_name"] == "identifier_value"
+    assert dropped[2]["issue"] == "identifier_numeric_leading"
+    assert dropped[3]["arg_name"] == "citation_role"
+    assert dropped[4]["arg_name"] == "detail_kind"
+    assert dropped[5]["arg_name"] == "role_or_purpose"
+    assert dropped[5]["issue"] == "detail_kind_role_mismatch"
+    assert dropped[6]["fact"].startswith("fda_violation_detail_slot(")
+    assert dropped[6]["arg_name"] == "detail_kind"
+    assert dropped[7]["fact"].startswith("fda_violation_detail_slot(")
+    assert dropped[7]["arg_name"] == "role_or_purpose"
+    assert dropped[8]["fact"].startswith("fda_violation_detail_slot(")
+    assert dropped[8]["arg_name"] == "role_or_purpose"
+    assert dropped[8]["issue"] == "detail_kind_role_mismatch"
     policy = source_compile["deterministic_carrier_value_domain_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
@@ -7510,10 +9448,34 @@ def test_atom_shape_integrity_drops_prose_shaped_registered_carrier_values() -> 
     assert policy["not_query_interpretation"] is True
 
 
+def test_atom_shape_integrity_drops_numeric_leading_registered_carrier_atoms() -> None:
+    source_compile = {
+        "facts": [
+            "ntsb_condition(occurrence_1, speed_limit, 55_mph, roadway, ntsb_surface_1).",
+            "ntsb_party(occurrence_1, driver_teen, driver, 17_year_old_driver, ntsb_surface_1).",
+            "ntsb_condition(occurrence_1, speed_limit, mph_55, roadway, ntsb_surface_1).",
+            "ntsb_injury_count(occurrence_1, bystander, 5, 8, 3, ntsb_surface_1).",
+        ]
+    }
+
+    report = _apply_atom_shape_integrity(source_compile)
+
+    assert report["dropped_count"] == 2
+    assert source_compile["facts"] == [
+        "ntsb_condition(occurrence_1, speed_limit, mph_55, roadway, ntsb_surface_1).",
+        "ntsb_injury_count(occurrence_1, bystander, 5, 8, 3, ntsb_surface_1).",
+    ]
+    dropped = source_compile["deterministic_atom_shape_integrity_dropped_facts"]
+    assert [item["issue"] for item in dropped] == ["numeric_leading", "numeric_leading"]
+    assert dropped[0]["arg"] == "arg3"
+    assert dropped[1]["arg"] == "arg4"
+
+
 def test_fda_office_atom_reduction_canonicalizes_registered_office_slots() -> None:
     source_compile = {
         "facts": [
             "fda_warning_letter(letter_1, office_pharmaceutical_quality_operations, acme_inc, v_2026_01_01, src_line_1).",
+            "fda_warning_letter(letter_2, division_of_pharmaceutical_quality_operations_i, firm, v_2023_07_26, src_line_2).",
             "fda_correspondence_party(letter_1, office_pharmaceutical_quality_operations, issuing_office, office_pharmaceutical_quality_operations, src_line_1).",
             "fda_facility_identity(facility_1, office_pharmaceutical_quality_operations, camden_new_jersey, fei_1, src_line_2).",
         ]
@@ -7521,13 +9483,38 @@ def test_fda_office_atom_reduction_canonicalizes_registered_office_slots() -> No
 
     report = _apply_fda_office_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 2
+    assert report["reduction_count"] == 3
     assert source_compile["facts"] == [
         "fda_warning_letter(letter_1, office_of_pharmaceutical_quality_operations, acme_inc, v_2026_01_01, src_line_1).",
+        "fda_warning_letter(letter_2, ora_pqo_i, firm, v_2023_07_26, src_line_2).",
         "fda_correspondence_party(letter_1, office_of_pharmaceutical_quality_operations, issuing_office, office_of_pharmaceutical_quality_operations, src_line_1).",
         "fda_facility_identity(facility_1, office_pharmaceutical_quality_operations, camden_new_jersey, fei_1, src_line_2).",
     ]
     assert source_compile["deterministic_fda_office_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_correspondence_party_name_reduction_strips_honorific_prefixes_and_contact_alias() -> None:
+    source_compile = {
+        "facts": [
+            "fda_correspondence_party(letter_1, kyle_y_flanigan, recipient, dr_kyle_y_flanigan, src_line_1).",
+            "fda_correspondence_party(letter_1, liatte_closs, contact, capt_liatte_closs, src_line_2).",
+            "fda_correspondence_party(letter_1, lisa_harlan, signatory, lisa_harlan, src_line_3).",
+            "fda_correspondence_party(letter_2, compounding_inspections_contact, contact, compounding_inspections_contact, src_line_4).",
+        ]
+    }
+
+    report = _apply_fda_correspondence_party_name_reduction(source_compile)
+
+    assert report["reduction_count"] == 3
+    assert source_compile["facts"] == [
+        "fda_correspondence_party(letter_1, kyle_y_flanigan, recipient, kyle_y_flanigan, src_line_1).",
+        "fda_correspondence_party(letter_1, liatte_closs, contact, liatte_closs, src_line_2).",
+        "fda_correspondence_party(letter_1, lisa_harlan, signatory, lisa_harlan, src_line_3).",
+        "fda_correspondence_party(letter_2, compounding_inspections_contact, contact, compoundinginspections_fda_hhs_gov, src_line_4).",
+    ]
+    policy = source_compile["deterministic_fda_correspondence_party_name_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
 
 
 def test_fda_correspondence_party_placeholder_contract_rejects_omission_substitutes() -> None:

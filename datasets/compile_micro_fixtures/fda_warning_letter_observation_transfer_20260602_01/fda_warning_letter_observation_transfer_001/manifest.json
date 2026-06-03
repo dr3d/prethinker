@@ -1,0 +1,11 @@
+{
+  "fixture_id": "fda_warning_letter_observation_transfer_001",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/catalent-indiana-llc-718189-11202025",
+  "fda_center": "CDER",
+  "company": "Catalent Indiana, LLC",
+  "warning_letter_date": "2025-11-20",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Observation-vs-record-review transfer test on an unlike finished-pharma CDER letter: EM failure cited as facility/control evidence (observation_subject) in 211.113(b) vs mammalian-hair and media-fill terminations as 211.192 investigation subjects (record_review_subject), plus decontamination-process validation and a positively-stated regulatory teleconference."
+}

@@ -220,6 +220,30 @@ def test_kb_atom_inventory_atom_shape_gate_flags_prose_shaped_typed_atoms(tmp_pa
     assert all(not issue["signature"].startswith("source_record_") for issue in report["atom_shape"]["examples"])
 
 
+def test_kb_atom_inventory_atom_shape_gate_flags_numeric_leading_atoms(tmp_path: Path) -> None:
+    compile_root = tmp_path / "compile"
+    _write_compile(
+        compile_root / "fixture_a" / "run.json",
+        [
+            "ntsb_condition(occurrence_1, visibility, 10_miles, weather, source_1).",
+            "ntsb_timeline_event(occurrence_1, report_issue, report_issue, 2025_11_07, update, source_1).",
+            "ntsb_injury_count(occurrence_1, crew, 0, 0, 0, source_1).",
+        ],
+    )
+
+    report = build_report(
+        compile_root=compile_root,
+        fixtures=None,
+        include_source_record=False,
+        include_prose_like=False,
+        max_examples=10,
+    )
+
+    assert report["atom_shape"]["status"] == "fail"
+    issue_types = report["atom_shape"]["issue_type_counts"]
+    assert issue_types["atom_value_numeric_leading"] == 2
+
+
 def test_kb_atom_inventory_reports_active_lens_scope_violations(tmp_path: Path) -> None:
     compile_root = tmp_path / "compile"
     _write_compile(

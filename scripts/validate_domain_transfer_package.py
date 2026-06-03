@@ -34,9 +34,11 @@ CORE_FDA_SIGNATURES = {
     "fda_warning_letter/5",
     "fda_correspondence_party/5",
     "fda_inspection_event/6",
+    "fda_cgmp_violation_item/5",
     "fda_violation/5",
     "fda_violation_citation/4",
     "fda_response_requirement/6",
+    "fda_response_assessment/5",
 }
 
 

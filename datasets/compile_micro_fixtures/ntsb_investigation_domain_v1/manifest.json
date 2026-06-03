@@ -1,0 +1,20 @@
+{
+  "schema_version": "typed_micro_fixture_v1",
+  "fixture_id": "ntsb_investigation_domain_v1",
+  "purpose": "Pressure a closed NTSB investigation domain schema to preserve report wrapper, occurrence identity, vehicle and party roles, casualty counts, chronology, conditions, safety action, and accountable finding omission without prose-shaped atom slots.",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "answer_types": [
+    "ntsb_report",
+    "occurrence_identity",
+    "vehicle_identity",
+    "party_role",
+    "casualty_summary",
+    "chronology",
+    "condition",
+    "safety_action",
+    "omission_accountability"
+  ],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

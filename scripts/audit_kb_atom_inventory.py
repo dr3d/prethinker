@@ -44,7 +44,7 @@ FREE_TEXT_PREDICATE_HINTS = (
 
 SOURCE_RECORD_PREFIX = "source_record_"
 SOURCE_COORD_RE = re.compile(r"^src_(?:line|row)_\d+$|^source_", re.IGNORECASE)
-DATE_ATOM_RE = re.compile(r"^(?:v_)?\d{4}(?:[_-]\d{1,2}){0,2}$")
+DATE_ATOM_RE = re.compile(r"^v_\d{4}(?:[_-]\d{1,2}){0,2}$")
 INTEGER_RE = re.compile(r"^-?\d+$")
 DECIMAL_RE = re.compile(r"^-?\d+\.\d+$")
 DEFAULT_MAX_PREDICATE_CHARS = 48
@@ -656,6 +656,16 @@ def _atom_shape_issues(
         value = str(raw_arg or "").strip().strip("'\"")
         if not value or _arg_kind(raw_arg) in {"integer", "decimal", "date_atom", "boolean_atom", "source_coord"}:
             continue
+        if not str(raw_arg or "").strip().startswith(("'", '"')) and value[:1].isdigit():
+            issues.append(
+                _shape_issue(
+                    fact=fact,
+                    issue_type="atom_value_numeric_leading",
+                    field=f"arg{index}",
+                    value=value,
+                    metrics={"reason": "bare_prolog_atom_cannot_start_with_digit"},
+                )
+            )
         tokens = _atom_tokens(value)
         base_issue_type = "registered_carrier_prose_shaped_value" if registered else "atom_value_prose_shaped"
         if len(value) > max_atom_chars:

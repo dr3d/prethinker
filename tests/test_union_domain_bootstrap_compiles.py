@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from scripts.union_domain_bootstrap_compiles import main
+from scripts.union_domain_bootstrap_compiles import _slug, main
 
 
 def _write_run(path: Path, facts: list[str], *, lens_id: str) -> Path:
@@ -64,3 +64,8 @@ def test_union_does_not_preserve_single_active_lens_metadata(tmp_path, monkeypat
     assert payload["profile_registry_lens"] == ""
     assert "no single active lens" in payload["profile_registry_lens_note"]
     assert payload["union_source_compile"]["source_runs"] == [str(left), str(right)]
+
+
+def test_union_slug_limit_keeps_nested_bundle_filenames_short() -> None:
+    assert len(_slug("sec-form-8k-skeleton-transfer-002-r3-local-qwen-wrapper-date-boundary", limit=48)) == 48
+    assert _slug("qwen/qwen3.6-35b-a3b", limit=32) == "qwen-qwen3-6-35b-a3b"

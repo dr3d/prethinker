@@ -1,29 +1,32 @@
 # Public Docs Guide
 
-Last updated: 2026-06-01
+Last updated: 2026-06-03
 
 This is the public reading map. It should stay short and current. Git history
 and `C:\prethinker_tmp_archive` keep older research diaries, prompt snapshots,
 dated run reports, and retired product lanes.
 
-Current status: Prethinker is in a sign-clean reset. Older 90%+ measurement
-notes are historical calibration evidence, not current claims. The current
-claim-bearing floor is the hard-clean floor in the domain-tier docs.
+Current status: Prethinker is in a research-first domain-pack transfer phase.
+Older 90%+ measurement notes are historical calibration evidence, not current
+claims. The current phase-close result is documented in the closed-domain
+predicate-pack technical note.
 
 ## Start Here
 
 1. [README](https://github.com/dr3d/prethinker/blob/main/README.md) - project entry point.
 2. [Docs README](https://github.com/dr3d/prethinker/blob/main/docs/README.md) - documentation map.
-3. [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md) - current post-reset strategy and trust-tier boundary.
-4. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
-5. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
-6. [Domain Tier Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_WORKSHEET.md) - current lab notes for the domain-schema climb.
-7. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
-8. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
+3. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
+4. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - compact current claim and evidence snapshot.
+5. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - artifact ledger and family-by-family evidence.
+6. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
+7. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
+8. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
+9. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
 
 ## Core Architecture
 
 - [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
+- [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 - [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
@@ -34,6 +37,7 @@ claim-bearing floor is the hard-clean floor in the domain-tier docs.
 ## Research Method
 
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 
@@ -71,7 +75,6 @@ public claims unless they have a newer status note at the top:
 
 - `docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md`
 - `docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md`
-- `docs/CURRENT_RESEARCH_HEADLINE.md`
 - `docs/COMPILING_LANGUAGE.md`
 - `docs/CTO_ARCHITECTURE_BRIEF.md`
 - `docs/CURRENT_UTTERANCE_PIPELINE.md`

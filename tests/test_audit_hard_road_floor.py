@@ -17,7 +17,7 @@ def test_hard_road_floor_requires_typed_redacted_and_atom_shape_clean(tmp_path: 
         {
             "source_compile": {
                 "facts": [
-                    "document_date(doc_a, issue_date, 2026_05_30).",
+                    "document_date(doc_a, issue_date, v_2026_05_30).",
                     "document_title(doc_a, this_title_is_a_complete_sentence_that_should_not_be_treated_as_a_compact_typed_atom_because_it_smuggles_source_text).",
                 ]
             }
@@ -31,7 +31,7 @@ def test_hard_road_floor_requires_typed_redacted_and_atom_shape_clean(tmp_path: 
             "rows": [
                 {
                     "id": "q001",
-                    "reference_answer": "2026-05-30",
+                    "reference_answer": "v_2026_05_30",
                     "reference_judge": {"verdict": "exact"},
                     "queries": ["document_date(doc_a, issue_date, Date)."],
                     "query_results": [
@@ -40,7 +40,7 @@ def test_hard_road_floor_requires_typed_redacted_and_atom_shape_clean(tmp_path: 
                             "result": {
                                 "status": "success",
                                 "predicate": "document_date",
-                                "rows": [{"Date": "2026_05_30"}],
+                                "rows": [{"Date": "v_2026_05_30"}],
                             },
                         }
                     ],

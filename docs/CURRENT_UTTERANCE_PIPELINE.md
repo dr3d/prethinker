@@ -3,10 +3,11 @@
 Last updated: 2026-05-28
 
 > Status: historical pre-reset pipeline note. Do not use the score summary in
-> this document as current claim posture. Current direction is documented in
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> this document as current claim posture. Current phase-close status is
+> documented in
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 > and
-> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+> [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md).
 
 This was the live pipeline shape at the time this note was written. The old
 English-first parser lane is historical context. The durable idea that remains
@@ -245,35 +246,27 @@ The endpoint remains OpenAI-compatible. The architecture treats model/provider
 variation as measurement data: durable surfaces should transfer; sensitive
 surfaces such as exact string preservation get deterministic reinforcement.
 
-## Current Evidence Pattern
+## Historical Evidence Pattern
 
-Transfer work supports the current direction:
+The scorecards that originally lived in this section are historical
+calibration evidence, not current claim posture. Later sign-clean audits showed
+that some high exact-rate measurements depended on source-record prose paths,
+open predicate drift, or judge-facing surface-token exposure. Those old runs
+remain useful for archaeology, but they are not the current research claim.
 
-- Earlier cold transfer on OpenRouter scored `177 / 10 / 53` over 240 rows,
-  or 73.75% exact, before the current direct-surface work.
-- The public measurement anchor is stronger: the native restamp is
-  `1997 / 46 / 120` over `2163` rows (`92.33%` exact), fresh ugly public
-  2026-05-28 R1 is `197 / 3 / 0` over `200` rows (`98.5%`), fresh ugly public
-  Batch 03 remains regression evidence at `291 / 6 / 3` over `300` rows
-  (`97.0%`) when SEC and non-SEC slices are combined, the sealed unseen authored
-  transfer is `152 / 1 / 6` over `160` rows (`95.0%` exact), and the
-  four-fixture real-world spotcheck is `160 / 0 / 0`.
-- A roster-reconciliation fixture exposed why compatibility evidence had to
-  become compile-surface work: the high-water was reachable, but the forward
-  repair is direct assignment/table surfaces.
-- A count-composition fixture now has a clean six-mode memory package with a
-  `40 / 0 / 0` row-gated ceiling. Adding question-shape selector risk gates
-  moved guarded selection from `31 / 3 / 6` to `40 / 0 / 0`, proving the
-  residual was surface routing rather than missing compiled state.
-- Grant, sensor, clinic, probate, and roster compatibility replays are now
-  treated as archaeology: they show which distinctions were reachable, then
-  CSS work decides which ones deserve direct compile or ledger surfaces.
-- The main weak surface is no longer "can the model understand the document?"
-  It is often "did the admitted state become addressable, composable, and
-  queryable at the exact row shape the question demands?"
+The current claim-bearing direction is closed-domain predicate packs: compile a
+bounded official-document family through a closed, lens-scoped predicate
+registry, then count only rows that survive the hard-clean governance gates.
+Use the closed-domain technical note and current research headline for the
+live evidence snapshot.
 
-This is the refocus: compile natural language into sharp durable memory, then
-make that memory inspectable and queryable.
+The durable lesson from this older pipeline note is still valid:
+
+```text
+compile natural language into sharp durable memory,
+then make that memory inspectable and queryable
+without rereading prose at answer time.
+```
 
 ## What Becomes Durable?
 

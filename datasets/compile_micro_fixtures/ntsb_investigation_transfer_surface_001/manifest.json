@@ -1,0 +1,21 @@
+{
+  "schema_version": "typed_micro_fixture_v1",
+  "fixture_id": "ntsb_investigation_transfer_surface_001",
+  "purpose": "Unlike NTSB transfer micro for ntsb_investigation_v1, using a retained highway/hazmat investigation report rather than the UPS aviation preliminary micro. Pressures whether the closed NTSB skeleton transfers across mode, casualty table shape, hazmat conditions, chronology, and final probable-cause findings without prose-shaped atom slots.",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_02/ntsb_surface_ugly_001",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "answer_types": [
+    "ntsb_report",
+    "occurrence_identity",
+    "occurrence_time",
+    "vehicle_identity",
+    "party_role",
+    "casualty_summary",
+    "chronology",
+    "condition",
+    "finding"
+  ],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

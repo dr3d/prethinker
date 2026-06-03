@@ -36,6 +36,7 @@ PROFILE_ADMISSION_FULL_DATE_ATOM_RE = re.compile(r"(?:^|[_\-\s])(?:v_)?(?:19|20)
 PROFILE_ADMISSION_COMPACT_DATE_RE = re.compile(r"(?:^|[_\-\s])(?:19|20)\d{6}(?:[_\-\s]|$)")
 FACT_CLAUSE_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 ENTITY_ID_ATOM_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+INTEGER_RE = re.compile(r"^-?\d+$")
 ATOM_SHAPE_MAX_CHARS = 96
 ATOM_SHAPE_MAX_TOKENS = 14
 ATOM_SHAPE_STOPWORD_DENSITY = 0.35
@@ -1211,6 +1212,14 @@ def parse_args() -> argparse.Namespace:
         help="When an intake plan exists, compile once per LLM-authored pass_plan item instead of one flat source compile.",
     )
     parser.add_argument(
+        "--profile-registry-lens-plan",
+        action="store_true",
+        help=(
+            "When a profile-registry lens is active, compile plan passes from a one-pass lens-scoped plan "
+            "built from registry metadata instead of the source-wide LLM intake plan."
+        ),
+    )
+    parser.add_argument(
         "--compile-flat-plus-plan-passes",
         action="store_true",
         help="Experimental: compile one broad flat pass plus focused LLM-authored pass_plan passes, then union admitted clauses.",
@@ -1282,6 +1291,30 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Experimental: after an FDA warning-letter profile compile, run one bounded source-grounded pass "
             "that may emit fda_violation_detail/5 rows only for numbered violation detail bundles."
+        ),
+    )
+    parser.add_argument(
+        "--fda-violation-detail-slot-followup",
+        action="store_true",
+        help=(
+            "Experimental: after an FDA warning-letter profile compile, run one bounded source-grounded pass "
+            "that may emit fda_violation_detail_slot/4 rows only for closed numbered-violation detail slots."
+        ),
+    )
+    parser.add_argument(
+        "--fda-violation-detail-item-map-context",
+        action="store_true",
+        help=(
+            "Experimental: include the existing typed numbered CGMP item map in the FDA violation-detail "
+            "bundle follow-up context. Keep off for baseline measurements until transfer-positive."
+        ),
+    )
+    parser.add_argument(
+        "--fda-response-assessment-followup",
+        action="store_true",
+        help=(
+            "Experimental: after an FDA warning-letter profile compile, run one bounded source-grounded pass "
+            "that may emit fda_response_assessment/5 rows only, using the existing typed numbered CGMP item map."
         ),
     )
     parser.add_argument(
@@ -1570,10 +1603,17 @@ def main() -> int:
         )
         active_lens = profile_registry.get("active_lens") if isinstance(profile_registry.get("active_lens"), dict) else {}
         if active_lens:
+            candidate_signatures = active_lens.get("candidate_signatures")
+            candidate_detail = (
+                "candidate_signatures"
+                if isinstance(candidate_signatures, list) and candidate_signatures
+                else "allowed_signatures"
+            )
             sample["context"].append(
                 "Active profile-registry lens: "
-                f"{active_lens.get('id')} offers only the predicate signatures listed in its allowed_signatures. "
-                "Do not import predicate families from other lenses during this pass."
+                f"{active_lens.get('id')} offers only the predicate signatures listed in its {candidate_detail}. "
+                "Do not import predicate families from other lenses during this pass. Deterministic reducers may "
+                "derive additional signatures only when they remain inside the lens allowed_signatures cage."
             )
         if bool(args.profile_registry_palette_prior):
             sample["context"].append(
@@ -2047,19 +2087,27 @@ def main() -> int:
         for line in (str(item).strip() for item in getattr(args, "extra_compile_context_line", []) or [])
         if line
     )
-    if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(intake_plan, dict):
+    compile_intake_plan = intake_plan
+    if (
+        bool(getattr(args, "profile_registry_lens_plan", False))
+        and isinstance(profile_registry, dict)
+        and isinstance(profile_registry.get("active_lens"), dict)
+    ):
+        compile_intake_plan = _profile_registry_lens_intake_plan(profile_registry)
+        record["profile_registry_lens_intake_plan"] = compile_intake_plan
+    if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(compile_intake_plan, dict):
         record["source_compile"] = _compile_source_flat_plus_plan_passes(
             source_text=source_text,
             parsed_profile=parsed,
-            intake_plan=intake_plan,
+            intake_plan=compile_intake_plan,
             args=args,
             extra_context=extra_compile_context,
         )
-    elif bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(intake_plan, dict):
+    elif bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_plan_passes) and isinstance(compile_intake_plan, dict):
         record["source_compile"] = _compile_source_with_plan_passes(
             source_text=source_text,
             parsed_profile=parsed,
-            intake_plan=intake_plan,
+            intake_plan=compile_intake_plan,
             args=args,
             extra_context=extra_compile_context,
         )
@@ -2071,6 +2119,10 @@ def main() -> int:
             args=args,
             extra_context=extra_compile_context,
         )
+    if isinstance(record.get("source_compile"), dict) and isinstance(
+        record.get("active_profile_registry_lens"), dict
+    ):
+        record["source_compile"]["active_profile_registry_lens"] = record["active_profile_registry_lens"]
     if (
         bool(args.compile_source)
         and bool(args.profile_delivery_repair_pass)
@@ -2234,18 +2286,45 @@ def main() -> int:
         _attach_governed_companion_subject_health(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
         _apply_fda_date_atom_reduction(record["source_compile"])
+        _apply_registered_date_slot_atom_reduction(record["source_compile"])
+        _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
+        _apply_sec_filing_id_atom_reduction(record["source_compile"])
+        _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
+        _apply_sec_identifier_value_atom_reduction(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
+        _apply_fda_correspondence_party_name_reduction(record["source_compile"])
+        _apply_fda_no_fei_omission_reduction(record["source_compile"])
+        _apply_fda_adulteration_basis_authority_reduction(record["source_compile"])
+        _apply_ntsb_timestamp_atom_reduction(record["source_compile"])
+        _apply_ntsb_actor_id_atom_reduction(record["source_compile"])
+        _apply_ntsb_condition_atom_reduction(record["source_compile"])
+        _apply_ntsb_injury_count_scope_specificity(record["source_compile"])
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
+        _apply_fda_cgmp_violation_item_projection(record["source_compile"])
+        _apply_fda_violation_category_from_unique_citation_reduction(record["source_compile"])
+        _apply_fda_cgmp_bundle_subject_integrity(record["source_compile"])
+        _apply_fda_response_assessment_scope_reduction(record["source_compile"])
+        _apply_fda_response_assessment_item_projection(record["source_compile"])
+        _apply_fda_response_documentation_gap_projection(record["source_compile"])
+        _apply_fda_response_investigation_gap_projection(record["source_compile"])
+        _apply_fda_response_assessment_id_canonicalization(record["source_compile"])
+        _apply_fda_response_assessment_kind_citation_reduction(record["source_compile"])
+        _apply_fda_response_assessment_specificity_reduction(record["source_compile"])
+        _apply_fda_response_assessment_subject_integrity(record["source_compile"])
+        _apply_fda_violation_detail_value_kind_integrity(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
+        _apply_fda_violation_detail_slot_projection(record["source_compile"])
+        _apply_fda_response_assessment_slot_projection(record["source_compile"])
         _apply_source_scope_payload_integrity(record["source_compile"])
         _apply_carrier_value_domain_integrity(record["source_compile"])
         _apply_atom_shape_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
+        _apply_active_lens_scope_integrity(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
             and
@@ -2261,9 +2340,14 @@ def main() -> int:
                 args=args,
                 extra_context=extra_compile_context,
             )
-            _attach_governed_companion_subject_health(record["source_compile"])
+        _attach_governed_companion_subject_health(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
         _apply_fda_date_atom_reduction(record["source_compile"])
+        _apply_registered_date_slot_atom_reduction(record["source_compile"])
+        _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
+        _apply_sec_filing_id_atom_reduction(record["source_compile"])
+        _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
+        _apply_sec_identifier_value_atom_reduction(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
         if (
             bool(getattr(args, "profile_registry_completion_followup", False))
@@ -2306,21 +2390,74 @@ def main() -> int:
                 args=args,
                 extra_context=extra_compile_context,
             )
+        if (
+            bool(getattr(args, "fda_violation_detail_slot_followup", False))
+            and isinstance(parsed, dict)
+            and _fda_violation_detail_slot_offered(parsed)
+        ):
+            _apply_fda_violation_detail_slot_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+            )
+        if (
+            bool(getattr(args, "fda_response_assessment_followup", False))
+            and isinstance(parsed, dict)
+            and _fda_response_assessment_offered(parsed)
+        ):
+            _apply_fda_response_assessment_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+            )
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_date_atom_reduction(record["source_compile"])
+        _apply_registered_date_slot_atom_reduction(record["source_compile"])
+        _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
+        _apply_sec_filing_id_atom_reduction(record["source_compile"])
+        _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
+        _apply_sec_identifier_value_atom_reduction(record["source_compile"])
+        _apply_ntsb_timestamp_atom_reduction(record["source_compile"])
+        _apply_ntsb_actor_id_atom_reduction(record["source_compile"])
+        _apply_ntsb_condition_atom_reduction(record["source_compile"])
+        _apply_ntsb_injury_count_scope_specificity(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
+        _apply_fda_correspondence_party_name_reduction(record["source_compile"])
+        _apply_fda_no_fei_omission_reduction(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
+        _apply_fda_adulteration_basis_authority_reduction(record["source_compile"])
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
+        _apply_fda_cgmp_violation_item_projection(record["source_compile"])
+        _apply_fda_violation_category_from_unique_citation_reduction(record["source_compile"])
+        _apply_fda_cgmp_bundle_subject_integrity(record["source_compile"])
+        _apply_fda_response_assessment_scope_reduction(record["source_compile"])
+        _apply_fda_response_assessment_item_projection(record["source_compile"])
+        _apply_fda_response_documentation_gap_projection(record["source_compile"])
+        _apply_fda_response_investigation_gap_projection(record["source_compile"])
+        _apply_fda_response_assessment_id_canonicalization(record["source_compile"])
+        _apply_fda_response_assessment_kind_citation_reduction(record["source_compile"])
+        _apply_fda_response_assessment_specificity_reduction(record["source_compile"])
+        _apply_fda_response_assessment_subject_integrity(record["source_compile"])
+        _apply_fda_violation_detail_value_kind_integrity(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
+        _apply_fda_violation_detail_slot_projection(record["source_compile"])
+        _apply_fda_response_assessment_slot_projection(record["source_compile"])
         _apply_source_scope_payload_integrity(record["source_compile"])
         _apply_carrier_value_domain_integrity(record["source_compile"])
         _apply_atom_shape_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
+        _apply_active_lens_scope_integrity(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
             source_compile=record["source_compile"],
@@ -2808,15 +2945,28 @@ def _load_profile_registry(path: Path | None) -> dict[str, Any]:
                 for signature in item.get("allowed_signatures", [])
                 if isinstance(item.get("allowed_signatures"), list) and str(signature).strip()
             ]
+            candidate_signatures = [
+                str(signature).strip()
+                for signature in item.get("candidate_signatures", [])
+                if isinstance(item.get("candidate_signatures"), list) and str(signature).strip()
+            ]
+            accountability_signatures = [
+                str(signature).strip()
+                for signature in item.get("accountability_signatures", [])
+                if isinstance(item.get("accountability_signatures"), list) and str(signature).strip()
+            ]
             lens_id = str(item.get("id", "")).strip()
             if lens_id:
-                lenses.append(
-                    {
-                        "id": lens_id,
-                        "purpose": str(item.get("purpose", "")).strip(),
-                        "allowed_signatures": allowed_signatures,
-                    }
-                )
+                lens = {
+                    "id": lens_id,
+                    "purpose": str(item.get("purpose", "")).strip(),
+                    "allowed_signatures": allowed_signatures,
+                }
+                if candidate_signatures:
+                    lens["candidate_signatures"] = candidate_signatures
+                if accountability_signatures:
+                    lens["accountability_signatures"] = accountability_signatures
+                lenses.append(lens)
     return {
         "schema": str(parsed.get("schema", "")).strip(),
         "fixture": str(parsed.get("fixture", "")).strip(),
@@ -2856,6 +3006,23 @@ def _profile_registry_for_lens(profile_registry: dict[str, Any], lens_id: str) -
         for signature in selected.get("allowed_signatures", [])
         if _normalized_signature(str(signature))
     }
+    raw_candidate_signatures = (
+        selected.get("candidate_signatures")
+        if isinstance(selected.get("candidate_signatures"), list)
+        else selected.get("allowed_signatures", [])
+    )
+    declared_candidates = {
+        _normalized_signature(str(signature))
+        for signature in raw_candidate_signatures
+        if _normalized_signature(str(signature))
+    }
+    declared_candidates &= declared_allowed
+    declared_accountability = {
+        _normalized_signature(str(signature))
+        for signature in selected.get("accountability_signatures", [])
+        if _normalized_signature(str(signature))
+    }
+    declared_accountability &= declared_allowed
     accountability_requirements = [
         dict(item)
         for item in profile_registry.get("accountability_requirements", [])
@@ -2865,13 +3032,15 @@ def _profile_registry_for_lens(profile_registry: dict[str, Any], lens_id: str) -
             and "domain_omission/5" in declared_allowed
         )
     ]
-    offered_allowed = set(declared_allowed)
+    runtime_allowed = set(declared_allowed)
+    candidate_allowed = set(declared_candidates)
     if not accountability_requirements:
-        offered_allowed.discard("domain_omission/5")
+        runtime_allowed.discard("domain_omission/5")
+        candidate_allowed.discard("domain_omission/5")
     predicates = [
         dict(item)
         for item in profile_registry.get("predicates", [])
-        if isinstance(item, dict) and _normalized_signature(str(item.get("signature", ""))) in offered_allowed
+        if isinstance(item, dict) and _normalized_signature(str(item.get("signature", ""))) in candidate_allowed
     ]
     filtered = dict(profile_registry)
     filtered["predicates"] = predicates
@@ -2880,11 +3049,125 @@ def _profile_registry_for_lens(profile_registry: dict[str, Any], lens_id: str) -
         "id": requested,
         "purpose": str(selected.get("purpose", "")).strip(),
         "declared_allowed_signatures": sorted(declared_allowed),
-        "allowed_signatures": sorted(offered_allowed),
+        "declared_candidate_signatures": sorted(declared_candidates),
+        "declared_accountability_signatures": sorted(declared_accountability),
+        "allowed_signatures": sorted(runtime_allowed),
+        "candidate_signatures": sorted(candidate_allowed),
+        "accountability_signatures": sorted(declared_accountability),
         "predicate_count": len(predicates),
         "accountability_requirement_count": len(accountability_requirements),
     }
     return filtered
+
+
+def _profile_registry_lens_intake_plan(profile_registry: dict[str, Any]) -> dict[str, Any]:
+    """Build a one-pass compile plan from active registry-lens metadata only.
+
+    This is a compile-control artifact, not source interpretation. It reads the
+    closed profile registry lens, allowed signatures, and predicate descriptions
+    so plan-pass source compiles stay inside the selected lens instead of using
+    a source-wide intake plan.
+    """
+
+    active_lens = (
+        profile_registry.get("active_lens")
+        if isinstance(profile_registry.get("active_lens"), dict)
+        else {}
+    )
+    lens_id = str(active_lens.get("id", "")).strip() or "profile_registry_lens"
+    purpose = str(active_lens.get("purpose", "")).strip() or f"Compile {lens_id} registry lens."
+    candidate_signatures = [
+        str(signature).strip()
+        for signature in active_lens.get("candidate_signatures", [])
+        if isinstance(active_lens.get("candidate_signatures"), list) and str(signature).strip()
+    ]
+    if not candidate_signatures:
+        candidate_signatures = [
+            str(signature).strip()
+            for signature in active_lens.get("allowed_signatures", [])
+            if isinstance(active_lens.get("allowed_signatures"), list) and str(signature).strip()
+        ]
+    accountability_signatures = [
+        str(signature).strip()
+        for signature in active_lens.get("accountability_signatures", [])
+        if isinstance(active_lens.get("accountability_signatures"), list) and str(signature).strip()
+    ]
+    predicate_notes = []
+    allowed = set(candidate_signatures)
+    for item in profile_registry.get("predicates", []) if isinstance(profile_registry.get("predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).strip()
+        if signature not in allowed:
+            continue
+        category = str(item.get("category", "")).strip()
+        args = ", ".join(str(arg).strip() for arg in item.get("args", []) if str(arg).strip()) if isinstance(item.get("args"), list) else ""
+        if category or args:
+            predicate_notes.append(f"{signature}: {category or 'registry predicate'} ({args})")
+        else:
+            predicate_notes.append(signature)
+    coverage_goals = [
+        "Emit only source-supported candidate_operations for the active profile-registry lens.",
+        "Keep every emitted predicate inside the recommended predicate list.",
+        "Use registered argument order and compact typed atoms; do not put prose in typed slots.",
+    ]
+    if accountability_signatures:
+        coverage_goals.append(
+            "Accountability-required signatures for this lens: "
+            + ", ".join(accountability_signatures)
+            + ". If source support is absent, let the delivery audit report the missing carrier unless a registered domain_omission row is source-stated."
+        )
+    if predicate_notes:
+        coverage_goals.extend(predicate_notes[:6])
+    return {
+        "schema_version": "intake_plan_v1",
+        "source_boundary": {
+            "source_id_hint": str(profile_registry.get("fixture", "")).strip() or lens_id,
+            "source_type": str(profile_registry.get("fixture", "")).strip() or "profile_registry_source",
+            "epistemic_stance": "source_fidelity_lens_compile",
+            "why": "Synthetic lens-scoped plan built from closed profile-registry metadata only.",
+        },
+        "symbolic_strategy": [
+            "Use the active closed predicate lens as the compile language.",
+            "The plan narrows carrier scope but does not authorize facts.",
+        ],
+        "entity_strategy": [
+            "Reuse compact source-local atoms proposed by the model.",
+            "Do not enumerate a broad entity catalogue when direct candidate operations can carry the lens rows.",
+        ],
+        "predicate_family_strategy": [
+            {
+                "family": lens_id,
+                "purpose": purpose,
+                "recommended_predicates": candidate_signatures,
+                "epistemic_status": "closed_registry_lens",
+            }
+        ],
+        "pass_plan": [
+            {
+                "pass_id": f"{lens_id}_pass_1",
+                "purpose": purpose,
+                "focus": "Active profile-registry lens only.",
+                "operation_budget": "Use the runner target; prefer required/accountability carriers before optional detail.",
+                "recommended_predicates": candidate_signatures,
+                "coverage_goals": coverage_goals[:10],
+                "completion_policy": (
+                    "Complete the active lens's supported typed rows first. Do not compile unrelated sections "
+                    "or predicates outside this lens."
+                ),
+            }
+        ],
+        "risk_policy": [
+            "This plan is vocabulary-only and source-agnostic.",
+            "Missing carrier delivery is audited after deterministic mapping.",
+        ],
+        "self_check": {
+            "plan_authority": "proposal_only",
+            "notes": [
+                "Built from active profile-registry lens metadata; not from source prose, query text, or oracle answers.",
+            ],
+        },
+    }
 
 
 def _unsafe_profile_registry_palette_prior_reason(profile_registry: dict[str, Any]) -> str:
@@ -3160,6 +3443,11 @@ def _compile_source_with_draft_profile(
         intake_plan=intake_plan,
         domain_hint=str(getattr(args, "domain_hint", "") or ""),
     )
+    carrier_contract_context = (
+        carrier_contract_prompt_lines(allowed_predicates)
+        if str(getattr(args, "profile_registry", "") or "").strip()
+        else []
+    )
     config = SemanticIRCallConfig(
         backend="lmstudio",
         base_url=str(args.base_url),
@@ -3182,6 +3470,7 @@ def _compile_source_with_draft_profile(
             context=[
                 *plan_context,
                 *source_compiler_context,
+                *carrier_contract_context,
                 *COMPILE_SURFACE_INVARIANT_CONTEXT_V1,
                 *(extra_context or []),
                 "Compile the raw source text using the draft profile proposed by profile_bootstrap_v1.",
@@ -3276,6 +3565,7 @@ def _compile_source_with_draft_profile(
         "admitted_count": int(diagnostics.get("admitted_count", 0) or 0),
         "skipped_count": int(diagnostics.get("skipped_count", 0) or 0),
         "warnings": warnings,
+        "admission_diagnostics": diagnostics,
         "facts": mapped.get("facts", []),
         "rules": mapped.get("rules", []),
         "queries": mapped.get("queries", []),
@@ -3924,8 +4214,134 @@ def _normalize_source_pass_operation_args(
         args = args[:-1]
     elif roles and roles[-1] == "source_order" and len(args) == len(roles) and args[-1].casefold() in {"operation_name", "predicate_name"}:
         args = args[:-1]
+    if roles and len(args) == len(roles):
+        args = _normalize_source_pass_typed_slot_atoms(
+            signature=signature,
+            roles=roles,
+            args=args,
+        )
     operation["args"] = args
     return operation
+
+
+def _normalize_source_pass_typed_slot_atoms(
+    *,
+    signature: str,
+    roles: list[str],
+    args: list[str],
+) -> list[str]:
+    """Normalize malformed typed atoms before semantic admission.
+
+    This is a typed-slot transport repair. It reads only the registered carrier
+    signature, registered argument roles, and the model's proposed compact
+    arguments. It does not inspect source prose, query text, or expected facts.
+    """
+
+    normalized = list(args)
+    for index, role in enumerate(roles):
+        if index >= len(normalized):
+            continue
+        role_key = str(role or "").strip().casefold()
+        value = str(normalized[index] or "").strip()
+        if not value:
+            continue
+        if "date" in role_key:
+            canonical_date = _canonical_fda_date_atom(value)
+            if canonical_date:
+                normalized[index] = canonical_date
+                continue
+        if signature in FDA_WARNING_LETTER_ID_SLOT_SIGNATURES and role_key == "letter_id":
+            canonical_letter_id = _canonical_fda_warning_letter_id_atom(value)
+            if canonical_letter_id:
+                normalized[index] = canonical_letter_id
+                continue
+        if signature == "domain_omission/5" and role_key == "carrier_signature":
+            canonical_signature = _canonical_domain_omission_signature_reference(value)
+            if canonical_signature:
+                normalized[index] = canonical_signature
+                continue
+        canonical_chronology_id = _canonical_fda_chronology_id_atom(
+            signature=signature,
+            role_key=role_key,
+            value=value,
+        )
+        if canonical_chronology_id:
+            normalized[index] = canonical_chronology_id
+            continue
+    return normalized
+
+
+FDA_WARNING_LETTER_ID_SLOT_SIGNATURES = {
+    "fda_warning_letter/5",
+    "fda_correspondence_party/5",
+    "fda_response_requirement/6",
+    "fda_consultant_recommendation/4",
+    "fda_conclusion_scope/4",
+    "fda_adulteration_basis/5",
+    "fda_violation/5",
+    "fda_cgmp_violation_item/5",
+    "fda_insanitary_condition/5",
+}
+
+
+FDA_CHRONOLOGY_ID_ROLE_PREFIXES = {
+    "fda_inspection_event/6": {
+        "inspection_id": "inspection",
+    },
+    "fda_form483_response/4": {
+        "response_id": "form483_response",
+        "inspection_id": "inspection",
+    },
+    "fda_prior_warning_letter/5": {
+        "prior_letter_id": "prior_warning_letter",
+    },
+    "fda_regulatory_meeting/4": {
+        "meeting_id": "regulatory_meeting",
+    },
+}
+
+
+def _canonical_fda_chronology_id_atom(*, signature: str, role_key: str, value: str) -> str:
+    prefixes = FDA_CHRONOLOGY_ID_ROLE_PREFIXES.get(signature)
+    if not prefixes:
+        return ""
+    prefix = prefixes.get(role_key)
+    if not prefix:
+        return ""
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    atom = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not atom:
+        return ""
+    if re.match(r"^\d", atom):
+        return f"{prefix}_{atom}"
+    return atom
+
+
+def _canonical_fda_warning_letter_id_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    if text.startswith(("fda_warning_letter_", "fda_wl_", "letter_")) and not re.match(r"^\d", text):
+        return _normalize_profile_atom(text)
+    if not re.fullmatch(r"\d{3}[_-]\d{2}[_-]\d{2,4}", text):
+        return ""
+    compact = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    return f"fda_warning_letter_{compact}" if compact else ""
+
+
+def _canonical_domain_omission_signature_reference(value: str) -> str:
+    text = str(value or "").strip().strip("'\"")
+    if not text:
+        return ""
+    if "/" in text and carrier_contract(text) is not None:
+        return text
+    match = re.fullmatch(r"([a-z][a-z0-9_]*)_(\d+)", text.casefold())
+    if not match:
+        return ""
+    signature = f"{match.group(1)}/{int(match.group(2))}"
+    return signature if carrier_contract(signature) is not None else ""
 
 
 def _source_pass_contracts_by_signature(predicate_contracts: list[dict[str, Any]]) -> dict[str, list[str]]:
@@ -7148,9 +7564,49 @@ def _fda_violation_detail_offered(parsed_profile: dict[str, Any]) -> bool:
     )
 
 
-def _fda_violation_detail_bundle_context_lines(source_compile: dict[str, Any]) -> list[str]:
+def _fda_violation_detail_slot_offered(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    return any(
+        isinstance(item, dict)
+        and str(item.get("signature", "")).strip() == "fda_violation_detail_slot/4"
+        for item in candidates
+    )
+
+
+def _fda_response_assessment_offered(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    return any(
+        isinstance(item, dict)
+        and str(item.get("signature", "")).strip()
+        in {"fda_response_assessment/5", "fda_response_assessment_item/6"}
+        for item in candidates
+    )
+
+
+def _fda_response_assessment_item_offered(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    return any(
+        isinstance(item, dict)
+        and str(item.get("signature", "")).strip() == "fda_response_assessment_item/6"
+        for item in candidates
+    )
+
+
+def _fda_violation_detail_bundle_context_lines(
+    source_compile: dict[str, Any],
+    *,
+    include_item_map: bool = False,
+) -> list[str]:
     violation_ids: list[str] = []
     seen: set[str] = set()
+    categories_by_violation: dict[str, str] = {}
+    citations_by_violation: dict[str, str] = {}
     for fact in source_compile.get("facts", []) if isinstance(source_compile.get("facts"), list) else []:
         parsed = _parse_fact_clause(str(fact).strip())
         if parsed is None:
@@ -7159,6 +7615,16 @@ def _fda_violation_detail_bundle_context_lines(source_compile: dict[str, Any]) -
         if predicate == "fda_violation" and len(args) == 5 and args[0] not in seen:
             seen.add(args[0])
             violation_ids.append(args[0])
+            categories_by_violation[args[0]] = args[3]
+        elif predicate == "fda_cgmp_violation_item" and len(args) == 5:
+            citations_by_violation[args[0]] = args[3]
+        elif (
+            predicate == "fda_violation_citation"
+            and len(args) == 4
+            and args[2] == "cgmps_requirement"
+            and args[0] not in citations_by_violation
+        ):
+            citations_by_violation[args[0]] = args[1]
     lines = [
         (
             "FDA VIOLATION DETAIL BUNDLE FOLLOWUP: this is a bounded FDA warning-letter detail pass. "
@@ -7176,11 +7642,28 @@ def _fda_violation_detail_bundle_context_lines(source_compile: dict[str, Any]) -
             "listed. If the source does not support a detail for a violation, emit no row for that detail."
         ),
     ]
+    if include_item_map:
+        lines.append(
+            "FDA VIOLATION DETAIL BUNDLE FOLLOWUP: when later corrective-action paragraphs discuss a deficiency "
+            "by topic rather than by number, attach the detail to the existing numbered CGMP item whose typed "
+            "citation/category matches that topic. Do not attach CGMP detail rows to separate 501(a)(2)(A) "
+            "insanitary-condition examples when a numbered CGMP item map is available."
+        )
     if violation_ids:
         lines.append(
             "FDA VIOLATION DETAIL BUNDLE FOLLOWUP existing violation IDs: "
             + ", ".join(violation_ids[:20])
         )
+        if include_item_map:
+            item_map = []
+            for violation_id in violation_ids[:20]:
+                category = categories_by_violation.get(violation_id, "unknown_category")
+                citation = citations_by_violation.get(violation_id, "unknown_citation")
+                item_map.append(f"{violation_id} -> {citation} / {category}")
+            lines.append(
+                "FDA VIOLATION DETAIL BUNDLE FOLLOWUP existing numbered CGMP item map: "
+                + "; ".join(item_map)
+            )
     lines.extend(carrier_contract_prompt_lines(["fda_violation_detail/5"]))
     return lines
 
@@ -7194,7 +7677,10 @@ def _apply_fda_violation_detail_bundle_followup_pass(
     args: argparse.Namespace,
     extra_context: list[str] | None = None,
 ) -> dict[str, Any]:
-    context_lines = _fda_violation_detail_bundle_context_lines(source_compile)
+    context_lines = _fda_violation_detail_bundle_context_lines(
+        source_compile,
+        include_item_map=bool(getattr(args, "fda_violation_detail_item_map_context", False)),
+    )
     prior_facts = {
         str(item).strip()
         for item in source_compile.get("facts", [])
@@ -7262,6 +7748,330 @@ def _apply_fda_violation_detail_bundle_followup_pass(
         }
     )
     source_compile["fda_violation_detail_bundle_followup"] = metadata
+    return metadata
+
+
+def _fda_violation_detail_slot_context_lines(source_compile: dict[str, Any]) -> list[str]:
+    violation_ids: list[str] = []
+    seen: set[str] = set()
+    for fact in source_compile.get("facts", []) if isinstance(source_compile.get("facts"), list) else []:
+        parsed = _parse_fact_clause(str(fact).strip())
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation" and len(args) == 5 and args[0] not in seen:
+            seen.add(args[0])
+            violation_ids.append(args[0])
+    lines = [
+        (
+            "FDA VIOLATION DETAIL SLOT FOLLOWUP: this is a bounded FDA warning-letter structural-slot pass. "
+            "Emit fda_violation_detail_slot/4 rows only. Do not emit fda_violation_detail/5 rows, source_record_* "
+            "rows, wrapper facts, citations, response requirements, or new predicate names."
+        ),
+        (
+            "FDA VIOLATION DETAIL SLOT FOLLOWUP: preserve only closed structural slots for each numbered violation: "
+            "detail_kind and role_or_purpose. Do not include the open detail_value, source excerpts, or answer strings."
+        ),
+        (
+            "FDA VIOLATION DETAIL SLOT FOLLOWUP: use record_review_subject for investigation/review subjects, "
+            "observation_subject for observed facility/control evidence, procedure_scope for procedures/process "
+            "validation, and response_status for later corrective-action response critiques."
+        ),
+        (
+            "FDA VIOLATION DETAIL SLOT FOLLOWUP: reuse existing fda_violation/5 subject IDs when they are listed. "
+            "If the source does not support a slot for a violation, emit no row for that slot."
+        ),
+    ]
+    if violation_ids:
+        lines.append(
+            "FDA VIOLATION DETAIL SLOT FOLLOWUP existing violation IDs: "
+            + ", ".join(violation_ids[:20])
+        )
+    lines.extend(carrier_contract_prompt_lines(["fda_violation_detail_slot/4"]))
+    return lines
+
+
+def _apply_fda_violation_detail_slot_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    context_lines = _fda_violation_detail_slot_context_lines(source_compile)
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(8, min(24, int(getattr(args, "focused_pass_operation_target", 12) or 12)))
+    metadata: dict[str, Any] = {
+        "schema_version": "fda_violation_detail_slot_followup_pass_v1",
+        "attempted": True,
+        "allowed_signatures": ["fda_violation_detail_slot/4"],
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=_profile_with_only_signatures(parsed_profile, {"fda_violation_detail_slot/4"}),
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="fda_violation_detail_slot_followup",
+        purpose="complete FDA numbered-violation detail slots only",
+        focus="source-stated closed structural slots for numbered FDA warning-letter violations",
+        completion=(
+            "Emit fda_violation_detail_slot/4 rows only. Add source-grounded structural slots that are missing "
+            "from the current detail bundle; emit no row when the source does not support the slot."
+        ),
+        predicates="fda_violation_detail_slot/4",
+        coverage_goals=(
+            "For each numbered violation, preserve closed slots for record-review subjects, observation subjects, "
+            "procedure/process scopes, process areas, missing record types, affected lots/products, and response status. "
+            "Do not emit the open detail_value."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "fda_violation_detail_slot_followup"
+    compiled["purpose"] = "complete FDA numbered-violation detail slots only"
+    compiled["focus"] = "source-stated closed structural slots for numbered FDA warning-letter violations"
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="fda_violation_detail_slot_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures={"fda_violation_detail_slot/4"},
+        metadata_prefix="fda_violation_detail_slot_followup",
+        pass_record=compiled,
+    )
+    _apply_fda_violation_detail_subject_integrity(source_compile)
+    _apply_carrier_value_domain_integrity(source_compile)
+    _apply_atom_shape_integrity(source_compile)
+    new_facts = (
+        compiled.get("_fda_violation_detail_slot_followup_new_facts", [])
+        if isinstance(compiled.get("_fda_violation_detail_slot_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["fda_violation_detail_slot_followup"] = metadata
+    return metadata
+
+
+def _fda_numbered_cgmp_item_map(source_compile: dict[str, Any]) -> list[tuple[str, str, str]]:
+    violation_ids: list[str] = []
+    seen: set[str] = set()
+    categories_by_violation: dict[str, str] = {}
+    citations_by_violation: dict[str, str] = {}
+    facts = source_compile.get("facts", [])
+    if not isinstance(facts, list):
+        return []
+    for fact in facts:
+        parsed = _parse_fact_clause(str(fact).strip())
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation" and len(args) == 5:
+            violation_id = args[0]
+            if violation_id not in seen:
+                seen.add(violation_id)
+                violation_ids.append(violation_id)
+            categories_by_violation[violation_id] = args[3]
+        elif predicate == "fda_cgmp_violation_item" and len(args) == 5:
+            violation_id = args[2] if args[2].startswith("violation_") else args[0]
+            if violation_id not in seen:
+                seen.add(violation_id)
+                violation_ids.append(violation_id)
+            citations_by_violation[violation_id] = args[3]
+        elif (
+            predicate == "fda_violation_citation"
+            and len(args) == 4
+            and args[2] == "cgmps_requirement"
+        ):
+            violation_id = args[0]
+            if violation_id not in seen:
+                seen.add(violation_id)
+                violation_ids.append(violation_id)
+            citations_by_violation.setdefault(violation_id, args[1])
+    item_map: list[tuple[str, str, str]] = []
+    for violation_id in violation_ids:
+        item_map.append(
+            (
+                violation_id,
+                citations_by_violation.get(violation_id, "unknown_citation"),
+                categories_by_violation.get(violation_id, "unknown_category"),
+            )
+        )
+    return item_map
+
+
+def _fda_response_assessment_context_lines(
+    source_compile: dict[str, Any],
+    *,
+    allowed_signatures: set[str] | None = None,
+) -> list[str]:
+    item_map = _fda_numbered_cgmp_item_map(source_compile)
+    allowed = {str(signature).strip() for signature in (allowed_signatures or set()) if str(signature).strip()}
+    use_item_bundle = "fda_response_assessment_item/6" in allowed
+    target_signature = "fda_response_assessment_item/6" if use_item_bundle else "fda_response_assessment/5"
+    forbidden_direct = (
+        " Do not emit fda_response_assessment/5 rows directly; deterministic projection will derive them from "
+        "valid item bundles."
+        if use_item_bundle
+        else ""
+    )
+    lines = [
+        (
+            "FDA RESPONSE ASSESSMENT FOLLOWUP: this is a bounded FDA warning-letter response/CAPA critique pass. "
+            f"Emit {target_signature} rows only."
+            f"{forbidden_direct} Do not emit fda_violation_detail/5, fda_violation_detail_slot/4, "
+            "source_record_* rows, wrapper facts, citations, response requirements, or new predicate names."
+        ),
+        (
+            "FDA RESPONSE ASSESSMENT FOLLOWUP: preserve only source-stated FDA critique of the firm's response, "
+            "corrective action, investigation, CAPA, or submitted documentation for an existing numbered CGMP "
+            "violation. Do not encode the firm's explanation, the full critique paragraph, or the underlying "
+            "violation detail value."
+        ),
+        (
+            "FDA RESPONSE ASSESSMENT FOLLOWUP: attach each row to an existing violation_N from the typed numbered "
+            "CGMP item map. If a corrective-action paragraph discusses a topic rather than a number, use the map's "
+            "citation/category to attach to the matching numbered CGMP item. If no matching numbered CGMP item is "
+            "supported, emit no row."
+        ),
+        (
+            "FDA RESPONSE ASSESSMENT FOLLOWUP: when emitting fda_response_assessment_item/6, include the same "
+            "cgmps_citation as the numbered CGMP item being critiqued. A row with a citation that does not match "
+            "the existing item map will be dropped before projection."
+        ),
+        (
+            "FDA RESPONSE ASSESSMENT FOLLOWUP: choose assessment_kind from the closed value domain. Prefer "
+            "documentation_not_provided only for missing supporting documentation, protocols, evidence, or records; "
+            "not_investigated only for uninvestigated or inadequately investigated failures; "
+            "corrective_action_inadequate only for inadequate corrective-action implementation; "
+            "response_inadequate only for broad response inadequacy; unable_to_evaluate only when FDA explicitly "
+            "says it could not evaluate or assess."
+        ),
+    ]
+    if item_map:
+        lines.append(
+            "FDA RESPONSE ASSESSMENT FOLLOWUP existing numbered CGMP item map: "
+            + "; ".join(
+                f"{violation_id} -> {citation} / {category}"
+                for violation_id, citation, category in item_map[:20]
+            )
+        )
+    lines.extend(carrier_contract_prompt_lines(["fda_response_assessment/5"]))
+    if use_item_bundle:
+        lines.extend(carrier_contract_prompt_lines(["fda_response_assessment_item/6"]))
+    return lines
+
+
+def _apply_fda_response_assessment_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    use_item_bundle = _fda_response_assessment_item_offered(parsed_profile)
+    allowed_signatures = (
+        {"fda_response_assessment_item/6"} if use_item_bundle else {"fda_response_assessment/5"}
+    )
+    target_signature = "fda_response_assessment_item/6" if use_item_bundle else "fda_response_assessment/5"
+    context_lines = _fda_response_assessment_context_lines(
+        source_compile,
+        allowed_signatures=allowed_signatures,
+    )
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(4, min(16, int(getattr(args, "focused_pass_operation_target", 8) or 8)))
+    metadata: dict[str, Any] = {
+        "schema_version": "fda_response_assessment_followup_pass_v1",
+        "attempted": True,
+        "allowed_signatures": sorted(allowed_signatures),
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=_profile_with_only_signatures(parsed_profile, allowed_signatures),
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="fda_response_assessment_followup",
+        purpose=f"complete FDA {target_signature} rows only",
+        focus="source-stated FDA response/CAPA critique attached to numbered CGMP items",
+        completion=(
+            f"Emit {target_signature} rows only. Add source-grounded response-assessment rows that are missing "
+            "from the current FDA warning-letter compile; emit no row when the source does not support a closed "
+            "assessment for a numbered CGMP item."
+        ),
+        predicates=target_signature,
+        coverage_goals=(
+            "For each numbered CGMP violation with a later corrective-action or response critique, preserve the "
+            "closed assessment_kind, corrective_action_evaluation scope, existing violation_N attachment, and "
+            "CGMP citation family when the item carrier is offered. "
+            "Keep assessment_kind inside the registered value domain."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "fda_response_assessment_followup"
+    compiled["purpose"] = "complete FDA response-assessment rows only"
+    compiled["focus"] = "source-stated FDA response/CAPA critique attached to numbered CGMP items"
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="fda_response_assessment_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=allowed_signatures,
+        metadata_prefix="fda_response_assessment_followup",
+        pass_record=compiled,
+    )
+    _apply_carrier_value_domain_integrity(source_compile)
+    _apply_fda_response_assessment_scope_reduction(source_compile)
+    _apply_fda_response_assessment_item_projection(source_compile)
+    _apply_fda_response_documentation_gap_projection(source_compile)
+    _apply_fda_response_investigation_gap_projection(source_compile)
+    _apply_fda_response_assessment_id_canonicalization(source_compile)
+    _apply_fda_response_assessment_kind_citation_reduction(source_compile)
+    _apply_fda_response_assessment_specificity_reduction(source_compile)
+    _apply_fda_response_assessment_subject_integrity(source_compile)
+    _apply_atom_shape_integrity(source_compile)
+    new_facts = (
+        compiled.get("_fda_response_assessment_followup_new_facts", [])
+        if isinstance(compiled.get("_fda_response_assessment_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["fda_response_assessment_followup"] = metadata
     return metadata
 
 
@@ -7586,6 +8396,156 @@ def _apply_domain_omission_carrier_signature_reduction(source_compile: dict[str,
     }
 
 
+def _apply_fda_no_fei_omission_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize/project FDA no-FEI omission rows from typed not_stated identity."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    no_fei_subjects: set[str] = set()
+    no_fei_rows: list[tuple[str, str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_facility_identity" and len(args) == 5 and args[3] == "not_stated":
+            no_fei_subjects.add(args[0])
+            no_fei_subjects.add(args[1])
+            no_fei_rows.append((args[0], args[1], args[4]))
+
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    projected: list[str] = []
+    existing_no_fei_subjects: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "domain_omission"
+                and len(args) == 5
+                and _canonical_registered_signature_reference(args[1]) == "fda_facility_identity/5"
+                and args[0] in no_fei_subjects
+                and args[2] in {"carrier_missing", "none_found"}
+                and args[3] in {"identifier_not_stated", "no_fei_shown_in_letter"}
+            ):
+                args[1] = "'fda_facility_identity/5'"
+                args[2] = "none_found"
+                args[3] = "no_fei_shown_in_letter"
+                existing_no_fei_subjects.add(args[0])
+                reduced = f"domain_omission({', '.join(args)})."
+                if reduced != fact:
+                    reductions.append({"from": fact, "to": reduced})
+                    fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    for facility_id, facility_name, source in sorted(set(no_fei_rows)):
+        if facility_id in existing_no_fei_subjects or facility_name in existing_no_fei_subjects:
+            continue
+        fact = f"domain_omission({facility_id}, 'fda_facility_identity/5', none_found, no_fei_shown_in_letter, {source})."
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+            projected.append(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_no_fei_omission_reduction_count"] = len(reductions) + len(projected)
+    source_compile["deterministic_fda_no_fei_omission_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_no_fei_omission_projected_facts"] = projected[:100]
+    source_compile["deterministic_fda_no_fei_omission_reduction_policy"] = {
+        "schema_version": "deterministic_fda_no_fei_omission_reduction_v1",
+        "authority": "typed_identity_accountability_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes or projects domain_omission/5 no-FEI rows only when an emitted fda_facility_identity/5 row "
+            "already states identifier_value=not_stated for the same facility subject or facility name. "
+            "It does not infer missing FEIs or inspect source prose."
+        ),
+    }
+    return {
+        "reduction_count": len(reductions),
+        "projection_count": len(projected),
+        "reductions": reductions[:100],
+        "projected_facts": projected[:100],
+    }
+
+
+def _canonical_fda_adulteration_authority(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    compact = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    squashed = re.sub(r"[^a-z0-9]+", "", text)
+    fdca_501_a_2_a = {
+        "fdca_501_a_2_a",
+        "fdc_act_501_a_2_a",
+        "fd_c_act_501_a_2_a",
+        "21_usc_351_a_2_a",
+    }
+    fdca_501_a_2_a_squashed = {
+        "fdca501a2a",
+        "fdcact501a2a",
+        "fdcact501a2a",
+        "21usc351a2a",
+    }
+    fdca_501_a_2_b = {
+        "fdca_501_a_2_b",
+        "fdc_act_501_a_2_b",
+        "fd_c_act_501_a_2_b",
+        "21_usc_351_a_2_b",
+    }
+    fdca_501_a_2_b_squashed = {
+        "fdca501a2b",
+        "fdcact501a2b",
+        "fdcact501a2b",
+        "21usc351a2b",
+    }
+    if compact in fdca_501_a_2_a or squashed in fdca_501_a_2_a_squashed:
+        return "fdca_501_a_2_a"
+    if compact in fdca_501_a_2_b or squashed in fdca_501_a_2_b_squashed:
+        return "fdca_501_a_2_b"
+    return ""
+
+
+def _apply_fda_adulteration_basis_authority_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize closed FDA adulteration-authority atoms in typed rows only."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_adulteration_basis" and len(args) == 5:
+                canonical = _canonical_fda_adulteration_authority(args[2])
+                if canonical and args[2] != canonical:
+                    args[2] = canonical
+                    reduced = f"fda_adulteration_basis({', '.join(args)})."
+                    reductions.append({"from": fact, "to": reduced})
+                    fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_adulteration_basis_authority_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_adulteration_basis_authority_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_adulteration_basis_authority_reduction_policy"] = {
+        "schema_version": "deterministic_fda_adulteration_basis_authority_reduction_v1",
+        "authority": "typed_closed_authority_atom_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes alternate atom spellings for FDCA 501(a)(2)(A)/(B) inside "
+            "fda_adulteration_basis/5 authority_or_scope slots. It does not inspect source prose "
+            "or infer an adulteration basis."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
 def _canonical_fda_lot_identifier(value: str) -> str:
     text = str(value or "").strip().strip("'\"").casefold()
     match = re.fullmatch(r"(?:lot|batch)_([a-z])_?(\d+)", text)
@@ -7607,12 +8567,25 @@ def _fda_warning_letter_date_key(value: str) -> str:
     return ""
 
 
+def _fda_warning_letter_reference_key(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.search(
+        r"(?:^|_)(?:fda_)?(?:warning_)?letter[_-]?(\d{2,4})[_-](\d{1,3})[_-](\d{1,4})(?:$|_)",
+        text,
+    )
+    if not match:
+        match = re.fullmatch(r"(\d{2,4})[_-](\d{1,3})[_-](\d{1,4})", text)
+    if match:
+        return "_".join(str(int(part)) for part in match.groups())
+    return ""
+
+
 def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
-    """Converge date-shaped FDA warning-letter aliases onto typed wrapper ids."""
+    """Converge FDA warning-letter aliases onto typed wrapper ids."""
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
-    date_to_letter: dict[str, str] = {}
-    ambiguous_dates: set[str] = set()
+    alias_to_letter: dict[str, str] = {}
+    ambiguous_aliases: set[str] = set()
     for fact in facts:
         parsed = _parse_fact_clause(fact)
         if parsed is None:
@@ -7620,17 +8593,26 @@ def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]
         predicate, args = parsed
         if predicate != "fda_warning_letter" or len(args) != 5:
             continue
-        date_key = _fda_warning_letter_date_key(args[3])
         letter_id = str(args[0]).strip()
-        if not date_key or not letter_id:
+        if not letter_id:
             continue
-        if date_key in date_to_letter and date_to_letter[date_key] != letter_id:
-            ambiguous_dates.add(date_key)
-            continue
-        date_to_letter[date_key] = letter_id
-    for date_key in ambiguous_dates:
-        date_to_letter.pop(date_key, None)
-    if not date_to_letter:
+        alias_keys = {
+            f"date:{key}"
+            for key in [_fda_warning_letter_date_key(args[3])]
+            if key
+        } | {
+            f"reference:{key}"
+            for key in [_fda_warning_letter_reference_key(letter_id)]
+            if key
+        }
+        for alias_key in alias_keys:
+            if alias_key in alias_to_letter and alias_to_letter[alias_key] != letter_id:
+                ambiguous_aliases.add(alias_key)
+                continue
+            alias_to_letter[alias_key] = letter_id
+    for alias_key in ambiguous_aliases:
+        alias_to_letter.pop(alias_key, None)
+    if not alias_to_letter:
         source_compile["deterministic_fda_warning_letter_subject_convergence_count"] = 0
         source_compile["deterministic_fda_warning_letter_subject_convergence_policy"] = {
             "schema_version": "deterministic_fda_warning_letter_subject_convergence_v1",
@@ -7643,8 +8625,11 @@ def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]
     subject_positions = {
         "domain_omission": {0},
         "fda_adulteration_basis": {0},
+        "fda_cgmp_violation_item": {1},
         "fda_conclusion_scope": {0},
         "fda_consultant_recommendation": {0},
+        "fda_correspondence_party": {0},
+        "fda_insanitary_condition": {1},
         "fda_response_requirement": {0},
         "fda_violation": {1},
         "fda_violation_citation": {0},
@@ -7666,7 +8651,12 @@ def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]
             if index >= len(args):
                 continue
             date_key = _fda_warning_letter_date_key(args[index])
-            canonical = date_to_letter.get(date_key, "")
+            reference_key = _fda_warning_letter_reference_key(args[index])
+            canonical = ""
+            if date_key:
+                canonical = alias_to_letter.get(f"date:{date_key}", "")
+            if not canonical and reference_key:
+                canonical = alias_to_letter.get(f"reference:{reference_key}", "")
             if canonical and args[index] != canonical:
                 args[index] = canonical
                 changed = True
@@ -7688,8 +8678,9 @@ def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Maps date-shaped FDA warning-letter aliases such as fda_warning_letter_2025_05_14 "
-            "onto the source-compiled fda_warning_letter/5 wrapper id for the same issue date. "
+            "Maps date-shaped aliases such as fda_warning_letter_2025_05_14 and "
+            "reference-shaped aliases such as letter_320_25_68 onto the source-compiled "
+            "fda_warning_letter/5 wrapper id when that wrapper id itself carries the same key. "
             "It does not infer warning letters or inspect source prose."
         ),
     }
@@ -7697,7 +8688,7 @@ def _apply_fda_warning_letter_subject_convergence(source_compile: dict[str, Any]
 
 
 def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
-    """Drop FDA violation-detail rows that are not attached to an emitted violation id."""
+    """Drop FDA violation-detail rows/slots that are not attached to an emitted violation id."""
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
     violation_ids: set[str] = set()
@@ -7715,7 +8706,16 @@ def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]
         parsed = _parse_fact_clause(fact)
         if parsed is not None:
             predicate, args = parsed
-            if predicate == "fda_violation_detail" and len(args) == 5 and violation_ids and args[0] not in violation_ids:
+            if (
+                (
+                    predicate == "fda_violation_detail"
+                    and len(args) == 5
+                    or predicate == "fda_violation_detail_slot"
+                    and len(args) == 4
+                )
+                and violation_ids
+                and args[0] not in violation_ids
+            ):
                 dropped.append(fact)
                 continue
         if fact not in seen:
@@ -7731,11 +8731,92 @@ def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Drops fda_violation_detail/5 rows whose subject is not an emitted fda_violation/5 id. "
+            "Drops fda_violation_detail/5 and fda_violation_detail_slot/4 rows whose subject is not an emitted fda_violation/5 id. "
             "It does not infer missing details or inspect source prose."
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_fda_violation_detail_slot_projection(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Project closed FDA violation-detail slots from typed detail rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    projected: list[str] = []
+    for fact in facts:
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "fda_violation_detail" or len(args) != 5:
+            continue
+        slot_fact = f"fda_violation_detail_slot({args[0]}, {args[1]}, {args[3]}, {args[4]})."
+        if slot_fact not in seen:
+            out.append(slot_fact)
+            seen.add(slot_fact)
+            projected.append(slot_fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_violation_detail_slot_projection_count"] = len(projected)
+    source_compile["deterministic_fda_violation_detail_slot_projection_facts"] = projected[:100]
+    source_compile["deterministic_fda_violation_detail_slot_projection_policy"] = {
+        "schema_version": "deterministic_fda_violation_detail_slot_projection_v1",
+        "authority": "typed_projection_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Projects fda_violation_detail_slot/4 from already-emitted fda_violation_detail/5 rows by dropping "
+            "the open detail_value slot. It does not infer missing details, inspect source prose, or normalize values."
+        ),
+    }
+    return {"projected_count": len(projected), "projected_facts": projected[:100]}
+
+
+def _apply_fda_response_assessment_slot_projection(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Project response-status slots from typed FDA response-assessment rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    projected: list[str] = []
+    for fact in facts:
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "fda_response_assessment" or len(args) != 5:
+            continue
+        if args[3] != "corrective_action_evaluation":
+            continue
+        slot_fact = f"fda_violation_detail_slot({args[1]}, response_status, corrective_action_evaluation, {args[4]})."
+        if slot_fact not in seen:
+            out.append(slot_fact)
+            seen.add(slot_fact)
+            projected.append(slot_fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_slot_projection_count"] = len(projected)
+    source_compile["deterministic_fda_response_assessment_slot_projection_facts"] = projected[:100]
+    source_compile["deterministic_fda_response_assessment_slot_projection_policy"] = {
+        "schema_version": "deterministic_fda_response_assessment_slot_projection_v1",
+        "authority": "typed_projection_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Projects fda_violation_detail_slot/4 response_status rows from already-emitted "
+            "fda_response_assessment/5 rows by dropping the ambiguous assessment_kind slot. "
+            "It preserves only the typed violation attachment and corrective_action_evaluation scope."
+        ),
+    }
+    return {"projected_count": len(projected), "projected_facts": projected[:100]}
 
 
 def _apply_fda_violation_number_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
@@ -7757,6 +8838,23 @@ def _apply_fda_violation_number_atom_reduction(source_compile: dict[str, Any]) -
                     if reduced != fact:
                         reductions.append({"from": fact, "to": reduced})
                         fact = reduced
+            elif predicate == "fda_cgmp_violation_item" and len(args) == 5:
+                id_key = _canonical_fda_numbered_violation_key(args[0])
+                number_key = _canonical_fda_numbered_violation_key(args[2])
+                canonical = ""
+                if id_key and number_key and id_key == number_key:
+                    canonical = id_key
+                elif id_key and not number_key:
+                    canonical = id_key
+                elif number_key and not id_key:
+                    canonical = number_key
+                if canonical and (args[0] != canonical or args[2] != canonical):
+                    args[0] = canonical
+                    args[2] = canonical
+                    reduced = f"{predicate}({', '.join(args)})."
+                    if reduced != fact:
+                        reductions.append({"from": fact, "to": reduced})
+                        fact = reduced
         if fact not in seen:
             out.append(fact)
             seen.add(fact)
@@ -7770,11 +8868,1107 @@ def _apply_fda_violation_number_atom_reduction(source_compile: dict[str, Any]) -
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Canonicalizes fda_violation/5 violation_number slots from bare numeric atoms to violation_N. "
-            "It does not create violations or inspect source prose."
+            "Canonicalizes fda_violation/5 violation_number slots and fda_cgmp_violation_item/5 "
+            "numbered bundle keys from bare numeric atoms to violation_N when the typed slots already "
+            "carry a stable numbered signal. It does not create violations, repair conflicting keys, "
+            "or inspect source prose."
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+FDA_CGMP_CITATION_CATEGORY = {
+    "cfr_21_211_68_b": "data_integrity",
+    "cfr_21_211_113_b": "contamination_control",
+    "cfr_21_211_42_c_10_iv": "facility_equipment_control",
+    "cfr_21_211_192": "investigation_failure",
+    "cfr_21_211_100_a": "process_validation",
+    "cfr_21_211_110_a": "process_validation",
+}
+FDA_CGMP_ALLOWED_CITATIONS = {
+    *FDA_CGMP_CITATION_CATEGORY.keys(),
+    "cfr_21_211_42_c_10_v",
+}
+FDA_RESPONSE_INVESTIGATION_GAP_CITATION = "cfr_21_211_192"
+
+
+def _is_fda_numbered_violation_key(value: str) -> bool:
+    text = str(value or "").strip().strip("'\"")
+    match = re.fullmatch(r"violation_(\d+)", text)
+    return bool(match)
+
+
+def _canonical_fda_numbered_violation_key(value: str) -> str:
+    text = str(value or "").strip().strip("'\"")
+    match = re.fullmatch(r"violation_(\d+)", text)
+    if match:
+        return f"violation_{int(match.group(1))}"
+    if re.fullmatch(r"\d+", text):
+        return f"violation_{int(text)}"
+    return ""
+
+
+def _apply_fda_violation_category_from_unique_citation_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Align FDA violation categories to uniquely attached typed CGMP citations."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    categories_by_violation: dict[str, set[str]] = {}
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_violation_citation"
+            and len(args) == 4
+            and args[2] == "cgmps_requirement"
+            and _is_fda_numbered_violation_key(args[0])
+        ):
+            category = FDA_CGMP_CITATION_CATEGORY.get(args[1])
+            if category:
+                categories_by_violation.setdefault(args[0], set()).add(category)
+
+    reductions: list[dict[str, str]] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "fda_violation"
+                and len(args) == 5
+                and _is_fda_numbered_violation_key(args[0])
+                and args[0] == args[2]
+            ):
+                categories = categories_by_violation.get(args[0], set())
+                if len(categories) == 1:
+                    category = next(iter(categories))
+                    if category and args[3] != category:
+                        args[3] = category
+                        reduced = f"{predicate}({', '.join(args)})."
+                        if reduced != fact:
+                            reductions.append({"from": fact, "to": reduced, "authority": "unique_typed_cgmp_citation"})
+                            fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_violation_category_from_unique_citation_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_violation_category_from_unique_citation_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_violation_category_from_unique_citation_reduction_policy"] = {
+        "schema_version": "deterministic_fda_violation_category_from_unique_citation_reduction_v1",
+        "authority": "typed_unique_citation_mapping_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "requires_stable_numbered_key": True,
+        "description": (
+            "Canonicalizes fda_violation/5 violation_category only when a stable numbered violation_N key has "
+            "exactly one attached fda_violation_citation/4 cgmps_requirement citation with a registered category "
+            "mapping. It does not read source prose, infer missing citations, or repair merged citation families."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_fda_cgmp_violation_item_projection(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Project FDA violation/citation rows from typed CGMP violation-item bundles."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    raw_bundles: dict[str, list[dict[str, str]]] = {}
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "fda_cgmp_violation_item" or len(args) != 5:
+            continue
+        violation_id, letter_id, violation_number, citation, source = args
+        raw_bundles.setdefault(violation_id, []).append(
+            {
+                "fact": fact,
+                "violation_id": violation_id,
+                "letter_id": letter_id,
+                "violation_number": violation_number,
+                "citation": citation,
+                "source": source,
+            }
+        )
+
+    bundles: dict[str, dict[str, str]] = {}
+    skipped: list[dict[str, str]] = []
+    for violation_id, rows in sorted(raw_bundles.items()):
+        numbers = {row["violation_number"] for row in rows}
+        citations = {row["citation"] for row in rows}
+        letters = {row["letter_id"] for row in rows}
+        if not _is_fda_numbered_violation_key(violation_id) or numbers != {violation_id}:
+            skipped.append(
+                {
+                    "violation_id": violation_id,
+                    "reason": "unstable_numbered_key",
+                    "facts": " | ".join(row["fact"] for row in rows[:5]),
+                }
+            )
+            continue
+        if len(citations) != 1 or len(letters) != 1:
+            skipped.append(
+                {
+                    "violation_id": violation_id,
+                    "reason": "ambiguous_bundle",
+                    "facts": " | ".join(row["fact"] for row in rows[:5]),
+                }
+            )
+            continue
+        citation = next(iter(citations))
+        if citation not in FDA_CGMP_ALLOWED_CITATIONS:
+            skipped.append(
+                {
+                    "violation_id": violation_id,
+                    "reason": "unmapped_cgmp_citation",
+                    "facts": " | ".join(row["fact"] for row in rows[:5]),
+                }
+            )
+            continue
+        bundles[violation_id] = rows[0]
+
+    reductions: list[dict[str, str]] = []
+    projected: list[str] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    present_violations: set[str] = set()
+    present_citations: set[tuple[str, str, str]] = set()
+
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_violation" and len(args) == 5:
+                present_violations.add(args[0])
+                bundle = bundles.get(args[0])
+                if bundle and args[2] == args[0]:
+                    category = FDA_CGMP_CITATION_CATEGORY.get(bundle["citation"], "")
+                    if args[3] != category:
+                        args[3] = category
+                        reduced = f"{predicate}({', '.join(args)})."
+                        if reduced != fact:
+                            reductions.append({"from": fact, "to": reduced, "authority": "fda_cgmp_violation_item"})
+                            fact = reduced
+            elif predicate == "fda_violation_citation" and len(args) == 4:
+                present_citations.add((args[0], args[1], args[2]))
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    for violation_id, bundle in sorted(bundles.items()):
+        citation = bundle["citation"]
+        category = FDA_CGMP_CITATION_CATEGORY.get(citation, "")
+        source = bundle["source"]
+        if category and violation_id not in present_violations:
+            fact = (
+                f"fda_violation({violation_id}, {bundle['letter_id']}, "
+                f"{bundle['violation_number']}, {category}, {source})."
+            )
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+                projected.append(fact)
+        citation_key = (violation_id, citation, "cgmps_requirement")
+        if citation_key not in present_citations:
+            fact = f"fda_violation_citation({violation_id}, {citation}, cgmps_requirement, {source})."
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+                projected.append(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_cgmp_violation_item_projection_count"] = len(projected) + len(reductions)
+    source_compile["deterministic_fda_cgmp_violation_item_projection_projected_facts"] = projected[:100]
+    source_compile["deterministic_fda_cgmp_violation_item_projection_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_cgmp_violation_item_projection_skipped"] = skipped[:100]
+    source_compile["deterministic_fda_cgmp_violation_item_projection_policy"] = {
+        "schema_version": "deterministic_fda_cgmp_violation_item_projection_v1",
+        "authority": "typed_bundle_projection_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "requires_stable_numbered_key": True,
+        "description": (
+            "Projects fda_violation/5 and fda_violation_citation/4 from already-emitted "
+            "fda_cgmp_violation_item/5 bundle rows. The violation category is projected only for "
+            "CGMP citations with an unambiguous closed category map; context-dependent citations "
+            "still project citation rows but require source-compiled category rows. "
+            "It does not read source prose, infer missing bundle rows, or repair ambiguous bundles."
+        ),
+    }
+    return {
+        "projection_count": len(projected),
+        "reduction_count": len(reductions),
+        "skipped_count": len(skipped),
+        "projected_facts": projected[:100],
+        "reductions": reductions[:100],
+        "skipped": skipped[:100],
+    }
+
+
+def _apply_fda_cgmp_bundle_subject_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop numbered CGMP violation rows that lack a matching bundle subject."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    bundled_violation_ids: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_cgmp_violation_item"
+            and len(args) == 5
+            and _is_fda_numbered_violation_key(args[0])
+            and args[2] == args[0]
+        ):
+            bundled_violation_ids.add(args[0])
+
+    policy = {
+        "schema_version": "deterministic_fda_cgmp_bundle_subject_integrity_v1",
+        "authority": "typed_subject_integrity_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+    }
+    if not bundled_violation_ids:
+        source_compile["deterministic_fda_cgmp_bundle_subject_integrity_count"] = 0
+        source_compile["deterministic_fda_cgmp_bundle_subject_integrity_dropped_facts"] = []
+        source_compile["deterministic_fda_cgmp_bundle_subject_integrity_policy"] = {
+            **policy,
+            "description": (
+                "When no fda_cgmp_violation_item/5 rows are present, this reducer leaves legacy/direct "
+                "fda_violation/5 rows untouched."
+            ),
+        }
+        return {"dropped_count": 0, "dropped_facts": []}
+
+    dropped: list[str] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_violation" and len(args) == 5 and _is_fda_numbered_violation_key(args[0]):
+                if args[0] not in bundled_violation_ids:
+                    dropped.append(fact)
+                    continue
+            if (
+                predicate == "fda_violation_citation"
+                and len(args) == 4
+                and args[2] == "cgmps_requirement"
+                and _is_fda_numbered_violation_key(args[0])
+                and args[0] not in bundled_violation_ids
+            ):
+                dropped.append(fact)
+                continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_cgmp_bundle_subject_integrity_count"] = len(dropped)
+    source_compile["deterministic_fda_cgmp_bundle_subject_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_cgmp_bundle_subject_integrity_policy"] = {
+        **policy,
+        "description": (
+            "When fda_cgmp_violation_item/5 rows are present, drops numbered fda_violation/5 and "
+            "numbered cgmps_requirement citation rows whose subject is not backed by a stable bundle. "
+            "It does not infer missing bundles or inspect source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_fda_response_assessment_scope_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize FDA response-assessment scope atoms inside the response-assessment lens."""
+
+    active_lens = source_compile.get("active_profile_registry_lens")
+    if not isinstance(active_lens, dict) or str(active_lens.get("id", "")).strip() != "response_assessment":
+        source_compile["deterministic_fda_response_assessment_scope_reduction_count"] = 0
+        source_compile["deterministic_fda_response_assessment_scope_reduction_facts"] = []
+        source_compile["deterministic_fda_response_assessment_scope_reduction_policy"] = {
+            "schema_version": "deterministic_fda_response_assessment_scope_reduction_v1",
+            "authority": "typed_lens_scope_canonicalization_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": "No-op outside the FDA response_assessment lens.",
+        }
+        return {"changed_count": 0, "changed_facts": []}
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    changed: list[dict[str, str]] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        new_fact = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_response_assessment" and len(args) == 5 and args[3] == "response_review":
+                new_args = list(args)
+                new_args[3] = "corrective_action_evaluation"
+                new_fact = f"{predicate}({', '.join(new_args)})."
+            elif predicate == "fda_response_assessment_item" and len(args) == 6 and args[4] == "response_review":
+                new_args = list(args)
+                new_args[4] = "corrective_action_evaluation"
+                new_fact = f"{predicate}({', '.join(new_args)})."
+        if new_fact != fact:
+            changed.append({"from": fact, "to": new_fact})
+        if new_fact not in seen:
+            out.append(new_fact)
+            seen.add(new_fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_scope_reduction_count"] = len(changed)
+    source_compile["deterministic_fda_response_assessment_scope_reduction_facts"] = changed[:100]
+    source_compile["deterministic_fda_response_assessment_scope_reduction_policy"] = {
+        "schema_version": "deterministic_fda_response_assessment_scope_reduction_v1",
+        "authority": "typed_lens_scope_canonicalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Within the FDA response_assessment lens, canonicalizes generic response_review scope to "
+            "corrective_action_evaluation for already-emitted fda_response_assessment/5 and "
+            "fda_response_assessment_item/6 rows. This reducer reads only typed scope atoms and does not inspect "
+            "source prose or query text."
+        ),
+    }
+    return {"changed_count": len(changed), "changed_facts": changed[:100]}
+
+
+def _apply_fda_response_assessment_item_projection(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Project response-assessment rows from typed response-assessment item bundles."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    projection_only_mode = _fda_response_assessment_projection_only_mode(source_compile)
+    bundle_citations: dict[str, str] = {}
+    ambiguous_bundles: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_cgmp_violation_item"
+            and len(args) == 5
+            and _is_fda_numbered_violation_key(args[0])
+            and args[2] == args[0]
+            and args[3] in FDA_CGMP_ALLOWED_CITATIONS
+        ):
+            if args[0] in ambiguous_bundles:
+                continue
+            existing = bundle_citations.get(args[0])
+            if existing and existing != args[3]:
+                bundle_citations.pop(args[0], None)
+                ambiguous_bundles.add(args[0])
+            else:
+                bundle_citations[args[0]] = args[3]
+
+    projected: list[str] = []
+    dropped: list[dict[str, str]] = []
+    raw_direct_dropped: list[dict[str, str]] = []
+    protected_projected_assessments = {
+        str(item).strip()
+        for item in source_compile.get("deterministic_fda_response_assessment_item_projection_facts", [])
+        if str(item).strip()
+    }
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                projection_only_mode
+                and predicate == "fda_response_assessment"
+                and len(args) == 5
+                and fact not in protected_projected_assessments
+            ):
+                raw_direct_dropped.append({"fact": fact, "reason": "projection_only_candidate_lens"})
+                continue
+            if predicate == "fda_response_assessment_item" and len(args) == 6 and bundle_citations:
+                violation_id = args[1]
+                citation = args[2]
+                expected_citation = bundle_citations.get(violation_id, "")
+                if not _is_fda_numbered_violation_key(violation_id) or not expected_citation:
+                    dropped.append({"fact": fact, "reason": "no_matching_cgmp_bundle"})
+                    continue
+                if citation != expected_citation:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "reason": "citation_mismatch",
+                            "expected_citation": expected_citation,
+                            "actual_citation": citation,
+                        }
+                    )
+                    continue
+                assessment_id = _fda_response_assessment_projection_id(violation_id, args[3])
+                projected_fact = (
+                    f"fda_response_assessment({assessment_id}, {violation_id}, {args[3]}, {args[4]}, {args[5]})."
+                )
+                if projected_fact not in seen:
+                    out.append(projected_fact)
+                    seen.add(projected_fact)
+                    projected.append(projected_fact)
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_item_projection_count"] = len(projected)
+    source_compile["deterministic_fda_response_assessment_item_projection_facts"] = projected[:100]
+    source_compile["deterministic_fda_response_assessment_item_projection_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_response_assessment_item_projection_dropped_direct_facts"] = raw_direct_dropped[
+        :100
+    ]
+    source_compile["deterministic_fda_response_assessment_item_projection_policy"] = {
+        "schema_version": "deterministic_fda_response_assessment_item_projection_v1",
+        "authority": "typed_bundle_projection_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "requires_stable_cgmp_bundle": True,
+        "projection_only_mode": projection_only_mode,
+        "description": (
+            "Projects fda_response_assessment/5 from already-emitted "
+            "fda_response_assessment_item/6 rows only when the item violation_id and cgmps_citation agree with "
+            "a stable fda_cgmp_violation_item/5 bundle. Mismatched item rows are dropped. In a lens whose "
+            "candidate_signatures offer fda_response_assessment_item/6 but not fda_response_assessment/5, raw direct "
+            "fda_response_assessment/5 rows are dropped and may be recreated only by this typed projection. It does "
+            "not infer attachments, inspect source prose, or inspect query text."
+        ),
+    }
+    return {
+        "projected_count": len(projected),
+        "dropped_count": len(dropped),
+        "dropped_direct_count": len(raw_direct_dropped),
+        "projected_facts": projected[:100],
+        "dropped_facts": dropped[:100],
+        "dropped_direct_facts": raw_direct_dropped[:100],
+    }
+
+
+def _apply_fda_response_documentation_gap_projection(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Project documentation-not-provided assessment rows from typed documentation-gap bundles."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    projection_only_mode = _fda_response_documentation_gap_projection_only_mode(source_compile)
+    bundle_citations: dict[str, str] = {}
+    ambiguous_bundles: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_cgmp_violation_item"
+            and len(args) == 5
+            and _is_fda_numbered_violation_key(args[0])
+            and args[2] == args[0]
+            and args[3] in FDA_CGMP_ALLOWED_CITATIONS
+        ):
+            if args[0] in ambiguous_bundles:
+                continue
+            existing = bundle_citations.get(args[0])
+            if existing and existing != args[3]:
+                bundle_citations.pop(args[0], None)
+                ambiguous_bundles.add(args[0])
+            else:
+                bundle_citations[args[0]] = args[3]
+
+    projected: list[str] = []
+    dropped: list[dict[str, str]] = []
+    raw_direct_dropped: list[dict[str, str]] = []
+    protected_projected_assessments = {
+        str(item).strip()
+        for item in source_compile.get("deterministic_fda_response_assessment_item_projection_facts", [])
+        if str(item).strip()
+    }
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                projection_only_mode
+                and predicate == "fda_response_assessment"
+                and len(args) == 5
+                and fact not in protected_projected_assessments
+            ):
+                raw_direct_dropped.append({"fact": fact, "reason": "projection_only_candidate_lens"})
+                continue
+            if predicate == "fda_response_documentation_gap" and len(args) == 5 and bundle_citations:
+                violation_id = args[1]
+                citation = args[2]
+                expected_citation = bundle_citations.get(violation_id, "")
+                if not _is_fda_numbered_violation_key(violation_id) or not expected_citation:
+                    dropped.append({"fact": fact, "reason": "no_matching_cgmp_bundle"})
+                    continue
+                if citation != expected_citation:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "reason": "citation_mismatch",
+                            "expected_citation": expected_citation,
+                            "actual_citation": citation,
+                        }
+                    )
+                    continue
+                assessment_id = _fda_response_assessment_projection_id(violation_id, "documentation_not_provided")
+                projected_fact = (
+                    f"fda_response_assessment({assessment_id}, {violation_id}, "
+                    f"documentation_not_provided, corrective_action_evaluation, {args[4]})."
+                )
+                if projected_fact not in seen:
+                    out.append(projected_fact)
+                    seen.add(projected_fact)
+                    projected.append(projected_fact)
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_documentation_gap_projection_count"] = len(projected)
+    source_compile["deterministic_fda_response_documentation_gap_projection_facts"] = projected[:100]
+    source_compile["deterministic_fda_response_documentation_gap_projection_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_response_documentation_gap_projection_dropped_direct_facts"] = (
+        raw_direct_dropped[:100]
+    )
+    source_compile["deterministic_fda_response_documentation_gap_projection_policy"] = {
+        "schema_version": "deterministic_fda_response_documentation_gap_projection_v1",
+        "authority": "typed_bundle_projection_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "requires_stable_cgmp_bundle": True,
+        "projection_only_mode": projection_only_mode,
+        "description": (
+            "Projects fda_response_assessment/5 documentation_not_provided rows from already-emitted "
+            "fda_response_documentation_gap/5 rows only when the gap violation_id and cgmps_citation agree with "
+            "a stable fda_cgmp_violation_item/5 bundle. In a lens whose candidate_signatures offer "
+            "fda_response_documentation_gap/5 but not fda_response_assessment/5, raw direct "
+            "fda_response_assessment/5 rows are dropped and may be recreated only by this typed projection. It does "
+            "not infer missing gaps, inspect source prose, or inspect query text."
+        ),
+    }
+    return {
+        "projected_count": len(projected),
+        "dropped_count": len(dropped),
+        "dropped_direct_count": len(raw_direct_dropped),
+        "projected_facts": projected[:100],
+        "dropped_facts": dropped[:100],
+        "dropped_direct_facts": raw_direct_dropped[:100],
+    }
+
+
+def _apply_fda_response_investigation_gap_projection(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Project not-investigated assessment rows from typed investigation-gap bundles."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    projection_only_mode = _fda_response_investigation_gap_projection_only_mode(source_compile)
+    bundle_citations: dict[str, str] = {}
+    ambiguous_bundles: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_cgmp_violation_item"
+            and len(args) == 5
+            and _is_fda_numbered_violation_key(args[0])
+            and args[2] == args[0]
+            and args[3] in FDA_CGMP_ALLOWED_CITATIONS
+        ):
+            if args[0] in ambiguous_bundles:
+                continue
+            existing = bundle_citations.get(args[0])
+            if existing and existing != args[3]:
+                bundle_citations.pop(args[0], None)
+                ambiguous_bundles.add(args[0])
+            else:
+                bundle_citations[args[0]] = args[3]
+
+    projected: list[str] = []
+    dropped: list[dict[str, str]] = []
+    raw_direct_dropped: list[dict[str, str]] = []
+    protected_projected_assessments = {
+        str(item).strip()
+        for key in (
+            "deterministic_fda_response_assessment_item_projection_facts",
+            "deterministic_fda_response_documentation_gap_projection_facts",
+        )
+        for item in source_compile.get(key, [])
+        if str(item).strip()
+    }
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                projection_only_mode
+                and predicate == "fda_response_assessment"
+                and len(args) == 5
+                and fact not in protected_projected_assessments
+            ):
+                raw_direct_dropped.append({"fact": fact, "reason": "projection_only_candidate_lens"})
+                continue
+            if predicate == "fda_response_investigation_gap" and len(args) == 5 and bundle_citations:
+                violation_id = args[1]
+                citation = args[2]
+                expected_citation = bundle_citations.get(violation_id, "")
+                if not _is_fda_numbered_violation_key(violation_id) or not expected_citation:
+                    dropped.append({"fact": fact, "reason": "no_matching_cgmp_bundle"})
+                    continue
+                if citation != expected_citation:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "reason": "citation_mismatch",
+                            "expected_citation": expected_citation,
+                            "actual_citation": citation,
+                        }
+                    )
+                    continue
+                if citation != FDA_RESPONSE_INVESTIGATION_GAP_CITATION:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "reason": "investigation_gap_requires_investigation_failure_citation",
+                            "required_citation": FDA_RESPONSE_INVESTIGATION_GAP_CITATION,
+                            "actual_citation": citation,
+                        }
+                    )
+                    continue
+                assessment_id = _fda_response_assessment_projection_id(violation_id, "not_investigated")
+                projected_fact = (
+                    f"fda_response_assessment({assessment_id}, {violation_id}, "
+                    f"not_investigated, corrective_action_evaluation, {args[4]})."
+                )
+                if projected_fact not in seen:
+                    out.append(projected_fact)
+                    seen.add(projected_fact)
+                    projected.append(projected_fact)
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_investigation_gap_projection_count"] = len(projected)
+    source_compile["deterministic_fda_response_investigation_gap_projection_facts"] = projected[:100]
+    source_compile["deterministic_fda_response_investigation_gap_projection_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_response_investigation_gap_projection_dropped_direct_facts"] = (
+        raw_direct_dropped[:100]
+    )
+    source_compile["deterministic_fda_response_investigation_gap_projection_policy"] = {
+        "schema_version": "deterministic_fda_response_investigation_gap_projection_v1",
+        "authority": "typed_bundle_projection_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "requires_stable_cgmp_bundle": True,
+        "projection_only_mode": projection_only_mode,
+        "description": (
+            "Projects fda_response_assessment/5 not_investigated rows from already-emitted "
+            "fda_response_investigation_gap/5 rows only when the gap violation_id and cgmps_citation agree with "
+            "a stable fda_cgmp_violation_item/5 bundle and the citation is the investigation-failure family "
+            "cfr_21_211_192. In a lens whose candidate_signatures offer "
+            "fda_response_investigation_gap/5 but not fda_response_assessment/5, raw direct "
+            "fda_response_assessment/5 rows are dropped and may be recreated only by typed projections. It does "
+            "not infer missing investigation gaps, inspect source prose, or inspect query text."
+        ),
+    }
+    return {
+        "projected_count": len(projected),
+        "dropped_count": len(dropped),
+        "dropped_direct_count": len(raw_direct_dropped),
+        "projected_facts": projected[:100],
+        "dropped_facts": dropped[:100],
+        "dropped_direct_facts": raw_direct_dropped[:100],
+    }
+
+
+def _apply_fda_response_assessment_subject_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop response-assessment rows whose numbered subject is not in the CGMP bundle."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    bundled_violation_ids: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_cgmp_violation_item"
+            and len(args) == 5
+            and _is_fda_numbered_violation_key(args[0])
+            and args[2] == args[0]
+        ):
+            bundled_violation_ids.add(args[0])
+
+    policy = {
+        "schema_version": "deterministic_fda_response_assessment_subject_integrity_v1",
+        "authority": "typed_subject_integrity_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+    }
+    if not bundled_violation_ids:
+        source_compile["deterministic_fda_response_assessment_subject_integrity_count"] = 0
+        source_compile["deterministic_fda_response_assessment_subject_integrity_dropped_facts"] = []
+        source_compile["deterministic_fda_response_assessment_subject_integrity_policy"] = {
+            **policy,
+            "description": (
+                "When no fda_cgmp_violation_item/5 rows are present, this reducer leaves "
+                "fda_response_assessment/5 rows untouched."
+            ),
+        }
+        return {"dropped_count": 0, "dropped_facts": []}
+
+    dropped: list[str] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "fda_response_assessment"
+                and len(args) == 5
+                and _is_fda_numbered_violation_key(args[1])
+                and args[1] not in bundled_violation_ids
+            ):
+                dropped.append(fact)
+                continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_subject_integrity_count"] = len(dropped)
+    source_compile["deterministic_fda_response_assessment_subject_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_response_assessment_subject_integrity_policy"] = {
+        **policy,
+        "description": (
+            "When fda_cgmp_violation_item/5 rows are present, drops fda_response_assessment/5 "
+            "rows attached to numbered violation ids not backed by the typed CGMP bundle. "
+            "It does not infer the correct attachment or inspect source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_fda_response_assessment_id_canonicalization(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize final response-assessment ids from typed final-row slots."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    changed: list[dict[str, str]] = []
+    for fact in facts:
+        normalized = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "fda_response_assessment"
+                and len(args) == 5
+                and _is_fda_numbered_violation_key(args[1])
+                and args[2]
+            ):
+                canonical_id = _fda_response_assessment_projection_id(args[1], args[2])
+                normalized = (
+                    f"fda_response_assessment({canonical_id}, {args[1]}, {args[2]}, {args[3]}, {args[4]})."
+                )
+                if normalized != fact:
+                    changed.append({"before": fact, "after": normalized})
+        if normalized not in seen:
+            out.append(normalized)
+            seen.add(normalized)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_id_canonicalization_count"] = len(changed)
+    source_compile["deterministic_fda_response_assessment_id_canonicalization_changed_facts"] = changed[:100]
+    source_compile["deterministic_fda_response_assessment_id_canonicalization_policy"] = {
+        "schema_version": "deterministic_fda_response_assessment_id_canonicalization_v1",
+        "authority": "typed_final_row_identity_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes fda_response_assessment/5 generated row ids from typed violation_id and "
+            "assessment_kind slots. It does not add or remove assessment claims except by deduplicating "
+            "identical canonical final rows."
+        ),
+    }
+    return {"changed_count": len(changed), "changed_facts": changed[:100]}
+
+
+def _apply_fda_response_assessment_specificity_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop broad response-inadequate rows when a narrower same-subject assessment exists."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    specific_subjects: set[tuple[str, str]] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "fda_response_assessment" or len(args) != 5:
+            continue
+        violation_id, assessment_kind, assessment_scope = args[1], args[2], args[3]
+        if assessment_kind and assessment_kind != "response_inadequate":
+            specific_subjects.add((violation_id, assessment_scope))
+
+    dropped: list[str] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "fda_response_assessment"
+                and len(args) == 5
+                and args[2] == "response_inadequate"
+                and (args[1], args[3]) in specific_subjects
+            ):
+                dropped.append(fact)
+                continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_specificity_reduction_count"] = len(dropped)
+    source_compile["deterministic_fda_response_assessment_specificity_reduction_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_response_assessment_specificity_reduction_policy"] = {
+        "schema_version": "deterministic_fda_response_assessment_specificity_reduction_v1",
+        "authority": "typed_assessment_specificity_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Treats response_inadequate as a broad fallback final assessment. When a same violation_id and "
+            "assessment_scope also has a narrower fda_response_assessment/5 kind, drops the broad fallback row. "
+            "This reads only typed assessment slots and does not inspect source prose or question text."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_fda_response_assessment_kind_citation_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop final response assessments whose kind is incompatible with typed CGMP citation family."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    bundle_citations: dict[str, str] = {}
+    ambiguous_bundles: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "fda_cgmp_violation_item"
+            and len(args) == 5
+            and _is_fda_numbered_violation_key(args[0])
+            and args[2] == args[0]
+            and args[3] in FDA_CGMP_ALLOWED_CITATIONS
+        ):
+            if args[0] in ambiguous_bundles:
+                continue
+            existing = bundle_citations.get(args[0])
+            if existing and existing != args[3]:
+                bundle_citations.pop(args[0], None)
+                ambiguous_bundles.add(args[0])
+            else:
+                bundle_citations[args[0]] = args[3]
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_response_assessment" and len(args) == 5:
+                citation = bundle_citations.get(args[1], "")
+                if args[2] == "not_investigated" and citation and citation != FDA_RESPONSE_INVESTIGATION_GAP_CITATION:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "reason": "not_investigated_requires_investigation_failure_citation",
+                            "required_citation": FDA_RESPONSE_INVESTIGATION_GAP_CITATION,
+                            "actual_citation": citation,
+                        }
+                    )
+                    continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_response_assessment_kind_citation_reduction_count"] = len(dropped)
+    source_compile["deterministic_fda_response_assessment_kind_citation_reduction_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_response_assessment_kind_citation_reduction_policy"] = {
+        "schema_version": "deterministic_fda_response_assessment_kind_citation_reduction_v1",
+        "authority": "typed_cgmp_citation_family_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops final fda_response_assessment/5 not_investigated rows when the row's numbered "
+            "violation_id has a stable fda_cgmp_violation_item/5 bundle and that bundle is not the "
+            "investigation-failure citation family cfr_21_211_192. It does not infer the right "
+            "assessment kind, inspect source prose, or inspect query text."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _fda_response_assessment_projection_id(violation_id: str, assessment_kind: str) -> str:
+    """Canonical final-row id for typed response-assessment projections."""
+
+    return f"assessment_{_safe_atom_fragment(violation_id)}_{_safe_atom_fragment(assessment_kind)}"
+
+
+def _safe_atom_fragment(value: str) -> str:
+    fragment = re.sub(r"[^a-z0-9_]+", "_", str(value or "").strip().lower()).strip("_")
+    return fragment or "unknown"
+
+
+def _active_lens_allowed_signatures(source_compile: dict[str, Any]) -> set[str]:
+    active_lens = source_compile.get("active_profile_registry_lens")
+    if not isinstance(active_lens, dict):
+        return set()
+    allowed = {
+        str(signature).strip()
+        for signature in active_lens.get("allowed_signatures", [])
+        if str(signature).strip()
+    }
+    return allowed
+
+
+def _active_lens_candidate_signatures(source_compile: dict[str, Any]) -> set[str]:
+    active_lens = source_compile.get("active_profile_registry_lens")
+    if not isinstance(active_lens, dict):
+        return set()
+    candidates = {
+        str(signature).strip()
+        for signature in active_lens.get("candidate_signatures", [])
+        if str(signature).strip()
+    }
+    return candidates
+
+
+def _fda_response_assessment_projection_only_mode(source_compile: dict[str, Any]) -> bool:
+    candidates = _active_lens_candidate_signatures(source_compile)
+    return bool(
+        "fda_response_assessment_item/6" in candidates
+        and "fda_response_assessment/5" not in candidates
+    )
+
+
+def _fda_response_documentation_gap_projection_only_mode(source_compile: dict[str, Any]) -> bool:
+    candidates = _active_lens_candidate_signatures(source_compile)
+    return bool(
+        "fda_response_documentation_gap/5" in candidates
+        and "fda_response_assessment/5" not in candidates
+    )
+
+
+def _fda_response_investigation_gap_projection_only_mode(source_compile: dict[str, Any]) -> bool:
+    candidates = _active_lens_candidate_signatures(source_compile)
+    return bool(
+        "fda_response_investigation_gap/5" in candidates
+        and "fda_response_assessment/5" not in candidates
+    )
+
+
+def _apply_active_lens_scope_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop typed facts outside the active profile-registry lens."""
+
+    if isinstance(source_compile.get("union_source_compile"), dict) or str(source_compile.get("mode", "")).strip() == "deterministic_compile_union":
+        policy = {
+            "schema_version": "deterministic_active_lens_scope_integrity_v1",
+            "authority": "profile_registry_lens_scope_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Deterministic all-lens union artifacts may carry stale active-lens metadata "
+                "from one source compile. Lens-scope pruning is skipped for these union "
+                "artifacts; the individual source lens compiles remain auditable."
+            ),
+        }
+        source_compile["deterministic_active_lens_scope_integrity_count"] = 0
+        source_compile["deterministic_active_lens_scope_integrity_dropped_facts"] = []
+        source_compile["deterministic_active_lens_scope_integrity_policy"] = policy
+        return {"dropped_count": 0, "dropped_facts": [], "allowed_signatures": []}
+
+    allowed = _active_lens_allowed_signatures(source_compile)
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    policy = {
+        "schema_version": "deterministic_active_lens_scope_integrity_v1",
+        "authority": "profile_registry_lens_scope_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+    }
+    if not allowed:
+        source_compile["deterministic_active_lens_scope_integrity_count"] = 0
+        source_compile["deterministic_active_lens_scope_integrity_dropped_facts"] = []
+        source_compile["deterministic_active_lens_scope_integrity_policy"] = {
+            **policy,
+            "description": (
+                "No active profile-registry lens with allowed signatures was present, so no "
+                "lens-scope pruning was applied."
+            ),
+        }
+        return {"dropped_count": 0, "dropped_facts": [], "allowed_signatures": sorted(allowed)}
+
+    kept: list[str] = []
+    dropped: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                kept.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        signature = f"{predicate}/{len(args)}"
+        if signature not in allowed:
+            dropped.append({"fact": fact, "signature": signature})
+            continue
+        if fact not in seen:
+            kept.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["deterministic_active_lens_scope_integrity_count"] = len(dropped)
+    source_compile["deterministic_active_lens_scope_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_active_lens_scope_integrity_policy"] = {
+        **policy,
+        "description": (
+            "When an active profile-registry lens is present, drops typed facts whose signatures "
+            "are outside that lens's allowed_signatures. It does not infer replacements, inspect "
+            "source prose, or inspect query text."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100], "allowed_signatures": sorted(allowed)}
 
 
 def _canonical_fda_date_atom(value: str) -> str:
@@ -7835,6 +10029,600 @@ def _apply_fda_date_atom_reduction(source_compile: dict[str, Any]) -> dict[str, 
         "description": "Canonicalizes date-shaped FDA carrier slots to v_YYYY_MM_DD atoms without reading source prose.",
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+REGISTERED_DATE_SLOT_HINTS = ("date",)
+
+
+def _registered_date_slot_indexes(predicate: str, arity: int) -> set[int]:
+    contract = carrier_contract(f"{predicate}/{arity}")
+    if not isinstance(contract, dict):
+        return set()
+    indexes: set[int] = set()
+    for index, arg_name in enumerate(contract.get("args", [])):
+        name = str(arg_name or "").strip().casefold()
+        if any(hint in name for hint in REGISTERED_DATE_SLOT_HINTS):
+            indexes.add(index)
+    return indexes
+
+
+def _apply_registered_date_slot_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize date-shaped atoms in registered date slots to v_YYYY_MM_DD."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in _registered_date_slot_indexes(predicate, len(args)):
+            if index >= len(args):
+                continue
+            canonical = _canonical_fda_date_atom(args[index])
+            if canonical and args[index] != canonical:
+                args[index] = canonical
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_registered_date_slot_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_registered_date_slot_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_registered_date_slot_atom_reduction_policy"] = {
+        "schema_version": "deterministic_registered_date_slot_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes date-shaped values already emitted in registered carrier date slots "
+            "from YYYY_MM_DD atoms to v_YYYY_MM_DD atoms. It does not read source prose, "
+            "query text, or infer missing dates."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_sec_exhibit_number_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text or text.startswith("exhibit_"):
+        return ""
+    if re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"exhibit_{text.replace('.', '_')}"
+    if re.fullmatch(r"\d+(?:_\d+)+", text):
+        return f"exhibit_{text}"
+    return ""
+
+
+def _apply_sec_exhibit_number_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize raw SEC exhibit numbers in the typed exhibit-number slot."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        candidate = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "sec_exhibit" and len(args) == 5:
+                canonical = _canonical_sec_exhibit_number_atom(args[1])
+                if canonical:
+                    original = args[1]
+                    args[1] = canonical
+                    candidate = f"{predicate}({', '.join(args)})."
+                    if candidate != fact:
+                        reductions.append({"from": fact, "to": candidate, "value": original, "canonical": canonical})
+        if candidate not in seen:
+            out.append(candidate)
+            seen.add(candidate)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_exhibit_number_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_sec_exhibit_number_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_sec_exhibit_number_atom_reduction_policy"] = {
+        "schema_version": "deterministic_sec_exhibit_number_atom_reduction_v1",
+        "authority": "typed_carrier_slot_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes raw numeric SEC exhibit numbers in sec_exhibit/5 exhibit_number slots "
+            "to compact exhibit_* atoms. It reads only typed carrier arguments and creates no new facts."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+SEC_TYPED_SLOT_PREFIX_REDUCTIONS: dict[tuple[str, int], dict[int, tuple[str, ...]]] = {
+    ("sec_registrant", 4): {
+        1: ("registrant_",),
+        2: ("jurisdiction_",),
+    },
+    ("sec_registrant_identifier", 5): {
+        1: ("registrant_",),
+    },
+}
+
+
+def _canonical_sec_prefixed_slot_atom(value: str, prefixes: tuple[str, ...]) -> str:
+    text = str(value or "").strip().strip("'\"")
+    normalized = text.casefold()
+    if not text or not normalized:
+        return ""
+    for prefix in prefixes:
+        if normalized.startswith(prefix) and len(normalized) > len(prefix):
+            return normalized[len(prefix) :]
+    return ""
+
+
+def _apply_sec_typed_slot_prefix_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Remove structural role prefixes from selected SEC typed carrier slots."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        candidate = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            slot_rules = SEC_TYPED_SLOT_PREFIX_REDUCTIONS.get((predicate, len(args)), {})
+            changed = False
+            fact_reductions: list[dict[str, str]] = []
+            for index, prefixes in slot_rules.items():
+                if index >= len(args):
+                    continue
+                canonical = _canonical_sec_prefixed_slot_atom(args[index], prefixes)
+                if canonical:
+                    original = args[index]
+                    args[index] = canonical
+                    fact_reductions.append(
+                        {
+                            "from": fact,
+                            "slot_index": str(index),
+                            "value": original,
+                            "canonical": canonical,
+                        }
+                    )
+                    changed = True
+            if changed:
+                candidate = f"{predicate}({', '.join(args)})."
+                for reduction in fact_reductions:
+                    reduction["to"] = candidate
+                reductions.extend(fact_reductions)
+        if candidate not in seen:
+            out.append(candidate)
+            seen.add(candidate)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_typed_slot_prefix_reduction_count"] = len(reductions)
+    source_compile["deterministic_sec_typed_slot_prefix_reductions"] = reductions[:100]
+    source_compile["deterministic_sec_typed_slot_prefix_reduction_policy"] = {
+        "schema_version": "deterministic_sec_typed_slot_prefix_reduction_v1",
+        "authority": "typed_carrier_slot_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Removes structural role prefixes such as registrant_ and jurisdiction_ only from "
+            "selected SEC registered carrier slots. It reads no source prose, no query text, "
+            "and does not map one entity name to another."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_sec_phone_identifier_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    digits = re.sub(r"\D+", "", text)
+    if len(digits) != 10:
+        return ""
+    canonical = f"phone_{digits[0:3]}_{digits[3:6]}_{digits[6:10]}"
+    return canonical if canonical != text else ""
+
+
+def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize selected SEC identifier value atoms by typed identifier kind."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        candidate = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "sec_registrant_identifier" and len(args) == 5 and args[2] == "telephone":
+                canonical = _canonical_sec_phone_identifier_atom(args[3])
+                if canonical:
+                    original = args[3]
+                    args[3] = canonical
+                    candidate = f"{predicate}({', '.join(args)})."
+                    reductions.append(
+                        {
+                            "from": fact,
+                            "to": candidate,
+                            "identifier_kind": "telephone",
+                            "value": original,
+                            "canonical": canonical,
+                        }
+                    )
+        if candidate not in seen:
+            out.append(candidate)
+            seen.add(candidate)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_identifier_value_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_sec_identifier_value_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_sec_identifier_value_atom_reduction_policy"] = {
+        "schema_version": "deterministic_sec_identifier_value_atom_reduction_v1",
+        "authority": "typed_carrier_slot_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes telephone values already emitted in sec_registrant_identifier/5 "
+            "identifier_value slots to phone_NNN_NNN_NNNN atoms. It reads only typed carrier "
+            "arguments and creates no new identifier facts."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+SEC_FILING_ID_SIGNATURES = {
+    "sec_filing",
+    "sec_registrant",
+    "sec_registrant_identifier",
+    "sec_filing_item",
+    "sec_exhibit",
+    "sec_signatory",
+}
+
+
+def _canonical_sec_filing_id_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text or not re.match(r"^[0-9]", text):
+        return ""
+    compact = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not compact:
+        return ""
+    canonical = f"filing_{compact}"
+    return canonical if canonical != text else ""
+
+
+def _apply_sec_filing_id_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize numeric-leading SEC filing_id slots to valid atoms."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        candidate = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate in SEC_FILING_ID_SIGNATURES and args:
+                canonical = _canonical_sec_filing_id_atom(args[0])
+                if canonical:
+                    original = args[0]
+                    args[0] = canonical
+                    candidate = f"{predicate}({', '.join(args)})."
+                    reductions.append(
+                        {
+                            "from": fact,
+                            "to": candidate,
+                            "slot": "filing_id",
+                            "value": original,
+                            "canonical": canonical,
+                        }
+                    )
+        if candidate not in seen:
+            out.append(candidate)
+            seen.add(candidate)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_filing_id_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_sec_filing_id_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_sec_filing_id_atom_reduction_policy"] = {
+        "schema_version": "deterministic_sec_filing_id_atom_reduction_v1",
+        "authority": "typed_carrier_slot_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes numeric-leading values already emitted in SEC registered carrier filing_id "
+            "slots to filing_* atoms so atom-shape governance can evaluate the row. It reads only typed "
+            "carrier arguments and creates no new facts."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+NTSB_TIMESTAMP_REDUCTION_SIGNATURE_SLOTS = {
+    "ntsb_occurrence_time": {1},
+    "ntsb_timeline_event": {3},
+    "ntsb_safety_action": {4},
+}
+
+
+def _canonical_ntsb_timestamp_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.fullmatch(
+        r"t_(?:(\d{4})_?(\d{2})_?(\d{2})_)?(\d{3,4})(?:_?00)?(_[a-z]+(?:_[a-z]+)*)?",
+        text,
+    )
+    if not match:
+        return ""
+    date_prefix = ""
+    if match.group(1):
+        date_prefix = f"{match.group(1)}_{match.group(2)}_{match.group(3)}_"
+    canonical = f"t_{date_prefix}{match.group(4)}{match.group(5) or ''}"
+    return canonical if canonical != text else ""
+
+
+def _apply_ntsb_timestamp_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize NTSB timestamp atoms with redundant zero seconds."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in NTSB_TIMESTAMP_REDUCTION_SIGNATURE_SLOTS.get(predicate, set()):
+            if index >= len(args):
+                continue
+            canonical = _canonical_ntsb_timestamp_atom(args[index])
+            if canonical and args[index] != canonical:
+                args[index] = canonical
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_ntsb_timestamp_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_ntsb_timestamp_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_ntsb_timestamp_atom_reduction_policy"] = {
+        "schema_version": "deterministic_ntsb_timestamp_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes NTSB typed timestamp atoms ending in redundant zero seconds, for example "
+            "t_2023_09_29_204100_cdt to t_2023_09_29_2041_cdt. It does not read source prose or infer times."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+NTSB_ACTOR_ID_REDUCTION_SIGNATURE_SLOTS = {
+    "ntsb_safety_action": {2},
+}
+
+
+def _canonical_ntsb_actor_id_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    stem = text[4:] if text.startswith("org_") else text
+    if stem.endswith("_fire_department"):
+        base = stem[: -len("_fire_department")]
+    elif stem.endswith("_fire_dept"):
+        base = stem[: -len("_fire_dept")]
+    elif stem.endswith("_fd"):
+        base = stem[: -len("_fd")]
+    elif stem.endswith("_fire"):
+        base = stem[: -len("_fire")]
+    else:
+        return ""
+    if not base or not re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", base):
+        return ""
+    canonical = f"org_{base}_fire_dept"
+    return canonical if canonical != text else ""
+
+
+def _apply_ntsb_actor_id_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize compact NTSB safety-action actor organization atoms."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in NTSB_ACTOR_ID_REDUCTION_SIGNATURE_SLOTS.get(predicate, set()):
+            if index >= len(args):
+                continue
+            canonical = _canonical_ntsb_actor_id_atom(args[index])
+            if canonical and args[index] != canonical:
+                args[index] = canonical
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_ntsb_actor_id_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_ntsb_actor_id_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_ntsb_actor_id_atom_reduction_policy"] = {
+        "schema_version": "deterministic_ntsb_actor_id_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes compact NTSB safety-action actor organization atoms for fire departments, for example "
+            "org_example_fd or org_example_fire to org_example_fire_dept. It does not read source prose."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_ntsb_condition_atom(*, kind: str, value: str) -> str:
+    kind_text = str(kind or "").strip().strip("'\"").casefold()
+    value_text = str(value or "").strip().strip("'\"").casefold()
+    if not kind_text or not value_text:
+        return ""
+    canonical = value_text
+    if kind_text == "weather":
+        if canonical.startswith("weather_"):
+            canonical = canonical[len("weather_") :]
+        if canonical in {"dry_clear_night", "dry_clear_and_night"}:
+            canonical = "dry_clear_nighttime"
+    elif kind_text == "roadway":
+        if canonical.startswith("roadway_"):
+            canonical = canonical[len("roadway_") :]
+        if canonical == "rural_unlit_undivided":
+            canonical = "rural_unlit_undivided_highway"
+    elif kind_text == "speed_limit":
+        match = re.fullmatch(r"(?:speed_limit_)?(\d+)_mph", canonical)
+        if match:
+            canonical = f"mph_{match.group(1)}"
+    elif kind_text == "hazmat_un_number":
+        match = re.fullmatch(r"un_?(\d+)", canonical)
+        if match:
+            canonical = f"un{match.group(1)}"
+    return canonical if canonical != value_text else ""
+
+
+def _apply_ntsb_condition_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize compact NTSB condition value atoms inside typed condition rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "ntsb_condition" and len(args) == 5:
+            canonical = _canonical_ntsb_condition_atom(kind=args[1], value=args[2])
+            if canonical and args[2] != canonical:
+                args[2] = canonical
+                reduced = f"{predicate}({', '.join(args)})."
+                if reduced != fact:
+                    reductions.append({"from": fact, "to": reduced})
+                    fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_ntsb_condition_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_ntsb_condition_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_ntsb_condition_atom_reduction_policy"] = {
+        "schema_version": "deterministic_ntsb_condition_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes compact NTSB condition value atoms within ntsb_condition/5 rows, such as "
+            "weather_dry_clear_night to dry_clear_nighttime, speed_limit_55_mph to mph_55, "
+            "roadway_rural_unlit_undivided to rural_unlit_undivided_highway, and un_1005 to un1005. "
+            "It does not read source prose or infer condition values."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_ntsb_injury_count_scope_specificity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop not_stated injury-count rows when a same-count scoped row exists."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    scoped_count_keys: set[tuple[str, str, str, str]] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "ntsb_injury_count" or len(args) != 6:
+            continue
+        occurrence_id, subject_scope, fatal_count, serious_count, minor_count, _source_scope = args
+        if subject_scope != "not_stated":
+            scoped_count_keys.add((occurrence_id, fatal_count, serious_count, minor_count))
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "ntsb_injury_count" and len(args) == 6:
+                occurrence_id, subject_scope, fatal_count, serious_count, minor_count, _source_scope = args
+                key = (occurrence_id, fatal_count, serious_count, minor_count)
+                if subject_scope == "not_stated" and key in scoped_count_keys:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "issue": "not_stated_duplicates_scoped_injury_count",
+                        }
+                    )
+                    continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_ntsb_injury_count_scope_specificity_count"] = len(dropped)
+    source_compile["deterministic_ntsb_injury_count_scope_specificity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_ntsb_injury_count_scope_specificity_policy"] = {
+        "schema_version": "deterministic_ntsb_injury_count_scope_specificity_v1",
+        "authority": "typed_fact_specificity_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops ntsb_injury_count/6 rows with subject_scope=not_stated when another "
+            "ntsb_injury_count/6 row for the same occurrence and fatal/serious/minor counts "
+            "has a specific source-stated subject scope."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped": dropped[:100]}
 
 
 def _apply_fda_facility_subject_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
@@ -8038,15 +10826,80 @@ def _apply_fda_violation_detail_atom_reduction(source_compile: dict[str, Any]) -
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
 
 
+FDA_VIOLATION_DETAIL_VALUE_KIND: dict[str, str] = {
+    "environmental_monitoring_failure": "observation_subject",
+    "environmental_monitoring_system_inadequate": "observation_subject",
+    "iso5_aseptic_area_microbial_contamination": "observation_subject",
+    "unidirectional_airflow_deficiency": "observation_subject",
+    "mammalian_hair_contamination": "record_review_subject",
+    "media_fill_positive_growth": "record_review_subject",
+    "media_fill_termination": "record_review_subject",
+    "iso5_viable_air_microbial_recovery": "record_review_subject",
+}
+
+
+def _apply_fda_violation_detail_value_kind_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop FDA violation-detail values that are in the wrong closed detail-kind slot."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    kept: list[str] = []
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            kept.append(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation_detail" and len(args) == 5:
+            detail_kind = str(args[1]).strip().strip("'\"")
+            detail_value = str(args[2]).strip().strip("'\"")
+            expected_kind = FDA_VIOLATION_DETAIL_VALUE_KIND.get(detail_value)
+            if expected_kind and detail_kind != expected_kind:
+                dropped.append(
+                    {
+                        "fact": fact,
+                        "detail_value": detail_value,
+                        "detail_kind": detail_kind,
+                        "expected_detail_kind": expected_kind,
+                    }
+                )
+                continue
+        kept.append(fact)
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["deterministic_fda_violation_detail_value_kind_integrity_count"] = len(dropped)
+    source_compile["deterministic_fda_violation_detail_value_kind_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_violation_detail_value_kind_integrity_policy"] = {
+        "schema_version": "deterministic_fda_violation_detail_value_kind_integrity_v1",
+        "authority": "closed_domain_value_kind_validation_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops fda_violation_detail/5 rows only when their compact detail_value is in a closed FDA "
+            "domain value-kind map and appears in the wrong detail_kind slot. Unmapped values are not "
+            "interpreted or repaired."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
 def _canonical_fda_violation_detail_value(detail_kind: str, value: str) -> str:
     kind = str(detail_kind or "").strip().strip("'\"").casefold()
     text = str(value or "").strip().strip("'\"").casefold()
+    value_synonyms = {
+        "positive_growth_media_fill": "media_fill_positive_growth",
+    }
+    if text in value_synonyms:
+        return value_synonyms[text]
     if kind == "process_area":
         match = re.fullmatch(r"(iso_\d+)_(.+)", text)
         if match and _fda_cleanroom_surface_suffix(match.group(2)):
             return match.group(1)
     if kind == "procedure_scope":
         procedure_synonyms = {
+            "aseptic_and_sterilization_processes": "aseptic_process_validation",
+            "validation_of_all_aseptic_and_sterilization_processes": "aseptic_process_validation",
+            "cleaning_and_disinfecting_room_and_equipment": "cleaning_disinfection_validation",
             "terminal_sterilization_validation": "terminal_sterilization_process_validation",
             "terminal_sterilization_process_qualification_status": "terminal_sterilization_process_validation",
         }
@@ -8194,13 +11047,79 @@ def _apply_fda_consultant_citation_scope_reduction(source_compile: dict[str, Any
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
 
 
+SOURCE_SCOPE_PAYLOAD_MAX_CHARS = 64
+SOURCE_SCOPE_PAYLOAD_MAX_TOKENS = 6
+SOURCE_SCOPE_PROVENANCE_TOKENS = {
+    "appendix",
+    "attachment",
+    "block",
+    "caption",
+    "cover",
+    "direct",
+    "exhibit",
+    "field",
+    "footer",
+    "header",
+    "heading",
+    "line",
+    "note",
+    "page",
+    "para",
+    "paragraph",
+    "record",
+    "row",
+    "schedule",
+    "scope",
+    "section",
+    "source",
+    "src",
+    "table",
+}
+SOURCE_SCOPE_LITERAL_VALUES = {
+    "context",
+    "direct",
+    "inferred",
+    "not_stated",
+    "raw_source_text",
+    "source",
+    "source_text",
+}
+
+
 def _source_scope_payload_issue(arg_name: str, value: str) -> str:
     if arg_name != "source_or_scope":
         return ""
     normalized = str(value or "").strip().strip("'\"").casefold()
     if re.match(r"^(?:cfr_|fdca_|usc_|u_s_c_|us_c_|\d+_cfr_|\d+_usc_)", normalized):
         return "citation_payload_in_source_or_scope"
-    return ""
+    tokens = _atom_shape_tokens(normalized)
+    if not tokens:
+        return ""
+    if re.match(r"^(?:cik|ein|file|ticker)_", normalized):
+        return "identifier_payload_in_source_or_scope"
+    if re.match(r"^(?:item|exhibit)_\d", normalized) and not any(
+        token in SOURCE_SCOPE_PROVENANCE_TOKENS for token in tokens
+    ):
+        return "identifier_payload_in_source_or_scope"
+    if _source_scope_value_looks_like_provenance(normalized, tokens):
+        return ""
+    return "semantic_payload_in_source_or_scope"
+
+
+def _source_scope_value_looks_like_provenance(value: str, tokens: list[str]) -> bool:
+    if value in SOURCE_SCOPE_LITERAL_VALUES:
+        return True
+    if _looks_like_source_scope_arg(value):
+        return True
+    if len(value) > SOURCE_SCOPE_PAYLOAD_MAX_CHARS:
+        return False
+    if len(tokens) > SOURCE_SCOPE_PAYLOAD_MAX_TOKENS:
+        return False
+    if any(token in SOURCE_SCOPE_PROVENANCE_TOKENS for token in tokens):
+        return True
+    if any(char.isdigit() for char in value) and len(tokens) <= SOURCE_SCOPE_PAYLOAD_MAX_TOKENS:
+        return True
+    return False
 
 
 def _carrier_value_domain_issue(signature: str, arg_name: str, value: str) -> str:
@@ -8220,21 +11139,48 @@ def _carrier_value_domain_issue(signature: str, arg_name: str, value: str) -> st
 
 
 def _carrier_value_tuple_issue(signature: str, args: list[str], arg_names: list[str]) -> tuple[str, str, str]:
-    if signature == "fda_violation_detail/5":
+    if signature in {"fda_violation_detail/5", "fda_violation_detail_slot/4"}:
         values = {
             arg_name: args[index]
             for index, arg_name in enumerate(arg_names)
             if index < len(args)
         }
+        detail_kind = values.get("detail_kind")
+        role_or_purpose = values.get("role_or_purpose")
         if (
-            values.get("detail_kind") == "record_review_subject"
-            and values.get("role_or_purpose") == "corrective_action_evaluation"
+            detail_kind == "record_review_subject"
+            and role_or_purpose == "corrective_action_evaluation"
         ):
             return (
                 "role_or_purpose",
-                values["role_or_purpose"],
+                role_or_purpose,
                 "detail_kind_role_mismatch",
             )
+        if role_or_purpose == "sterile_drug_products" and detail_kind != "affected_product":
+            return (
+                "role_or_purpose",
+                role_or_purpose,
+                "detail_kind_role_mismatch",
+            )
+    if signature == "ntsb_injury_count/6":
+        for arg_name in ("fatal_count", "serious_count", "minor_count"):
+            try:
+                index = arg_names.index(arg_name)
+            except ValueError:
+                continue
+            if index >= len(args):
+                continue
+            if not INTEGER_RE.fullmatch(str(args[index] or "").strip()):
+                return (arg_name, args[index], "count_not_integer")
+    if signature == "ntsb_vehicle/6":
+        try:
+            index = arg_names.index("identifier_value")
+        except ValueError:
+            index = -1
+        if 0 <= index < len(args):
+            value = str(args[index] or "").strip().strip("'\"")
+            if value and re.match(r"^\d", value):
+                return ("identifier_value", args[index], "identifier_numeric_leading")
     return "", "", ""
 
 
@@ -8331,7 +11277,7 @@ def _apply_atom_shape_integrity(source_compile: dict[str, Any]) -> dict[str, Any
         "not_query_interpretation": True,
         "description": (
             "Drops registered carrier rows whose atom values are too long, too token-heavy, "
-            "or sentence-like. It does not infer replacement values or create facts."
+            "numeric-leading, or sentence-like. It does not infer replacement values or create facts."
         ),
     }
     return {"dropped_count": len(dropped), "dropped": dropped[:100]}
@@ -8344,6 +11290,8 @@ def _atom_shape_issue(value: str) -> str:
     if _atom_shape_exempt(text):
         return ""
     tokens = _atom_shape_tokens(text)
+    if re.match(r"^\d", text):
+        return "numeric_leading"
     if len(text) > ATOM_SHAPE_MAX_CHARS:
         return "too_long"
     if len(tokens) > ATOM_SHAPE_MAX_TOKENS:
@@ -8415,7 +11363,8 @@ def _apply_source_scope_payload_integrity(source_compile: dict[str, Any]) -> dic
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Drops registered carrier rows when source_or_scope contains citation-shaped answer payload. "
+            "Drops registered carrier rows when source_or_scope contains citation-, identifier-, "
+            "or semantic-shaped answer payload. "
             "It does not infer replacement provenance or create facts."
         ),
     }
@@ -8426,6 +11375,8 @@ def _canonical_fda_office_atom(value: str) -> str:
     text = str(value or "").strip().strip("'\"").casefold()
     if text == "office_pharmaceutical_quality_operations":
         return "office_of_pharmaceutical_quality_operations"
+    if text in {"division_pharmaceutical_quality_operations_i", "division_of_pharmaceutical_quality_operations_i"}:
+        return "ora_pqo_i"
     return ""
 
 
@@ -8476,6 +11427,62 @@ def _apply_fda_office_atom_reduction(source_compile: dict[str, Any]) -> dict[str
         "description": (
             "Canonicalizes the narrow FDA office atom office_pharmaceutical_quality_operations to "
             "office_of_pharmaceutical_quality_operations in registered FDA office slots."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_fda_correspondence_party_name(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    party_aliases = {
+        "compounding_inspections_contact": "compoundinginspections_fda_hhs_gov",
+    }
+    if text in party_aliases:
+        return party_aliases[text]
+    for prefix in ("dr_", "capt_", "captain_", "mr_", "mrs_", "ms_"):
+        if text.startswith(prefix) and len(text) > len(prefix):
+            return text[len(prefix):]
+    return ""
+
+
+def _apply_fda_correspondence_party_name_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize narrow FDA correspondence-party honorific prefixes."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "fda_correspondence_party" and len(args) == 5:
+            canonical = _canonical_fda_correspondence_party_name(args[3])
+            if canonical:
+                args[3] = canonical
+                reduced = f"fda_correspondence_party({', '.join(args)})."
+                if reduced != fact:
+                    reductions.append({"from": fact, "to": reduced})
+                    fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_correspondence_party_name_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_correspondence_party_name_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_correspondence_party_name_reduction_policy"] = {
+        "schema_version": "deterministic_fda_correspondence_party_name_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes professional honorific prefixes in fda_correspondence_party/5 party_name slots. "
+            "It does not read source prose, infer roles, or alter party_role values."
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
@@ -12225,6 +15232,7 @@ def _attach_registered_carrier_delivery_report(
     """
 
     offered_rows = _registered_carrier_delivery_offered_rows(
+        source_compile=source_compile,
         parsed_profile=parsed_profile,
         profile_extension_metadata=profile_extension_metadata,
     )
@@ -12260,7 +15268,13 @@ def _attach_registered_carrier_delivery_report(
             "class": "registered_carrier_offered_but_undelivered",
             "signature": signature,
             "delivered_carrier_row_count": delivered_row_counts.get(signature, 0),
-            "reason": "registered carrier signature was offered by profile extension metadata but no typed rows were emitted",
+            "reason": _registered_carrier_delivery_missing_reason(
+                [
+                    str(row.get("source", "")).strip()
+                    for row in offered_rows
+                    if str(row.get("signature", "")).strip() == signature
+                ]
+            ),
         }
         for signature in accountable_signatures
         if delivered_row_counts.get(signature, 0) <= 0
@@ -12290,8 +15304,15 @@ def _attach_registered_carrier_delivery_report(
     return report
 
 
+def _registered_carrier_delivery_missing_reason(sources: list[str]) -> str:
+    if "active_profile_registry_lens" in set(sources):
+        return "registered carrier signature was accountability-required by active profile-registry lens but no typed rows were emitted"
+    return "registered carrier signature was offered by profile extension metadata but no typed rows were emitted"
+
+
 def _registered_carrier_delivery_offered_rows(
     *,
+    source_compile: dict[str, Any] | None = None,
     parsed_profile: dict[str, Any],
     profile_extension_metadata: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
@@ -12311,11 +15332,27 @@ def _registered_carrier_delivery_offered_rows(
             continue
         signature = str(row.get("signature", "")).strip()
         if signature:
-            extension_rows.append({"signature": signature, "extension": row})
+            extension_rows.append({"signature": signature, "extension": row, "source": "profile_extension_metadata"})
         for item in row.get("signatures", []) if isinstance(row.get("signatures"), list) else []:
             text = str(item).strip()
             if text:
-                extension_rows.append({"signature": text, "extension": row})
+                extension_rows.append({"signature": text, "extension": row, "source": "profile_extension_metadata"})
+    active_lens = source_compile.get("active_profile_registry_lens") if isinstance(source_compile, dict) else {}
+    accountability_signatures = (
+        active_lens.get("accountability_signatures", [])
+        if isinstance(active_lens, dict) and isinstance(active_lens.get("accountability_signatures"), list)
+        else []
+    )
+    for signature in accountability_signatures:
+        text = str(signature).strip()
+        if text:
+            extension_rows.append(
+                {
+                    "signature": text,
+                    "extension": {"accountability_required": True},
+                    "source": "active_profile_registry_lens",
+                }
+            )
     offered: list[dict[str, Any]] = []
     seen: set[str] = set()
     for row in extension_rows:
@@ -12333,6 +15370,7 @@ def _registered_carrier_delivery_offered_rows(
                     extension.get("accountability_required") is True
                     or extension.get("source_pressure") is True
                 ),
+                "source": str(row.get("source", "")).strip() or "profile_extension_metadata",
             }
         )
     return offered

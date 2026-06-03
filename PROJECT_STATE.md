@@ -1,280 +1,199 @@
 # Project State
 
-Last updated: 2026-05-29
+Last updated: 2026-06-03
 
 ## One-Sentence Shape
 
-Prethinker compiles source documents into queryable symbolic knowledge bases,
-then uses LLMs as language/intent planners over admitted state while
-deterministic gates decide what can become durable truth.
+Prethinker is currently a research instrument for testing whether LLM-proposed,
+closed, lens-scoped predicate domains can compile messy official documents into
+auditable typed facts under strict deterministic governance.
 
 ## Current Center
 
-- Runtime entrypoint: `src/mcp_server.py`, especially `process_utterance()`.
-- Daily harness entrypoint: `scripts/run_kb_pipeline_clean_harness.py`, backed
-  by `src/kb_pipeline_clean`.
-- Public package facade: `prethinker.Engine` `0.5.0`, whose
-  `compile_document()` returns and persists the semantic compiled artifact
-  bundle contract. Default `compile_mode="ledger"` stays fast and local; opt-in
-  `compile_mode="semantic"` calls an OpenAI-compatible endpoint and admits only
-  source-record-anchored semantic candidates into `world.pl` / `epistemic.pl`.
-- Current instrument brief: `docs/SEMANTIC_INSTRUMENT.md`.
-- Public research headline: `docs/CURRENT_RESEARCH_HEADLINE.md`.
-- Operating doctrine for high-context agents: `docs/CTO_ARCHITECTURE_BRIEF.md`.
-- Public documentation map: `docs/PUBLIC_DOCS_GUIDE.md` and `docs/README.md`.
-- Active architecture map: `docs/SEMANTIC_INSTRUMENT.md`.
-- Active work map: `docs/ACTIVE_RESEARCH_LANES.md`.
-
-Retired product/research lanes such as lab automation, public benchmarking,
-publishing workflows, and guard-compression worksheets are no longer active
-repo surfaces. Git history is the archive.
-
-## Current Instrument State
-
-The latest full native-corpus compile and QA stamp is:
+The active research question is:
 
 ```text
-2163 judged rows
-1997 exact / 46 partial / 120 miss
-92.33% exact
-0 compatibility rows
-0 runtime load errors
-0 write proposal rows
+Can a closed predicate domain, built from a small seed set, transfer hard-clean
+to unseen messy official documents in the same family under strict governance?
 ```
 
-The matching compile stamp is:
+Current evidence says: yes for recurring official-document skeleton anatomy;
+not yet for open-ended substantive detail.
+
+The current front-door documents are:
+
+- `docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md`
+- `docs/CURRENT_RESEARCH_HEADLINE.md`
+- `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
+- `docs/ACTIVE_RESEARCH_LANES.md`
+- `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
+- `docs/PUBLIC_DOCS_GUIDE.md`
+
+Older 80.5%, 92.33%, 95%, 98.5%, and 99% measurements remain historical
+calibration evidence only. They are not current claim-bearing metrics unless a
+newer note explicitly re-gates them under the current hard-clean conditions.
+
+## Claim-Bearing Gates
+
+A domain-pack result is claim-bearing only when the named run satisfies the
+gates relevant to that result:
+
+- closed profile registry;
+- lens-scoped offered signatures;
+- N>=3 same-condition compiles;
+- support>=2 for supported expected facts;
+- 0 supported forbidden facts;
+- registered signatures only;
+- atom-shape pass;
+- lens-scope pass;
+- carrier value-domain pass where applicable;
+- sign-clean audit pass for current code where applicable;
+- no source-record prose matching;
+- no query-text routing;
+- no fixture vocabulary;
+- no prose-shaped atoms in the winning path.
+
+Targeted replays are mechanism evidence, not transfer claims. Composed
+historical runs are diagnostic unless a fresh same-condition bundle reproduces
+them.
+
+## Current Evidence
 
 ```text
-56 / 56 fixtures parsed
-1383 candidate predicates
-7814 compile admitted / 1106 skipped
-7814 effective admitted / 1106 effective skipped
-0 diagnostic rejected flat-pass skips
-compile quality gate: 9 passed / 47 held
+SEC Form 8-K skeleton pack
+  seed micro: 13 / 13
+  transfer_001: 13 / 13
+  transfer_002: 12 / 12
+  transfer_003: 12 / 12
+  forbidden support: 0 in all claim-bearing cells
+  read: strongest current methods example that a small closed skeleton pack
+    can transfer across unlike same-family official documents
+
+FDA warning-letter pack
+  transfer_001 current replay: 26 / 26, 0 / 9 supported forbidden
+  transfer_002 fresh current-pack bundle: 20 / 27, 0 / 7 supported forbidden
+  transfer_003 archived replay: 18 / 26, 0 / 10 supported forbidden,
+    current integrity fail
+  read: primary richer case study; skeleton/citation/regulatory boilerplate
+    transfer better than wrapper role semantics, context-dependent categories,
+    response/detail value flesh, and other substance lanes
+
+NTSB investigation pack
+  seed micro: 13 / 13
+  first unlike transfer: 18 / 25 manifest
+  deterministic reducer replay: 19 / 25
+  forbidden support: 0 / 15
+  read: corroborating boundary evidence; wrapper, chronology, vehicles, and
+    conditions transfer more cleanly than casualty, safety-action attachment,
+    findings, and probable-cause substance
 ```
 
-That compile-gate line is the historical overloaded pass/hold headline from
-the native stamp. Current tooling also reports reason tiers. A 2026-05-28
-rescore of the saved May 22 native compile artifacts reads `2 pass / 54 hold`
-under the old headline, with `11` blocking-tier holds, `53` diagnostic-tier
-holds, and `0` advisory holds. Treat the old pass/hold as a continuity metric;
-future release claims should state whether blocking, diagnostic, and advisory
-tiers are clean.
-
-The latest native QA failure distribution is:
+The publishable technical shape is narrow:
 
 ```text
-compile-surface gap: 96
-hybrid-join gap: 39
-query-surface gap: 29
-answer-surface gap: 1
-judge-uncertain: 1
+Closed, lens-scoped predicate domains can stabilize recurring official-document
+anatomy under strict governance. Open-ended substance remains an abstention or
+lower-tier boundary unless a compact domain layer reproduces on unlike
+documents.
 ```
 
-Current transfer anchors:
+This does not support claims of 90%+ general QA accuracy, arbitrary-domain
+document understanding, product readiness, or self-serve schema induction.
+
+## Active Architecture
 
 ```text
-fresh ugly public 2026-05-28 R1:
-  197 / 3 / 0 over 200 rows, 98.5% exact
-  compile gate old pass/hold 2 / 6; blocking / diagnostic / advisory holds 4 / 6 / 0
-fresh ugly public 2026-05-28 R2 targeted query-template replay:
-  affected two-fixture slice moved 47 / 3 / 0 -> 50 / 0 / 0
-  changed rows 3, improved 3, regressed 0, compatibility/runtime/write 0/0/0
-fresh ugly public 2026-05-28 R2 full QA replay:
-  198 / 2 / 0 over 200 rows, 99.0% exact
-  changed rows 3, improved 2, regressed 1, regression guard failed
-  compatibility/runtime/write 0/0/0
-fresh ugly public 2026-05-28 R3 targeted variance probe:
-  labor+SEC slice 49 / 1 / 0 over 50 rows
-  changed rows 1, improved 1, regressed 0, regression guard passed
-fresh ugly public 2026-05-28 R5 SEC role-start targeted replay:
-  SEC slice 25 / 0 / 0 over 25 rows
-  changed rows 1, improved 1, regressed 0, compatibility/runtime/write 0/0/0
-fresh ugly public 2026-05-28 R6 full current-code replay:
-  199 / 1 / 0 over 200 rows, 99.5% exact
-  changed rows 3 versus R2, improved 2, regressed 1, regression guard failed
-  compatibility/runtime/write 0/0/0
-fresh ugly public 2026-05-28 R8/R9/R10 question-overlap visibility check:
-  targeted q017 recovery 1 / 0 / 0
-  full R9 artifacts 198 / 1 / 1 over 200 rows, 99.0% exact, compatibility/runtime/write 0/0/0
-  R9 regressions both recovered on isolated R10 rerun, indicating hosted-path/query-plan variance
-fresh ugly public Batch 03 latest guarded slices:
-  75 / 0 / 0 SEC
-  216 / 6 / 3 non-SEC
-  slice-combined 291 / 6 / 3 over 300 rows, 97.0% exact
-real-world external four-fixture spotcheck: 160 / 0 / 0, 4 / 4 compile gates clean
-sealed unseen authored transfer: 152 / 1 / 6 over 160 rows, 95.0% exact
-NTSB two-document pilot transfer: 50 / 0 / 0 over 50 rows, 100.0% exact
-earlier cold transfer baseline: 177 / 10 / 53 over 240 rows, 73.75% exact
-```
-
-The Batch 03 line is a slice-combined current view, not one single fresh
-300-row rerun. The SEC subset is now clean under current code; the non-SEC
-guard predates the later one-row ratio-calculation targeted replay. Treat
-Batch 03 as current transfer/regression evidence, not as a benchmark claim.
-
-The May 28 fresh ugly line is a single fresh R1 compile+QA run over newly
-landed public English official-document fixtures. Treat it as the strongest
-current fresh-transfer thermometer. Its QA hygiene is clean, but its compile
-gate is not release-clean.
-
-The R2 targeted replay is mechanism evidence. The full R2 replay improved the
-aggregate but was not a clean promotion because one previously exact row became
-partial. The R3 targeted variance probe indicates that labor-board regression
-was transient judge/classifier variance. The R5 SEC targeted replay indicates
-the role-tenure row can be recovered by routing structured `date` / start-date
-intents into employment-history support. The R6 full replay is the best full
-May 28 aggregate so far, but still not a clean promotion. R8 recovered the last
-R6 residue by making query-overlap source-record evidence visible to the judge;
-R9's two full-run regressions did not reproduce in R10 isolated reruns. Treat
-this as 99% band transfer evidence plus hosted-path variance, not as a clean
-`200 / 0 / 0` corpus claim.
-
-Fresh fixture intake has a current cut-and-paste specification at
-`docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
-now measured as above; the second package is `fresh_ach_stress_public_20260528_04`.
-
-Durable real-world fixture inputs live under `datasets/real_world_transfer/`.
-They are transfer evidence, not part of the native `datasets/story_worlds`
-baseline.
-
-The sealed unseen authored fixture inputs live at
-`datasets/sealed_unseen/20260521`. They are useful transfer evidence, but they
-should remain distinct from externally sourced real-world documents.
-
-The current full-suite verification is:
-
-```text
-2015 passed, 2 subtests passed
-```
-
-These numbers are the current public measurement anchor, not a permanent
-ceiling. New repairs should be judged by transfer-safe probes and then by a
-fresh stamp when the instrument is otherwise stable.
-
-## Current Architecture
-
-```text
-source document
-  -> semantic compile passes
-  -> deterministic mapper admission
-  -> Prolog KB artifact package
-  -> query planning over admitted state
-  -> selector/guard choice among evidence surfaces
-  -> judged answer row
+source document family
+  -> closed domain profile
+  -> lens-scoped offered predicate signatures
+  -> LLM compile proposals
+  -> deterministic contract / signature / value-domain admission
+  -> typed artifact bundle
+  -> deterministic replay and governance gates
+  -> claim-bearing rows only if they survive hard-clean checks
 ```
 
 The important boundary is source meaning versus durable truth:
 
-- LLMs may propose predicates, rows, rules, query plans, and evidence bundles.
-- Deterministic mappers admit only palette-valid, arity-valid, contract-valid
-  operations.
-- Query-side language understanding belongs in Semantic IR / structured
-  `query_intents[]`, not in Python regex gates over raw user questions.
-- QA should answer from admitted KB state, deterministic ledgers, and runtime
-  virtual predicates, not by re-reading source prose.
-- Query-only diagnostics cannot authorize writes.
-- Compatibility adapters are retired by default and should not appear in normal
-  stamp runs.
+- LLMs may judge source meaning and propose typed facts inside a closed
+  domain/lens scope.
+- The LLM may not freely define the instrument language after the domain pack is
+  closed.
+- Deterministic code may normalize and replay typed atoms.
+- Deterministic code may not parse source prose, display text, or query text for
+  semantic routing.
+- Query and compile must meet on the same governed atoms.
+- Predicate sets are offered as a function of lens, not as one global bag
+  available to every compile pass.
 
-## Active Research Pressure
+## Current Research Pressure
 
-The current center is not guard compression. It is post-claim discipline:
+The next useful work is not another row-grinding climb. It is to preserve and
+explain the current falsifiable result:
 
-- Preserve direct compile surfaces so answer-bearing distinctions remain
-  queryable coordinates.
-- Treat fresh ugly 2026-05-28 R2 as the current product thermometer, with the
-  row-churn caveat visible, and Batch 03 as a regression guard.
-- Work remaining fresh ugly residue as generic role-tenure/source-display
-  support, provider-variance, compile-gate, source-record, and
-  authority-normalization mechanisms.
-- Keep the May 22 native restamp as the current internal non-regression anchor
-  until a new full native stamp is worth the cost.
-- Use the tiered compile gate for new compile stamps: blocking reasons are
-  release blockers, diagnostic reasons are instrument signals, and advisory
-  reasons are low-risk notes. Preserve the old pass/hold headline for
-  continuity, but do not collapse every diagnostic hold into release failure.
-- Keep source-fidelity surfaces clean: authority, status, temporal interval,
-  provenance, lifecycle, assignment, rule, and epistemic distinctions should
-  survive as typed rows.
-- Audit recent vocabulary and invariants for fixture-language leakage.
-- Keep public docs and agent-facing docs aligned with the current architecture.
+- keep SEC as the formal methods example;
+- keep FDA as the richer case study with both positive transfer and boundary
+  evidence;
+- keep NTSB as corroborating boundary evidence, not as a new grind target;
+- keep stale-number re-gating visible as a research finding;
+- run answer-judge null controls and oracle-isolation checks before any QA
+  metric becomes claim-bearing;
+- choose any next domain-pack experiment only if it answers a named research
+  gap.
 
-Current lab notes live in short, run-named worksheets when an active stamp or
-repair lane needs them. Old worksheets are not front-door project state.
+## Non-Claims
 
-The stop condition before another full native stamp is: a change materially
-touches compile behavior or query-surface policy and focused probes suggest it
-should change corpus-level behavior. Do not burn a full stamp just to re-prove
-the current public claim.
+The repo should not currently claim:
 
-## Guardrails
-
-- Do not let fixture nouns, QA answer strings, row ids, local people,
-  organizations, or story-specific phrasing become architecture.
-- Prefer unlike-document probes before promoting a new invariant.
-- Treat a cold dataset result as measurement, not permission to tune to that
-  dataset.
-- Keep old work out of the public face unless it is still an active reference.
-- If old context is needed, use git history or `C:\prethinker_tmp_archive`.
+- 90%+ general Prethinker QA accuracy;
+- arbitrary-document understanding;
+- product readiness;
+- broad FDA warning-letter completion;
+- a promoted full NTSB pack;
+- self-serve schema induction;
+- that a targeted replay is a transfer claim;
+- that a composed historical run is equivalent to a fresh same-condition
+  bundle;
+- that judge exactness alone is a claim-bearing score.
 
 ## Operating Notes
 
-- OpenRouter is the default measured lane for stamps, transfer batches, and
-  provider-variance investigations. Default hosted concurrency should stay
-  around six lanes unless provider behavior changes.
-- Local LM Studio on POWER remains useful for package/API development,
-  one-row smoke tests, and small affected-set probes. It is not currently the
-  default lane for broad compiles, QA batches, or release claims.
-- Local LM Studio localhost should stay at or below four inference lanes for
-  QA-scale work when used at all.
-- POWER is the local workstation with the RTX 5090. Current Q8 LM Studio probes
-  showed low GPU utilization, CPU-heavy prefill, and slower broad compile/QA
-  economics than hosted lanes.
-- Model-path metadata matters: provider/backend, quantization, loaded context,
-  routing, and prompt packing are measurement conditions. See
-  `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
-- Fresh package validation profiles live in
-  `scripts/validate_fresh_ugly_batch.py`: use `--package-profile extended` for
-  the next fresh ugly public package and `--package-profile ach` for the ACH
-  stress package.
-- Use OpenAI-compatible structured output where possible.
-- Keep run titles granular enough to distinguish compile versus QA and corpus
-  or fixture group.
+- OpenRouter remains the main hosted measurement lane when broad runs are
+  necessary, but provider/model/settings metadata must be recorded.
+- Local LM Studio remains useful for small probes, package/API development, and
+  local-domain experiments when speed and reproducibility are adequate.
+- Provider/backend, quantization, context, routing, and prompt packing are
+  measurement conditions; see `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
+- Durable fixtures belong under `datasets/`.
+- Temporary run artifacts may live under `tmp/`; old useful run artifacts can
+  be moved to `C:\prethinker_tmp_archive`.
+- Old worksheets should not become public front-door state. Active worksheets
+  should stay run-scoped and should retire to archive/history once the claim is
+  summarized in a current note.
 
 ## Verification Commands
 
 Common local checks:
 
 ```powershell
-$env:PYTHONPATH='.'; pytest -q
-python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_qa.py
+$env:PYTHONPATH='.'
+pytest -q
+python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 ```
 
-Before a public/docs cleanup commit, also run a stale-link grep over README,
-agent docs, public docs, and active scripts for retired document names.
+Before a public/docs cleanup commit, also run stale-claim greps over
+`README.md`, `PROJECT_STATE.md`, `docs/*.md`, and `docs/index.html`.
 
 ## Next Decision
 
-The public claim should be preserved with caveats intact. The three May 28 R1
-partials produced one generic, query-only normalization repair. A full R2 replay
-now reads `198 / 2 / 0` over `200` rows (`99.0%` exact), but because the
-regression guard failed it should be described as improved measurement with
-row-churn caveat, not as a clean promotion. Native QA remains `92.33%`.
+This phase is close enough to land as a technical note. The next decision is
+whether to:
 
-Next energy:
+1. stop and publish the narrow domain-pack transfer finding as the current
+   research milestone;
+2. run one bounded follow-up that strengthens a missing cell in the note;
+3. select a new document family only if it tests a named gap in the closed-pack
+   thesis rather than chasing a higher-looking score.
 
-1. decide whether to spend a full eight-fixture QA replay under current code or
-   let the next fresh ugly package be the transfer confirmation;
-2. decide whether future OpenRouter measurement should pin provider/quantization
-   for stamp claims or explicitly report hosted-path variance bands;
-3. keep inspecting compile-gate holds separately from QA exactness, especially
-   blocking-tier holds that QA can still answer around;
-4. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
-   needs a heldout sensitivity read;
-5. use the tiered compile gate in future compile stamps and report old
-   pass/hold separately from blocking/diagnostic/advisory tiers;
-6. keep native restamp preparation warm, but do not spend it until the next
-   change set is stable;
-7. keep fixture language, row IDs, answer strings, and local source names out
-   of active prompts, code, and public doctrine.
+If new research continues, it should start from the phase-close note and the
+claim-bearing gates above, not from historical QA-score targets.

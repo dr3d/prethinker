@@ -14,9 +14,11 @@ def _registry(path: Path) -> Path:
         "fda_warning_letter/5",
         "fda_correspondence_party/5",
         "fda_inspection_event/6",
+        "fda_cgmp_violation_item/5",
         "fda_violation/5",
         "fda_violation_citation/4",
         "fda_response_requirement/6",
+        "fda_response_assessment/5",
         "fda_violation_detail/5",
     ]
     _write(
@@ -52,9 +54,11 @@ def test_domain_transfer_package_validation_passes_well_formed_package(tmp_path:
                 "fda_warning_letter(Letter, office_x, firm_x, v_2026_01_01, SrcLetter).",
                 "fda_correspondence_party(Letter, Party, recipient, firm_x, SrcRecipient).",
                 "fda_inspection_event(Inspection, Facility, v_2025_01_01, v_2025_01_02, fda, SrcInspection).",
+                "fda_cgmp_violation_item(Violation, Letter, violation_1, cfr_21_211_192, SrcBundle).",
                 "fda_violation(Violation, Letter, violation_1, quality_unit_failure, SrcViolation).",
                 "fda_violation_citation(Violation, cfr_21_211_192, cgmps_requirement, SrcCitation).",
                 "fda_response_requirement(Letter, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, SrcResponse).",
+                "fda_response_assessment(Assessment, Violation, response_inadequate, corrective_action_evaluation, SrcAssessment).",
             ]
         ),
     )
@@ -66,12 +70,12 @@ def test_domain_transfer_package_validation_passes_well_formed_package(tmp_path:
     report = build_report(
         package_dir=package,
         profile_registry=_registry(tmp_path / "registry.json"),
-        expected_min=6,
-        expected_max=8,
+        expected_min=8,
+        expected_max=10,
     )
 
     assert report["summary"]["status"] == "pass"
-    assert report["summary"]["expected_fact_count"] == 6
+    assert report["summary"]["expected_fact_count"] == 8
 
 
 def test_domain_transfer_package_validation_blocks_outside_registry_and_prose_expected(tmp_path: Path) -> None:

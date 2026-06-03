@@ -2,9 +2,9 @@
 
 > Status: historical design overview. The architecture context remains useful,
 > but any score posture here is pre-reset. Use
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 > and
-> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+> [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 > for current claims.
 
 This is the stable design overview for the project. It is intentionally
@@ -151,11 +151,11 @@ That lets the main workspace do more of the discourse and truth-maintenance
 setup before deterministic admission, without adding a second mainline model
 role.
 
-## Current Reality
+## Historical Reset Snapshot
 
-As of June 1, 2026, Prethinker is in a sign-clean reset. Older 90%+ QA
-scorecards remain useful lab history, but they are not current claim-bearing
-accuracy numbers. The current public floor is the hard-clean measurement:
+As of June 1, 2026, Prethinker entered a sign-clean reset. Older 90%+ QA
+scorecards remained useful lab history, but were no longer claim-bearing
+accuracy numbers. The reset floor at that time was:
 
 ```text
 Product exact:                  88 / 200 = 44.0%
@@ -165,9 +165,8 @@ Atom-shape-clean product exact: 84 / 200 = 42.0%
 Hard-clean floor:               73 / 200 = 36.5%
 ```
 
-The current product-shaped path is closed domain schemas that can earn Tier 1
-trust only when their answers survive sign-clean, typed-plan, redaction,
-atom-shape, value-domain, omission-accountability, and N>=3 transfer gates.
+The current phase-close result has moved from that floor to closed domain
+predicate packs. Use the closed-domain technical note for the current claim.
 
 Current system notes:
 

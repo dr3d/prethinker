@@ -1,0 +1,25 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "sec_form_8k_skeleton_transfer_001",
+  "purpose": "Unlike SEC Form 8-K skeleton transfer fixture for the closed SEC skeleton carrier pack. It pressures cover-page identifiers, item headings, exhibit rows, and signature anatomy without admitting event-substance predicates.",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_02/sec_material_event_ugly_003",
+  "domain_profile": "datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "sec_filing",
+    "sec_registrant",
+    "sec_registrant_identifier",
+    "sec_filing_item",
+    "sec_exhibit",
+    "sec_signatory"
+  ],
+  "forbidden_classes": [
+    "full_cover_page",
+    "identifier_bundle",
+    "item_body_summary",
+    "employment_or_severance_terms",
+    "full_exhibit_description",
+    "full_signature_block"
+  ]
+}

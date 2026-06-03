@@ -744,6 +744,45 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertEqual(score["violation_category_slot_loss_count"], 0)
         self.assertEqual(score["violation_category_slot_loss_refs"], [])
 
+    def test_score_accepts_fda_cgmp_bundle_as_category_capable_carrier(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "fda_warning_letter",
+            "domain_scope": "FDA warning letter with CGMP violations and response critique.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "violation", "description": "Numbered CGMP violation."}],
+            "candidate_predicates": [
+                {
+                    "signature": "fda_cgmp_violation_item/5",
+                    "args": ["violation_id", "letter_id", "violation_number", "citation", "source_or_scope"],
+                    "description": "Numbered CGMP item with citation.",
+                    "why": "Citation projects to the governed FDA violation category.",
+                    "admission_notes": [],
+                },
+                {
+                    "signature": "fda_response_assessment/5",
+                    "args": ["assessment_id", "violation_id", "assessment_kind", "assessment_scope", "source_or_scope"],
+                    "description": "FDA critique of the response.",
+                    "why": "The source states response assessments.",
+                    "admission_notes": [],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["fda_cgmp_violation_item/5"],
+            "admission_risks": ["violation category collapse"],
+            "clarification_policy": [],
+            "unsafe_transformations": [],
+            "starter_frontier_cases": [],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["violation_category_slot_loss_count"], 0)
+        self.assertEqual(score["violation_category_slot_loss_refs"], [])
+
     def test_score_surfaces_lossy_numbered_range_outcome_without_inventory_carrier(self) -> None:
         parsed = {
             "schema_version": "profile_bootstrap_v1",

@@ -31,15 +31,40 @@ from scripts.run_rule_acquisition_pass import (  # noqa: E402
 from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_domain_omission_carrier_signature_reduction,
     _apply_fda_consultant_citation_scope_reduction,
+    _apply_fda_correspondence_party_name_reduction,
+    _apply_fda_cgmp_violation_item_projection,
+    _apply_fda_cgmp_bundle_subject_integrity,
     _apply_fda_date_atom_reduction,
     _apply_fda_facility_identity_atom_reduction,
     _apply_fda_facility_subject_convergence,
     _apply_fda_lot_identifier_atom_reduction,
+    _apply_fda_no_fei_omission_reduction,
     _apply_fda_office_atom_reduction,
+    _apply_fda_response_assessment_slot_projection,
+    _apply_fda_response_assessment_scope_reduction,
+    _apply_fda_response_assessment_item_projection,
+    _apply_fda_response_documentation_gap_projection,
+    _apply_fda_response_investigation_gap_projection,
+    _apply_fda_response_assessment_id_canonicalization,
+    _apply_fda_response_assessment_kind_citation_reduction,
+    _apply_fda_response_assessment_specificity_reduction,
+    _apply_fda_response_assessment_subject_integrity,
     _apply_fda_violation_detail_atom_reduction,
+    _apply_fda_violation_detail_value_kind_integrity,
+    _apply_fda_violation_detail_slot_projection,
     _apply_fda_violation_detail_subject_integrity,
+    _apply_fda_violation_category_from_unique_citation_reduction,
     _apply_fda_violation_number_atom_reduction,
     _apply_fda_warning_letter_subject_convergence,
+    _apply_ntsb_actor_id_atom_reduction,
+    _apply_ntsb_condition_atom_reduction,
+    _apply_ntsb_injury_count_scope_specificity,
+    _apply_ntsb_timestamp_atom_reduction,
+    _apply_registered_date_slot_atom_reduction,
+    _apply_sec_exhibit_number_atom_reduction,
+    _apply_sec_filing_id_atom_reduction,
+    _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_typed_slot_prefix_reduction,
     _apply_atom_shape_integrity,
     _apply_carrier_value_domain_integrity,
     _apply_source_scope_payload_integrity,
@@ -111,8 +136,33 @@ def main() -> int:
             ("fda_facility_identity_atom_reduction", _apply_fda_facility_identity_atom_reduction),
             ("fda_consultant_citation_scope_reduction", _apply_fda_consultant_citation_scope_reduction),
             ("fda_office_atom_reduction", _apply_fda_office_atom_reduction),
+            ("fda_correspondence_party_name_reduction", _apply_fda_correspondence_party_name_reduction),
+            ("fda_no_fei_omission_reduction", _apply_fda_no_fei_omission_reduction),
+            ("registered_date_slot_atom_reduction", _apply_registered_date_slot_atom_reduction),
+            ("sec_exhibit_number_atom_reduction", _apply_sec_exhibit_number_atom_reduction),
+            ("sec_filing_id_atom_reduction", _apply_sec_filing_id_atom_reduction),
+            ("sec_typed_slot_prefix_reduction", _apply_sec_typed_slot_prefix_reduction),
+            ("sec_identifier_value_atom_reduction", _apply_sec_identifier_value_atom_reduction),
+            ("ntsb_timestamp_atom_reduction", _apply_ntsb_timestamp_atom_reduction),
+            ("ntsb_actor_id_atom_reduction", _apply_ntsb_actor_id_atom_reduction),
+            ("ntsb_condition_atom_reduction", _apply_ntsb_condition_atom_reduction),
+            ("ntsb_injury_count_scope_specificity", _apply_ntsb_injury_count_scope_specificity),
             ("fda_violation_number_atom_reduction", _apply_fda_violation_number_atom_reduction),
+            ("fda_cgmp_violation_item_projection", _apply_fda_cgmp_violation_item_projection),
+            ("fda_violation_category_from_unique_citation_reduction", _apply_fda_violation_category_from_unique_citation_reduction),
+            ("fda_cgmp_bundle_subject_integrity", _apply_fda_cgmp_bundle_subject_integrity),
+            ("fda_violation_detail_value_kind_integrity", _apply_fda_violation_detail_value_kind_integrity),
             ("fda_violation_detail_subject_integrity", _apply_fda_violation_detail_subject_integrity),
+            ("fda_violation_detail_slot_projection", _apply_fda_violation_detail_slot_projection),
+            ("fda_response_assessment_scope_reduction", _apply_fda_response_assessment_scope_reduction),
+            ("fda_response_assessment_item_projection", _apply_fda_response_assessment_item_projection),
+            ("fda_response_documentation_gap_projection", _apply_fda_response_documentation_gap_projection),
+            ("fda_response_investigation_gap_projection", _apply_fda_response_investigation_gap_projection),
+            ("fda_response_assessment_id_canonicalization", _apply_fda_response_assessment_id_canonicalization),
+            ("fda_response_assessment_kind_citation_reduction", _apply_fda_response_assessment_kind_citation_reduction),
+            ("fda_response_assessment_specificity_reduction", _apply_fda_response_assessment_specificity_reduction),
+            ("fda_response_assessment_subject_integrity", _apply_fda_response_assessment_subject_integrity),
+            ("fda_response_assessment_slot_projection", _apply_fda_response_assessment_slot_projection),
             ("source_scope_payload_integrity", _apply_source_scope_payload_integrity),
             ("carrier_value_domain_integrity", _apply_carrier_value_domain_integrity),
             ("atom_shape_integrity", _apply_atom_shape_integrity),
@@ -218,8 +268,10 @@ def main() -> int:
 
     out_dir = args.out_dir if args.out_dir.is_absolute() else (REPO_ROOT / args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
-    slug = _slug(str(args.label or "union"))
-    model_slug = _slug(str(first.get("model") or "model"))
+    # Lens-bundle runs nest union artifacts under already-descriptive Windows
+    # paths, so keep filename slugs short enough to avoid MAX_PATH surprises.
+    slug = _slug(str(args.label or "union"), limit=48)
+    model_slug = _slug(str(first.get("model") or "model"), limit=32)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     out_path = out_dir / f"domain_bootstrap_file_{stamp}_{slug}_{model_slug}.json"
     out_path.write_text(json.dumps(first, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
@@ -302,10 +354,10 @@ def _runtime_validated(*, facts: list[str], rules: list[str]) -> tuple[list[str]
     return good_facts, good_rules, errors
 
 
-def _slug(value: str) -> str:
+def _slug(value: str, *, limit: int = 80) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "-" for ch in str(value or "").strip())
     out = "-".join(part for part in out.split("-") if part)
-    return out[:80] or "union"
+    return out[: max(1, int(limit))] or "union"
 
 
 if __name__ == "__main__":

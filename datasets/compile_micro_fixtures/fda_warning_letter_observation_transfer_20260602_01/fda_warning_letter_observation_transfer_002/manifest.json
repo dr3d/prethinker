@@ -1,0 +1,11 @@
+{
+  "fixture_id": "fda_warning_letter_observation_transfer_002",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/annovex-pharma-inc-698115-03052025",
+  "fda_center": "CDER",
+  "company": "Annovex Pharma, Inc.",
+  "warning_letter_date": "2025-03-05",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Observation-vs-record-review transfer test on an unlike 503B outsourcing-facility CDER letter: unidirectional-airflow and EM-system inadequacies cited as facility/control evidence (observation_subject) vs media-fill positive growth as a 211.192 investigation subject (record_review_subject), aseptic-process validation (procedure_scope), and a no-FEI negative control."
+}

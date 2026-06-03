@@ -1,0 +1,14 @@
+{
+  "fixture_id": "sec_form_8k_skeleton_transfer_002",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260529_01/sec_material_event_ugly_007",
+  "domain_profile": "datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json",
+  "description": "SEC Form 8-K skeleton transfer fixture from Driven Brands Holdings Inc. Item 4.02 filing. Skeleton only: cover-page filing identity, registrant, identifiers, item headings, exhibit table, and signature block.",
+  "notes": [
+    "The source preserves two distinct commission-file-number values: a header value and a registrant-cover-page value.",
+    "The source excerpt does not state a CIK; any CIK row is forbidden.",
+    "The oracle does not include restatement substance, error categories, auditor discussion, forward-looking statements, or checkbox citations."
+  ]
+}

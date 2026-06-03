@@ -1,11 +1,11 @@
 # Prethinker Explainer
 
 > Status: historical pre-reset explainer. The project story remains useful, but
-> score claims in this document are not current. The current claim-bearing floor
-> and strategy live in
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> score claims in this document are not current. The current phase-close result
+> lives in
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 > and
-> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+> [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md).
 
 This is the plain-language explanation of what Prethinker is trying to become, what it already does well, and where the boundaries still are.
 
@@ -204,13 +204,12 @@ verdict = records what happened
 Truth lives in the compiled KB. Rows are where the system tests whether that
 truth can be retrieved, selected, and answered under pressure.
 
-Current evidence is deliberately harsher after the sign-clean reset. Older
-native, fresh ugly, real-world, and sealed-unseen scorecards remain useful lab
-history, but the current claim-bearing number is the hard-clean floor: `73 /
-200` (`36.5%`) on the current 8-fixture English batch. That floor requires
-product exactness, typed-plan replay, redaction survival, and atom-shape
-cleanliness. The next product-shaped proof is not another broad high score; it
-is a closed domain schema that can earn Tier 1 trust under those gates.
+After the sign-clean reset, older native, fresh ugly, real-world, and
+sealed-unseen scorecards became useful lab history rather than current claims.
+The reset floor was `73 / 200` (`36.5%`) on the 8-fixture English batch. The
+current phase-close result is narrower and stronger: closed, lens-scoped
+predicate packs stabilize recurring official-document skeleton anatomy under
+strict governance, while open-ended substance remains a boundary.
 
 That is not perfection. Compile-surface gaps, source-fidelity preservation,
 hybrid joins, language transfer, and palette stability are still frontier work.
@@ -348,18 +347,16 @@ As of May 28, 2026:
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
 - the policy/reimbursement demo installs English rules, derives query answers, retracts a fact, and changes the answer without writing derived violations as facts
 
-### Evidence Snapshot
+### Historical Evidence Snapshot
 
-- current claim-bearing hard-clean floor: `73 / 200` (`36.5%`) on the current
-  8-fixture English batch
+- reset hard-clean floor: `73 / 200` (`36.5%`) on the 8-fixture English batch
 - product exact on that same batch: `88 / 200` (`44.0%`)
 - typed-plan exact: `84 / 200` (`42.0%`)
 - redaction-survived exact: `81 / 200` (`40.5%`)
 - older 90%+ native, ugly-public, real-world, and sealed-unseen measurements
   are historical pre-reset evidence and must travel with their caveats
-- the current residual pressure is clean compile recall: answer-bearing
-  distinctions must become governed predicates, deterministic ledgers, or
-  explicitly lower-tier retrieval, not hidden query-time archaeology
+- the current phase-close claim lives in the closed-domain predicate-pack
+  technical note, not in this historical evidence snapshot
 - enterprise-guidance and clarification probes show that safe-surface accumulation and ask/no-ask governance can be measured separately from ordinary QA
 - rule-ingestion transfer now uses separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering
 - the next hard problem is row-level activation: accumulated symbolic surfaces can rescue weak answers, but global activation can perturb rows that were already good

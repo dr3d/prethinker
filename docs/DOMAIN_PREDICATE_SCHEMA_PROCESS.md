@@ -1,6 +1,6 @@
 # Domain Predicate Schema Process
 
-Status: working process note, June 1, 2026. This document explains how
+Status: working process note, June 2, 2026. This document explains how
 Prethinker builds a domain predicate schema for one document family. It is a
 process description, not a score claim.
 
@@ -312,6 +312,14 @@ to defend the oracle change from the source and registered domain contract. If
 the correction only makes sense because the model emitted that value, leave it
 as a miss and treat it as a compile or schema blocker.
 
+For promoted validation cells, keep oracle authorship independent from schema
+closure. The person who closed or materially edited the domain predicate pack
+should not be the only person authoring the validation oracle for that same
+pack. In assisted onboarding this separation can come from customer expert vs.
+Prethinker operator roles. In self-serve onboarding it must be explicit:
+schema closer and validation-oracle author are separate roles, or a blind
+reviewer must approve the oracle before the result becomes claim-bearing.
+
 10. Require omission/accountability.
 
 When a carrier is common for the domain but absent or uncertain in the source,
@@ -365,6 +373,134 @@ They should not customize:
 
 Those are governance rules, not preferences.
 
+Value domains are configurable, but their compactness is not optional. A
+customer may propose any enum or value family that fits the domain, but it only
+promotes if it survives the same gates as carrier predicates:
+
+- N>=3 same-condition support with support>=2;
+- no atom-shape blockers;
+- no prose-shaped values;
+- no row-specific value proliferation;
+- unlike-document transfer inside the same document family.
+
+A near-open enum is just open vocabulary with a friendlier label. If a value
+domain cannot stay compact and reproducible, the pack should abstain for that
+class or move the class to a lower, explicitly untrusted product tier. It should
+not relax the gate.
+
+## Customer Domain Onboarding
+
+The same process can become a customer-facing onboarding workflow, but it
+should be framed as governed domain-pack construction, not automatic schema
+invention.
+
+Prethinker can help a customer sort a document corpus into recurring document
+families, propose candidate predicate families from representative samples,
+and run falsifiability gates over draft packs. The model's proposals are
+design material. They do not become trusted instrument language until a human
+domain expert and the governance gates close the schema.
+
+Recommended customer flow:
+
+1. Cluster or manually separate unrelated document families before schema
+   work begins. Contracts, inspection reports, warning letters, claims files,
+   correspondence, and policy manuals should not be forced into one predicate
+   pack merely because they belong to the same customer.
+2. Use existing discovery mechanisms to propose candidate carriers, lenses,
+   value domains, omissions, and answer classes from a small representative
+   sample.
+3. Reduce those proposals into a closed registry: predicate names, arities,
+   argument roles, value domains, lens allowlists, forbidden uses, and
+   abstention/omission rules.
+4. Validate on same-condition N>=3 compiles and unlike documents from the same
+   family. Promotion requires support>=2, clean gates, and no forbidden facts.
+5. Treat the resulting artifact as a customer/domain pack: a governed evidence
+   compiler for that document family, not a model-weight fine-tune and not a
+   claim that arbitrary documents are solved.
+
+Early commercial shape should probably be assisted or done-for-you onboarding:
+Prethinker operators build domain packs with customer experts, then measure
+how much of schema closure can be handed to non-Prethinker specialists. Fully
+self-serve schema induction is a later hypothesis. The risk is the old
+open-vocabulary drift returning under a product label; the safeguard is the
+same one used in research: LLM proposes, human and gates close, deterministic
+checks decide what can be trusted.
+
+Mechanize that handoff instead of treating it as a feeling. In early customer
+work, ask the customer or domain expert to close the draft schema first:
+approve carriers, reject prose-shaped values, choose compact value domains,
+name omissions, and set abstention boundaries. Then have a Prethinker operator
+review the result and log every rescue:
+
+- carrier rewritten;
+- value domain narrowed;
+- lens allowlist changed;
+- omission rule added;
+- atom-shape or prose leak caught;
+- oracle or expected fact corrected;
+- abstention boundary changed;
+- gate failure interpreted.
+
+The rescue log is the self-serve roadmap. If rescues shrink over engagements,
+the workbench can move toward customer-led schema closure. If rescues remain
+heavy, the product is still a high-value assisted domain-pack buildout rather
+than a fully self-serve schema-induction platform.
+
+Self-serve validation also needs role separation. A customer expert may close
+the schema, and another customer reviewer may author or approve the validation
+oracle, but the same unchecked person should not both shape the predicate pack
+and define the claim-bearing target. Otherwise the workflow can fit the test
+to the schema while all mechanical gates still pass.
+
+This implies a useful product distinction:
+
+- **Domain pack buildout:** a service/workbench process that turns one
+  repeated document family into a closed, audited predicate domain.
+- **Evidence workstation:** the runtime experience that compiles new documents
+  against that pack, answers within trusted tiers, and abstains when the typed
+  evidence is not there.
+
+If a customer domain cannot close without proliferating row-specific
+predicates, prose-shaped atoms, or unstable N-cycle coverage, that is a valid
+negative onboarding result rather than a failure to be hidden.
+
+## Pack Maintenance And Drift
+
+A domain pack is not finished forever when it passes its first transfer gate.
+Document families drift: agencies revise templates, citation styles change,
+forms are reorganized, customer workflows mutate, and recurring roles or
+obligations acquire new surface shapes. A silently degrading pack is an audit
+failure even if the original buildout was clean.
+
+Treat the hard-clean gate as a maintenance monitor:
+
+1. Sample new production documents on a cadence appropriate to the domain.
+2. Compile them against the current closed pack without expanding the
+   vocabulary.
+3. Run the same governance gates used for promotion: registered signatures,
+   lens scope, value domains, atom shape, forbidden facts, typed-plan replay,
+   redaction replay, and judge null controls where QA exists.
+4. Track coverage by answer class and carrier family, not only aggregate score.
+5. When coverage drops or omissions cluster, classify the event as document
+   family drift, source-distribution drift, schema gap, or fixture/oracle gap.
+6. Re-close the pack only through the normal domain process: propose, reduce,
+   gate, N>=3, unlike transfer.
+
+Maintenance is not a loophole for one-off fixes. A new customer document should
+not cause a private predicate or permissive value to be added because one row is
+important. If the family has genuinely moved, the pack gets a new version and
+the before/after hard-clean table records what changed.
+
+Recommended maintenance record:
+
+- pack version and active registry hash;
+- documents sampled;
+- gate results by answer class;
+- coverage changes since the last maintenance run;
+- new omissions or repeated abstentions;
+- proposed schema changes and their rejection/promotion status;
+- whether the pack remains trusted for Tier 1 on that document family.
+
 ## Guardrails
 
 Use these checks as the domain pack matures:
@@ -397,6 +533,8 @@ For each domain pack, keep a compact record of:
 - dry-run failures and contract changes;
 - N-cycle reproducibility results;
 - hard-clean before/after table;
+- schema-closer and validation-oracle author/reviewer roles;
+- maintenance cadence and drift-monitor results;
 - omitted classes and why they were not covered;
 - rejected carriers and rejection reasons.
 

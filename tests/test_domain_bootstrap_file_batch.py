@@ -114,6 +114,9 @@ def test_build_command_forwards_profile_registry_followups() -> None:
         profile_registry_completion_followup=True,
         profile_registry_accountability_followup=True,
         fda_violation_detail_bundle_followup=True,
+        fda_violation_detail_slot_followup=True,
+        fda_violation_detail_item_map_context=True,
+        fda_response_assessment_followup=True,
         intake_registry_context=False,
         review_profile=False,
         profile_review_retry=False,
@@ -135,6 +138,9 @@ def test_build_command_forwards_profile_registry_followups() -> None:
     assert "--profile-registry-completion-followup" in command
     assert "--profile-registry-accountability-followup" in command
     assert "--fda-violation-detail-bundle-followup" in command
+    assert "--fda-violation-detail-slot-followup" in command
+    assert "--fda-violation-detail-item-map-context" in command
+    assert "--fda-response-assessment-followup" in command
 
 
 def test_build_command_forwards_profile_identifier_occurrence_repair_pass() -> None:
@@ -384,6 +390,31 @@ def test_compile_batch_summary_flags_regulatory_violation_category_loss() -> Non
         flag.startswith("violation_category_slot_loss:")
         for flag in summary["profile_schema_contract_flags"]
     )
+
+
+def test_compile_batch_summary_flags_fda_violation_alignment() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {
+                "schema_version": "profile_bootstrap_v1",
+                "candidate_predicates": [],
+            },
+            "source_compile": {
+                "admitted_count": 3,
+                "skipped_count": 0,
+                "facts": [
+                    "fda_violation(violation_1, letter_1, violation_1, contamination_control, src_1).",
+                    "fda_violation_citation(violation_1, cfr_21_211_113_b, cgmps_requirement, src_2).",
+                    "fda_violation_citation(violation_1, cfr_21_211_192, cgmps_requirement, src_3).",
+                ],
+            },
+            "score": {"rough_score": 0.9, "risk_count": 0},
+        }
+    )
+
+    assert "category_citation_mismatch:1" in summary["fda_violation_alignment_flags"]
+    assert "merged_citation_category_families:1" in summary["fda_violation_alignment_flags"]
 
 
 def test_compile_batch_summary_refreshes_list_range_inventory_slot_loss() -> None:
@@ -1724,6 +1755,32 @@ def test_quality_gate_rank_does_not_prefer_fewer_reasons_with_larger_surface_reg
     assert _quality_gate_rank_tuple(smaller_surface_hold) < _quality_gate_rank_tuple(larger_surface_hold)
 
 
+def test_quality_gate_rank_prefers_lower_fda_alignment_finding_count() -> None:
+    broad_but_smaller = {
+        "passed": False,
+        "reasons": [
+            "fda_violation_alignment:category_citation_mismatch:1",
+            "fda_violation_alignment:merged_citation_category_families:1",
+            "fda_violation_alignment:violation_without_specific_cgmp_citation:2",
+        ],
+        "rough_score": 0.658,
+        "risk_count": 2,
+        "compile_skipped_share": 0.0,
+    }
+    narrow_but_larger = {
+        "passed": False,
+        "reasons": [
+            "fda_violation_alignment:category_citation_mismatch:24",
+            "fda_violation_alignment:merged_citation_category_families:1",
+        ],
+        "rough_score": 0.658,
+        "risk_count": 2,
+        "compile_skipped_share": 0.0,
+    }
+
+    assert _quality_gate_rank_tuple(broad_but_smaller) < _quality_gate_rank_tuple(narrow_but_larger)
+
+
 def test_compile_batch_summary_allows_detail_wrapper_with_backbone() -> None:
     summary = _extract_compile_summary(
         {
@@ -1919,6 +1976,33 @@ def test_compile_quality_gate_holds_profile_delivery_flag() -> None:
     ]
 
 
+def test_compile_quality_gate_holds_fda_violation_alignment_diagnostic() -> None:
+    result = {
+        "fixture": "fixture_fda",
+        "returncode": 0,
+        "compile_json": "compile.json",
+        "summary": {
+            "parsed_ok": True,
+            "rough_score": 0.9,
+            "risk_count": 2,
+            "candidate_predicates": 12,
+            "compile_admitted": 30,
+            "compile_skipped": 0,
+            "fda_violation_alignment_flags": [
+                "category_citation_mismatch:2",
+            ],
+        },
+    }
+
+    gate = _quality_gate_result(result, min_rough_score=0.775, max_risk_count=5)
+
+    assert gate["passed"] is False
+    assert gate["blocking_passed"] is True
+    assert gate["diagnostic_reasons"] == [
+        "fda_violation_alignment:category_citation_mismatch:2"
+    ]
+
+
 def test_compile_quality_gate_holds_profile_schema_contract_flag() -> None:
     result = {
         "fixture": "fixture_profile_schema",
@@ -1956,6 +2040,27 @@ def test_quality_retry_context_includes_profile_signature_arity_mismatch() -> No
     )
 
     assert any("signature's arity equal its short schema role list" in line for line in lines)
+
+
+def test_quality_retry_context_includes_fda_violation_alignment_guidance() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "fda_violation_alignment:category_citation_mismatch:2",
+            ]
+        }
+    )
+
+    joined = "\n".join(lines)
+    assert "preserve the source-stated numbered 501(a)(2)(B) CGMP violation list exactly" in joined
+    assert "first declare each numbered CGMP item with fda_cgmp_violation_item/5" in joined
+    assert "same local violation_N atom as both fda_cgmp_violation_item/5 violation_id and violation_number" in joined
+    assert "as both fda_violation/5 violation_id and violation_number" in joined
+    assert "Attach each fda_violation_citation/4 cgmps_requirement row" in joined
+    assert "Do not use the warning-letter id" in joined
+    assert "Do not reuse the same cgmps_requirement citation" in joined
+    assert "adulteration-authority citations belong at warning-letter/adulteration-basis scope" in joined
+    assert "Keep 501(a)(2)(A) insanitary-condition observations separate" in joined
 
 
 def test_quality_retry_context_includes_repeated_structure_profile_defects() -> None:

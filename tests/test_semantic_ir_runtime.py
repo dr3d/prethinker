@@ -1125,6 +1125,77 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         assert not any("non-temporal atom" in warning for warning in warnings)
         assert parsed["admission_diagnostics"]["admitted_count"] == 1
 
+    def test_mapper_allows_typed_timestamp_atoms_and_not_stated_temporal_sentinel(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "ntsb_timeline_event",
+                    "args": [
+                        "occurrence_hir_25_06",
+                        "event_911",
+                        "distress_call",
+                        "t_2023_09_29_204300_cdt",
+                        "start",
+                        "src_911",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "ntsb_safety_action",
+                    "args": [
+                        "action_training",
+                        "occurrence_hir_25_06",
+                        "teutopolis_fire_department",
+                        "hazmat_training",
+                        "not_stated",
+                        "src_training",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["ntsb_timeline_event/6", "ntsb_safety_action/6"],
+            predicate_contracts=[
+                {
+                    "signature": "ntsb_timeline_event/6",
+                    "args": [
+                        "occurrence_id",
+                        "event_id",
+                        "event_kind",
+                        "event_time_or_date",
+                        "sequence_role",
+                        "source_or_scope",
+                    ],
+                },
+                {
+                    "signature": "ntsb_safety_action/6",
+                    "args": [
+                        "action_id",
+                        "occurrence_id",
+                        "actor_id",
+                        "action_kind",
+                        "action_date",
+                        "source_or_scope",
+                    ],
+                },
+            ],
+        )
+
+        assert parsed["facts"] == [
+            "ntsb_timeline_event(occurrence_hir_25_06, event_911, distress_call, t_2023_09_29_204300_cdt, start, src_911).",
+            "ntsb_safety_action(action_training, occurrence_hir_25_06, teutopolis_fire_department, hazmat_training, not_stated, src_training).",
+        ]
+        assert not any("non-temporal atom" in warning for warning in warnings)
+        assert parsed["admission_diagnostics"]["admitted_count"] == 2
+
     def test_mapper_allows_interval_label_as_label_not_temporal_span(self) -> None:
         ir = _ir(
             candidate_operations=[

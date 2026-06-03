@@ -1646,6 +1646,8 @@ def _profile_bootstrap_text_surface(parsed: dict[str, Any]) -> str:
 
 def _is_violation_category_carrier(*, name: str, args: list[str]) -> bool:
     name_text = str(name or "").casefold()
+    if name_text == "fda_cgmp_violation_item":
+        return True
     args_text = " ".join(str(arg or "").casefold() for arg in args)
     violation_markers = (
         "breach",

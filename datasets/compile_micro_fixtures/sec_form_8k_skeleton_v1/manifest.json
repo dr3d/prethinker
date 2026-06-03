@@ -1,0 +1,24 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "sec_form_8k_skeleton_v1",
+  "purpose": "Pressure the SEC Form 8-K skeleton domain pack to preserve cover-page, item-heading, exhibit, and signature anatomy without packing item body prose or exhibit descriptions into atoms.",
+  "source_fixture": "datasets/real_world_transfer/20260523_wild_01/sec_8k_material_event_001",
+  "domain_profile": "datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "sec_filing",
+    "sec_registrant",
+    "sec_registrant_identifier",
+    "sec_filing_item",
+    "sec_exhibit",
+    "sec_signatory"
+  ],
+  "forbidden_classes": [
+    "full_cover_page",
+    "identifier_bundle",
+    "item_body_summary",
+    "full_exhibit_description",
+    "full_signature_block"
+  ]
+}

@@ -3,9 +3,9 @@
 > Status: historical pre-reset instrument overview. The instrument vocabulary is
 > still useful, but old score figures in this document are not current claims.
 > Use
-> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 > and
-> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+> [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 > for current status.
 
 ## What This Document Is
@@ -190,10 +190,10 @@ These distinctions matter because "I don't know," "the source doesn't say," "the
 
 ---
 
-## Current Instrument State
+## Historical Reset Snapshot
 
-The live evidence anchor after the sign-clean reset is the hard-clean floor on
-the current 8-fixture English batch:
+The reset evidence anchor after the sign-clean audit was the hard-clean floor
+on the then-current 8-fixture English batch:
 
 ```text
 Product exact:                  88 / 200 = 44.0%
@@ -203,11 +203,12 @@ Atom-shape-clean product exact: 84 / 200 = 42.0%
 Hard-clean floor:               73 / 200 = 36.5%
 ```
 
-Older native, fresh ugly, real-world, and sealed-unseen 90%+ scorecards remain
-historical evidence with caveats, not current claim-bearing numbers. Detailed
-score history belongs in Git history, local cold archive, or the active
-worksheets. This document keeps the instrument vocabulary, not a rolling
-results ledger.
+Older native, fresh ugly, real-world, sealed-unseen, and reset-floor scorecards
+remain historical evidence with caveats, not current claim-bearing numbers.
+The current phase-close claim is the closed-domain predicate-pack transfer
+result. Detailed score history belongs in Git history, local cold archive, or
+the active worksheets. This document keeps the instrument vocabulary, not a
+rolling results ledger.
 
 Current lessons:
 

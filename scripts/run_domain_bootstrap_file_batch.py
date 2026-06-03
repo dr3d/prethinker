@@ -42,6 +42,7 @@ from scripts.audit_compile_surface_stability import (  # noqa: E402
     _predicate_name as _surface_predicate_name,
     _source_text_atoms as _surface_source_text_atoms,
 )
+from scripts.audit_fda_violation_alignment import audit_facts as _audit_fda_violation_alignment_facts  # noqa: E402
 from scripts.run_domain_bootstrap_file import _attach_profile_admission_report  # noqa: E402
 
 bootstrap_env_local()
@@ -298,6 +299,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--profile-registry-completion-followup", action="store_true")
     parser.add_argument("--profile-registry-accountability-followup", action="store_true")
     parser.add_argument("--fda-violation-detail-bundle-followup", action="store_true")
+    parser.add_argument("--fda-violation-detail-slot-followup", action="store_true")
+    parser.add_argument("--fda-violation-detail-item-map-context", action="store_true")
+    parser.add_argument("--fda-response-assessment-followup", action="store_true")
     parser.add_argument("--document-metadata-profile-extension", action="store_true")
     parser.add_argument("--role-detail-profile-extension", action="store_true")
     parser.add_argument("--legal-citation-profile-extension", action="store_true")
@@ -498,6 +502,9 @@ def _build_command(
         "profile_registry_completion_followup",
         "profile_registry_accountability_followup",
         "fda_violation_detail_bundle_followup",
+        "fda_violation_detail_slot_followup",
+        "fda_violation_detail_item_map_context",
+        "fda_response_assessment_followup",
         "document_metadata_profile_extension",
         "role_detail_profile_extension",
         "legal_citation_profile_extension",
@@ -717,6 +724,7 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "table_list_surface_flags": _table_list_surface_flags(payload),
         "identity_canonicality_flags": _identity_canonicality_flags(payload),
         "compile_health_flags": _compile_health_flags(payload),
+        "fda_violation_alignment_flags": _fda_violation_alignment_flags(payload),
     }
 
 
@@ -989,6 +997,10 @@ def _quality_gate_reason_severity(reason: str) -> int:
         match = re.search(r":groups=(\d+)", text)
         if match:
             return int(match.group(1))
+    if text.startswith("fda_violation_alignment:"):
+        match = re.search(r":(\d+)$", text)
+        if match:
+            return int(match.group(1))
     return 0
 
 
@@ -1159,6 +1171,25 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                 "domain-owned carrier with governed target, category/type/class/context, basis/source, and detail/status "
                 "slots. Do not treat order/request/citation/fine/warning type or legal_basis alone as the violation "
                 "category."
+            )
+        if reason.startswith("fda_violation_alignment:"):
+            add(
+                "QUALITY GATE RETRY: the prior FDA warning-letter compile emitted typed violation/citation rows "
+                "whose numbered violation ids, categories, or CGMP citations did not align. In this retry, preserve "
+                "the source-stated numbered 501(a)(2)(B) CGMP violation list exactly: do not renumber a modeled "
+                "subset, do not merge several numbered bullets into one violation id, and first declare each numbered "
+                "CGMP item with fda_cgmp_violation_item/5: violation_id, letter_id, violation_number, exact CGMP "
+                "citation, source. For numbered CGMP rows use "
+                "the same local violation_N atom as both fda_cgmp_violation_item/5 violation_id and violation_number, "
+                "and as both fda_violation/5 violation_id and violation_number. Attach "
+                "each fda_violation_citation/4 cgmps_requirement row to that same violation_N atom. Do not use the "
+                "warning-letter id, facility id, or wrapper id as the violation_id for a numbered CGMP row. Do not "
+                "reuse the same cgmps_requirement citation across multiple numbered violation_N subjects unless the "
+                "source repeats that citation under each numbered item. Keep "
+                "501(a)(2)(A) insanitary-condition observations separate when "
+                "fda_insanitary_condition/5 is available. FDCA 501(a)(2)(A) or 501(a)(2)(B) adulteration-authority "
+                "citations belong at warning-letter/adulteration-basis scope, not on a numbered violation_N subject. "
+                "Do not repair by inventing new predicate names or by placing citations/prose inside violation_category."
             )
         if reason.startswith("profile_schema_contract:list_range_inventory_slot_loss:"):
             add(
@@ -1534,6 +1565,28 @@ def _compile_surface_contract_flags(payload: dict[str, Any]) -> list[str]:
         direct_surface_count = _optional_int(report.get("direct_surface_count")) or 0
         flags.append(f"{contract}:{status}:source={source_signal_count}:direct={direct_surface_count}")
     return flags
+
+
+def _fda_violation_alignment_flags(payload: dict[str, Any]) -> list[str]:
+    """Summarize typed FDA violation/citation alignment issues."""
+
+    source_compile = payload.get("source_compile")
+    if not isinstance(source_compile, dict):
+        return []
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    if not any(fact.startswith("fda_violation(") or fact.startswith("fda_violation_citation(") for fact in facts):
+        return []
+    text_file = str(payload.get("text_file") or "").replace("\\", "/").rstrip("/")
+    fixture = Path(text_file).parent.name if text_file.endswith("/source.md") else Path(text_file).name
+    audit = _audit_fda_violation_alignment_facts(facts=facts, fixture=fixture or "compile", path=text_file)
+    counts: dict[str, int] = {}
+    for finding in audit.get("findings", []):
+        if not isinstance(finding, dict):
+            continue
+        issue = str(finding.get("issue") or "").strip()
+        if issue:
+            counts[issue] = counts.get(issue, 0) + 1
+    return [f"{issue}:{count}" for issue, count in sorted(counts.items())]
 
 
 def _profile_delivery_flags(payload: dict[str, Any]) -> list[str]:
@@ -2337,6 +2390,13 @@ def _quality_gate_result(
     ] if isinstance(item.get("compile_health_flags"), list) else []
     if compile_health_flags:
         reasons.extend(f"compile_health:{flag}" for flag in compile_health_flags)
+    fda_violation_alignment_flags = [
+        str(flag)
+        for flag in item.get("fda_violation_alignment_flags", [])
+        if str(flag).strip()
+    ] if isinstance(item.get("fda_violation_alignment_flags"), list) else []
+    if fda_violation_alignment_flags:
+        reasons.extend(f"fda_violation_alignment:{flag}" for flag in fda_violation_alignment_flags)
     admitted = _optional_int(item.get("compile_admitted")) or 0
     skipped = _optional_int(item.get("compile_skipped")) or 0
     effective_admitted = _optional_int(item.get("compile_effective_admitted"))
@@ -2378,6 +2438,7 @@ def _quality_gate_result(
         "table_list_surface_flags": table_list_flags,
         "identity_canonicality_flags": identity_flags,
         "compile_health_flags": compile_health_flags,
+        "fda_violation_alignment_flags": fda_violation_alignment_flags,
     }
 
 
@@ -2418,6 +2479,7 @@ def _quality_gate_reason_is_diagnostic(reason: str) -> bool:
         reason.startswith("profile_schema_contract:")
         or reason.startswith("profile_delivery:")
         or reason.startswith("table_list_surface_coverage:")
+        or reason.startswith("fda_violation_alignment:")
         or reason.startswith("compile_health:")
     )
 

@@ -34,8 +34,10 @@ propagation = visible recomputation, not hidden belief
 ## Read First
 
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
+- [Closed domain predicate packs technical note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
 - [Domain tier strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md) - the current post-reset strategy: closed domain schemas, hard-clean gates, and visible trust tiers.
 - [Domain predicate schema process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a document family becomes a customizable governed predicate pack.
+- [Domain pack research evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current evidence for the closed-domain transfer thesis.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for the docs that still describe the living project.
 - [Compiled KB artifact package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - what a compiled document product contains and what Q&A may use.
@@ -49,34 +51,44 @@ marked in-place as pre-reset context. They are not current claim-bearing docs.
 
 ## Current Research Headline
 
-Prethinker is in a **sign-clean reset**. Earlier high scores were useful
-research signals, but they are no longer public claims because audits showed
-that some answer delivery depended on prose/source-record routing,
-question-shape routing, or judge-facing surface tokens.
+Prethinker is in a research-first **domain-pack transfer** phase. Earlier high
+scores were useful lab signals, but they are no longer public claims because
+audits showed that some answer delivery depended on prose/source-record
+routing, question-shape routing, or judge-facing surface tokens.
 
-The current claim-bearing floor is deliberately harsher:
+The current claim-bearing question is narrower and falsifiable:
 
 ```text
-Current 8-fixture English batch, model-redacted hard-road floor
-
-Product exact:                  88 / 200 = 44.0%
-Typed-plan exact:               84 / 200 = 42.0%
-Redaction-survived exact:       81 / 200 = 40.5%
-Atom-shape-clean product exact: 84 / 200 = 42.0%
-Hard-clean floor:               73 / 200 = 36.5%
+Can a closed predicate domain, built from a small seed set, transfer hard-clean
+to unseen messy official documents in the same family under strict governance?
 ```
 
-That number is not the product ambition. It is the honest research floor for
-the open general compiler after the old shortcuts are no longer allowed to
-score. The current product-shaped direction is a closed domain schema: one
-document family, a governed predicate pack, explicit omission/accountability,
-typed-plan replay, redaction survival, atom-shape cleanliness, and visible
-trust tiers.
+Current evidence supports the narrow claim that recurring official-document
+skeleton anatomy can stabilize under closed, lens-scoped predicate packs:
 
-The practical next target is not another broad public proclamation. It is a
-domain pack that can show Tier 1 verified answers on a bounded document type,
-with lower-trust general typed and RAG/retrieval fallbacks labeled instead of
-blended into the score.
+```text
+SEC Form 8-K skeleton pack:
+  seed micro 13 / 13
+  three unlike transfers: 13 / 13, 12 / 12, 12 / 12
+  forbidden support: 0 in all claim-bearing cells
+
+FDA warning-letter pack:
+  transfer_001 current-gate replay: 26 / 26
+  transfer_002 fresh current-pack bundle: 20 / 27
+  boundary: wrapper role semantics, context-dependent category/substance,
+    response/detail value flesh
+
+NTSB investigation pack:
+  seed micro 13 / 13
+  first unlike transfer 18 / 25 manifest; 19 / 25 reducer replay
+  boundary: casualty, safety-action, and findings substance
+```
+
+The earlier general hard-clean floor remains important historical context:
+`73 / 200` (`36.5%`) on the then-current 8-fixture English batch. It is not the
+active thesis by itself. The active thesis is whether closed predicate domains
+can produce verified, abstention-aware Tier 1 answers on bounded document
+families under strict gates.
 
 ## Current State
 
@@ -84,25 +96,21 @@ Read [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STA
 
 The short version:
 
-- `process_utterance()` is the canonical live runtime entrypoint.
-- The UI is a manual demonstration cockpit, not a marketing page.
-- Source-document research is artifact-first: compile once, freeze the KB package, then run row-level QA, selector, direct-surface, and repair experiments against that package.
-- `semantic_ir_v1` remains the live architecture pivot: stronger model semantics before deterministic admission.
-- The console defaults to the current LM Studio `qwen/qwen3.6-35b-a3b` Semantic IR lane for manual research runs.
-- `medical@v0` is the main bounded domain profile.
-- UMLS is used as a bounded normalization and semantic-type bridge, not as a giant preloaded clinical encyclopedia.
-- The active Semantic IR path passes `medical@v0` predicate contracts and compact UMLS concept context into the model input before deterministic admission.
-- A thin profile roster now exposes skill-like domain packages such as `medical@v0`, `story_world@v0`, and `probate@v0`; only explicitly selected thick context affects the current Semantic IR pass.
-- `active_profile=auto` now uses `semantic_router_v1` to select a cataloged profile per turn and load that profile's thick context/contracts into the Semantic IR call without granting write authority.
-- `scripts/run_profile_bootstrap.py`, `scripts/run_domain_bootstrap_file.py`, and `scripts/run_profile_bootstrap_loop.py` are the current meta-profile experiments: the model proposes entity types, predicates, contracts, risks, intake passes, and starter cases for unfamiliar material; review loops and ordinary mapper admission decide whether the proposed surface is useful.
-- `scripts/run_mixed_domain_agility.py` randomizes Goldilocks, Glitch, Ledger, Silverton, Harbor, CourtListener, SEC/contracts, and medical turns through `active_profile=auto` as a cross-domain agility pressure gauge.
-- `legal_courtlistener@v0` and `adapters/courtlistener/` are the legal-source profile/adapter lane for claim/finding, citation, docket, role-scope, provenance, and identity-boundary experiments.
-- `sec_contracts@v0` and `adapters/sec_edgar/` are the third large starter domain, aimed at obligations, conditions, temporal triggers, party roles, and filing/exhibit provenance.
-- Epistemic Worlds v1 preserves projection-blocked and supported-but-skipped candidate writes as scoped diagnostics, without asserting them as global truth.
-- The Prolog KB is the committed truth layer; model output remains provisional until the runtime admits it.
-- Long story-like utterances can now be segmented into focused Semantic IR passes so narrative ingestion stays inspectable instead of relying on one summary-shaped model response.
-- Historical reports, old prompt snapshots, and run logs were pruned from the forward-facing tree because Git already preserves them.
-- Selector guard pressure is tracked as a design signal: the current guard surface has `5` active return sites that collapse into `4` semantic families with `0` unclassified reasons. The next discipline is merge and retire before parameterizing.
+- Research is artifact-first: compile a source document family through a closed
+  predicate profile, freeze the typed artifacts, then test hard-clean transfer
+  on unlike same-family documents.
+- The active claim-bearing profiles are FDA warning letters, SEC Form 8-K
+  skeletons, and NTSB investigation skeleton/boundary probes.
+- Query and compile must meet on governed typed atoms; source-record prose,
+  display strings, and question-text regex routing are not allowed to carry a
+  claim.
+- `semantic_ir_v1` and the mapper/admission layer remain important runtime
+  substrate, but the current public research story is the domain-pack transfer
+  result.
+- Historical high-score runs, old prompt snapshots, and run logs are retained
+  as history, not as current public claim surfaces.
+- The repo should be read as a lab notebook plus instrument, not as a polished
+  product SDK.
 
 ## Useful Entry Points
 
@@ -133,28 +141,29 @@ Open `http://127.0.0.1:8765` for the live console.
 The current full-suite verification headline is kept in
 [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md).
 
-Focused local verification for the newest compile-surface and source-record
-work:
+Focused local verification for the current domain-pack and governance work:
 
 ```powershell
 python -m pytest -q
-# 2009 passed, 2 subtests passed
-
-python scripts\audit_active_instrument_leakage.py
-# forbidden hits: 0
-# warning hits: 0
+python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 ```
 
 Current high-signal evidence:
 
-- Current 8-fixture English hard-road floor: product exact `88 / 200`
-  (`44.0%`), typed-plan exact `84 / 200` (`42.0%`), redaction-survived
-  exact `81 / 200` (`40.5%`), atom-shape-clean product exact `84 / 200`
-  (`42.0%`), hard-clean floor `73 / 200` (`36.5%`).
-- FDA warning-letter domain micro-fixture: the first domain-pack wedge is live
-  under `datasets/compile_micro_fixtures/fda_warning_letter_domain_v1/`, with
-  value-domain, atom-shape, omission/accountability, and carrier-contract gates
-  being tested before any public product claim.
+- SEC Form 8-K skeleton domain pack: seed micro `13 / 13`; three unlike
+  retained transfers `13 / 13`, `12 / 12`, and `12 / 12`, with `0` supported
+  forbidden rows and clean atom/lens governance in claim-bearing cells.
+- FDA warning-letter domain pack: transfer_001 current-gate replay `26 / 26`;
+  transfer_002 fresh current-pack bundle `20 / 27`, `0 / 7` forbidden, clean
+  atom/lens governance, now treated as boundary evidence rather than a
+  row-grinding target.
+- NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
+  `18 / 25` in the manifest and `19 / 25` after deterministic reducer replay,
+  `0` forbidden, showing the same skeleton-vs-substance boundary.
+- Current 8-fixture English hard-road floor remains historical context:
+  product exact `88 / 200` (`44.0%`), typed-plan exact `84 / 200` (`42.0%`),
+  redaction-survived exact `81 / 200` (`40.5%`), atom-shape-clean product exact
+  `84 / 200` (`42.0%`), hard-clean floor `73 / 200` (`36.5%`).
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.
