@@ -30,8 +30,11 @@ The current front-door documents are:
 - `docs/PUBLIC_DOCS_GUIDE.md`
 
 Older 80.5%, 92.33%, 95%, 98.5%, and 99% measurements remain historical
-calibration evidence only. They are not current claim-bearing metrics unless a
-newer note explicitly re-gates them under the current hard-clean conditions.
+calibration evidence only. Some were contaminated by prose-smuggling paths:
+source/display text, question-shape routing, and judge-facing answer tokens
+helped rows score exact without proving typed derivation. They are not current
+claim-bearing metrics unless a newer note explicitly re-gates them under the
+current hard-clean conditions.
 
 ## Claim-Bearing Gates
 

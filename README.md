@@ -35,7 +35,6 @@ propagation = visible recomputation, not hidden belief
 
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
 - [Closed domain predicate packs technical note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
-- [Domain tier strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md) - the current post-reset strategy: closed domain schemas, hard-clean gates, and visible trust tiers.
 - [Domain predicate schema process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a document family becomes a customizable governed predicate pack.
 - [Domain pack research evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current evidence for the closed-domain transfer thesis.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
@@ -46,15 +45,16 @@ propagation = visible recomputation, not hidden belief
 - [Boundary probe method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed without fixture-vocabulary leakage.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
 
-Historical scorecards and older public notes remain in Git history or are
-marked in-place as pre-reset context. They are not current claim-bearing docs.
+Historical scorecards and older public notes remain in Git history or the local
+archive. They are not current claim-bearing docs.
 
 ## Current Research Headline
 
 Prethinker is in a research-first **domain-pack transfer** phase. Earlier high
-scores were useful lab signals, but they are no longer public claims because
-audits showed that some answer delivery depended on prose/source-record
-routing, question-shape routing, or judge-facing surface tokens.
+scores were useful lab signals, but some were contaminated measurements, not
+current public claims. Audits showed that agent-authored repairs had let
+prose/source-record routing, question-shape routing, and judge-facing answer
+tokens lift exact-rate without proving typed derivation.
 
 The current claim-bearing question is narrower and falsifiable:
 
@@ -84,12 +84,6 @@ NTSB investigation pack:
   boundary: casualty, safety-action, and findings substance
 ```
 
-The earlier general hard-clean floor remains important historical context:
-`73 / 200` (`36.5%`) on the then-current 8-fixture English batch. It is not the
-active thesis by itself. The active thesis is whether closed predicate domains
-can produce verified, abstention-aware Tier 1 answers on bounded document
-families under strict gates.
-
 ## Current State
 
 Read [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) first. It is the compact, current orientation document for the repo.
@@ -114,9 +108,10 @@ The short version:
 
 ## Useful Entry Points
 
-- [docs/DOMAIN_TIER_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md) - current post-reset strategy and trust-tier boundary.
+- [docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
 - [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - current work map and reset readiness.
-- [docs/DOMAIN_TIER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_WORKSHEET.md) - live lab notes for the domain-schema climb.
+- [docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
+- [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current artifact ledger and family-by-family evidence.
 - [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - maintained public-doc reading map.
 - [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - boundary-coordinate and transfer-safe fixture method.
 - [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
@@ -160,16 +155,11 @@ Current high-signal evidence:
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
   `18 / 25` in the manifest and `19 / 25` after deterministic reducer replay,
   `0` forbidden, showing the same skeleton-vs-substance boundary.
-- Current 8-fixture English hard-road floor remains historical context:
-  product exact `88 / 200` (`44.0%`), typed-plan exact `84 / 200` (`42.0%`),
-  redaction-survived exact `81 / 200` (`40.5%`), atom-shape-clean product exact
-  `84 / 200` (`42.0%`), hard-clean floor `73 / 200` (`36.5%`).
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.
-- Historical high-score runs remain in Git history and marked docs as
-  calibration context. They are not current claim-bearing numbers after the
-  sign-clean reset.
+- Historical high-score runs remain in Git history and the local archive. They
+  are not current claim-bearing numbers after the sign-clean reset.
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
 

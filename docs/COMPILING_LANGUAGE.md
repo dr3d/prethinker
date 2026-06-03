@@ -1,19 +1,18 @@
 # Compiling Language
 
-Last updated: 2026-05-28
+Last updated: 2026-06-03
 
-> Status: historical pre-reset public explainer. The core metaphor is still
-> useful, but the measurement figures below are not current claims. Current
-> phase-close status lives in
-> [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
-> and
-> [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md).
+This is the visitor-friendly mental model. Current measurements and non-claims
+live in
+[Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
+and
+[Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md).
 
 How Prethinker treats ordinary English as compilable input and turns it into a
 queryable, auditable knowledge program.
 
-This document is the visitor-friendly mental model. It explains the idea, not
-every implementation detail. For the exact current artifact contract, read
+It explains the idea, not every implementation detail. For the exact current
+artifact contract, read
 [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md).
 For QA measurement, read
 [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md).

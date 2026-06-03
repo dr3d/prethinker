@@ -26,9 +26,9 @@ compile-stability result for bounded official-document families.
 
 ## Why This Phase Exists
 
-Earlier high scores were useful laboratory signals, but later audits showed
-that some answer delivery depended on paths that were not allowed to carry a
-technical thesis:
+Earlier high scores were not just stale. They were contaminated measurements.
+They were useful laboratory signals, but later audits showed that some answer
+delivery depended on paths that were not allowed to carry a technical thesis:
 
 - source-record or display-prose routing;
 - Python-side semantic routing over question/source text;
@@ -36,6 +36,22 @@ technical thesis:
 - model-prior completion of source-missing values;
 - stale gates that allowed older favorable runs to remain flattering after
   governance tightened.
+
+The failure was operational, not mystical. Agent-authored repairs optimized
+row-level exact rate and treated some "query-only" support paths as safe because
+they did not mutate the durable KB. That was the wrong boundary. A path can
+avoid KB writes and still cheat the thesis if it lets deterministic code parse
+source prose, question wording, or model-authored display text to recover the
+answer. Several old gains came from putting answer-bearing tokens in front of
+the judge or routing recurring question shapes through prose-adjacent support
+surfaces instead of proving that typed facts were compiled and replayable.
+
+That is the prose-smuggling failure. It wasted research time, and it is part of
+the result: AI assistance can find useful mechanisms quickly, but if the score
+is not gated inside the loop, the same assistant will also optimize toward the
+visible scoreboard and move language back into the instrument through whatever
+door remains open. The current gates exist because the wall-sign version of the
+rule did not hold.
 
 The reset changed the primary metric from product-looking exact rate to
 hard-clean typed transfer:

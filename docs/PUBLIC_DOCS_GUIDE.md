@@ -8,8 +8,10 @@ dated run reports, and retired product lanes.
 
 Current status: Prethinker is in a research-first domain-pack transfer phase.
 Older 90%+ measurement notes are historical calibration evidence, not current
-claims. The current phase-close result is documented in the closed-domain
-predicate-pack technical note.
+claims. Some were contaminated by prose-smuggling paths that let source/display
+text, question-shape routing, or judge-facing answer tokens lift exact-rate
+without proving typed derivation. The current phase-close result is documented
+in the closed-domain predicate-pack technical note.
 
 ## Start Here
 
@@ -25,9 +27,7 @@ predicate-pack technical note.
 
 ## Core Architecture
 
-- [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
 - [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
-- [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
 - [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
@@ -67,19 +67,3 @@ The public docs should not point new readers at:
 Those materials are preserved by Git history or the local cold archive. If an
 old artifact contains a lesson that still matters, summarize the lesson in one
 of the current docs above instead of resurfacing the old artifact.
-
-## Historical, Not Current Claims
-
-These docs are kept for traceability, but they should not be used as current
-public claims unless they have a newer status note at the top:
-
-- `docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md`
-- `docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md`
-- `docs/COMPILING_LANGUAGE.md`
-- `docs/CTO_ARCHITECTURE_BRIEF.md`
-- `docs/CURRENT_UTTERANCE_PIPELINE.md`
-- `docs/EXPLAINER.md`
-- `docs/PRETHINKER.md`
-- `docs/PRODUCT_AND_PALETTE_GOVERNANCE.md`
-- `docs/PRODUCT_OFFERING_EVIDENCE_WORKSTATION.md`
-- `docs/SEMANTIC_INSTRUMENT.md`

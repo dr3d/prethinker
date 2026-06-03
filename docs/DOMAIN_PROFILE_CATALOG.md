@@ -60,14 +60,14 @@ compilation while keeping the admission boundary inspectable.
 
 ## Unknown Domains
 
-Unknown-domain work now belongs under product and palette governance:
+Unknown-domain work now belongs under the governed domain-predicate process:
 
 - use retrieval or representative samples to propose a predicate palette;
 - treat the palette as review material, not facts;
 - validate slot contracts and unlike-document transfer;
 - promote only terms that survive replay without fixture vocabulary.
 
-See [Product And Palette Governance](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md)
+See [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 for the current version of this direction.
 
 ## Safety Rules

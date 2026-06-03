@@ -73,9 +73,14 @@ documents.
 This does not support claims of 90%+ general QA accuracy, arbitrary-domain
 document understanding, product readiness, or self-serve schema induction.
 
-Older 80.5%, 92.33%, 95%, 98.5%, and 99% figures are historical calibration
-evidence only unless a newer note explicitly re-gates them under the current
-hard-clean conditions.
+Older 80.5%, 92.33%, 95%, 98.5%, and 99% figures are not current accuracy
+claims. Some were contaminated by prose-smuggling paths: source/display text,
+question-shape routing, and judge-facing answer tokens were allowed to help
+rows score exact even when the answer had not been derived from compact typed
+facts. That happened because agent-authored repairs optimized row-level score
+and confused "does not mutate the KB" with "does not interpret prose." Treat
+those numbers as evidence of what the old harness could be fooled into
+measuring, not as evidence of the current thesis.
 
 ## Next Technical Work
 

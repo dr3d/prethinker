@@ -425,8 +425,6 @@ Current read:
   scorer need a fresh heldout ACH batch before we say Prethinker can reliably
   identify pivotal evidence.
 
-The fixture request for that heldout is:
-
-```text
-docs\NEXT_FRESH_FIXTURE_REQUESTS_20260528.md
-```
+The original May 2026 fixture request has been aged out of the public tree.
+Current fixture requests should be written from the active research question
+rather than resurrecting the old work order.

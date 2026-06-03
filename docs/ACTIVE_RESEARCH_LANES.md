@@ -41,8 +41,8 @@ dataset label. Promote only when the principle survives unlike probes.
 
 | Priority | Lane | Question | Current Surface |
 | --- | --- | --- | --- |
-| 1 | Domain tier strategy | Can one closed document-type schema produce verified Tier 1 answers while the general compiler remains a lower-trust fallback? | `docs/DOMAIN_TIER_STRATEGY.md` |
-| 2 | Per-answer-class hard-clean table | Which answer classes survive the hard-clean gate, and which substantive classes need domain predicates? | `docs/DOMAIN_TIER_WORKSHEET.md`, archive artifacts |
+| 1 | Closed-domain transfer claim | Can a small closed predicate pack transfer hard-clean across unlike same-family official documents? | `docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md`, `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md` |
+| 2 | Domain predicate process | Can pack construction be described without reopening prose smuggling, fixture vocabulary, or open predicate drift? | `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md` |
 | 3 | Answer-judge governance | Does the evaluator reject empty evidence, wrong-reference evidence, prose-dependent evidence, and oracle leakage? | `scripts/audit_reference_judge_null_controls.py`, `scripts/audit_redaction_replay.py`, `scripts/audit_typed_plan_replay.py` |
 | 4 | Atom-shape and carrier governance | Can compiled atoms stay compact, typed, and contract-governed instead of hiding prose in names or slots? | `scripts/audit_kb_atom_inventory.py`, carrier registry |
 | 5 | Fixture-bank predicate packs | Which retained official-document families can become closed, lens-scoped predicate packs without collecting new documents or grinding rows? | `docs/FIXTURE_BANK_PREDICATE_PACK_WORKSHEET.md`, domain registries |
@@ -83,27 +83,13 @@ clean evidence fastest:
 
 Provider failures are transport evidence, not architecture evidence.
 
-## Reset And Domain-Pack Readiness
+## Domain-Pack Readiness
 
-The project is in a sign-clean reset, not a release freeze. Earlier high product
-scores remain useful history, but they are not current claim-bearing numbers
-because they depended on source-record prose paths, open predicate drift, or
-judge-facing surface tokens.
-
-The reset hard-road floor on the 8-fixture English batch was:
-
-```text
-Product exact:                  88 / 200 = 44.0%
-Typed-plan exact:               84 / 200 = 42.0%
-Redaction-survived exact:       81 / 200 = 40.5%
-Atom-shape-clean product exact: 84 / 200 = 42.0%
-Hard-clean floor:               73 / 200 = 36.5%
-```
-
-This remains useful reset context, not the current headline claim. It says the
-general typed layer is alive but not sufficient as the whole research claim.
-The current claim-bearing move is closed domain schemas measured by the same
-hard-clean gates.
+The project is past the sign-clean reset and is now in a narrow domain-pack
+transfer phase. Earlier high product scores are not current claim-bearing
+numbers because they depended on source-record prose paths, open predicate
+drift, or judge-facing surface tokens. The current claim-bearing move is closed
+domain schemas measured by hard-clean gates.
 
 FDA warning letters remain the first wedge, but they are not "done". The
 current-gate replay picture is stricter than the older worksheet notes:
