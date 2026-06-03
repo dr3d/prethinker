@@ -335,6 +335,15 @@ Current audit:
 python scripts\audit_domain_omission_accountability.py --compile-json PATH --fixture FIXTURE_ID
 ```
 
+Current static coverage report:
+
+```text
+python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
+```
+
+The static report reads only registries and typed fixture oracles. It should
+surface fixture-only omission patterns before they become hidden conventions.
+
 11. Test reproducibility before promotion.
 
 A domain carrier does not promote because it works once. The promotion bar is:

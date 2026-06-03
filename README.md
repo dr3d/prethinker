@@ -38,6 +38,7 @@ propagation = visible recomputation, not hidden belief
 - [Domain predicate schema process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a document family becomes a customizable governed predicate pack.
 - [Domain pack research evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current evidence for the closed-domain transfer thesis.
 - [Domain pack status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for the active closed predicate packs.
+- [Domain accountability status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for the docs that still describe the living project.
 - [Compiled KB artifact package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - what a compiled document product contains and what Q&A may use.
@@ -114,6 +115,7 @@ The short version:
 - [docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
 - [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current artifact ledger and family-by-family evidence.
 - [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
+- [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission/accountability coverage for active closed predicate packs.
 - [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - maintained public-doc reading map.
 - [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - boundary-coordinate and transfer-safe fixture method.
 - [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.

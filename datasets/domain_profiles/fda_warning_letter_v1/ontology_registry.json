@@ -22,6 +22,13 @@
       "omission_kind": "none_found",
       "reason_code": "future_eligibility_only_no_meeting_held",
       "trigger": "source_mentions_future_post_warning_letter_meeting_eligibility_but_does_not_state_a_meeting_or_teleconference_occurred"
+    },
+    {
+      "id": "facility_fei_not_shown",
+      "carrier_signature": "fda_facility_identity/5",
+      "omission_kind": "none_found",
+      "reason_code": "no_fei_shown_in_letter",
+      "trigger": "source_identifies_the_facility_but_does_not_state_an_fei_or_equivalent_registered_facility_identifier"
     }
   ],
   "lenses": [

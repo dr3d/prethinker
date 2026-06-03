@@ -26,6 +26,7 @@ The current front-door documents are:
 - `docs/CURRENT_RESEARCH_HEADLINE.md`
 - `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
 - `docs/DOMAIN_PACK_STATUS.md`
+- `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`
 - `docs/ACTIVE_RESEARCH_LANES.md`
 - `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
 - `docs/PUBLIC_DOCS_GUIDE.md`
@@ -138,6 +139,9 @@ explain the current falsifiable result:
 - keep `docs/DOMAIN_PACK_STATUS.md` regenerated from
   `scripts/summarize_domain_pack_status.py` so domain/predicate/fixture counts
   are visible without worksheet archaeology;
+- keep `docs/DOMAIN_ACCOUNTABILITY_STATUS.md` regenerated from
+  `scripts/summarize_domain_accountability_status.py` so omission requirements,
+  fixture coverage, and fixture-only omission patterns are visible;
 - keep SEC as the formal methods example;
 - keep FDA as the richer case study with both positive transfer and boundary
   evidence;
@@ -187,6 +191,7 @@ $env:PYTHONPATH='.'
 pytest -q
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json
+python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
 ```
 
 Before a public/docs cleanup commit, also run stale-claim greps over

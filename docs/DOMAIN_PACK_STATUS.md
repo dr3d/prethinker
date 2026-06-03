@@ -26,7 +26,7 @@ This report does not read source prose, QA questions, or judge outputs.
 - Predicates: `22`
 - Domain-specific predicates: `21`
 - Lenses: `10`
-- Accountability requirements: `2`
+- Accountability requirements: `3`
 
 ### Lenses
 
