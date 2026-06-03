@@ -183,7 +183,7 @@ Recommended protocol:
    - no direct corpus-specific answer patches.
 7. Re-run the locked pack for N=2 or N=3 cycles if variance is suspected.
 8. Confirm on a fresh ugly heldout batch before calling the candidate lane
-   product-ready.
+   research-viable.
 
 Promotion standard:
 
@@ -237,7 +237,7 @@ Read the four cells separately:
 - If only `candidate compile + candidate query` looks good, suspect paired
   overfitting: the two paths may be compensating for each other's quirks.
 - If both cross-pairs hold and the paired lane holds, the split is much more
-  product-plausible.
+  research-viable.
 
 Calibration fixtures for this matrix should include:
 

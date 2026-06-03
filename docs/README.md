@@ -24,14 +24,15 @@ Use this short path if you are new:
 1. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
 2. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - compact research claim and evidence snapshot.
 3. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - artifact ledger and family-by-family evidence.
-4. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
-5. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
-6. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
-7. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
-8. [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future review lenses read evidence without mutating the KB.
-9. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - doctrine for designing fixtures as boundary probes rather than random ingestion.
-10. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
-11. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
+4. [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
+5. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
+6. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
+7. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
+8. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
+9. [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future review lenses read evidence without mutating the KB.
+10. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - doctrine for designing fixtures as boundary probes rather than random ingestion.
+11. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
+12. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
 
 Then go deeper:
 
@@ -46,6 +47,7 @@ Then go deeper:
 - [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+- [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md)
 - [Fixture Bank Predicate Pack Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FIXTURE_BANK_PREDICATE_PACK_WORKSHEET.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)

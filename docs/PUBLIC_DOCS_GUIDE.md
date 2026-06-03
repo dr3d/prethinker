@@ -20,10 +20,11 @@ in the closed-domain predicate-pack technical note.
 3. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
 4. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - compact current claim and evidence snapshot.
 5. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - artifact ledger and family-by-family evidence.
-6. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
-7. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
-8. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
-9. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
+6. [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
+7. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
+8. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
+9. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
+10. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
 
 ## Core Architecture
 
@@ -38,6 +39,7 @@ in the closed-domain predicate-pack technical note.
 
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+- [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 

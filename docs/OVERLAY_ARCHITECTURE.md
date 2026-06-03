@@ -22,8 +22,8 @@ source documents
 
 Overlays may:
 
-- read compiled evidence, source records, claims, dates, quantities, statuses,
-  authorities, and diagnostics;
+- read compiled typed evidence, source coordinates, claims, dates, quantities,
+  statuses, authorities, and diagnostics;
 - ask an LLM to propose report-only judgments under an explicit schema;
 - run deterministic scoring, ranking, grouping, or visualization over those
   proposed judgments;
@@ -35,6 +35,7 @@ Overlays may not:
 - alter compile artifacts;
 - mutate QA verdicts;
 - create compatibility shortcuts for core queries;
+- parse source-record/display prose as the evidence route;
 - use fixture labels, answer strings, row ids, or source nouns as hidden
   architecture;
 - turn an overlay ranking into truth without an explicit governed admission
@@ -68,12 +69,16 @@ metrics.
 
 Current read:
 
-- ranking is product-plausible on the recent ACH stress batches;
-- low-sensitivity controls are behaving;
-- high-sensitivity pivotal evidence is promising on the current stress sets;
-- medium sensitivity now has a deterministic family-level mechanism, but that
+- ACH is research-plausible as a deterministic overlay, but not a solved
+  competing-hypotheses claim;
+- the existing real-document probes mostly collapse to one survivor and zero
+  sensitivity rows, so they are arithmetic sanity checks rather than validation
+  of pivotal-evidence intelligence;
+- low-sensitivity controls have behaved in recent stress work, and
+  high-sensitivity pivotal evidence is promising on the current stress sets;
+- medium sensitivity has a deterministic family-level mechanism, but that
   success is still same-batch rescore evidence and needs a fresh heldout before
-  it becomes a product claim;
+  it becomes a claim-bearing result;
 - evidence-role diagnostics are useful but remain optional because they can
   compete with dependency capture.
 
@@ -94,18 +99,18 @@ deterministic report out, no KB mutation and no QA score movement.
 
 Current read:
 
-- useful as a low-cost product lens for official documents with deadlines,
+- useful as a low-cost research lens for official documents with deadlines,
   notices, effective dates, response windows, and status changes;
 - not yet integrated with compiled date/event predicates;
 - no claim yet that Prethinker automatically builds timeline payloads.
 
 ## Why This Pattern Matters
 
-The overlay pattern lets Prethinker grow product surfaces without stuffing every
-reasoning mode into the compiler. The compiler's job is preservation and
-admission. Overlays can then make specialized review modes legible to people
-who already work with evidence matrices, timelines, coverage gaps,
-contradictions, obligations, and source confidence.
+The overlay pattern lets Prethinker test specialized review surfaces without
+stuffing every reasoning mode into the compiler. The compiler's job is
+preservation and admission. Overlays can then make specialized review modes
+legible to people who already work with evidence matrices, timelines, coverage
+gaps, contradictions, obligations, and source confidence.
 
 This keeps the market-facing story broad while keeping the instrument narrow:
 

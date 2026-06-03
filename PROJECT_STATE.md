@@ -25,6 +25,7 @@ The current front-door documents are:
 - `docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md`
 - `docs/CURRENT_RESEARCH_HEADLINE.md`
 - `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
+- `docs/DOMAIN_PACK_STATUS.md`
 - `docs/ACTIVE_RESEARCH_LANES.md`
 - `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
 - `docs/PUBLIC_DOCS_GUIDE.md`
@@ -134,6 +135,9 @@ The important boundary is source meaning versus durable truth:
 The next useful work is not another row-grinding climb. It is to preserve and
 explain the current falsifiable result:
 
+- keep `docs/DOMAIN_PACK_STATUS.md` regenerated from
+  `scripts/summarize_domain_pack_status.py` so domain/predicate/fixture counts
+  are visible without worksheet archaeology;
 - keep SEC as the formal methods example;
 - keep FDA as the richer case study with both positive transfer and boundary
   evidence;
@@ -182,6 +186,7 @@ Common local checks:
 $env:PYTHONPATH='.'
 pytest -q
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
+python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json
 ```
 
 Before a public/docs cleanup commit, also run stale-claim greps over
