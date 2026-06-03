@@ -116,7 +116,9 @@ fda_warning_letter_domain_transfer_001
   current replay of local LM Studio all-lens union archive:
     26 / 26, 0 / 9 supported forbidden, research integrity gate pass
   note: the current replay required the deterministic-union lens-scope guard
-    and the context-dependent CGMP citation/category correction
+    and the context-dependent CGMP citation/category correction. It also
+    depends on a post-reset destructive-reducer bug fix, so it is legitimate
+    current-gate evidence but not a pristine first-pass compile.
 
 fda_warning_letter_domain_transfer_002
   fresh current-pack local LM Studio lens bundle:

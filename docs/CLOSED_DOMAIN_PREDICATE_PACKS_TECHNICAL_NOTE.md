@@ -24,6 +24,14 @@ This is not a claim of general document understanding, product readiness,
 self-serve schema induction, or 90%+ QA accuracy. It is a falsifiable
 compile-stability result for bounded official-document families.
 
+This note has two co-headline findings:
+
+1. Closed, lens-scoped predicate packs can make recurring official-document
+   skeleton anatomy reproducible enough to test under hard gates.
+2. AI-assisted measurement will optimize toward the visible score unless the
+   governance rule bites inside the loop. The old high-score arc is evidence
+   for that failure mode, not just project backstory.
+
 ## Why This Phase Exists
 
 Earlier high scores were not just stale. They were contaminated measurements.
@@ -52,6 +60,10 @@ is not gated inside the loop, the same assistant will also optimize toward the
 visible scoreboard and move language back into the instrument through whatever
 door remains open. The current gates exist because the wall-sign version of the
 rule did not hold.
+
+That measurement-drift result is as important as the domain-pack result. It is
+the reason claim-bearing gates are run as part of the research loop instead of
+being treated as reviewer advice after the score is already known.
 
 The reset changed the primary metric from product-looking exact rate to
 hard-clean typed transfer:
@@ -85,6 +97,39 @@ gates relevant to that run:
 Targeted replays are mechanism evidence, not transfer claims. Composed
 historical runs are diagnostic unless a fresh same-condition bundle reproduces
 them.
+
+## Reproduction Conditions
+
+Current public numbers should be read with the following reproducibility unit:
+
+```text
+code / fixture checkpoint:
+  053f3294 before this documentation polish
+
+fixtures and profiles:
+  datasets/domain_profiles/*
+  datasets/compile_micro_fixtures/*
+
+primary recent local lane:
+  LM Studio OpenAI-compatible endpoint
+  qwen/qwen3.6-35b-a3b / Qwen3.6 35B A3B where recorded
+
+representative recorded settings:
+  temperature=0
+  top_p=1.0
+  requested num_ctx=65536 where recorded
+  N>=3 same-condition compiles
+  support>=2 promotion threshold
+
+seed / quantization / loaded context:
+  must be taken from the run artifact or local-server metadata when present.
+  They are part of the measurement condition; if absent, that cell has a
+  metadata limitation and should not be used as a cross-runtime comparison.
+```
+
+The artifact roots named below are the current handles for reconstruction. A
+reader should not treat model name alone, or a later docs-only commit, as the
+reproducibility unit.
 
 ## Method Summary
 
@@ -156,6 +201,13 @@ Claim-bearing and boundary artifacts:
 | Transfer 001 current replay | `26/26`, `0/9` supported forbidden, integrity pass | `tmp/domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` |
 | Transfer 002 fresh current pack | `20/27`, `0/7` supported forbidden, atom/lens gates clean | `tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` |
 | Transfer 003 archived replay | `18/26`, `0/10` supported forbidden, current integrity fail | `tmp/domain_transfer_gate_fda_t003_current_rescore_fixed_20260603` |
+
+The transfer_001 `26/26` cell is legitimate under the current gate, but it is
+not a pristine first-pass compile. It depends on post-reset deterministic
+cleanup, including a destructive-reducer bug fix and removal of an ambiguous,
+context-dependent CGMP citation/category projection from deterministic category
+mapping. Treat it as evidence that the current gated pack can support that
+cell, not as evidence that all FDA warning-letter substance is solved.
 
 Per-layer boundary:
 
