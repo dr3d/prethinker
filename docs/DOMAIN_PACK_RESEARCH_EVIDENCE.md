@@ -113,19 +113,21 @@ standalone compile artifacts.
 
 `datasets/domain_pack_measurements/current_compile_fact_qa_manifest.json`
 records the current locally reproducible compile-fact QA cells for the SEC seed
-and three transfers, the first NTSB transfer, and FDA transfer_002 current
-bundle. Run it with:
+and three transfers, the first NTSB transfer, FDA transfer_002 current bundle,
+and OSHA seed/transfer probe. Run it with:
 
 ```powershell
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 ```
 
-The 2026-06-04 manifest run passed across all six cells:
+The 2026-06-04 manifest run passed across all eight cells:
 
 ```text
 SEC seed/transfer support>=2: 13/13, 13/13, 12/12, 12/12
 NTSB transfer support>=2: 18/25
 FDA transfer_002 support>=2: 20/27
+OSHA seed/transfer support>=2: 18/20, 12/15
+OSHA per-run exact: 53/60 seed, 27/45 transfer
 redaction replay: pass, 0 prose-dependent exact rows in every cell
 typed-plan replay: pass, 0 unregistered exact plans in every cell
 ```

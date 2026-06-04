@@ -1,6 +1,6 @@
 {
   "schema": "prethinker.compile_fact_qa_manifest.v1",
-  "description": "Current locally reproducible compile-fact judged-QA cells backed by domain-lens bundle roots. This manifest does not include archived external judged-QA packages.",
+  "description": "Current locally reproducible compile-fact judged-QA cells backed by domain-lens bundle roots. Some roots live in the local archive when their tmp artifacts have been retired. This manifest does not include archived external judged-QA packages.",
   "cells": [
     {
       "id": "sec_form_8k_skeleton_seed",
@@ -70,6 +70,30 @@
       "expect": {
         "support.reference_count": 27,
         "support.exact_support_ge_2": 20,
+        "redaction.prose_dependent_exact": 0,
+        "typed_plan.unregistered_plan_exact_rows": 0
+      }
+    },
+    {
+      "id": "osha_incident_seed",
+      "fixture_id": "osha_incident_domain_v1",
+      "description": "OSHA accident/inspection seed skeleton/table probe.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_incident_domain_probe_20260604\\osha-incident-domain-v1-r2-local-arity-fix",
+      "expect": {
+        "support.reference_count": 20,
+        "support.exact_support_ge_2": 18,
+        "redaction.prose_dependent_exact": 0,
+        "typed_plan.unregistered_plan_exact_rows": 0
+      }
+    },
+    {
+      "id": "osha_incident_transfer_001",
+      "fixture_id": "osha_incident_transfer_001",
+      "description": "OSHA accident/inspection first unlike skeleton/table transfer.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_incident_domain_probe_20260604\\osha-incident-transfer-001-r1-local",
+      "expect": {
+        "support.reference_count": 15,
+        "support.exact_support_ge_2": 12,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

@@ -120,10 +120,13 @@ The next work should strengthen the research claim rather than lift one fixture:
    target.
 3. Keep NTSB as corroborating boundary evidence, with manifest and reducer
    replay numbers separated.
-4. Run answer-judge null controls and oracle-isolation checks before any
+4. Keep OSHA as fourth-family corroborating evidence inside the standing
+   compile-fact QA manifest; do not turn the wrapper boundary into a grind
+   target.
+5. Run answer-judge null controls and oracle-isolation checks before any
    LLM-judged QA metric becomes claim-bearing; deterministic compile-fact QA
    still needs typed-plan and redaction replay.
-5. Treat stale-number re-gating as a research finding: old clean cells are
+6. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 
 ## Read Next

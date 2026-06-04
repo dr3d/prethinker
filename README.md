@@ -168,7 +168,7 @@ Use repeated `--fixture-run fixture_id:run_id=path\to\compile.json` arguments
 for compile artifacts that are not stored as `unions\run*` domain-lens bundles.
 The current manifest lives at
 `datasets\domain_pack_measurements\current_compile_fact_qa_manifest.json` and
-checks the locally reproducible SEC, NTSB, and FDA-transfer-002 cells.
+checks the locally reproducible SEC, NTSB, FDA-transfer-002, and OSHA cells.
 
 Current high-signal evidence:
 
@@ -193,9 +193,12 @@ Current high-signal evidence:
   retained fixtures with `10` registered predicates and `4` lens-scoped
   compile surfaces. Local LM Studio N=3 seed replay is `18 / 20`
   support>=2; first unlike transfer is `12 / 15`, both with `0` supported
-  forbidden rows and clean atom/lens gates. This is corroborating skeleton
-  evidence, not a broad OSHA pack claim; wrapper/establishment rows and one
-  related-activity blank-value boundary remain visible.
+  forbidden rows and clean atom/lens gates. The standing compile-fact QA
+  manifest now replays those cells at `53 / 60` seed per-run exact and
+  `27 / 45` transfer per-run exact, with every exact row passing typed-plan and
+  redaction replay. This is corroborating skeleton evidence, not a broad OSHA
+  pack claim; wrapper/establishment rows and one related-activity blank-value
+  boundary remain visible.
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.
