@@ -123,5 +123,4 @@ The next work should strengthen the research claim rather than lift one fixture:
 - [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
-- [Fixture Bank Predicate Pack Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FIXTURE_BANK_PREDICATE_PACK_WORKSHEET.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
