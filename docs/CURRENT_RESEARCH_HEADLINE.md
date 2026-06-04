@@ -75,6 +75,8 @@ FDA warning-letter pack
   documentation-gap candidate review: 0 expected / 13 forbidden on
     transfer_002; stable candidate emissions for violations 1, 2, and 3 are
     false positives
+  response-assessment item proposal:
+    still a candidate with no independent review results; no promoted claim
   claim: primary richer case study; skeleton and recurring regulatory anatomy
     transfer better than wrapper role semantics, context-dependent categories,
     response/detail value flesh, and other substance lanes
