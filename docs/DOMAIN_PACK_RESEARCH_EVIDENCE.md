@@ -199,12 +199,15 @@ FDA interventions that count as research mechanisms:
 
 FDA open blockers:
 
-- consolidate per-layer status into one FDA case-study table with current-gate
-  columns before another lane intervention;
+- per-layer status is now consolidated in the FDA case-study table above; use
+  that table rather than worksheet-era headline scores when describing the FDA
+  result;
+- documentation-gap proposal evidence is waiting on blind oracle review before
+  any fixture oracle changes or promotion attempt;
 - leave transfer_002 as boundary evidence unless a new FDA transfer fixture
   shows the same failure class and makes a general mechanism worth testing;
-- remeasure transfer_003 as a fresh current-pack bundle only if the FDA
-  case-study table needs a second boundary point;
+- remeasure transfer_003 as a fresh current-pack bundle only if we deliberately
+  want a second FDA boundary point beyond transfer_002;
 - keep response assessment frozen unless it becomes load-bearing for the FDA
   case-study claim;
 - keep value-level violation detail as the main abstention/Tier-2 boundary
