@@ -30,6 +30,21 @@ registered predicates, source coordinates, and explicit structural fields. It
 must not parse source-record prose, display strings, model-authored prose
 fields, or raw user questions to recover meaning.
 
+## Atom-Library Query Grounding
+
+`--atom-library-query-grounding` is the strict query-planning mode for the
+closed-domain research lane. In this mode the planner sees the emitted typed KB
+atom inventory, compact argument profiles/values, typed examples, registered
+contracts, and legal query templates. It does not receive source-record
+predicate families, source-record header inventories, source prose, or
+profile-only wish-list predicates.
+
+Atom-library mode also forces strict query execution. If a model still proposes
+a `source_record_*` query, the runtime records a `blocked_by_sign_clean_strict`
+result instead of executing a source-record fallback. Evidence-bundle planning
+uses the same filtered inventory. This makes "query over the KB atom library"
+a biting constraint rather than a prompt preference.
+
 ## The Shape
 
 ```text

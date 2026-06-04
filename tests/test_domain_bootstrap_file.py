@@ -9747,7 +9747,9 @@ def test_lmstudio_json_schema_portable_openrouter_payload_omits_nonportable_thin
         return FakeResponse()
 
     monkeypatch.setenv("PRETHINKER_OPENROUTER_PORTABLE_PAYLOAD", "true")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_PROVIDER_ORDER", "provider-a")
     monkeypatch.setenv("PRETHINKER_OPENROUTER_PROVIDER_ONLY", "provider-a")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_ALLOW_FALLBACKS", "false")
     monkeypatch.setenv("PRETHINKER_OPENROUTER_REQUIRE_PARAMETERS", "true")
     monkeypatch.setattr(domain_bootstrap_file.urllib.request, "urlopen", fake_urlopen)
 
@@ -9772,7 +9774,9 @@ def test_lmstudio_json_schema_portable_openrouter_payload_omits_nonportable_thin
     assert "include_reasoning" not in payload
     assert "reasoning_effort" not in payload
     assert payload["provider"] == {
+        "order": ["provider-a"],
         "only": ["provider-a"],
+        "allow_fallbacks": False,
         "require_parameters": True,
     }
 

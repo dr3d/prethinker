@@ -1825,7 +1825,6 @@ def _sign_clean_strict_filtered_inventory(kb_inventory: dict[str, Any]) -> dict[
             continue
         surface_alias_inventory.append(item)
     return {
-        **kb_inventory,
         "signatures": signatures,
         "counts": counts,
         "examples": examples,
@@ -1895,7 +1894,6 @@ def _atom_library_filtered_inventory(kb_inventory: dict[str, Any]) -> dict[str, 
         if predicate and _atom_library_predicate_allowed(predicate):
             surface_alias_inventory.append(item)
     return {
-        **kb_inventory,
         "signatures": signatures,
         "counts": counts,
         "examples": examples,
@@ -3048,19 +3046,20 @@ def run_one_question(
     atom_library_query_grounding: bool = False,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
-    query_kb_inventory = _sign_clean_strict_filtered_inventory(kb_inventory) if sign_clean_strict else kb_inventory
+    strict_query_execution = bool(sign_clean_strict or atom_library_query_grounding)
+    query_kb_inventory = _sign_clean_strict_filtered_inventory(kb_inventory) if strict_query_execution else kb_inventory
     query_allowed_predicates = [
         predicate
         for predicate in allowed_predicates
         if not _sign_clean_strict_disallowed_predicate(str(predicate).split("/", 1)[0])
-    ] if sign_clean_strict else allowed_predicates
+    ] if strict_query_execution else allowed_predicates
     query_predicate_contracts = [
         contract
         for contract in predicate_contracts
         if not _sign_clean_strict_disallowed_predicate(_predicate_name_from_contract(contract))
-    ] if sign_clean_strict else predicate_contracts
-    query_facts = _sign_clean_strict_filtered_clauses(facts) if sign_clean_strict else facts
-    query_rules = _sign_clean_strict_filtered_clauses(rules) if sign_clean_strict else rules
+    ] if strict_query_execution else predicate_contracts
+    query_facts = _sign_clean_strict_filtered_clauses(facts) if strict_query_execution else facts
+    query_rules = _sign_clean_strict_filtered_clauses(rules) if strict_query_execution else rules
     if bool(atom_library_query_grounding):
         query_kb_inventory = _atom_library_filtered_inventory(query_kb_inventory)
         query_allowed_predicates = list(query_kb_inventory.get("signatures", []) or [])
@@ -3102,6 +3101,7 @@ def run_one_question(
             "policy": [
                 "The planner is grounded in emitted KB atoms, not profile wish-list predicates.",
                 "The planner may propose query operations only over compiled_predicate_inventory.signatures.",
+                "Source-record predicates and source-record header inventories are unavailable in atom-library mode.",
                 "compiled_predicate_inventory.arg_values lists compact constants actually present in each argument slot. If the question names a status, type, or value not present in that slot, leave the slot as a variable rather than substituting a nearby value.",
                 "When several predicates share a status word, choose the predicate whose argument slots match the requested answer type. If the question asks for item numbers or ranges, prefer predicates with item/range slots over argument-treatment predicates.",
                 "When an outcome/status predicate and a list/range inventory predicate share a set/list id, join them with the shared variable so the answer comes from typed member/range slots, not from a compressed set label.",
@@ -3115,7 +3115,7 @@ def run_one_question(
             ],
             "typed_atom_clause_count": len(query_facts) + len(query_rules),
         }
-    if sign_clean_strict:
+    if strict_query_execution:
         kb_context_pack["sign_clean_strict_policy"] = {
             "schema_version": "sign_clean_strict_policy_v1",
             "blocked_query_predicate_family": "source_record free-text, display, surface mention, and query-only support predicates",
@@ -3131,7 +3131,7 @@ def run_one_question(
             rules=query_rules,
             predicate_contracts=query_predicate_contracts,
             config=config,
-            sign_clean_strict=sign_clean_strict,
+            sign_clean_strict=strict_query_execution,
         )
         kb_context_pack["evidence_bundle_plan_v1"] = evidence_plan
         kb_context_pack["evidence_bundle_plan_policy"] = [
@@ -3205,7 +3205,14 @@ def run_one_question(
     clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics.get("clauses"), dict) else {}
     model_queries = [str(q).strip() for q in clauses.get("queries", []) if str(q).strip()]
     if not model_queries:
-        model_queries = _fallback_queries_from_semantic_ir(ir, allowed_predicates=allowed_predicates)
+        model_queries = _fallback_queries_from_semantic_ir(
+            ir,
+            allowed_predicates={
+                str(predicate).split("/", 1)[0]
+                for predicate in query_allowed_predicates
+                if str(predicate).strip()
+            },
+        )
     query_intents = _query_intents_from_semantic_ir(
         ir,
         queries=model_queries,
@@ -3218,9 +3225,9 @@ def run_one_question(
     query_results = run_query_plan(
         runtime,
         queries,
-        helper_companions_enabled=(False if sign_clean_strict else _helper_companions_enabled(helper_companion_row_limit)),
+        helper_companions_enabled=(False if strict_query_execution else _helper_companions_enabled(helper_companion_row_limit)),
         include_legacy_native_helpers=include_legacy_native_helper_adapters,
-        sign_clean_strict=sign_clean_strict,
+        sign_clean_strict=strict_query_execution,
         typed_support_companions=typed_support_companions,
     )
     evidence_plan_query_results: list[dict[str, Any]] = []
@@ -3228,10 +3235,10 @@ def run_one_question(
         evidence_plan_query_results = run_evidence_bundle_plan_queries(
             runtime=runtime,
             evidence_plan=evidence_plan,
-            kb_inventory=kb_inventory,
-            helper_companions_enabled=(False if sign_clean_strict else _helper_companions_enabled(helper_companion_row_limit)),
+            kb_inventory=query_kb_inventory,
+            helper_companions_enabled=(False if strict_query_execution else _helper_companions_enabled(helper_companion_row_limit)),
             include_legacy_native_helpers=include_legacy_native_helper_adapters,
-            sign_clean_strict=sign_clean_strict,
+            sign_clean_strict=strict_query_execution,
             typed_support_companions=typed_support_companions,
         )
         if evidence_plan_query_results:
@@ -3263,7 +3270,7 @@ def run_one_question(
         queries=queries,
     )
     strict_claim_path_filter: list[dict[str, Any]] = []
-    if sign_clean_strict:
+    if strict_query_execution:
         query_results, strict_claim_path_filter = _filter_strict_claim_path_query_results(query_results)
         if strict_claim_path_filter:
             queries = _ordered_query_unique(
@@ -3274,7 +3281,7 @@ def run_one_question(
                 ]
             )
     named_role_anchor_filter: list[dict[str, Any]] = []
-    if sign_clean_strict:
+    if strict_query_execution:
         query_results, named_role_anchor_filter = _filter_unanchored_named_role_query_results(
             query_results=query_results,
             query_intents=query_intents,

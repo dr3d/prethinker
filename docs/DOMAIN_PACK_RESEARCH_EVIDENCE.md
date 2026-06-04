@@ -129,6 +129,26 @@ sufficient for treating historical and fresh runs as interchangeable. Any
 future cross-runtime or seeded-stability claim needs its own same-condition
 cell.
 
+## Query Grounding Governance
+
+On 2026-06-04, atom-library query grounding was tightened so the query planner
+and evidence-bundle planner operate over the filtered emitted typed atom
+inventory only. In that mode, source-record predicates, source-record header
+inventories, source prose, profile-only predicates, and source-record fallback
+execution are unavailable. A proposed `source_record_*` query is recorded as
+`blocked_by_sign_clean_strict` rather than executed.
+
+Retained governance artifact:
+
+```text
+C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\current_research_governance_atom_library_query_20260604
+```
+
+This is a governance hardening result, not a new accuracy score. It keeps the
+query-over-atoms research path aligned with the same rule as compile: the LLM
+may propose inside the closed language, but deterministic code executes only
+registered typed atoms.
+
 ## Compile-Fact QA Reproduction
 
 `scripts/build_compile_fact_judged_qa.py` is the in-repo deterministic builder

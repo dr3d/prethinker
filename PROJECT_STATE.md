@@ -212,6 +212,9 @@ The repo should not currently claim:
 - `PRETHINKER_LLM_SEED`, when supplied, is now recorded in compile
   `model_serving_path.decoding`; a recorded seed is a reproducibility surface,
   not proof that historical and fresh runs are interchangeable.
+- Atom-library query grounding is strict: planner payloads are filtered to
+  emitted typed atoms, and source-record fallback execution is blocked even if
+  the separate sign-clean flag was not supplied.
 - Durable fixtures belong under `datasets/`.
 - Temporary run artifacts may live under `tmp/`; old useful run artifacts can
   be moved to `C:\prethinker_tmp_archive`.
@@ -224,7 +227,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2391 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2392 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

@@ -191,6 +191,9 @@ def test_atom_library_filtered_inventory_keeps_only_emitted_typed_atoms() -> Non
             {"predicate": "party_role"},
             {"predicate": "party_role_context"},
         ],
+        "source_record_field_headers": ["consumer_contact"],
+        "source_record_label_headers": ["warning_letter_subject"],
+        "source_record_section_headers": ["corrective_actions"],
     }
 
     filtered = _atom_library_filtered_inventory(inventory)
@@ -222,6 +225,81 @@ def test_atom_library_filtered_inventory_keeps_only_emitted_typed_atoms() -> Non
         {"predicate": "party_role"},
         {"predicate": "party_role_context"},
     ]
+    assert "source_record_field_headers" not in filtered
+    assert "source_record_label_headers" not in filtered
+    assert "source_record_section_headers" not in filtered
+
+
+def test_atom_library_query_grounding_forces_strict_typed_execution(monkeypatch: pytest.MonkeyPatch) -> None:
+    facts = [
+        "document_date(doc_a, v_2026_05_30).",
+        "source_record_text_atom(src_line_1, consumer_contact_phone_800_555_0100).",
+        "source_record_field(src_line_1, consumer_contact, phone_800_555_0100).",
+    ]
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    captured: dict[str, object] = {}
+
+    def fake_call_semantic_ir(**kwargs):
+        captured["allowed_predicates"] = kwargs["allowed_predicates"]
+        captured["kb_context_pack"] = kwargs["kb_context_pack"]
+        return {
+            "parsed": {
+                "decision": "query",
+                "clarification_questions": [],
+                "self_check": {},
+            }
+        }
+
+    def fake_semantic_ir_to_legacy_parse(*_args, **_kwargs):
+        return (
+            {
+                "admission_diagnostics": {
+                    "projected_decision": "query",
+                    "clauses": {"queries": ["source_record_text_atom(SourceRow, TextAtom)."]},
+                }
+            },
+            [],
+        )
+
+    monkeypatch.setattr(qa_module, "call_semantic_ir", fake_call_semantic_ir)
+    monkeypatch.setattr(qa_module, "semantic_ir_to_legacy_parse", fake_semantic_ir_to_legacy_parse)
+
+    row = qa_module.run_one_question(
+        item={"id": "q001", "utterance": "What consumer contact phone is listed?"},
+        config=qa_module.SemanticIRCallConfig(),
+        allowed_predicates=["document_date/2", "source_record_text_atom/2", "source_record_field/3"],
+        predicate_contracts=compiled_kb_contracts(
+            ["document_date/2", "source_record_text_atom/2", "source_record_field/3"]
+        ),
+        domain_context=[],
+        kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        facts=facts,
+        rules=[],
+        runtime=runtime,
+        oracle={"reference_answer": "phone_800_555_0100"},
+        include_model_input=False,
+        evidence_bundle_plan=False,
+        execute_evidence_bundle_plan=False,
+        evidence_bundle_context_filter=False,
+        evidence_bundle_context_max_clauses=220,
+        evidence_bundle_context_broad_floor=80,
+        helper_companion_row_limit=None,
+        include_legacy_native_helper_adapters=False,
+        sign_clean_strict=False,
+        atom_library_query_grounding=True,
+    )
+
+    assert captured["allowed_predicates"] == ["document_date/2"]
+    kb_context_pack = captured["kb_context_pack"]
+    inventory = kb_context_pack["compiled_predicate_inventory"]
+    assert inventory["signatures"] == ["document_date/2"]
+    assert "source_record_field_headers" not in kb_context_pack
+    assert all("source_record_" not in clause for clause in kb_context_pack["relevant_clauses"])
+    assert row["query_results"][0]["result"]["status"] == "blocked_by_sign_clean_strict"
+    assert row["query_results"][0]["result"]["blocked_predicates"] == ["source_record_text_atom"]
 
 
 def test_sign_clean_query_guidance_prefers_item_range_slots_over_status_word_match() -> None:
