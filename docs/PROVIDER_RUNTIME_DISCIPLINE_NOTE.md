@@ -378,6 +378,24 @@ Gemma 4 12B local dense control, Q4_K_M, temp 0, N=5, random local seed:
   redacted rejudge: 25 / 25, 0 prose-dependent, pass
   metadata: arch=gemma4, compatibility_type=gguf, quantization=Q4_K_M,
     loaded_context_length=65536
+
+Gemma 4 12B local compile-substitution control, Q4_K_M, temp 0, N=3:
+  fixture: sec_form_8k_skeleton_transfer_003
+  expected support>=2: 10 / 12 in two same-condition roots
+  supported forbidden: 0 / 10
+  registered signatures / atom-shape / lens-scope: pass
+  unexpected same-signature facts: 7 in the early root, 6 in r1
+  metadata: arch=gemma4, compatibility_type=gguf, quantization=Q4_K_M,
+    loaded_context_length=65536
+
+Qwen 3.6 27B local dense same-family control, Q4_K_M, temp 0, N=3:
+  fixture: sec_form_8k_skeleton_transfer_003
+  expected support>=2: 10 / 12
+  supported forbidden: 0 / 10
+  registered signatures / atom-shape / lens-scope: pass
+  unexpected same-signature facts: 3
+  metadata: arch=qwen35, compatibility_type=gguf, quantization=Q4_K_M,
+    loaded_context_length=65536
 ```
 
 Read: Gemma Q4 is the cleanest tiny query-control arm so far, and it is slightly
@@ -385,7 +403,11 @@ faster than the Q8 control on this machine. It is still not a model migration:
 the cell used one five-row query anchor over a Qwen-compiled typed artifact.
 The stricter finding is that Qwen temp-0 query planning should be reported as a
 4-5/5 band on this anchor rather than as a single favorable 5/5 point, and
-nonzero temperature did not remove the query-surface jitter.
+nonzero temperature did not remove the query-surface jitter. The follow-up
+compile-substitution controls are the load-bearing model-swap results: Gemma Q4
+and same-family dense Qwen 27B stayed inside the closed SEC registry but did not
+reproduce the Qwen MoE transfer_003 compile cell cleanly. The model-swap compile
+robustness claim is therefore not established.
 
 The cell also exposed a local metadata bug: when the harness used a `/v1`
 base URL, the LM Studio metadata helper appended another `/v1` and therefore

@@ -149,6 +149,69 @@ Results:
 | Local Gemma 4 12B dense control, operator-observed Q8 | 5 | 25/25 | 25/25, 0 unregistered, pass | 24/25, blocked by one normalized-name partial | Promising as a query-planning control, but not promoted. One redacted rejudge row showed judge/rendering strictness around `blackstone_inc` versus "Blackstone Inc." |
 | Local Gemma 4 12B Q4_K_M dense control | 5 | 25/25 | 25/25, 0 unregistered, pass | 25/25, 0 prose-dependent, pass | Cleanest tiny query-control arm so far. Metadata captured `arch=gemma4`, `compatibility_type=gguf`, `quantization=Q4_K_M`, and loaded context `65536`. Still not a model migration because it used one five-row query anchor over a Qwen-compiled typed artifact. |
 
+The follow-up load-bearing compile-substitution control used Gemma Q4_K_M to
+fresh-compile SEC transfer_003 with the same closed SEC registry and lens bundle
+instead of querying over a retained Qwen artifact.
+
+Retained artifact:
+
+```text
+C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\compile_substitution_sec\sec8k-t003-gemma4-q4-temp0-r1
+```
+
+Result:
+
+```text
+Gemma 4 12B Q4_K_M local compile substitution, temp 0, N=3:
+  support>=2 expected facts: 10 / 12 in two same-condition roots
+  supported forbidden facts: 0 / 10
+  registered signatures: pass
+  atom-shape: pass
+  lens-scope: pass
+  unexpected same-signature facts: 7 in the early root, 6 in r1
+```
+
+The two unsupported expected rows were `exhibit_104` as
+`embedded_ixbrl` and `item_2_02` as `furnished`. Gemma emitted registered,
+atom-shape-clean same-signature variants, but with role/key differences:
+Exhibit 104 as `filed`, Item 2.02 as `substantive`, and inconsistent
+filing/source identifiers. The Qwen reference for the same transfer_003 cell
+was `12/12` support>=2, `0/10` forbidden, with one unexpected same-signature
+fact.
+
+A same-family dense Qwen compile-substitution control was then run on the same
+cell.
+
+Retained artifact:
+
+```text
+C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\qwen27b_compile_substitution_sec\sec8k-t003-qwen27b-q4-temp0-r1
+```
+
+Result:
+
+```text
+Qwen 3.6 27B Q4_K_M local compile substitution, temp 0, N=3:
+  support>=2 expected facts: 10 / 12
+  supported forbidden facts: 0 / 10
+  registered signatures: pass
+  atom-shape: pass
+  lens-scope: pass
+  unexpected same-signature facts: 3
+```
+
+Qwen 27B missed the same two expected rows, with stable variants: Exhibit 104 as
+`filed` instead of `embedded_ixbrl`, and Item 2.02 as `substantive` instead of
+`furnished`. It also emitted a repeated
+`domain_omission(... 'sec_signatory/5' ... none_found ...)` while emitting the
+expected signer row.
+
+Read: the tiny Gemma query controls saturated, but the compile substitutions did
+not. SEC remains the strongest local-Qwen-MoE methods example; cross-model
+compile robustness is unproven and should not be claimed from the query arms.
+The dense controls stayed inside the closed SEC language, so the negative result
+is role-semantics/model-path sensitivity rather than a prose or vocabulary leak.
+
 The Gemma/Qwen run artifacts were generated before a local LM Studio metadata
 URL-normalization fix, so the artifacts recorded model id and decoding settings
 but did not recover quantization from `/api/v0/models`. The metadata capture
@@ -156,7 +219,9 @@ bug was fixed after the run; a live check then recovered `google/gemma-4-12b`
 as GGUF `Q8_0`. Treat the Q8 detail as operator-observed plus post-fix
 metadata validation, not as an in-artifact field for the completed cell. The
 Gemma Q4 arm was run after the metadata fix, so its artifacts do include
-quantization and loaded-context metadata.
+quantization and loaded-context metadata. The later Gemma Q4 compile-substitution
+cell was also run after the metadata fix and records quantization and
+loaded-context metadata in its compile artifacts.
 
 ## Query Grounding Governance
 

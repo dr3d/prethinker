@@ -151,6 +151,21 @@ Atom-library query grounding
   read: the query-over-atoms path is real but still a variance-measured query
     lane; Gemma Q4 is a useful query-control candidate, not a promoted model
     switch
+  compile-substitution control on SEC transfer_003:
+    Gemma 4 12B local Q4_K_M, temp 0, N=3, same SEC closed registry:
+      two same-condition roots both landed 10 / 12 support>=2; 0 / 10
+      supported forbidden; registered signatures, atom-shape, and lens-scope
+      all clean; unexpected same-signature facts were 7 in the early root and
+      6 in the retained r1 root
+    Qwen 3.6 27B local dense Q4_K_M, temp 0, N=3, same SEC closed registry:
+      10 / 12 support>=2; 0 / 10 supported forbidden; registered signatures,
+      atom-shape, and lens-scope all clean; 3 unexpected same-signature facts
+    Qwen reference for the same cell:
+      12 / 12 support>=2; 0 / 10 supported forbidden; 1 unexpected fact
+    read: dense controls can stay inside the closed SEC language, but they did
+      not reproduce the SEC compile cell cleanly. The model-swap robustness
+      claim is therefore not established; dirty rows are SEC role/key semantics
+      and one Qwen 27B accountability inconsistency, not a governance leak.
   mapper finding: the strict path exposed that uppercase query variables emitted
     by the LLM were being atomized into lowercase constants; the mapper now
     preserves uppercase slot-label query variables while still atomizing ordinary

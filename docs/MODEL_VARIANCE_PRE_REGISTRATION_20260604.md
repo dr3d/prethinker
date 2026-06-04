@@ -274,3 +274,143 @@ artifact:
 
 Read: cleanest query-control arm so far, but still only a tiny query-anchor
 result over a Qwen-compiled typed artifact.
+
+## Addendum - Gemma Q4 SEC Compile Substitution
+
+Added and executed on 2026-06-04 after the query-control surface saturated.
+
+Arm E:
+
+```text
+model: google/gemma-4-12b
+provider: local LM Studio
+observed quantization in artifacts: GGUF Q4_K_M
+loaded context in artifacts: 65536
+temperature: 0.0
+top_p: 1.0
+top_k: 20 requested by harness
+seed: local GUI set to random; harness does not request a seed
+fixture: sec_form_8k_skeleton_transfer_003
+profile registry: datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json
+lenses: wrapper, items, exhibits, signature
+draws: N=3 same-condition lens-bundle compiles
+support rule: support>=2 with constant-slot matcher
+```
+
+This is the first compile-substitution control. It tests whether the SEC
+transfer_003 skeleton compile result survives a model swap, not merely whether
+Gemma can query over Qwen-emitted atoms.
+
+Completed result:
+
+```text
+expected supported: 10 / 12 in two same-condition roots
+forbidden supported: 0 / 10 in both roots
+registered signatures: pass in both roots
+atom-shape: pass in both roots
+lens-scope: pass in both roots
+unexpected same-signature facts: 7 in the early root, 6 in r1
+metadata: arch=gemma4, compatibility_type=gguf, quantization=Q4_K_M,
+  loaded_context_length=65536
+artifacts:
+  C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\sec_compile_substitution_early_10of12_7unexpected\sec8k-t003-gemma4-q4-temp0-r1
+  C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\compile_substitution_sec\sec8k-t003-gemma4-q4-temp0-r1
+```
+
+Unsupported expected rows:
+
+```text
+sec_exhibit(... exhibit_104, cover_page_ixbrl, embedded_ixbrl, ...)
+sec_filing_item(... item_2_02, results_of_operations_financial_condition,
+  furnished, ...)
+```
+
+The emitted same-signature variants stayed registered and atom-shape clean, but
+used different role/key semantics: Exhibit 104 was emitted as `filed`, Item
+2.02 was emitted as `substantive`, and filing/source identifiers varied across
+runs. The Qwen reference cell for the same fixture remained `12/12` support>=2
+with `0/10` forbidden and one unexpected fact.
+
+Read: Gemma Q4 did not reproduce the SEC compile cell cleanly in either
+same-condition root. The SEC skeleton methods example remains a local-Qwen
+result; cross-model compile robustness is not established. Because this is a
+dirty Q4 compile-substitution cell, do not tune prompts or contracts inside
+this protocol. A Gemma Q8 compile-substitution rerun may be a later diagnostic,
+but only as a new reported arm, not a repair of this one.
+
+## Addendum - Planned Qwen 27B Dense Same-Family Control
+
+Added before execution on 2026-06-04 after Gemma Q4 compile substitution came
+back dirty.
+
+Arm F:
+
+```text
+model: qwen/qwen3.6-27b
+provider: local LM Studio
+observed metadata before run attempt: arch=qwen35, compatibility_type=gguf,
+  quantization=Q4_K_M, max_context_length=262144
+observed state before run attempt: not-loaded
+intended loaded context: 65536 if confirmed by artifacts
+temperature: 0.0
+top_p: 1.0
+top_k: 20 requested by harness
+seed: local GUI setting only; harness does not request a seed
+fixture: sec_form_8k_skeleton_transfer_003
+profile registry: datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json
+lenses: wrapper, items, exhibits, signature
+draws: N=3 same-condition lens-bundle compiles
+support rule: support>=2 with constant-slot matcher
+```
+
+Reason for the arm:
+
+```text
+Gemma Q4 is dense but outside the Qwen family. Qwen 27B is dense and closer to
+the current Qwen MoE reference, so it tests whether the SEC compile drift is
+mostly MoE/runtime behavior, Qwen-family behavior, or broader model
+sensitivity.
+```
+
+Run condition:
+
+```text
+Do not run until LM Studio reports qwen/qwen3.6-27b as loaded. If it is
+unavailable or too slow, record the arm as unavailable rather than substituting
+a different model.
+```
+
+Completed result:
+
+```text
+loaded metadata: arch=qwen35, compatibility_type=gguf, quantization=Q4_K_M,
+  loaded_context_length=65536
+expected supported: 10 / 12
+forbidden supported: 0 / 10
+registered signatures: pass
+atom-shape: pass
+lens-scope: pass
+unexpected same-signature facts: 3
+artifact:
+  C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\qwen27b_compile_substitution_sec\sec8k-t003-qwen27b-q4-temp0-r1
+```
+
+Unsupported expected rows:
+
+```text
+sec_exhibit(... exhibit_104, cover_page_ixbrl, embedded_ixbrl, ...)
+sec_filing_item(... item_2_02, results_of_operations_financial_condition,
+  furnished, ...)
+```
+
+The emitted same-signature variants were stable across all three runs but used
+different role semantics: Exhibit 104 as `filed` and Item 2.02 as
+`substantive`. Qwen 27B also emitted a repeated
+`domain_omission(... 'sec_signatory/5' ... none_found ...)` while also emitting
+the expected signer row, an accountability inconsistency rather than a
+forbidden-fact leak.
+
+Read: same-family dense Qwen did not recover the Qwen MoE reference cell. The
+result narrows the hypothesis: the SEC transfer_003 compile substitution problem
+is not only Gemma-family mismatch, and not only MoE-vs-dense routing. It is a
+model/path-sensitive SEC role-semantics boundary under the current closed pack.

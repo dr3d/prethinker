@@ -145,9 +145,16 @@ The next work should strengthen the research claim rather than lift one fixture:
    separately registered local Gemma 4 12B Q4_K_M temp-0 arm then landed at
    `25/25` product exact, typed-plan replay, and redacted rejudge with 0
    prose-dependent rows. Gemma Q4 is therefore a useful query-control
-   candidate, not a promoted model switch. The next query question is measured
-   planner performance on a larger unlike set, not permission to use prose or
-   fallback rescue.
+   candidate, not a promoted model switch. Follow-up compile-substitution
+   controls then fresh-compiled the same SEC transfer_003 fixture with the same
+   closed SEC registry and N=3/support>=2 lens bundle. Gemma Q4_K_M landed at
+   `10/12` in two same-condition roots, with `0/10` forbidden and clean
+   registered-signature, atom-shape, and lens-scope gates; Qwen 3.6 27B Q4_K_M
+   landed at `10/12` with the same clean gates. Both dense controls missed the
+   same SEC role/key semantics (`exhibit_104` role and `item_2_02` role), so
+   cross-model compile robustness is not established. The next query question
+   is measured planner performance on a larger unlike set, not permission to
+   use prose or fallback rescue.
 7. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 

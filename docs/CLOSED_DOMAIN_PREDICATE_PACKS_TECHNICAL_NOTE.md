@@ -422,7 +422,14 @@ Possible next questions:
    once by redacted-rejudge normalized-name strictness. A separately registered
    Gemma Q4_K_M control passed all five draws and both gates on the same tiny
    query anchor; this hardens the query-over-atoms hypothesis, but it is not a
-   compile-pack or product-model migration result.
+   compile-pack or product-model migration result. The first load-bearing
+   compile-substitution controls then fresh-compiled SEC transfer_003 with the
+   same closed SEC registry and N=3/support>=2 lens bundle. Gemma Q4_K_M landed
+   at `10/12` in two same-condition roots, with `0/10` forbidden and clean
+   registered-signature, atom-shape, and lens-scope gates. Same-family dense
+   Qwen 3.6 27B Q4_K_M also landed at `10/12` with clean gates. Both dense
+   controls missed the same SEC role/key semantics (`exhibit_104` and
+   `item_2_02`), so cross-model compile robustness is not established.
 5. **QA governance question:** Can answer-judge null controls and redaction
    replay make a QA metric claim-bearing again? The retained FDA v2
    null-control report is now audited inside the default governance command.
