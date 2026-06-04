@@ -117,6 +117,17 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                         "self_check_omission_notes": [],
                     }
                 )
+        for fact in _fda_correspondence_party_omission_contradictions(facts):
+            rows.append(
+                {
+                    "fixture": path.parent.name,
+                    "compile_json": str(path),
+                    "class": "domain_omission_contradicts_emitted_carrier",
+                    "fact": fact,
+                    "carrier_signature": "fda_correspondence_party/5",
+                    "self_check_omission_notes": [],
+                }
+            )
         for fact in _sec_signature_omission_contradictions(facts):
             rows.append(
                 {
@@ -283,6 +294,46 @@ def _ordinary_omission_placeholder(fact: str) -> str:
         ):
             return "fda_correspondence_party/5"
     return ""
+
+
+def _fda_correspondence_party_omission_contradictions(facts: list[str]) -> list[str]:
+    letters_with_real_signatory: set[str] = set()
+    parsed_facts: list[tuple[str, list[str], str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match:
+            continue
+        predicate = match.group(1)
+        args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+        parsed_facts.append((predicate, args, fact))
+        if (
+            predicate == "fda_correspondence_party"
+            and len(args) == 5
+            and args[0]
+            and args[2] == "signatory"
+            and not _fda_correspondence_party_is_not_stated(args)
+        ):
+            letters_with_real_signatory.add(args[0])
+
+    out: list[str] = []
+    for predicate, args, fact in parsed_facts:
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[0] in letters_with_real_signatory
+            and args[1] == "fda_correspondence_party/5"
+            and args[2] == "role_missing"
+            and args[3] == "signatory_not_stated"
+        ):
+            out.append(fact)
+    return out
+
+
+def _fda_correspondence_party_is_not_stated(args: list[str]) -> bool:
+    if len(args) != 5:
+        return False
+    missing_values = {"not_stated", "unknown", "none_found", "not_applicable", "missing"}
+    return _normalize_arg(args[1]) in missing_values or _normalize_arg(args[3]) in missing_values
 
 
 def _sec_signature_omission_contradictions(facts: list[str]) -> list[str]:

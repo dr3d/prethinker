@@ -378,6 +378,45 @@ def test_domain_omission_accountability_allows_fda_signatory_omission_with_recip
     assert report["summary"]["status"] == "pass"
 
 
+def test_domain_omission_accountability_blocks_fda_signatory_omission_when_real_signatory_exists(
+    tmp_path: Path,
+) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "fda_correspondence_party(letter_1, lisa_harlan, signatory, lisa_harlan, src_signature).",
+                "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "fda_correspondence_party/5"
+    assert report["rows"][0]["fact"].startswith("domain_omission(")
+
+
+def test_domain_omission_accountability_allows_fda_signatory_omission_for_different_letter(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "fda_correspondence_party(letter_1, lisa_harlan, signatory, lisa_harlan, src_signature).",
+                "domain_omission(letter_2, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+
+
 def test_domain_omission_accountability_ignores_profiles_without_domain_omission(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",
