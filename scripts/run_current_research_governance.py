@@ -95,6 +95,45 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "domain_pack_status",
+            "command": [
+                python,
+                "scripts/summarize_domain_pack_status.py",
+                "--out-json",
+                str(report_root / "domain_pack_status.json"),
+                "--out-md",
+                str(report_root / "domain_pack_status.md"),
+                "--expect-md",
+                "docs/DOMAIN_PACK_STATUS.md",
+            ],
+        },
+        {
+            "id": "domain_accountability_status",
+            "command": [
+                python,
+                "scripts/summarize_domain_accountability_status.py",
+                "--out-json",
+                str(report_root / "domain_accountability_status.json"),
+                "--out-md",
+                str(report_root / "domain_accountability_status.md"),
+                "--expect-md",
+                "docs/DOMAIN_ACCOUNTABILITY_STATUS.md",
+            ],
+        },
+        {
+            "id": "domain_predicate_proposal_status",
+            "command": [
+                python,
+                "scripts/validate_domain_predicate_proposals.py",
+                "--out-json",
+                str(report_root / "domain_predicate_proposal_status.json"),
+                "--out-md",
+                str(report_root / "domain_predicate_proposal_status.md"),
+                "--expect-md",
+                "docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md",
+            ],
+        },
+        {
             "id": "compile_fact_qa_manifest_sources",
             "command": [
                 python,

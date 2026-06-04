@@ -15,9 +15,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.report_freshness import apply_markdown_freshness_check
 
 
 DEFAULT_MANIFEST_RUN = Path("tmp/compile_fact_qa_manifest_run/summary.json")
@@ -64,26 +71,6 @@ def main() -> int:
         print(json.dumps(report, indent=2, sort_keys=True))
     blocked = report["summary"]["status"] != "pass"
     return 0 if args.exit_zero or not blocked else 1
-
-
-def apply_markdown_freshness_check(
-    *,
-    report: dict[str, Any],
-    expected_path: Path,
-    rendered_md: str,
-) -> None:
-    expected_text = _read_optional_text(expected_path)
-    reason = ""
-    if expected_text is None:
-        reason = f"expected_markdown_missing:{expected_path}"
-    elif _normalize_markdown(expected_text) != _normalize_markdown(rendered_md):
-        reason = f"expected_markdown_stale:{expected_path}"
-    if not reason:
-        return
-    summary = report.setdefault("summary", {})
-    blockers = summary.setdefault("blocking_reasons", [])
-    blockers.append(reason)
-    summary["status"] = "fail"
 
 
 def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[str, Any]:
@@ -351,17 +338,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise SystemExit(f"JSON file must contain an object: {path}")
     return payload
-
-
-def _read_optional_text(path: Path) -> str | None:
-    try:
-        return path.read_text(encoding="utf-8")
-    except OSError:
-        return None
-
-
-def _normalize_markdown(text: str) -> str:
-    return text.replace("\r\n", "\n").rstrip() + "\n"
 
 
 if __name__ == "__main__":

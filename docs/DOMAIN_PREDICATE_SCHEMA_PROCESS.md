@@ -210,7 +210,7 @@ it as a proposal and validate the proposal shape:
 ```text
 python scripts\validate_domain_predicate_proposals.py --print-template
 python scripts\validate_domain_predicate_proposals.py --proposal PATH_TO_PROPOSAL.json
-python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json
+python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
 ```
 
 The proposal validator is intentionally stricter than ordinary brainstorming.
@@ -367,7 +367,7 @@ python scripts\audit_domain_omission_accountability.py --compile-json PATH --fix
 Current static coverage report:
 
 ```text
-python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
+python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json --expect-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md
 ```
 
 The static report reads only registries and typed fixture oracles. It should

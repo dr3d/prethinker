@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.carrier_contract_registry import carrier_contract  # noqa: E402
+from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E402
 
 
 DEFAULT_ROOT = REPO_ROOT / "datasets" / "domain_predicate_proposals"
@@ -122,6 +123,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--proposal", action="append", default=[], type=Path)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
+    parser.add_argument(
+        "--expect-md",
+        type=Path,
+        default=None,
+        help="Fail if this markdown file differs from the freshly rendered report.",
+    )
     parser.add_argument("--print-template", action="store_true")
     parser.add_argument("--exit-zero", action="store_true")
     return parser.parse_args()
@@ -134,15 +141,23 @@ def main() -> int:
         return 0
     paths = _proposal_paths(root=args.root, explicit=args.proposal)
     report = build_report(paths, profile_root=args.profile_root)
+    rendered_md = render_markdown(report)
+    if args.expect_md:
+        apply_markdown_freshness_check(
+            report=report,
+            expected_path=args.expect_md,
+            rendered_md=rendered_md,
+        )
+        rendered_md = render_markdown(report)
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.out_md:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
-        args.out_md.write_text(render_markdown(report), encoding="utf-8")
+        args.out_md.write_text(rendered_md, encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if args.exit_zero or not report["summary"]["blocking_errors"] else 1
+    return 0 if args.exit_zero or report["summary"]["status"] == "pass" else 1
 
 
 def build_report(paths: list[Path], *, profile_root: Path = DEFAULT_PROFILE_ROOT) -> dict[str, Any]:
@@ -154,6 +169,7 @@ def build_report(paths: list[Path], *, profile_root: Path = DEFAULT_PROFILE_ROOT
         "summary": {
             "proposal_count": len(rows),
             "blocking_errors": blocking_errors,
+            "blocking_reasons": [],
             "warning_count": warning_count,
             "status": "fail" if blocking_errors else "pass",
         },

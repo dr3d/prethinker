@@ -13,6 +13,7 @@ This report does not read source prose, QA questions, or judge outputs.
 - Expected facts in associated fixtures: `414`
 - Forbidden facts in associated fixtures: `153`
 - Schema status: `pass` (0 errors, 0 warnings)
+- Status: `pass`
 
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |

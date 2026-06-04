@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.summarize_domain_pack_status import build_report as build_pack_report  # noqa: E402
 from scripts.validate_typed_micro_fixtures import _load_fact_lines, _parse_fact  # noqa: E402
+from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E402
 
 
 DEFAULT_PROFILE_ROOT = REPO_ROOT / "datasets" / "domain_profiles"
@@ -35,6 +36,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fixture-root", type=Path, default=DEFAULT_FIXTURE_ROOT)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
+    parser.add_argument(
+        "--expect-md",
+        type=Path,
+        default=None,
+        help="Fail if this markdown file differs from the freshly rendered report.",
+    )
     parser.add_argument("--exit-zero", action="store_true")
     return parser.parse_args()
 
@@ -42,15 +49,23 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     report = build_report(profile_root=args.profile_root, fixture_root=args.fixture_root)
+    rendered_md = render_markdown(report)
+    if args.expect_md:
+        apply_markdown_freshness_check(
+            report=report,
+            expected_path=args.expect_md,
+            rendered_md=rendered_md,
+        )
+        rendered_md = render_markdown(report)
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.out_md:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
-        args.out_md.write_text(render_markdown(report), encoding="utf-8")
+        args.out_md.write_text(rendered_md, encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if args.exit_zero or not report["summary"]["blocking_errors"] else 1
+    return 0 if args.exit_zero or report["summary"]["status"] == "pass" else 1
 
 
 def build_report(
@@ -79,6 +94,7 @@ def build_report(
             "fixture_omission_fact_count": fixture_omission_total,
             "fixture_only_omission_pattern_count": fixture_only_total,
             "blocking_errors": int(pack_report["summary"]["schema_blocking_errors"]),
+            "blocking_reasons": [],
             "status": "fail" if int(pack_report["summary"]["schema_blocking_errors"]) else "pass",
         },
         "domains": domains,
