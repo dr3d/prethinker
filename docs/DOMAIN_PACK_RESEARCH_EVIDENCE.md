@@ -315,8 +315,10 @@ two bad `domain_omission/5` shapes that were not support wins: contradictory
 for the same filing was already emitted, and an unregistered
 `subject_missing/former_name_address_not_applicable` omission. The guard now
 audits union artifacts even when profile metadata omits `domain_omission/5`,
-blocks unregistered omission kind/reason triples, and drops the contradictory
-SEC signatory omission class through typed reducers. Rescoring the same
+blocks unregistered omission kind/reason triples, and resolves SEC signatory
+omission contradictions through typed reducers. Real signatory rows beat
+omission rows; all-not-stated dummy signatory rows lose to the registered
+omission. Rescoring the same
 transfer_003 stability artifact stayed at `12/13` with `0/10` supported
 forbidden; unexpected same-signature facts dropped from 2 to 0. This is
 governance cleanup, not a support lift.
@@ -852,9 +854,10 @@ SEC interventions that count as research mechanisms:
 - typed Item 9.01 treatment guard: drops `sec_filing_item_treatment/4`
   attachments to the structural exhibit item without creating replacements.
 - typed omission-accountability guards: block unregistered
-  `domain_omission/5` kind/reason triples and drop contradictory SEC signatory
-  omissions when an emitted `sec_signatory/5` already exists for the same
-  filing.
+  `domain_omission/5` kind/reason triples and resolve SEC signatory omission
+  contradictions by preserving omissions over all-not-stated dummy signatory
+  rows while dropping omission rows only when a real emitted `sec_signatory/5`
+  row exists for the same filing.
 - fenced event-substance contract registration: `sec_material_event/6` is
   available for explicit experiments but is not offered by the promoted SEC
   skeleton profile. The first temporary seed probe kept skeleton support at
