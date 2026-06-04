@@ -156,12 +156,13 @@ Deterministic compile-fact QA bundles can be regenerated in-repo from
 
 ```powershell
 python scripts\build_compile_fact_judged_qa.py --out-dir tmp\judged_qa_probe `
-  --fixture-run fixture_id:run1=path\to\compile_run1.json `
-  --fixture-run fixture_id:run2=path\to\compile_run2.json `
-  --fixture-run fixture_id:run3=path\to\compile_run3.json
+  --domain-lens-bundle fixture_id=tmp\domain_lens_bundle\bundle_root
 python scripts\audit_redaction_replay.py tmp\judged_qa_probe
 python scripts\audit_typed_plan_replay.py tmp\judged_qa_probe
 ```
+
+Use repeated `--fixture-run fixture_id:run_id=path\to\compile.json` arguments
+for compile artifacts that are not stored as `unions\run*` domain-lens bundles.
 
 Current high-signal evidence:
 

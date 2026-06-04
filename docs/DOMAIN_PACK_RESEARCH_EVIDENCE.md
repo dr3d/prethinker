@@ -100,6 +100,10 @@ for compile-fact judged-QA bundles. It compares `expected_facts.pl` rows to the
 typed facts emitted by compile JSON artifacts. It does not call an LLM, read
 source prose, or rewrite oracle facts.
 
+Use `--domain-lens-bundle fixture_id=path\to\bundle_root` for the common
+`unions\run*` bundle layout, and `--fixture-run fixture_id:run_id=path` for
+standalone compile artifacts.
+
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:
 

@@ -1,7 +1,12 @@
 import json
 from pathlib import Path
 
-from scripts.build_compile_fact_judged_qa import build_bundle, build_run_payload, write_bundle
+from scripts.build_compile_fact_judged_qa import (
+    _parse_domain_lens_bundles,
+    build_bundle,
+    build_run_payload,
+    write_bundle,
+)
 
 
 def test_build_compile_fact_judged_qa_exact_partial_miss_and_forbidden(tmp_path: Path) -> None:
@@ -120,4 +125,27 @@ def test_build_compile_fact_judged_qa_writes_bundle(tmp_path: Path) -> None:
     }
     assert qa["rows"][0]["queries"] == [
         "fda_warning_letter(Letter, cder, apothecary_pharma_llc, v_2025_12_01, SrcLetter)."
+    ]
+
+
+def test_parse_domain_lens_bundle_discovers_union_runs(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    for run_id in ["run2", "run1"]:
+        run_dir = bundle / "unions" / run_id
+        run_dir.mkdir(parents=True)
+        (run_dir / "compile.json").write_text("{}", encoding="utf-8")
+
+    specs = _parse_domain_lens_bundles([f"fixture_a={bundle}"])
+
+    assert specs == [
+        {
+            "compile_json": str(bundle / "unions" / "run1" / "compile.json"),
+            "fixture_id": "fixture_a",
+            "run_id": "run1",
+        },
+        {
+            "compile_json": str(bundle / "unions" / "run2" / "compile.json"),
+            "fixture_id": "fixture_a",
+            "run_id": "run2",
+        },
     ]

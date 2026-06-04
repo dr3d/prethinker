@@ -46,6 +46,13 @@ def parse_args() -> argparse.Namespace:
         metavar="FIXTURE_ID:RUN_ID=PATH",
         help="Compile artifact to judge. Repeat for multiple fixtures/runs.",
     )
+    parser.add_argument(
+        "--domain-lens-bundle",
+        action="append",
+        default=[],
+        metavar="FIXTURE_ID=PATH",
+        help="Discover union compile artifacts under PATH/unions/run*/. Repeat for multiple bundles.",
+    )
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument(
         "--created-utc",
@@ -59,6 +66,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     run_specs = _parse_fixture_runs(args.fixture_run)
+    run_specs.extend(_parse_domain_lens_bundles(args.domain_lens_bundle))
     created_utc = str(args.created_utc).strip() or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     bundle = build_bundle(
         fixture_root=args.fixture_root,
@@ -456,6 +464,34 @@ def _parse_fixture_runs(values: list[str]) -> list[dict[str, Any]]:
                 "compile_json": str(Path(match.group(3).strip())),
             }
         )
+    return out
+
+
+def _parse_domain_lens_bundles(values: list[str]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for value in values:
+        text = str(value or "").strip()
+        match = re.fullmatch(r"([^=]+)=(.+)", text)
+        if not match:
+            raise SystemExit(f"--domain-lens-bundle must be FIXTURE_ID=PATH, got: {value}")
+        fixture_id = match.group(1).strip()
+        bundle_root = Path(match.group(2).strip())
+        union_root = bundle_root / "unions"
+        if not union_root.is_dir():
+            raise SystemExit(f"--domain-lens-bundle has no unions directory: {union_root}")
+        for run_dir in sorted(path for path in union_root.iterdir() if path.is_dir()):
+            json_files = sorted(run_dir.glob("*.json"))
+            if not json_files:
+                raise SystemExit(f"No union compile JSON found under {run_dir}")
+            if len(json_files) > 1:
+                raise SystemExit(f"Ambiguous union compile JSONs under {run_dir}: {json_files}")
+            out.append(
+                {
+                    "fixture_id": fixture_id,
+                    "run_id": run_dir.name,
+                    "compile_json": str(json_files[0]),
+                }
+            )
     return out
 
 
