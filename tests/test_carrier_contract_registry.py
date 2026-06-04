@@ -520,6 +520,21 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "material_definitive_agreement" in event["value_domains"]["event_kind"]
 
 
+def test_sec_material_event_probe_is_not_offered_by_promoted_sec_profile() -> None:
+    registry_path = REPO_ROOT / "datasets" / "domain_profiles" / "sec_form_8k_v1" / "ontology_registry.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    predicate_signatures = {item["signature"] for item in registry["predicates"]}
+    offered_signatures = {
+        signature
+        for lens in registry["lenses"]
+        for signature in lens.get("allowed_signatures", [])
+    }
+
+    assert carrier_contract("sec_material_event/6") is not None
+    assert "sec_material_event/6" not in predicate_signatures
+    assert "sec_material_event/6" not in offered_signatures
+
+
 def test_ntsb_domain_profile_registry_matches_registered_contracts() -> None:
     registry_path = REPO_ROOT / "datasets" / "domain_profiles" / "ntsb_investigation_v1" / "ontology_registry.json"
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
