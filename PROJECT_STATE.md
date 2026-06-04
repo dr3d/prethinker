@@ -144,12 +144,16 @@ OSHA accident/inspection pack
   new transfer diagnostics:
     transfer_002 long violation table: 18 / 53 support>=2, 0 / 8 forbidden
     transfer_003 mixed news-release/prior-inspection fixture: 2 / 21 support>=2
-      with 3 / 10 supported forbidden after wildcard cross-section controls
+      with 0 / 10 supported forbidden after the typed accident-omission
+      contradiction guard
   governance: registered signatures, atom-shape, and lens-scope clean
   read: fourth-family corroboration for skeleton/table anatomy; accident,
     employee injury, violation counts, penalties, item, and status rows transfer
     better than wrapper/establishment rows, long-table enumeration, mixed-source
-    section attachment, and one related-activity blank-value boundary
+    section attachment, and one related-activity blank-value boundary. The
+    transfer_003 guard is cleanup only: support stays 2 / 21 while the current
+    news-release accident/injury rows are blocked from contaminating the prior
+    inspection detail.
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,

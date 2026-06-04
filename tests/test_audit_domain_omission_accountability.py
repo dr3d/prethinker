@@ -164,6 +164,46 @@ def test_domain_omission_accountability_blocks_sec_signature_omission_contradict
     assert report["rows"][0]["carrier_signature"] == "sec_signatory/5"
 
 
+def test_domain_omission_accountability_blocks_osha_accident_omission_contradiction(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(accident_yarmouth_2025_11, 'osha_accident/7', none_found, accident_summary_not_stated, direct).",
+                "osha_accident(accident_yarmouth_2025_11, inspection_1, accident_summary_yarmouth_2025_11, v_2025_11_18, trench_collapse, 1, direct).",
+                "osha_injured_employee(accident_yarmouth_2025_11, employee_1, not_stated, not_stated, fatality, construction_worker, direct).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["blocker_count"] == 2
+    assert {row["class"] for row in report["rows"]} == {"domain_omission_contradicts_emitted_carrier"}
+    assert {row["carrier_signature"] for row in report["rows"]} == {"osha_accident/7"}
+
+
+def test_domain_omission_accountability_allows_osha_accident_omission_different_scope(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(accident_1, 'osha_accident/7', none_found, accident_summary_not_stated, source_inspection_detail).",
+                "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, source_accident_report).",
+                "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, source_accident_report).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["blocker_count"] == 0
+
+
 def test_domain_omission_accountability_audits_union_artifact_with_omission_fact(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",

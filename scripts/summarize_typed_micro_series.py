@@ -55,6 +55,7 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_ntsb_condition_atom_reduction,
     _apply_ntsb_injury_count_scope_specificity,
     _apply_ntsb_timestamp_atom_reduction,
+    _apply_osha_accident_omission_contradiction_integrity,
     _apply_registered_date_slot_atom_reduction,
     _apply_sec_exhibit_number_atom_reduction,
     _apply_sec_filing_id_atom_reduction,
@@ -555,6 +556,7 @@ def _apply_domain_reducers(source_compile: dict[str, Any]) -> dict[str, Any]:
         ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),
         ("domain_omission_registry_value_integrity", _apply_domain_omission_registry_value_integrity),
         ("sec_signature_omission_contradiction_integrity", _apply_sec_signature_omission_contradiction_integrity),
+        ("osha_accident_omission_contradiction_integrity", _apply_osha_accident_omission_contradiction_integrity),
         ("active_lens_scope_integrity", _apply_active_lens_scope_integrity),
     ):
         reports[name] = reducer(source_compile)

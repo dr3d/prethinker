@@ -2461,6 +2461,7 @@ def main() -> int:
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
         _apply_domain_omission_registry_value_integrity(record["source_compile"])
         _apply_sec_signature_omission_contradiction_integrity(record["source_compile"])
+        _apply_osha_accident_omission_contradiction_integrity(record["source_compile"])
         _apply_active_lens_scope_integrity(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
@@ -8547,6 +8548,87 @@ def _apply_sec_signature_omission_contradiction_integrity(source_compile: dict[s
             "Drops domain_omission/5 signature_block_not_stated rows only when a sec_signatory/5 "
             "row for the same filing id is already present. It does not create signatory facts or "
             "read source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_osha_accident_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop OSHA accident/injury rows contradicted by typed no-accident omissions.
+
+    This is a typed-fact consistency guard. It does not decide whether a source
+    describes an accident. It only enforces that a bundle cannot simultaneously
+    emit a domain_omission/5 row saying the OSHA accident carrier found no
+    accident summary and ordinary accident/injury rows for the same subject.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    omitted_subjects_by_scope: set[tuple[str, str]] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and _canonical_registered_signature_reference(args[1]) == "osha_accident/7"
+            and _strip_fact_atom_quotes(args[2]) == "none_found"
+            and _strip_fact_atom_quotes(args[3]) == "accident_summary_not_stated"
+            and args[0]
+        ):
+            omitted_subjects_by_scope.add((args[0], args[4]))
+
+    contradicted_accidents_by_scope: set[tuple[str, str]] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "osha_accident" and len(args) == 7 and (
+            (args[0], args[6]) in omitted_subjects_by_scope or (args[1], args[6]) in omitted_subjects_by_scope
+        ):
+            contradicted_accidents_by_scope.add((args[0], args[6]))
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        should_drop = False
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "osha_accident" and len(args) == 7:
+                should_drop = (args[0], args[6]) in contradicted_accidents_by_scope or (
+                    args[1],
+                    args[6],
+                ) in omitted_subjects_by_scope
+            elif predicate == "osha_injured_employee" and len(args) == 7:
+                should_drop = (args[0], args[6]) in contradicted_accidents_by_scope or (
+                    args[0],
+                    args[6],
+                ) in omitted_subjects_by_scope
+        if should_drop:
+            dropped.append(fact)
+            continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_osha_accident_omission_contradiction_dropped_count"] = len(dropped)
+    source_compile["deterministic_osha_accident_omission_contradiction_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_osha_accident_omission_contradiction_policy"] = {
+        "schema_version": "deterministic_osha_accident_omission_contradiction_v1",
+        "authority": "typed_fact_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops osha_accident/7 and dependent osha_injured_employee/7 rows only when a "
+            "domain_omission/5 row for osha_accident/7 says accident_summary_not_stated for the "
+            "same accident or inspection subject and the same typed source/scope. It does not create "
+            "replacement facts or read source prose."
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}

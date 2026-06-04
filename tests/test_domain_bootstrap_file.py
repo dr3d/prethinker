@@ -115,6 +115,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_ntsb_condition_atom_reduction,
     _apply_ntsb_injury_count_scope_specificity,
     _apply_ntsb_timestamp_atom_reduction,
+    _apply_osha_accident_omission_contradiction_integrity,
     _apply_fda_facility_subject_convergence,
     _apply_fda_lot_identifier_atom_reduction,
     _apply_fda_no_fei_omission_reduction,
@@ -8647,6 +8648,72 @@ def test_domain_omission_registry_value_integrity_drops_unregistered_kind_reason
     policy = source_compile["deterministic_domain_omission_registry_value_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
+
+
+def test_osha_accident_omission_contradiction_integrity_drops_matching_accident_rows() -> None:
+    source_compile = {
+        "facts": [
+            "osha_accident(accident_yarmouth_2025_11, inspection_1, accident_summary_yarmouth_2025_11, v_2025_11_18, trench_collapse, 1, direct).",
+            "osha_injured_employee(accident_yarmouth_2025_11, employee_1, not_stated, not_stated, fatality, construction_worker, direct).",
+            "domain_omission(accident_yarmouth_2025_11, 'osha_accident/7', none_found, accident_summary_not_stated, direct).",
+            "osha_accident(accident_other, inspection_2, accident_summary_other, v_2026_01_02, fall, 0, direct).",
+            "osha_injured_employee(accident_other, employee_1, not_stated, not_stated, serious_injury, worker, direct).",
+        ]
+    }
+
+    report = _apply_osha_accident_omission_contradiction_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 2,
+        "dropped_facts": [
+            "osha_accident(accident_yarmouth_2025_11, inspection_1, accident_summary_yarmouth_2025_11, v_2025_11_18, trench_collapse, 1, direct).",
+            "osha_injured_employee(accident_yarmouth_2025_11, employee_1, not_stated, not_stated, fatality, construction_worker, direct).",
+        ],
+    }
+    assert source_compile["facts"] == [
+        "domain_omission(accident_yarmouth_2025_11, 'osha_accident/7', none_found, accident_summary_not_stated, direct).",
+        "osha_accident(accident_other, inspection_2, accident_summary_other, v_2026_01_02, fall, 0, direct).",
+        "osha_injured_employee(accident_other, employee_1, not_stated, not_stated, serious_injury, worker, direct).",
+    ]
+    policy = source_compile["deterministic_osha_accident_omission_contradiction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_osha_accident_omission_contradiction_integrity_handles_inspection_subject() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(inspection_1, 'osha_accident/7', none_found, accident_summary_not_stated, direct).",
+            "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, direct).",
+            "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, direct).",
+        ]
+    }
+
+    report = _apply_osha_accident_omission_contradiction_integrity(source_compile)
+
+    assert report["dropped_count"] == 2
+    assert source_compile["facts"] == [
+        "domain_omission(inspection_1, 'osha_accident/7', none_found, accident_summary_not_stated, direct).",
+    ]
+
+
+def test_osha_accident_omission_contradiction_integrity_keeps_different_source_scope() -> None:
+    source_compile = {
+        "facts": [
+            "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, source_accident_report).",
+            "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, source_accident_report).",
+            "domain_omission(accident_1, 'osha_accident/7', none_found, accident_summary_not_stated, source_inspection_detail).",
+        ]
+    }
+
+    report = _apply_osha_accident_omission_contradiction_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, source_accident_report).",
+        "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, source_accident_report).",
+        "domain_omission(accident_1, 'osha_accident/7', none_found, accident_summary_not_stated, source_inspection_detail).",
+    ]
 
 
 def test_ntsb_timestamp_atom_reduction_removes_redundant_zero_seconds() -> None:

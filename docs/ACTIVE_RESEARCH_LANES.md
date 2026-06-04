@@ -382,11 +382,13 @@ artifact root:
   C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore
 local-Qwen lens bundle: N=3, support>=2
 supported expected facts: 2 / 21
-supported forbidden facts: 3 / 10 after stricter wildcard controls
+supported forbidden facts: 0 / 10 after the typed accident-omission
+  contradiction guard
 atom-shape/signature/lens-scope blockers: 0
-read: mixed-document integrity failure; the accident lens attaches the current
-  news-release trench accident to the appended prior-inspection id. This is a
-  section/scope boundary, not a clean transfer cell.
+read: clean mixed-document boundary; support remains 2 / 21, but the current
+  news-release trench accident and injury rows are now blocked from
+  contaminating the appended prior-inspection id by typed fact consistency.
+  This is still not a promoted transfer cell.
 ```
 
 OSHA strengthens the cross-family pattern without changing the research claim:

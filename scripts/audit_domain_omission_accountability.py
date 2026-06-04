@@ -128,6 +128,17 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                     "self_check_omission_notes": [],
                 }
             )
+        for fact in _osha_accident_omission_contradictions(facts):
+            rows.append(
+                {
+                    "fixture": path.parent.name,
+                    "compile_json": str(path),
+                    "class": "domain_omission_contradicts_emitted_carrier",
+                    "fact": fact,
+                    "carrier_signature": "osha_accident/7",
+                    "self_check_omission_notes": [],
+                }
+            )
         if _self_check_omission_requires_domain_omission(data):
             omission_notes = [
                 text
@@ -274,6 +285,46 @@ def _sec_signature_omission_contradictions(facts: list[str]) -> list[str]:
             and args[1] == "sec_signatory/5"
             and args[2] == "role_missing"
             and args[3] == "signature_block_not_stated"
+        ):
+            out.append(fact)
+    return out
+
+
+def _osha_accident_omission_contradictions(facts: list[str]) -> list[str]:
+    omitted_subjects_by_scope: set[tuple[str, str]] = set()
+    parsed_facts: list[tuple[str, list[str], str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match:
+            continue
+        predicate = match.group(1)
+        args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+        parsed_facts.append((predicate, args, fact))
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[1] == "osha_accident/7"
+            and args[2] == "none_found"
+            and args[3] == "accident_summary_not_stated"
+            and args[0]
+        ):
+            omitted_subjects_by_scope.add((args[0], args[4]))
+
+    contradicted_accidents_by_scope: set[tuple[str, str]] = set()
+    for predicate, args, _fact in parsed_facts:
+        if predicate == "osha_accident" and len(args) == 7 and (
+            (args[0], args[6]) in omitted_subjects_by_scope or (args[1], args[6]) in omitted_subjects_by_scope
+        ):
+            contradicted_accidents_by_scope.add((args[0], args[6]))
+
+    out: list[str] = []
+    for predicate, args, fact in parsed_facts:
+        if predicate == "osha_accident" and len(args) == 7 and (
+            (args[0], args[6]) in contradicted_accidents_by_scope or (args[1], args[6]) in omitted_subjects_by_scope
+        ):
+            out.append(fact)
+        elif predicate == "osha_injured_employee" and len(args) == 7 and (
+            (args[0], args[6]) in contradicted_accidents_by_scope or (args[0], args[6]) in omitted_subjects_by_scope
         ):
             out.append(fact)
     return out
