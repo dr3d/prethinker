@@ -390,14 +390,22 @@ Possible next questions:
    probe, repeat the SEC pattern with at least three unlike transfers?
 3. **Query question:** Can a query planner constrained to the compiled atom
    inventory produce deterministic typed plans without reintroducing
-   question-text routing?
+   question-text routing? The current harness now makes atom-library grounding
+   strict: source-record predicates/header inventories are filtered from the
+   planner payload, evidence-bundle plans see the same filtered inventory, and
+   proposed `source_record_*` queries are blocked instead of executed. The
+   remaining research question is planner performance, not whether the source
+   prose fallback is still allowed.
 4. **Runtime/provider question:** How much variance remains when a domain pack
    is pinned to one local or remote model/provider/settings bundle? A
    2026-06-04 local-Qwen seeded SEC probe repeated its own `10/12` aggregate
    but did not reproduce the older `12/12` historical cell, so runtime variance
    remains a live measurement condition rather than a solved bookkeeping issue.
 5. **QA governance question:** Can answer-judge null controls and redaction
-   replay make a QA metric claim-bearing again?
+   replay make a QA metric claim-bearing again? The retained FDA v2
+   null-control report is now audited inside the default governance command.
+   A new LLM-judged QA metric still needs its own fresh null-control cell before
+   it can become claim-bearing.
 
 Until one of those is selected, more fixture/lane work should be treated as
 exploratory, not as the mainline claim.

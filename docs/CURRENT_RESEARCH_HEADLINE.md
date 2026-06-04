@@ -123,10 +123,15 @@ The next work should strengthen the research claim rather than lift one fixture:
 4. Keep OSHA as fourth-family corroborating evidence inside the standing
    compile-fact QA manifest; do not turn the wrapper boundary into a grind
    target.
-5. Run answer-judge null controls and oracle-isolation checks before any
-   LLM-judged QA metric becomes claim-bearing; deterministic compile-fact QA
-   still needs typed-plan and redaction replay.
-6. Treat stale-number re-gating as a research finding: old clean cells are
+5. Keep answer-judge null-control report auditing inside the default
+   governance command. Any new LLM-judged QA metric still needs its own fresh
+   null-control cell; deterministic compile-fact QA still needs typed-plan and
+   redaction replay.
+6. Treat atom-library query grounding as the strict query path: planner payloads
+   expose emitted typed atoms, and proposed `source_record_*` queries are
+   blocked rather than executed. The next query question is measured planner
+   performance, not permission to use prose fallback.
+7. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 
 ## Read Next
