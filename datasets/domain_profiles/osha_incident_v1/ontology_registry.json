@@ -185,7 +185,7 @@
         "health_flag"
       ],
       "category": "osha_related_activity",
-      "notes": "Preserves one related-activity table row. It does not assert causal or legal relationships outside the table."
+      "notes": "Preserves one related-activity table row. Blank Safety or Health cells are not_stated; use no only when the source explicitly states no, N, or No. It does not assert causal or legal relationships outside the table."
     },
     {
       "signature": "domain_omission/5",

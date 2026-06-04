@@ -395,6 +395,17 @@ def test_ntsb_investigation_contracts_keep_skeleton_and_prose_separate() -> None
     assert "full_probable_cause_paragraph" in finding_text
 
 
+def test_osha_related_activity_contract_keeps_blank_flags_not_stated() -> None:
+    related = carrier_contract("osha_related_activity/5")
+
+    assert related is not None
+    assert related["args"] == ["inspection_id", "activity_type", "activity_number", "safety_flag", "health_flag"]
+    text = " ".join(related["contract"] + related["forbidden_uses"])
+    assert "Blank Safety or Health cells mean not_stated" in text
+    assert "use no only when the source explicitly states" in text
+    assert "narrative_relationship" in text
+
+
 def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     filing = carrier_contract("sec_filing/6")
     registrant = carrier_contract("sec_registrant/4")

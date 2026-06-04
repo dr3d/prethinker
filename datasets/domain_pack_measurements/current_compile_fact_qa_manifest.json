@@ -89,11 +89,11 @@
     {
       "id": "osha_incident_transfer_001",
       "fixture_id": "osha_incident_transfer_001",
-      "description": "OSHA accident/inspection first unlike skeleton/table transfer.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_incident_domain_probe_20260604\\osha-incident-transfer-001-r1-local",
+      "description": "OSHA accident/inspection first unlike skeleton/table transfer, with blank Safety/Health related-activity flags constrained to not_stated.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_related_activity_flag_contract_20260604\\osha-transfer-001-related-activity-blank-flag-r1",
       "expect": {
         "support.reference_count": 15,
-        "support.exact_support_ge_2": 12,
+        "support.exact_support_ge_2": 15,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

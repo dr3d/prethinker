@@ -1534,6 +1534,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "activity_type is a compact controlled value such as accident, inspection, complaint, referral, or other_activity.",
             "activity_number is the source-stated Activity Nr prefixed as activity_...; do not infer it from the inspection id.",
             "safety_flag and health_flag are yes, no, or not_stated from the source row.",
+            "Blank Safety or Health cells mean not_stated; use no only when the source explicitly states no, N, or No.",
             "Do not use this row for narrative relationships or causal connections outside the related-activity table.",
         ],
         "value_domains": {
