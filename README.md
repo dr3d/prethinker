@@ -155,6 +155,8 @@ Deterministic compile-fact QA bundles can be regenerated in-repo from
 `expected_facts.pl` and compile JSON typed facts:
 
 ```powershell
+python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
+
 python scripts\build_compile_fact_judged_qa.py --out-dir tmp\judged_qa_probe `
   --domain-lens-bundle fixture_id=tmp\domain_lens_bundle\bundle_root
 python scripts\audit_redaction_replay.py tmp\judged_qa_probe
@@ -163,6 +165,9 @@ python scripts\audit_typed_plan_replay.py tmp\judged_qa_probe
 
 Use repeated `--fixture-run fixture_id:run_id=path\to\compile.json` arguments
 for compile artifacts that are not stored as `unions\run*` domain-lens bundles.
+The current manifest lives at
+`datasets\domain_pack_measurements\current_compile_fact_qa_manifest.json` and
+checks the locally reproducible SEC, NTSB, and FDA-transfer-002 cells.
 
 Current high-signal evidence:
 

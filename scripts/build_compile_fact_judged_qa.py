@@ -479,6 +479,7 @@ def _parse_domain_lens_bundles(values: list[str]) -> list[dict[str, Any]]:
         union_root = bundle_root / "unions"
         if not union_root.is_dir():
             raise SystemExit(f"--domain-lens-bundle has no unions directory: {union_root}")
+        seen_run_ids: set[str] = set()
         for run_dir in sorted(path for path in union_root.iterdir() if path.is_dir()):
             json_files = sorted(run_dir.glob("*.json"))
             if not json_files:
@@ -492,7 +493,27 @@ def _parse_domain_lens_bundles(values: list[str]) -> list[dict[str, Any]]:
                     "compile_json": str(json_files[0]),
                 }
             )
+            seen_run_ids.add(run_dir.name)
+        for json_file in sorted(union_root.glob("*.json")):
+            run_id = _run_id_from_union_file(json_file)
+            if run_id in seen_run_ids:
+                raise SystemExit(f"Duplicate run id {run_id} in {union_root}")
+            out.append(
+                {
+                    "fixture_id": fixture_id,
+                    "run_id": run_id,
+                    "compile_json": str(json_file),
+                }
+            )
+            seen_run_ids.add(run_id)
     return out
+
+
+def _run_id_from_union_file(path: Path) -> str:
+    match = re.search(r"(?:^|[-_])run(\d+)(?:[-_.]|$)", path.name)
+    if match:
+        return f"run{match.group(1)}"
+    return path.stem
 
 
 def _support_summary_by_fixture(files: list[dict[str, Any]]) -> dict[str, dict[str, int]]:

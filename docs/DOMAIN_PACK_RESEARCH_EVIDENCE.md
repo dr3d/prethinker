@@ -104,6 +104,25 @@ Use `--domain-lens-bundle fixture_id=path\to\bundle_root` for the common
 `unions\run*` bundle layout, and `--fixture-run fixture_id:run_id=path` for
 standalone compile artifacts.
 
+`datasets/domain_pack_measurements/current_compile_fact_qa_manifest.json`
+records the current locally reproducible compile-fact QA cells for the SEC seed
+and three transfers, the first NTSB transfer, and FDA transfer_002 current
+bundle. Run it with:
+
+```powershell
+python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
+```
+
+The 2026-06-04 manifest run passed across all six cells:
+
+```text
+SEC seed/transfer support>=2: 13/13, 13/13, 12/12, 12/12
+NTSB transfer support>=2: 18/25
+FDA transfer_002 support>=2: 20/27
+redaction replay: pass, 0 prose-dependent exact rows in every cell
+typed-plan replay: pass, 0 unregistered exact plans in every cell
+```
+
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:
 

@@ -149,3 +149,29 @@ def test_parse_domain_lens_bundle_discovers_union_runs(tmp_path: Path) -> None:
             "run_id": "run2",
         },
     ]
+
+
+def test_parse_domain_lens_bundle_discovers_flat_union_files(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    union_dir = bundle / "unions"
+    union_dir.mkdir(parents=True)
+    for name in [
+        "domain_bootstrap_file_20260603_fixture-run2_model.json",
+        "domain_bootstrap_file_20260603_fixture-run1_model.json",
+    ]:
+        (union_dir / name).write_text("{}", encoding="utf-8")
+
+    specs = _parse_domain_lens_bundles([f"fixture_a={bundle}"])
+
+    assert specs == [
+        {
+            "compile_json": str(union_dir / "domain_bootstrap_file_20260603_fixture-run1_model.json"),
+            "fixture_id": "fixture_a",
+            "run_id": "run1",
+        },
+        {
+            "compile_json": str(union_dir / "domain_bootstrap_file_20260603_fixture-run2_model.json"),
+            "fixture_id": "fixture_a",
+            "run_id": "run2",
+        },
+    ]
