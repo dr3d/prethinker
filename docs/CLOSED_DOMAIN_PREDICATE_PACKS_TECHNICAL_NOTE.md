@@ -1,6 +1,6 @@
 # Closed Domain Predicate Packs Technical Note
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Abstract
 
@@ -104,11 +104,17 @@ Current public numbers should be read with the following reproducibility unit:
 
 ```text
 code / fixture checkpoint:
-  053f3294 before this documentation polish
+  the repo checkout containing this note and the named scripts/artifacts;
+  record the exact git commit alongside any reproduced run
 
 fixtures and profiles:
   datasets/domain_profiles/*
   datasets/compile_micro_fixtures/*
+
+deterministic compile-fact QA builder:
+  scripts/build_compile_fact_judged_qa.py
+  compares expected_facts.pl rows to compile JSON typed facts
+  does not call an LLM, read source prose, or rewrite oracle facts
 
 primary recent local lane:
   LM Studio OpenAI-compatible endpoint
@@ -152,8 +158,8 @@ compiler proposes facts; deterministic gates decide what counts.
 
 | Family | Scope | Current result | What it supports |
 | --- | --- | --- | --- |
-| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden | Strongest methods example: a small closed skeleton pack transfers across unlike same-family filings. |
-| FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
+| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Deterministic compile-fact QA over seed plus transfers: `144/150` per-run exact, `50/50` support>=2, all exact rows typed-plan/redaction clean | Strongest methods example: a small closed skeleton pack transfers across unlike same-family filings. Per-run misses/partials are variance evidence, not a contradiction of the support>=2 claim. |
+| FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. |
 
 ## SEC Methods Example

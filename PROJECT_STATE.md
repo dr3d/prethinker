@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## One-Sentence Shape
 
@@ -81,6 +81,9 @@ FDA warning-letter pack
     all 137 exact rows pass typed-plan replay and redaction replay
     transfer_001: 78 / 78 exact across N=3
     transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
+    support>=2 view:
+      transfer_001: 26 / 26
+      transfer_002: 20 / 27
   transfer_003 archived replay: 18 / 26, 0 / 10 supported forbidden,
     current integrity fail
   read: primary richer case study; skeleton/citation/regulatory boilerplate
@@ -91,6 +94,9 @@ FDA warning-letter pack
     for violations 1, 2, and 3 are false positives
   scope note: v2 is oracle-shaped compile-fact QA, not evidence that messy
     human query planning is solved
+  reproducibility note: `scripts/build_compile_fact_judged_qa.py` now
+    regenerates this deterministic compile-fact QA package locally from
+    `expected_facts.pl` and compile JSON typed facts
 
 NTSB investigation pack
   seed micro: 13 / 13
@@ -193,10 +199,10 @@ The repo should not currently claim:
 
 ## Verification Commands
 
-Current full-suite result on 2026-06-03:
+Current full-suite result on 2026-06-04:
 
 ```text
-2363 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
+2365 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
@@ -209,6 +215,7 @@ Common local checks:
 $env:PYTHONPATH='.'
 pytest -q
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
+python scripts\build_compile_fact_judged_qa.py --help
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json

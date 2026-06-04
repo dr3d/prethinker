@@ -1,6 +1,6 @@
 # Domain Pack Research Evidence
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 This note summarizes the current evidence for the mainline research question:
 
@@ -37,7 +37,7 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 | --- | --- | --- | --- | --- |
 | FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Deterministic judged-QA v2 across transfer_001 and transfer_002: 137/159 exact; all 137 exact rows pass typed-plan replay and redaction replay. Archived transfer_003 replay fails current gates | Strongest domain-pack work, but not finished; current claim is compile-fact transfer with clear boundary rows, not broad FDA completion or messy-query competence |
 | NTSB investigations | Skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | One micro and one unlike transfer | Micro 13/13; fresh transfer manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden, clean governance | Transfer confirms skeleton/conditions/chronology; casualty, safety-action, and finding lanes remain weak |
-| SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers | Seed micro 13/13; transfers 13/13, 12/12, 12/12 with 0 supported forbidden and clean atom/lens governance | Best current evidence that a small closed skeleton pack can transfer within one official-document family |
+| SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers | Seed micro 13/13; transfers 13/13, 12/12, 12/12 with 0 supported forbidden and clean atom/lens governance. Deterministic compile-fact QA over the seed plus three transfers is 144/150 per-run exact, while support>=2 remains 50/50 and all exact rows pass typed-plan and redaction replay | Best current evidence that a small closed skeleton pack can transfer within one official-document family |
 
 ## Case-Study Matrix
 
@@ -50,7 +50,7 @@ gap, not from whichever worksheet row is most recent.
 | FDA warning-letter skeleton and CGMP numbered-item layer | FDA warning-letter micro plus transfer fixtures | Closed FDA registry, lens-scoped compile, N>=3/support>=2, 0 forbidden, clean atom/lens/value gates | Judged-QA v2: transfer_001 78/78 exact across N=3; transfer_002 59/81 exact across N=3 with 7 partial and 15 miss; combined 137/159 exact. All exact rows pass registered typed-plan replay and redaction replay with 0 prose-dependent exact rows. Archived transfer_003 replay: 18/26, integrity fail | FDA is promising but not broadly transfer-clean; transfer_002 cleanly exposes wrapper role semantics, context-dependent category/substance, and value-detail boundaries. V2 is oracle-shaped compile-fact QA, not messy human query planning | Stop lifting transfer_002 row-by-row; summarize the boundary and use a second family or transfer_003 only if the research question requires another boundary point |
 | FDA response assessment | Three-fixture observation-transfer response lanes | Same gates plus fresh same-condition composition, not historical lane mixing | 16/17 composed diagnostic with one repeated unexpected final row | Typed attachment/taxonomy conflict; not safe for more row grinding | Keep frozen unless a broader FDA case-study checkpoint makes response coverage load-bearing |
 | NTSB skeleton/chronology/condition pack | UPS aviation micro plus unlike highway/hazmat transfer | Closed NTSB registry, N>=3/support>=2, lens-scope and atom-shape clean | Micro 13/13; scripted lens-bundle manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden | Casualty instability, one safety-action actor/organization attachment miss, and findings/probable-cause substance should abstain or Tier 2 | Use NTSB as boundary evidence; do not grind toward a promoted pack before FDA is summarized |
-| SEC Form 8-K skeleton pack | One seed micro plus three unlike retained Form 8-K/8-K/A transfers | Closed SEC skeleton registry, local-Qwen N>=3/support>=2, integrity gates clean | Seed 13/13; transfers 13/13, 12/12, 12/12, all 0 supported forbidden | Skeleton transfers; event-substance intentionally untested | Use as the methods example in the phase-close technical note |
+| SEC Form 8-K skeleton pack | One seed micro plus three unlike retained Form 8-K/8-K/A transfers | Closed SEC skeleton registry, local-Qwen N>=3/support>=2, integrity gates clean | Seed 13/13; transfers 13/13, 12/12, 12/12, all 0 supported forbidden. Local deterministic compile-fact QA: 144/150 per-run exact, 50/50 support>=2, 0 prose-dependent exact rows | Skeleton transfers; event-substance intentionally untested. The per-run misses/partials are useful variance evidence, not a contradiction of the support>=2 claim | Use as the methods example in the phase-close technical note |
 
 ## Current Research Verdict
 
@@ -92,6 +92,24 @@ historical unless they are re-gated here or in a newer note.
 | FDA | `fda_warning_letter_domain_transfer_002` | `tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` | Clean boundary transfer cell, 20/27 |
 | FDA | `fda_transfer_judged_qa_v2` | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` | Deterministic compile-fact QA across transfer_001 and transfer_002, 137/159; every exact row typed-plan and redaction replay clean |
 | NTSB | `ntsb_investigation_transfer_surface_001` | `tmp/domain_lens_bundle/ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, 18/25 manifest; 19/25 R2 reducer replay |
+
+## Compile-Fact QA Reproduction
+
+`scripts/build_compile_fact_judged_qa.py` is the in-repo deterministic builder
+for compile-fact judged-QA bundles. It compares `expected_facts.pl` rows to the
+typed facts emitted by compile JSON artifacts. It does not call an LLM, read
+source prose, or rewrite oracle facts.
+
+The generated bundles are still governed by the same two checks used for the
+external FDA v2 package:
+
+```powershell
+python scripts\audit_redaction_replay.py <judged-qa-bundle>
+python scripts\audit_typed_plan_replay.py <judged-qa-bundle>
+```
+
+The builder now reports both per-run exact counts and support>=2 by fixture, so
+N-cycle evidence can be read from the manifest instead of inferred manually.
 
 ## FDA Detail
 

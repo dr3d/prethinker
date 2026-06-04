@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 Prethinker is currently a lab/research project, not a product sprint. The
 claim-bearing question is:
@@ -39,6 +39,10 @@ SEC Form 8-K skeleton pack
   transfer_002: 12 / 12
   transfer_003: 12 / 12
   forbidden support: 0 in all claim-bearing cells
+  deterministic compile-fact QA over seed plus three transfers:
+    144 / 150 per-run exact
+    50 / 50 support>=2
+    all 144 exact rows pass typed-plan replay and redaction replay
   governance: research-integrity gate clean on retained transfer artifacts
   claim: strongest current example that a small closed predicate pack can
     stabilize same-family official-document skeleton compilation
@@ -49,6 +53,7 @@ FDA warning-letter pack
     all 137 exact rows pass typed-plan replay and redaction replay
     transfer_001: 78 / 78 exact across N=3
     transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
+    support>=2: transfer_001 26 / 26; transfer_002 20 / 27
   transfer_003 archived replay: 18 / 26, 0 / 10 forbidden, integrity fail
   documentation-gap candidate review: 0 expected / 13 forbidden on
     transfer_002; stable candidate emissions for violations 1, 2, and 3 are

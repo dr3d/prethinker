@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 This page is the compact public map of current work. It is not a rolling
 session journal. Older lane notes, fixture-specific repair slices, retired
@@ -102,6 +102,7 @@ fda_transfer_judged_qa_v2 deterministic compile-fact QA:
   transfer_001: 78 / 78 exact across N=3
   transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
   combined: 137 / 159 exact = 86.16%
+  support>=2: transfer_001 26 / 26; transfer_002 20 / 27
   typed-plan replay: 137 / 137 exact rows replay through registered carriers
   redaction replay: 137 / 137 exact rows survive with 0 prose-dependent rows
   scope: oracle-shaped Prolog fact QA, not messy human query planning
@@ -125,7 +126,10 @@ transfer_003 archived single-lens replay:
 The v2 judged-QA bundle is the cleanest current FDA compile-fact measurement:
 the exact rows replay through registered typed plans and survive redaction, but
 the queries are oracle-shaped carrier facts. It should not be described as
-messy human QA. The `transfer_001` replay is the clean FDA transfer cell.
+messy human QA. The package is now reproducible locally with
+`scripts/build_compile_fact_judged_qa.py`, which compares `expected_facts.pl`
+against compile JSON typed facts and prints support>=2 summaries by fixture.
+The `transfer_001` replay is the clean FDA transfer cell.
 `transfer_002` is now the clean boundary cell: current gates hold, but the
 richer rows do not all transfer. A blind candidate review of
 `fda_response_documentation_gap/5` on `transfer_002` found 0 expected facts and
@@ -249,6 +253,23 @@ measurement: `form_8_k_a` and `results_of_operations_financial_condition`. It
 does not prove event-substance extraction. It says the SEC skeleton domain pack
 now has one seed micro and three unlike skeleton transfers under hard
 governance.
+
+A local deterministic compile-fact QA replay over the SEC seed plus all three
+transfers gives the complementary per-run view:
+
+```text
+rows: 144 / 150 exact, 4 partial, 2 miss
+support>=2 by fixture:
+  seed: 13 / 13
+  transfer_001: 13 / 13
+  transfer_002: 12 / 12
+  transfer_003: 12 / 12
+redaction replay: 144 / 144 exact rows survive, 0 prose-dependent
+typed-plan replay: 144 / 144 exact rows replay through registered carriers
+```
+
+The per-run misses/partials are not a contradiction of the SEC transfer claim;
+they are exactly why N>=3/support>=2 is the claim-bearing convention.
 
 Next SEC work should either summarize the methodology evidence across FDA,
 NTSB, and SEC or deliberately test whether adding SEC event-substance carriers

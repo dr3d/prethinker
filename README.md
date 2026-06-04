@@ -151,11 +151,26 @@ python -m pytest -q
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 ```
 
+Deterministic compile-fact QA bundles can be regenerated in-repo from
+`expected_facts.pl` and compile JSON typed facts:
+
+```powershell
+python scripts\build_compile_fact_judged_qa.py --out-dir tmp\judged_qa_probe `
+  --fixture-run fixture_id:run1=path\to\compile_run1.json `
+  --fixture-run fixture_id:run2=path\to\compile_run2.json `
+  --fixture-run fixture_id:run3=path\to\compile_run3.json
+python scripts\audit_redaction_replay.py tmp\judged_qa_probe
+python scripts\audit_typed_plan_replay.py tmp\judged_qa_probe
+```
+
 Current high-signal evidence:
 
 - SEC Form 8-K skeleton domain pack: seed micro `13 / 13`; three unlike
   retained transfers `13 / 13`, `12 / 12`, and `12 / 12`, with `0` supported
-  forbidden rows and clean atom/lens governance in claim-bearing cells.
+  forbidden rows and clean atom/lens governance in claim-bearing cells. A
+  deterministic compile-fact QA replay over the seed plus three transfers is
+  `144 / 150` per-run exact and `50 / 50` support>=2, with every exact row
+  passing typed-plan and redaction replay.
 - FDA warning-letter domain pack: deterministic judged-QA v2 across
   transfer_001 and transfer_002 is `137 / 159` exact; all `137` exact rows pass
   typed-plan replay and redaction replay. This is compile-fact transfer
