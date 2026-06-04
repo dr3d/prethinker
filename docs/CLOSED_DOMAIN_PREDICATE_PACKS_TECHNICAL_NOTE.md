@@ -222,6 +222,13 @@ Per-layer boundary:
 
 FDA supports the richer-domain path, but not broad FDA completion.
 
+A blind candidate review also rejected the
+`fda_response_documentation_gap/5` candidate on transfer_002: 0 expected facts
+and 13 forbidden boundaries. The stable candidate emissions for violations 1,
+2, and 3 are therefore false positives, reinforcing that response/detail
+substance should abstain unless a compact layer survives independent review and
+fresh transfer gates.
+
 ## NTSB Boundary Corroboration
 
 NTSB is a second unlike official-document family used to test whether the same

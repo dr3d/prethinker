@@ -107,6 +107,7 @@ transfer_002 fresh current-pack lens-scoped bundle:
     wrapper role semantics
     context-dependent violation-3 category/substance
     response/detail value flesh
+    documentation-gap candidate false positives confirmed by blind review
 
 transfer_003 archived single-lens replay:
   18 / 26 expected, 0 / 10 supported forbidden
@@ -115,7 +116,10 @@ transfer_003 archived single-lens replay:
 
 The `transfer_001` replay is the clean FDA transfer cell. `transfer_002` is now
 the clean boundary cell: current gates hold, but the richer rows do not all
-transfer. Do not grind `transfer_002` upward row-by-row; use it to name the
+transfer. A blind candidate review of `fda_response_documentation_gap/5` on
+`transfer_002` found 0 expected facts and 13 forbidden boundaries, so retained
+stable documentation-gap emissions for violations 1, 2, and 3 are false
+positives. Do not grind `transfer_002` upward row-by-row; use it to name the
 current abstention boundary. `transfer_003` remains archived boundary/blocker
 evidence until it is rerun as a fresh current-pack bundle or deliberately left
 out of the claim. The response-assessment lane remains a 16/17 composed

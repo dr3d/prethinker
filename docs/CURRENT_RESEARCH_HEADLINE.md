@@ -47,6 +47,9 @@ FDA warning-letter pack
   transfer_001 current-gate replay: 26 / 26, 0 / 9 forbidden
   transfer_002 fresh current-pack lens bundle: 20 / 27, 0 / 7 forbidden
   transfer_003 archived replay: 18 / 26, 0 / 10 forbidden, integrity fail
+  documentation-gap candidate review: 0 expected / 13 forbidden on
+    transfer_002; stable candidate emissions for violations 1, 2, and 3 are
+    false positives
   claim: primary richer case study; skeleton and recurring regulatory anatomy
     transfer better than wrapper role semantics, context-dependent categories,
     response/detail value flesh, and other substance lanes
