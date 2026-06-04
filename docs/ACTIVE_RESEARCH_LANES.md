@@ -359,12 +359,13 @@ Current OSHA seed status:
 fixture: osha_incident_domain_v1
 artifact root: C:\prethinker_tmp_archive\osha_seed_current_contract_rerun_20260604\osha-seed-current-contract-r1
 local-Qwen lens bundle: N=3, support>=2
-supported expected facts: 20 / 20 using constant-slot support report
+supported expected facts: 21 / 21 in the standing manifest after FTA
+  total-penalty source-only adjudication
 supported forbidden facts: 0 / 8
 atom-shape/signature/lens-scope blockers: 0
-standing manifest note: one repeated source-true
-  osha_penalty_amount(..., fta, total, usd_0, ...) extra remains visible as
-  an unexpected precision/adjudication target
+standing manifest note: after source-only adjudication, the FTA total-penalty
+  row is expected; current manifest support is 21 / 21 with 0 unexpected
+  same-signature support>=2
 ```
 
 The first unlike retained OSHA transfer also ran under the same local settings:

@@ -144,7 +144,7 @@ NTSB investigation pack
     row still unstable
 
 OSHA accident/inspection pack
-  seed micro: 20 / 20 support>=2 after high-arity registry intake fix and
+  seed micro: 21 / 21 support>=2 after high-arity registry intake fix and
     current related-activity blank-flag contract
   first unlike transfer: 15 / 15 support>=2
   forbidden support: 0 in both measured cells
@@ -157,10 +157,10 @@ OSHA accident/inspection pack
   read: fourth-family corroboration for skeleton/table anatomy; accident,
     employee injury, violation counts, penalties, item, and status rows transfer
     better than long-table enumeration and mixed-source section attachment. The
-    seed still emits one repeated source-true FTA penalty extra, carried as a
-    visible precision/adjudication target. The transfer_003 guard is cleanup
-    only: support stays 2 / 21 while the current news-release accident/injury
-    rows are blocked from contaminating the prior inspection detail.
+    prior repeated FTA total-penalty extra was adjudicated as source-backed and
+    is now in the seed oracle. The transfer_003 guard is cleanup only: support
+    stays 2 / 21 while the current news-release accident/injury rows are
+    blocked from contaminating the prior inspection detail.
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,

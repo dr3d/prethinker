@@ -15,6 +15,7 @@ osha_penalty_amount(Inspection, initial, serious, usd_23170, SrcInitialSeriousPe
 osha_penalty_amount(Inspection, current, serious, usd_23170, SrcCurrentSeriousPenalty).
 osha_penalty_amount(Inspection, initial, total, usd_23170, SrcInitialTotalPenalty).
 osha_penalty_amount(Inspection, current, total, usd_23170, SrcCurrentTotalPenalty).
+osha_penalty_amount(Inspection, fta, total, usd_0, SrcFtaTotalPenalty).
 
 osha_violation_item(Inspection, Citation1, item_1, serious, standard_19260200_g01, v_2025_09_17, usd_11585, SrcViolation1).
 osha_violation_item(Inspection, Citation2, item_2, serious, standard_19260200_g02, v_2025_09_17, usd_11585, SrcViolation2).

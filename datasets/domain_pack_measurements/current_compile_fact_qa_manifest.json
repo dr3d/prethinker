@@ -80,8 +80,8 @@
       "description": "OSHA accident/inspection seed skeleton/table probe, rerun with current related-activity blank-flag contract.",
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_seed_current_contract_rerun_20260604\\osha-seed-current-contract-r1",
       "expect": {
-        "support.reference_count": 20,
-        "support.exact_support_ge_2": 20,
+        "support.reference_count": 21,
+        "support.exact_support_ge_2": 21,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

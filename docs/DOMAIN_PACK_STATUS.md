@@ -10,7 +10,7 @@ This report does not read source prose, QA questions, or judge outputs.
 - Lenses: `24`
 - Associated fixtures: `23`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `492`
+- Expected facts in associated fixtures: `493`
 - Forbidden facts in associated fixtures: `174`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
@@ -19,7 +19,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 291 | 79 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
-| `osha_incident_v1` | 10 | 9 | 4 | 5 | 110 | 35 |
+| `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 31 |
 
 ## fda_warning_letter_v1
@@ -108,7 +108,7 @@ This report does not read source prose, QA questions, or judge outputs.
 
 | Fixture | Association | Expected | Forbidden | Expected signatures |
 | --- | --- | ---: | ---: | --- |
-| `osha_incident_domain_v1` | `manifest_domain_profile` | 20 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:3, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:2, `osha_violation_count/5`:4, `osha_violation_item/8`:2, `osha_violation_status/5`:2 |
+| `osha_incident_domain_v1` | `manifest_domain_profile` | 21 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:3, `osha_inspection/7`:1, `osha_penalty_amount/5`:5, `osha_related_activity/5`:2, `osha_violation_count/5`:4, `osha_violation_item/8`:2, `osha_violation_status/5`:2 |
 | `osha_incident_inspection_id_omission_v1` | `manifest_domain_profile` | 1 | 1 | `domain_omission/5`:1 |
 | `osha_incident_transfer_001` | `manifest_domain_profile` | 15 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:1, `osha_violation_count/5`:4, `osha_violation_item/8`:1, `osha_violation_status/5`:1 |
 | `osha_incident_transfer_002` | `manifest_domain_profile` | 53 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:8, `osha_related_activity/5`:2, `osha_violation_count/5`:8, `osha_violation_item/8`:16, `osha_violation_status/5`:16 |

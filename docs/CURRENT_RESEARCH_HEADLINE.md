@@ -68,12 +68,12 @@ SEC Form 8-K skeleton pack
     14 governance checks passed, including full pytest,
     `sec_value_axis_integrity`, and
     `compile_fact_qa_exclusions`; the standing manifest now prints
-    same-signature unexpected support (`5` rows at support>=2 across all
+    same-signature unexpected support (`4` rows at support>=2 across all
     standing cells) as a precision diagnostic. A typed SEC identifier-value
     normalization pass raised only per-run exact support in transfer_002
     (commission-file/EIN punctuation loss), not support>=2. The current
-    standing compile-fact QA status is 122/138 expected facts at support>=2
-    and 340/414 deterministic per-run exact rows, with 0 prose-dependent exact
+    standing compile-fact QA status is 123/139 expected facts at support>=2
+    and 342/417 deterministic per-run exact rows, with 0 prose-dependent exact
     rows and 0 unregistered exact typed plans.
 
 FDA warning-letter pack
@@ -113,14 +113,14 @@ NTSB investigation pack
     remains unstable
 
 OSHA accident/inspection pack
-  seed micro: 20 / 20 support>=2 after the high-arity registry intake fix
+  seed micro: 21 / 21 support>=2 after the high-arity registry intake fix
     and current related-activity blank-flag contract
   first unlike transfer: 15 / 15 support>=2
   forbidden support: 0 in both measured cells
   governance: registered signatures, atom-shape, and lens-scope clean
-  caveat: seed emits one repeated source-true FTA penalty extra, retained as
-    an unexpected precision/adjudication target rather than folded into the
-    oracle
+  caveat: the previous repeated FTA total-penalty extra was adjudicated
+    source-backed and folded into the seed oracle; OSHA now has 0 unexpected
+    same-signature support>=2 in the standing manifest
   claim: fourth-family corroboration; accident, employee injury, violation
     counts, penalties, item, status, and related-activity rows transfer in
     the standing cells, while larger long-table and mixed-document diagnostics

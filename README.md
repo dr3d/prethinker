@@ -214,14 +214,14 @@ Current high-signal evidence:
   timeline sequence-role row remain unsupported.
 - OSHA accident/inspection domain pack: fourth-family skeleton probe from
   retained fixtures with `10` registered predicates and `4` lens-scoped
-  compile surfaces. Local LM Studio N=3 seed replay is `20 / 20`
+  compile surfaces. Local LM Studio N=3 seed replay is `21 / 21`
   support>=2; first unlike transfer is `15 / 15`, both with `0` supported
   forbidden rows and clean atom/lens gates. The standing compile-fact QA
-  manifest now replays those cells at `55 / 60` seed per-run exact and
+  manifest now replays those cells at `57 / 63` seed per-run exact and
   `36 / 45` transfer per-run exact, with every exact row passing typed-plan and
   redaction replay. This is corroborating skeleton evidence, not a broad OSHA
-  pack claim; one repeated source-true FTA penalty extra remains visible as an
-  unexpected precision/adjudication target.
+  pack claim. The previous repeated FTA total-penalty extra was adjudicated as
+  source-backed and is now part of the expected seed oracle.
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.
