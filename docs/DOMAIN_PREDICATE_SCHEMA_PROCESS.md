@@ -219,6 +219,18 @@ signatures that are not actually registered and lens-allowed. A candidate may
 be unregistered while it is still a draft, but it cannot be promoted until the
 central carrier registry, domain registry, and lens allowlist all agree.
 
+After a proposal validates, retained compile artifacts can be checked without
+changing the fixture oracle:
+
+```text
+python scripts\summarize_domain_predicate_proposal_evidence.py --compile-root PATH_TO_RETAINED_BUNDLE --apply-domain-reducers --out-md tmp\proposal_evidence.md --out-json tmp\proposal_evidence.json
+```
+
+This evidence report is deliberately not a score. `candidate_signal_no_oracle`
+means repeated typed facts exist in retained compiles, but the fixture oracle
+did not predeclare them; those rows require independent review before any
+claim-bearing promotion.
+
 5. Define allowed value domains.
 
 For enum-like slots, declare compact allowed values before running broad
