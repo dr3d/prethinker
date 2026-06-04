@@ -8569,18 +8569,24 @@ def test_sec_identifier_value_atom_reduction_canonicalizes_typed_phone_values_on
             "sec_registrant_identifier(filing_1, servicenow_inc, exchange_name, exchange_the_new_york_stock_exchange, source_cover_page).",
             "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
             "sec_registrant_identifier(filing_1, servicenow_inc, commission_file_number, file_001_35580, source_cover_page).",
+            "sec_registrant_identifier(filing_1, driven_brands_holdings_inc, commission_file_number, file_00139898, source_cover_page).",
+            "sec_registrant_identifier(filing_1, driven_brands_holdings_inc, commission_file_number, file_139898, source_cover_page).",
+            "sec_registrant_identifier(filing_1, driven_brands_holdings_inc, irs_ein, ein_473595252, source_cover_page).",
             "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, exchange_nyse, source_cover_page).",
         ]
     }
 
     report = _apply_sec_identifier_value_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 4
+    assert report["reduction_count"] == 6
     assert source_compile["facts"] == [
         "sec_registrant_identifier(filing_1, servicenow_inc, telephone, phone_408_501_8550, source_cover_page).",
         "sec_registrant_identifier(filing_1, servicenow_inc, exchange_name, exchange_new_york_stock_exchange, source_cover_page).",
         "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
         "sec_registrant_identifier(filing_1, servicenow_inc, commission_file_number, file_001_35580, source_cover_page).",
+        "sec_registrant_identifier(filing_1, driven_brands_holdings_inc, commission_file_number, file_001_39898, source_cover_page).",
+        "sec_registrant_identifier(filing_1, driven_brands_holdings_inc, commission_file_number, file_139898, source_cover_page).",
+        "sec_registrant_identifier(filing_1, driven_brands_holdings_inc, irs_ein, ein_47_3595252, source_cover_page).",
         "sec_registrant_identifier(filing_1, servicenow_inc, ticker_symbol, exchange_nyse, source_cover_page).",
     ]
     policy = source_compile["deterministic_sec_identifier_value_atom_reduction_policy"]

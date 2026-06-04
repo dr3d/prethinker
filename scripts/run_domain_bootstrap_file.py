@@ -10504,6 +10504,36 @@ def _canonical_sec_exchange_identifier_atom(value: str) -> str:
     return canonical if canonical and canonical != text else ""
 
 
+def _canonical_sec_commission_file_identifier_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    compact = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not compact.startswith("file_"):
+        compact = f"file_{compact}"
+    suffix = compact.removeprefix("file_")
+    digits = re.sub(r"\D+", "", suffix)
+    if len(digits) == 8:
+        canonical = f"file_{digits[0:3]}_{digits[3:8]}"
+        return canonical if canonical != text else ""
+    return compact if compact != text else ""
+
+
+def _canonical_sec_ein_identifier_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    compact = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not compact.startswith("ein_"):
+        compact = f"ein_{compact}"
+    suffix = compact.removeprefix("ein_")
+    digits = re.sub(r"\D+", "", suffix)
+    if len(digits) == 9:
+        canonical = f"ein_{digits[0:2]}_{digits[2:9]}"
+        return canonical if canonical != text else ""
+    return compact if compact != text else ""
+
+
 def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
     """Canonicalize selected SEC identifier value atoms by typed identifier kind."""
 
@@ -10522,6 +10552,10 @@ def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -
                 canonical = _canonical_sec_phone_identifier_atom(args[3])
             elif identifier_kind == "exchange_name":
                 canonical = _canonical_sec_exchange_identifier_atom(args[3])
+            elif identifier_kind == "commission_file_number":
+                canonical = _canonical_sec_commission_file_identifier_atom(args[3])
+            elif identifier_kind == "irs_ein":
+                canonical = _canonical_sec_ein_identifier_atom(args[3])
             if canonical:
                 original = args[3]
                 args[3] = canonical
@@ -10550,7 +10584,9 @@ def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -
         "description": (
             "Canonicalizes selected values already emitted in sec_registrant_identifier/5 "
             "identifier_value slots. Telephone values normalize to phone_NNN_NNN_NNNN; "
-            "known SEC exchange-name aliases normalize to the registered exchange atom. "
+            "known SEC exchange-name aliases normalize to the registered exchange atom; "
+            "compact commission-file and EIN punctuation loss normalizes within the "
+            "already-emitted typed identifier value. "
             "It reads only typed carrier arguments and creates no new identifier facts."
         ),
     }
