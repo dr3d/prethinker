@@ -144,8 +144,13 @@ Atom-library query grounding
     Gemma 4 12B local dense control, temp 0, N=5:
       25 / 25 product exact and typed-plan replay; redaction rejudge marked
       24 / 25 thesis exact because one normalized-name row was judged partial
+    Gemma 4 12B local Q4_K_M control, temp 0, N=5, random local seed:
+      25 / 25 product exact; 25 / 25 typed-plan replay; 25 / 25 redacted
+      rejudge; 0 prose-dependent exact rows; artifact metadata captured
+      quantization, architecture, and loaded context
   read: the query-over-atoms path is real but still a variance-measured query
-    lane; Gemma is a useful control, not a promoted model switch
+    lane; Gemma Q4 is a useful query-control candidate, not a promoted model
+    switch
   mapper finding: the strict path exposed that uppercase query variables emitted
     by the LLM were being atomized into lowercase constants; the mapper now
     preserves uppercase slot-label query variables while still atomizing ordinary

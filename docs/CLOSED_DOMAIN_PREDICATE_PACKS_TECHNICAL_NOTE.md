@@ -406,7 +406,9 @@ Possible next questions:
    query anchor, Qwen nonzero-temperature arms landed at `13/15` product exact,
    and a local Gemma 4 12B Q8 dense-control arm landed at `25/25` product exact
    and typed-plan replay but `24/25` redacted rejudge because one normalized-name
-   row was judged partial. The remaining research question is planner
+   row was judged partial. A later local Gemma 4 12B Q4_K_M dense-control arm
+   landed at `25/25` product exact, typed-plan replay, and redacted rejudge with
+   0 prose-dependent rows. The remaining research question is planner
    performance inside the atom library on a larger and unlike query set, not
    whether source-prose or fallback rescue is still allowed.
 4. **Runtime/provider question:** How much variance remains when a domain pack
@@ -417,7 +419,10 @@ Possible next questions:
    The first pre-registered atom-query variance cell also found temp-0 Qwen
    query planning stable only as a `4-5/5` band on the five-row SEC query
    anchor, while Gemma Q8 was cleaner on raw query planning but still blocked
-   once by redacted-rejudge normalized-name strictness.
+   once by redacted-rejudge normalized-name strictness. A separately registered
+   Gemma Q4_K_M control passed all five draws and both gates on the same tiny
+   query anchor; this hardens the query-over-atoms hypothesis, but it is not a
+   compile-pack or product-model migration result.
 5. **QA governance question:** Can answer-judge null controls and redaction
    replay make a QA metric claim-bearing again? The retained FDA v2
    null-control report is now audited inside the default governance command.

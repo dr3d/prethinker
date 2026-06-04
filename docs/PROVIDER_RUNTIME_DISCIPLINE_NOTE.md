@@ -371,16 +371,26 @@ Gemma 4 12B local dense control, operator-observed Q8, temp 0, N=5:
   product exact: 25 / 25
   typed-plan replay: 25 / 25, pass
   redacted rejudge: 24 / 25, blocked by one normalized-name partial
+
+Gemma 4 12B local dense control, Q4_K_M, temp 0, N=5, random local seed:
+  product exact: 25 / 25
+  typed-plan replay: 25 / 25, pass
+  redacted rejudge: 25 / 25, 0 prose-dependent, pass
+  metadata: arch=gemma4, compatibility_type=gguf, quantization=Q4_K_M,
+    loaded_context_length=65536
 ```
 
-Read: Gemma is a useful query-planning control and may merit a Q4 arm later,
-but this tiny cell is not a model migration. The stricter finding is that Qwen
-temp-0 query planning should be reported as a 4-5/5 band on this anchor rather
-than as a single favorable 5/5 point, and nonzero temperature did not remove
-the query-surface jitter.
+Read: Gemma Q4 is the cleanest tiny query-control arm so far, and it is slightly
+faster than the Q8 control on this machine. It is still not a model migration:
+the cell used one five-row query anchor over a Qwen-compiled typed artifact.
+The stricter finding is that Qwen temp-0 query planning should be reported as a
+4-5/5 band on this anchor rather than as a single favorable 5/5 point, and
+nonzero temperature did not remove the query-surface jitter.
 
 The cell also exposed a local metadata bug: when the harness used a `/v1`
 base URL, the LM Studio metadata helper appended another `/v1` and therefore
 missed model-list and quantization details. That has been fixed for future
 artifacts. The completed cell's Gemma Q8 detail is operator-observed plus
 post-fix metadata validation, not a field recovered in the original run JSON.
+The later Gemma Q4 arm was generated after the fix and therefore records
+quantization and loaded-context metadata in each draw artifact.

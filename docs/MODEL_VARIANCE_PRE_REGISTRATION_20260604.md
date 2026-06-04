@@ -258,3 +258,19 @@ does not test fresh compile stability. Report product exact, typed-plan replay,
 redacted rejudge, prose-dependent rows, latency, and metadata completeness. If
 Q4 is faster or cleaner than Q8 on this small anchor, treat that as a candidate
 follow-up hypothesis, not as a promoted model migration.
+
+Completed result:
+
+```text
+product exact: 25 / 25
+typed-plan replay: 25 / 25, pass
+redacted rejudge: 25 / 25, 0 prose-dependent, pass
+latency: about 74-76 seconds per five-row draw
+metadata: arch=gemma4, compatibility_type=gguf, quantization=Q4_K_M,
+  loaded_context_length=65536
+artifact:
+  C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_t003_atom_query_variance_20260604\sec_t003_atom_query_armD_gemma12b_q4_temp0_N5
+```
+
+Read: cleanest query-control arm so far, but still only a tiny query-anchor
+result over a Qwen-compiled typed artifact.

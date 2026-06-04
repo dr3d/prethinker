@@ -147,14 +147,16 @@ Results:
 | Local Qwen temp 0.2 | 3 | 13/15 | 13/15, pass | 12/15, blocked by one normalized-name partial | Temperature did not improve the query lane; it added gate noise. |
 | Local Qwen temp 0.5 | 3 | 13/15 | 13/15, pass | 13/15, pass | Nonzero temperature remains diagnostic only, not a claim setting. |
 | Local Gemma 4 12B dense control, operator-observed Q8 | 5 | 25/25 | 25/25, 0 unregistered, pass | 24/25, blocked by one normalized-name partial | Promising as a query-planning control, but not promoted. One redacted rejudge row showed judge/rendering strictness around `blackstone_inc` versus "Blackstone Inc." |
+| Local Gemma 4 12B Q4_K_M dense control | 5 | 25/25 | 25/25, 0 unregistered, pass | 25/25, 0 prose-dependent, pass | Cleanest tiny query-control arm so far. Metadata captured `arch=gemma4`, `compatibility_type=gguf`, `quantization=Q4_K_M`, and loaded context `65536`. Still not a model migration because it used one five-row query anchor over a Qwen-compiled typed artifact. |
 
 The Gemma/Qwen run artifacts were generated before a local LM Studio metadata
 URL-normalization fix, so the artifacts recorded model id and decoding settings
 but did not recover quantization from `/api/v0/models`. The metadata capture
 bug was fixed after the run; a live check then recovered `google/gemma-4-12b`
 as GGUF `Q8_0`. Treat the Q8 detail as operator-observed plus post-fix
-metadata validation, not as an in-artifact field for the completed cell. A
-Gemma Q4 comparison would need its own dated arm.
+metadata validation, not as an in-artifact field for the completed cell. The
+Gemma Q4 arm was run after the metadata fix, so its artifacts do include
+quantization and loaded-context metadata.
 
 ## Query Grounding Governance
 
@@ -183,8 +185,9 @@ atom-query smoke reached 5/5 exact; all five exact rows passed typed-plan
 replay and redacted rejudge, with 0 prose-dependent exact rows and 0
 compatibility/runtime/write rows. The follow-up pre-registered query-variance
 cell above is the current honest measurement: local Qwen temp-0 is a 4-5/5
-per-draw band, and Gemma Q8 is promising but still gated by one redacted-rejudge
-normalized-display partial.
+per-draw band, Gemma Q8 is promising but still gated by one redacted-rejudge
+normalized-display partial, and Gemma Q4_K_M is clean on this tiny retained
+query anchor.
 
 The active next question is planner performance inside the atom library on a
 larger and unlike query set, not permission to restore fallback rescue. The
