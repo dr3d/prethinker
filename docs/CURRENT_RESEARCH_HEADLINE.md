@@ -63,7 +63,8 @@ SEC Form 8-K skeleton pack
     than counted as an open support boundary.
   latest governance artifact:
     C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
-    11 governance checks passed; fixture value-axis audit checked 29 SEC
+    12 governance checks passed, including `sec_value_axis_integrity`; that
+    fixture value-axis audit checked 29 SEC
     item/exhibit/treatment facts with 0 issues. This is guard tightening, not
     a support increase.
 

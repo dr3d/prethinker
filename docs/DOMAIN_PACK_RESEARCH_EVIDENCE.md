@@ -265,7 +265,7 @@ only from `exhibit_table_row_*` handles and cover-page IXBRL legal-treatment
 inference; its artifact is
 `C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604`, where the fixture
 value-axis audit checked 29 SEC item/exhibit/treatment facts with 0 issues and
-the 11-command governance run passed. This is guard tightening, not a support
+the 12-command governance run passed. This is guard tightening, not a support
 increase. Repaired Qwen MoE transfer_003 reruns landed at `12/13` and
 then `11/13`, both with `0` supported forbidden and clean axis/value/atom gates.
 A pre-registered follow-up stability rerun landed at `12/13`, again with `0`

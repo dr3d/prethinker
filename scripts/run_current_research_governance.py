@@ -14,6 +14,17 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+SEC_VALUE_AXIS_FACT_FILES = [
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_v1/expected_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_001/expected_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_002/expected_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_003/expected_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_v1/forbidden_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_001/forbidden_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_002/forbidden_facts.pl",
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_003/forbidden_facts.pl",
+]
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -131,6 +142,22 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(report_root / "domain_predicate_proposal_status.md"),
                 "--expect-md",
                 "docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md",
+            ],
+        },
+        {
+            "id": "sec_value_axis_integrity",
+            "command": [
+                python,
+                "scripts/audit_sec_value_axis_integrity.py",
+                *[
+                    item
+                    for fact_file in SEC_VALUE_AXIS_FACT_FILES
+                    for item in ("--fact-file", fact_file)
+                ],
+                "--out-json",
+                str(report_root / "sec_value_axis_integrity.json"),
+                "--out-md",
+                str(report_root / "sec_value_axis_integrity.md"),
             ],
         },
         {
