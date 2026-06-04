@@ -203,7 +203,9 @@ expected item/exhibit facts were themselves axis-mixed. The schema now separates
 `sec_filing_item/5.item_role` for structural role,
 `sec_filing_item_treatment/4` for item legal treatment, and
 `sec_exhibit/5.exhibit_role` for exhibit legal treatment. A typed guard blocks
-Item 9.01 item-treatment misattachments. Under the repaired schema,
+Item 9.01 item-treatment misattachments. A later typed guard also blocks
+item-treatment rows sourced only from `exhibit_table_row_*` handles and
+cover-page IXBRL legal-treatment inference. Under the repaired schema,
 transfer_003 reruns landed at `12/13` and `11/13` with `0` supported forbidden;
 a pre-registered transfer_003 stability rerun then landed at `12/13` with `0`
 supported forbidden and clean atom/signature/lens/value-axis gates. The

@@ -9541,7 +9541,10 @@ def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None
             "ntsb_vehicle(vehicle_1, occurrence_1, aircraft, boeing_md_11f, 2005_international_9900ix, src_line_7).",
             "ntsb_vehicle(vehicle_2, occurrence_1, aircraft, boeing_md_11f, n259up, src_line_8).",
             "sec_filing_item_treatment(filing_1, item_9_01, furnished, item_heading_9_01).",
+            "sec_filing_item_treatment(filing_1, item_2_02, furnished, exhibit_table_row_99_1).",
             "sec_filing_item_treatment(filing_1, item_2_02, furnished, item_heading_2_02).",
+            "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, filed, exhibit_table_row_104).",
+            "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, not_stated, exhibit_table_row_104).",
             "fda_violation_citation(violation_1, cfr_21_211_22_d, cfr_21_211_22_d, src_line_8).",
             "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
             "fda_violation_detail(violation_6, violation_6, missing_records, batch_production_and_control_records, src_line_12).",
@@ -9558,12 +9561,13 @@ def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None
 
     report = _apply_carrier_value_domain_integrity(source_compile)
 
-    assert report["dropped_count"] == 10
+    assert report["dropped_count"] == 12
     assert source_compile["facts"] == [
         "ntsb_finding(occurrence_1, finding_1, probable_cause, pilot_loss_of_control, src_line_4).",
         "ntsb_injury_count(occurrence_1, passenger, 0, 0, 0, src_line_6).",
         "ntsb_vehicle(vehicle_2, occurrence_1, aircraft, boeing_md_11f, n259up, src_line_8).",
         "sec_filing_item_treatment(filing_1, item_2_02, furnished, item_heading_2_02).",
+        "sec_exhibit(filing_1, exhibit_104, cover_page_ixbrl, not_stated, exhibit_table_row_104).",
         "fda_violation_citation(violation_1, cfr_21_211_22_d, cgmps_requirement, src_line_8).",
         "fda_violation_detail(violation_1, record_review_subject, oos_endotoxin_result, violation_scope, src_line_13).",
         "fda_violation_detail(violation_6, missing_record_type, batch_production_and_control_records, product_release_record_review, src_line_12).",
@@ -9583,17 +9587,23 @@ def test_carrier_value_domain_integrity_drops_invalid_closed_slot_rows() -> None
     assert dropped[3]["fact"].startswith("sec_filing_item_treatment(")
     assert dropped[3]["arg_name"] == "item_code"
     assert dropped[3]["issue"] == "exhibit_item_treatment_misattached"
-    assert dropped[4]["arg_name"] == "citation_role"
-    assert dropped[5]["arg_name"] == "detail_kind"
-    assert dropped[6]["arg_name"] == "role_or_purpose"
-    assert dropped[6]["issue"] == "detail_kind_role_mismatch"
-    assert dropped[7]["fact"].startswith("fda_violation_detail_slot(")
+    assert dropped[4]["fact"].startswith("sec_filing_item_treatment(")
+    assert dropped[4]["arg_name"] == "source_or_scope"
+    assert dropped[4]["issue"] == "item_treatment_from_exhibit_table_scope"
+    assert dropped[5]["fact"].startswith("sec_exhibit(")
+    assert dropped[5]["arg_name"] == "exhibit_role"
+    assert dropped[5]["issue"] == "cover_page_ixbrl_treatment_inferred"
+    assert dropped[6]["arg_name"] == "citation_role"
     assert dropped[7]["arg_name"] == "detail_kind"
-    assert dropped[8]["fact"].startswith("fda_violation_detail_slot(")
     assert dropped[8]["arg_name"] == "role_or_purpose"
+    assert dropped[8]["issue"] == "detail_kind_role_mismatch"
     assert dropped[9]["fact"].startswith("fda_violation_detail_slot(")
-    assert dropped[9]["arg_name"] == "role_or_purpose"
-    assert dropped[9]["issue"] == "detail_kind_role_mismatch"
+    assert dropped[9]["arg_name"] == "detail_kind"
+    assert dropped[10]["fact"].startswith("fda_violation_detail_slot(")
+    assert dropped[10]["arg_name"] == "role_or_purpose"
+    assert dropped[11]["fact"].startswith("fda_violation_detail_slot(")
+    assert dropped[11]["arg_name"] == "role_or_purpose"
+    assert dropped[11]["issue"] == "detail_kind_role_mismatch"
     policy = source_compile["deterministic_carrier_value_domain_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True

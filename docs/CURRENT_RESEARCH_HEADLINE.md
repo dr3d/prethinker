@@ -40,7 +40,9 @@ SEC Form 8-K skeleton pack
     `sec_filing_item/5.item_role` structural only
     `sec_filing_item_treatment/4` item legal treatment
     `sec_exhibit/5.exhibit_role` exhibit legal treatment
-    typed guard blocks Item 9.01 item-treatment misattachment
+    typed guard blocks Item 9.01 item-treatment misattachment,
+      item-treatment rows sourced only from exhibit-table handles, and
+      cover-page IXBRL legal-treatment inference
   repaired transfer_003 Qwen MoE reruns:
     R1: 12 / 13, 0 / 11 supported forbidden
     R2 after treatment-contract tightening and typed guard:
@@ -59,6 +61,11 @@ SEC Form 8-K skeleton pack
     MoE jitter plus unstable item-treatment recall, not prose leakage. Bad
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary.
+  latest governance artifact:
+    C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
+    11 governance checks passed; fixture value-axis audit checked 29 SEC
+    item/exhibit/treatment facts with 0 issues. This is guard tightening, not
+    a support increase.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:

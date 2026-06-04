@@ -11447,6 +11447,28 @@ def _carrier_value_tuple_issue(signature: str, args: list[str], arg_names: list[
         }
         if values.get("item_code") == "item_9_01":
             return ("item_code", values["item_code"], "exhibit_item_treatment_misattached")
+        source_or_scope = str(values.get("source_or_scope") or "").strip().strip("'\"")
+        if source_or_scope.startswith("exhibit_table_row_"):
+            return (
+                "source_or_scope",
+                values["source_or_scope"],
+                "item_treatment_from_exhibit_table_scope",
+            )
+    if signature == "sec_exhibit/5":
+        values = {
+            arg_name: args[index]
+            for index, arg_name in enumerate(arg_names)
+            if index < len(args)
+        }
+        if (
+            values.get("exhibit_kind") == "cover_page_ixbrl"
+            and values.get("exhibit_role") != "not_stated"
+        ):
+            return (
+                "exhibit_role",
+                values["exhibit_role"],
+                "cover_page_ixbrl_treatment_inferred",
+            )
     return "", "", ""
 
 

@@ -207,7 +207,9 @@ item/exhibit role semantics. The schema now splits item structure
 (`sec_filing_item/5`), item legal treatment
 (`sec_filing_item_treatment/4`), and exhibit legal treatment
 (`sec_exhibit/5`), with a typed guard against Item 9.01 item-treatment
-misattachments. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
+misattachments. A follow-up typed guard also blocks item-treatment rows sourced
+only from `exhibit_table_row_*` handles and cover-page IXBRL legal-treatment
+inference. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
 `11/13`, both with `0` supported forbidden and clean axis/value/atom gates. A
 pre-registered stability rerun then landed at `12/13`, again with `0`
 supported forbidden and clean atom/signature/lens/value-axis gates. Treat this
@@ -223,6 +225,10 @@ guard now blocks/drops contradictory SEC signatory omissions and unregistered
 omission kind/reason triples; rescoring the repaired transfer_003 stability
 artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
 same-signature facts dropped from 2 to 0.
+The latest guard artifact is
+`C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604`; its fixture
+value-axis audit checked 29 SEC item/exhibit/treatment facts with 0 issues.
+This is governance cleanup, not a support lift.
 
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,

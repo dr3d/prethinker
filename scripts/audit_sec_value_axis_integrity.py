@@ -179,6 +179,7 @@ def _audit_sec_filing_item(source: dict[str, Any], fact: str, args: list[str]) -
 
 
 def _audit_sec_exhibit(source: dict[str, Any], fact: str, args: list[str]) -> list[dict[str, Any]]:
+    exhibit_kind = _normalize_arg(args[2])
     role = _normalize_arg(args[3])
     issues: list[dict[str, Any]] = []
     if role in EXHIBIT_CONTENT_FORMAT_VALUES:
@@ -191,6 +192,18 @@ def _audit_sec_exhibit(source: dict[str, Any], fact: str, args: list[str]) -> li
                 value=role,
                 issue="content_format_in_exhibit_legal_treatment_slot",
                 expected_axis="legal_treatment",
+            )
+        )
+    elif exhibit_kind == "cover_page_ixbrl" and role != "not_stated":
+        issues.append(
+            _issue(
+                source=source,
+                fact=fact,
+                predicate="sec_exhibit/5",
+                slot="exhibit_role",
+                value=role,
+                issue="cover_page_ixbrl_treatment_inferred",
+                expected_axis="source_stated_exhibit_legal_treatment",
             )
         )
     elif role not in EXHIBIT_LEGAL_TREATMENTS:
@@ -211,6 +224,7 @@ def _audit_sec_exhibit(source: dict[str, Any], fact: str, args: list[str]) -> li
 def _audit_sec_filing_item_treatment(source: dict[str, Any], fact: str, args: list[str]) -> list[dict[str, Any]]:
     item_code = _normalize_arg(args[1])
     treatment = _normalize_arg(args[2])
+    source_or_scope = _normalize_arg(args[3])
     issues: list[dict[str, Any]] = []
     if item_code == "item_9_01":
         issues.append(
@@ -221,6 +235,18 @@ def _audit_sec_filing_item_treatment(source: dict[str, Any], fact: str, args: li
                 slot="item_code",
                 value=item_code,
                 issue="exhibit_item_treatment_misattached",
+                expected_axis="substantive_item_treatment",
+            )
+        )
+    if source_or_scope.startswith("exhibit_table_row_"):
+        issues.append(
+            _issue(
+                source=source,
+                fact=fact,
+                predicate="sec_filing_item_treatment/4",
+                slot="source_or_scope",
+                value=source_or_scope,
+                issue="item_treatment_from_exhibit_table_scope",
                 expected_axis="substantive_item_treatment",
             )
         )

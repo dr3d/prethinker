@@ -466,6 +466,7 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "Item 2.02 or Item 7.01" in treatment_text
     assert "not to Item 9.01" in treatment_text
     assert "exhibit-row treatment belongs in sec_exhibit/5" in treatment_text
+    assert "never an exhibit_table_row_* handle" in treatment_text
     assert "furnished" in treatment["value_domains"]["item_treatment"]
 
     assert exhibit is not None
@@ -475,6 +476,7 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "one row for each exhibit table row" in exhibit_text
     assert "exhibit_table_row_10_1" in exhibit_text
     assert "policy/plan exhibits use exhibit_kind=other_exhibit" in exhibit_text
+    assert "never infer legal treatment from cover_page_ixbrl format alone" in exhibit_text
     assert "cover_page_ixbrl" in exhibit["value_domains"]["exhibit_kind"]
 
     assert signatory is not None

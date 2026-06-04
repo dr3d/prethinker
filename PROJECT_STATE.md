@@ -78,6 +78,8 @@ SEC Form 8-K skeleton pack
     `sec_filing_item_treatment/4` carries source-stated item legal treatment
     `sec_exhibit/5.exhibit_role` is legal treatment only
     Item 9.01 item-treatment misattachments are blocked by typed governance
+    exhibit-table-scope item-treatment rows and cover-page IXBRL treatment
+      inference are also blocked by typed governance
   repaired transfer_003 Qwen MoE reruns:
     R1: 12 / 13, 0 / 11 supported forbidden, clean axis/value/atom gates
     R2 after treatment-contract tightening and typed Item 9.01 guard:
@@ -98,6 +100,9 @@ SEC Form 8-K skeleton pack
     item-treatment recall, and ordinary MoE jitter. Bad SEC omission-accounting
     rows are now blocked/dropped by typed guards; do not inflate the cell with
     prompt polishing or a favorable same-condition draw.
+  latest SEC governance artifact:
+    C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
+    This guard cleanup did not raise SEC support; it tightened the axis cage.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
