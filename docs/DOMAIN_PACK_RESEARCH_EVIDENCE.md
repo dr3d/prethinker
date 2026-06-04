@@ -133,6 +133,9 @@ python scripts\audit_typed_plan_replay.py <judged-qa-bundle>
 
 The builder now reports both per-run exact counts and support>=2 by fixture, so
 N-cycle evidence can be read from the manifest instead of inferred manually.
+`scripts/audit_research_artifact_paths.py` checks that inline local evidence
+handles in the current research docs still resolve; the 2026-06-04 audit checked
+24 handles with 0 missing.
 
 ## FDA Detail
 
