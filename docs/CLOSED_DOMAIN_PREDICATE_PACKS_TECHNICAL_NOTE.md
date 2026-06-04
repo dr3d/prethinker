@@ -131,6 +131,11 @@ seed / quantization / loaded context:
   must be taken from the run artifact or local-server metadata when present.
   They are part of the measurement condition; if absent, that cell has a
   metadata limitation and should not be used as a cross-runtime comparison.
+
+request seed:
+  recorded in model_serving_path.decoding when PRETHINKER_LLM_SEED is set.
+  A recorded seed is a reproducibility surface, not proof of determinism; any
+  seeded-stability claim still needs its own fresh same-condition cell.
 ```
 
 The artifact roots named below are the current handles for reconstruction. A
@@ -380,7 +385,10 @@ Possible next questions:
    inventory produce deterministic typed plans without reintroducing
    question-text routing?
 4. **Runtime/provider question:** How much variance remains when a domain pack
-   is pinned to one local or remote model/provider/settings bundle?
+   is pinned to one local or remote model/provider/settings bundle? A
+   2026-06-04 local-Qwen seeded SEC probe repeated its own `10/12` aggregate
+   but did not reproduce the older `12/12` historical cell, so runtime variance
+   remains a live measurement condition rather than a solved bookkeeping issue.
 5. **QA governance question:** Can answer-judge null controls and redaction
    replay make a QA metric claim-bearing again?
 

@@ -209,6 +209,9 @@ The repo should not currently claim:
   local-domain experiments when speed and reproducibility are adequate.
 - Provider/backend, quantization, context, routing, and prompt packing are
   measurement conditions; see `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
+- `PRETHINKER_LLM_SEED`, when supplied, is now recorded in compile
+  `model_serving_path.decoding`; a recorded seed is a reproducibility surface,
+  not proof that historical and fresh runs are interchangeable.
 - Durable fixtures belong under `datasets/`.
 - Temporary run artifacts may live under `tmp/`; old useful run artifacts can
   be moved to `C:\prethinker_tmp_archive`.
@@ -221,7 +224,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2377 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
+2390 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

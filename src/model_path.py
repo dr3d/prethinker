@@ -487,6 +487,7 @@ def model_serving_path_metadata(
     cache_enabled: bool | None = None,
     lanes: int | None = None,
     fresh_compile: bool | None = None,
+    seed: Any | None = None,
     provider_routing: dict[str, Any] | None = None,
     observed_runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -519,6 +520,8 @@ def model_serving_path_metadata(
             "fresh_compile": fresh_compile,
         },
     }
+    if seed is not None:
+        metadata["decoding"]["seed"] = seed
     if isinstance(observed_runtime, dict) and observed_runtime:
         metadata["observed_runtime"] = sanitized_openrouter_metadata(observed_runtime)
     return metadata

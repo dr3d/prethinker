@@ -102,6 +102,33 @@ historical unless they are re-gated here or in a newer note.
 | OSHA | `osha_incident_transfer_002` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-002-r1-local-long-table-boundary` | Diagnostic boundary probe, 18/53; 0/8 forbidden; atom/lens gates clean; not promoted |
 | OSHA | `osha_incident_transfer_003` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore` | Diagnostic integrity probe, 2/21 with 3/10 supported forbidden after wildcard cross-section controls; not promoted |
 
+## Diagnostic Variance Probes
+
+These probes are not claim-bearing cells. They are retained because runtime
+variance is part of the research method, and because historical labels should
+not be trusted unless a fresh same-condition run reproduces them.
+
+On 2026-06-04, `sec_form_8k_skeleton_transfer_003` was rerun twice on local
+LM Studio Qwen with `temperature=0`, `top_p=1.0`, requested `top_k=20`,
+`num_ctx=65536`, `N=3`, and request seed `12345`. Both seeded probes scored
+`10/12` support>=2 with clean atom/signature/lens governance and `0` supported
+forbidden facts. The two unsupported rows were the same semantic slots:
+`exhibit_104` filing status and `item_2_02` item status. The second probe
+captured `seed=12345` in `model_serving_path.decoding`.
+
+Retained artifacts:
+
+```text
+C:\prethinker_tmp_archive\variance_probe_20260604\sec8k-t003-local-seed12345-r1-no-seed-metadata
+C:\prethinker_tmp_archive\variance_probe_20260604\sec8k-t003-local-seed12345-r2-seed-metadata
+```
+
+This does not revise the SEC support>=2 claim in the table above. It records a
+variance warning: model/provider/settings/seed metadata are necessary but not
+sufficient for treating historical and fresh runs as interchangeable. Any
+future cross-runtime or seeded-stability claim needs its own same-condition
+cell.
+
 ## Compile-Fact QA Reproduction
 
 `scripts/build_compile_fact_judged_qa.py` is the in-repo deterministic builder
@@ -524,6 +551,10 @@ The next technical work should serve one of four purposes:
 5. Run answer-judge null controls before any LLM-judged QA exact-rate metric
    becomes claim-bearing; deterministic compile-fact QA remains governed by
    typed-plan replay and redaction replay.
+6. Keep runtime variance as a standing measurement lane: seed, provider,
+   quantization, context, and effective sampler settings must be recorded, and
+   seeded/local probes stay diagnostic unless they are promoted through the
+   same N>=3/support>=2 gates.
 
 Avoid row-grinding. The technical result gets stronger through reproducible
 transfer, clear abstention boundaries, and honest failure classes.

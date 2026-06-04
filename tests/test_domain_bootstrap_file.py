@@ -9704,6 +9704,7 @@ def test_lmstudio_json_schema_adds_openrouter_provider_routing(monkeypatch) -> N
     monkeypatch.setenv("PRETHINKER_OPENROUTER_PROVIDER_ORDER", "provider-a")
     monkeypatch.setenv("PRETHINKER_OPENROUTER_ALLOW_FALLBACKS", "false")
     monkeypatch.setenv("PRETHINKER_OPENROUTER_REQUIRE_PARAMETERS", "true")
+    monkeypatch.setenv("PRETHINKER_LLM_SEED", "12345")
     monkeypatch.setattr(domain_bootstrap_file.urllib.request, "urlopen", fake_urlopen)
 
     result = _call_lmstudio_json_schema(
@@ -9724,6 +9725,7 @@ def test_lmstudio_json_schema_adds_openrouter_provider_routing(monkeypatch) -> N
         "order": ["provider-a"],
         "require_parameters": True,
     }
+    assert captured["payload"]["seed"] == 12345
     assert captured["headers"]["X-openrouter-experimental-metadata"] == "enabled"
 
 

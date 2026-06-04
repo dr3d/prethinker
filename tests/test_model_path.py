@@ -55,6 +55,7 @@ def test_model_serving_path_metadata_is_reproducibility_surface_not_secret_surfa
         cache_enabled=False,
         lanes=1,
         fresh_compile=True,
+        seed=12345,
         provider_routing={"allow_fallbacks": False},
         observed_runtime={"schema_version": "local_lmstudio_model_metadata_v1", "quantization": "Q8_0"},
     )
@@ -65,6 +66,7 @@ def test_model_serving_path_metadata_is_reproducibility_surface_not_secret_surfa
     assert metadata["decoding"]["top_k"] is None
     assert metadata["decoding"]["top_k_requested"] == 20
     assert metadata["decoding"]["top_k_effective"] is None
+    assert metadata["decoding"]["seed"] == 12345
     assert metadata["execution"]["lanes"] == 1
     assert metadata["observed_runtime"]["quantization"] == "Q8_0"
     assert "secret-value" not in str(metadata)

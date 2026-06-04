@@ -1968,6 +1968,7 @@ def main() -> int:
             cache_enabled=None,
             lanes=1,
             fresh_compile=bool(args.compile_source),
+            seed=_llm_seed_from_env(),
             provider_routing=openrouter_provider_routing_from_env(),
             observed_runtime=local_lmstudio_model_metadata(
                 backend=str(args.backend),
@@ -18027,6 +18028,16 @@ def _source_entity_ledger_context(source_entity_ledger: dict[str, Any] | None) -
     ]
 
 
+def _llm_seed_from_env() -> int | str | None:
+    seed_text = str(os.environ.get("PRETHINKER_LLM_SEED", "") or "").strip()
+    if not seed_text:
+        return None
+    try:
+        return int(seed_text)
+    except ValueError:
+        return seed_text
+
+
 def _call_lmstudio_json_schema(
     *,
     base_url: str,
@@ -18075,12 +18086,9 @@ def _call_lmstudio_json_schema(
     if not portable_openrouter_payload:
         payload["think"] = False
         payload["thinking"] = False
-    seed_text = str(os.environ.get("PRETHINKER_LLM_SEED", "") or "").strip()
-    if seed_text:
-        try:
-            payload["seed"] = int(seed_text)
-        except ValueError:
-            payload["seed"] = seed_text
+    seed = _llm_seed_from_env()
+    if seed is not None:
+        payload["seed"] = seed
     if str(reasoning_effort or "").strip() and not portable_openrouter_payload:
         payload["reasoning_effort"] = str(reasoning_effort).strip()
     if is_openrouter:
