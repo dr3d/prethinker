@@ -161,6 +161,7 @@ compiler proposes facts; deterministic gates decide what counts.
 | SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Deterministic compile-fact QA over seed plus transfers: `144/150` per-run exact, `50/50` support>=2, all exact rows typed-plan/redaction clean | Strongest methods example: a small closed skeleton pack transfers across unlike same-family filings. Per-run misses/partials are variance evidence, not a contradiction of the support>=2 claim. |
 | FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; raw compile-fact QA `53/75` per-run exact and `18/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. Raw fact QA separates emitted fact support from reducer replay. |
+| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates | Fourth-family corroboration: accident/injury rows and violation tables transfer better than wrapper/establishment rows and blank-value related activity. Transfer also shows visible compile variance. |
 
 ## SEC Methods Example
 
@@ -276,6 +277,49 @@ Per-layer boundary:
 NTSB corroborates the skeleton-vs-substance boundary; it is not a promoted
 second full domain pack.
 
+## OSHA Fourth-Family Corroboration
+
+OSHA accident/inspection records were added as a fourth fixture-bank family to
+test whether the same closed-pack method carries to another official-document
+shape with tabular counts, penalties, and incident skeleton rows.
+
+```text
+profile: datasets/domain_profiles/osha_incident_v1/ontology_registry.json
+seed artifact:
+  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix
+transfer artifact:
+  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local
+```
+
+Current OSHA measurements:
+
+```text
+seed: 18 / 20 support>=2, 0 / 8 supported forbidden
+transfer_001: 12 / 15 support>=2, 0 / 8 supported forbidden
+atom-shape / registered-signature / lens-scope blockers: 0
+```
+
+The seed run exposed and fixed a general harness bug: profile-registry lens
+intake only preserved predicate signatures with arities `/1` through `/6`, so
+OSHA `/7` and `/8` carriers were silently withheld from the planner. The fix
+accepts registered signatures through `/8` while keeping `/9` and higher
+rejected. That is a bounded harness correction, not an OSHA-specific semantic
+rescue.
+
+Per-layer boundary:
+
+| Layer | Seed | Transfer | Read |
+| --- | --- | --- | --- |
+| Accident and injured employees | `4/4` | `2/2` | Stable incident skeleton. |
+| Violation counts and penalties | `8/8` | `8/8` | Strong table anatomy. |
+| Violation item and status | `4/4` | `2/2` | Citation/item/status rows transfer. |
+| Related activity | `2/2` | `0/1` | Blank-value semantics need an explicit `not_stated` versus `no` policy. |
+| Wrapper / establishment | `0/2` at support>=2 | `0/2` at support>=2 | Wrapper rows are unstable in this first OSHA pack. |
+
+OSHA strengthens the cross-family skeleton/table claim while preserving the
+boundary: compact official-document anatomy transfers before wrapper semantics
+and open-ended substance. It is not a promoted OSHA product pack.
+
 ## What Was Learned
 
 1. **Closed predicate domains help.** Once a document family has a compact,
@@ -285,13 +329,14 @@ second full domain pack.
    not as a global bag available to every compile pass.
 3. **Typed normalization is legitimate when narrow.** Reducers may normalize
    already-emitted typed atoms; they may not parse source prose or query text.
-4. **The abstention boundary is repeatable.** FDA and NTSB both show that
-   skeleton/categorical anatomy stabilizes before open causal/detail substance.
+4. **The abstention boundary is repeatable.** FDA, NTSB, and OSHA all show that
+   skeleton/categorical/table anatomy stabilizes before open causal/detail
+   substance or unstable wrapper semantics.
 5. **Old scores decay under stricter gates.** Historical measurements remain
    useful but are not current claims until re-gated.
-6. **The gates caught real leaks.** The SEC unstated-CIK case and FDA/NTSB
-   atom-shape failures show why the governance suite has to bite inside the
-   loop.
+6. **The gates caught real leaks and harness blind spots.** The SEC
+   unstated-CIK case, FDA/NTSB atom-shape failures, and OSHA high-arity intake
+   miss show why the governance suite has to bite inside the loop.
 
 ## Non-Claims
 
@@ -304,6 +349,7 @@ This note does not claim:
 - event-substance extraction for SEC filings;
 - broad FDA warning-letter completion;
 - a promoted full NTSB pack;
+- a promoted full OSHA pack;
 - that a single transfer fixture proves a domain pack transfers;
 - that composed historical runs are equivalent to fresh same-condition bundles;
 - any LLM-judged QA exact-rate claim that has not passed judge null controls.
@@ -318,8 +364,9 @@ Possible next questions:
 1. **Substance layer question:** Can one compact substantive layer, such as FDA
    violation detail or NTSB findings, reproduce on unlike documents without
    prose-shaped atoms?
-2. **Second clean family question:** Can another skeleton-only official-document
-   pack repeat the SEC pattern with at least three unlike transfers?
+2. **Additional clean-family question:** Can another skeleton-only
+   official-document pack, or the OSHA skeleton/table pack after its first
+   probe, repeat the SEC pattern with at least three unlike transfers?
 3. **Query question:** Can a query planner constrained to the compiled atom
    inventory produce deterministic typed plans without reintroducing
    question-text routing?

@@ -289,6 +289,52 @@ Next SEC work should either summarize the methodology evidence across FDA,
 NTSB, and SEC or deliberately test whether adding SEC event-substance carriers
 breaks the skeleton stability. Do not add event-substance carriers by default.
 
+OSHA accident/inspection is the fourth fixture-bank family under review. A
+closed skeleton/table registry now exists for inspection wrapper,
+establishment, accident, injured employees, violation counts, penalties,
+violation item/status, and related activity. The probe is deliberately narrow:
+it tests whether retained OSHA accident/inspection tables can compile into
+closed typed facts under the same gates, not whether Prethinker understands
+OSHA reports broadly.
+
+The seed micro initially exposed a harness bug: profile-registry lens intake
+only preserved `/1` through `/6` signatures, so the OSHA `/7` and `/8`
+carriers never reached the planner. That was fixed generically by accepting
+registered signatures through `/8` while keeping `/9` and higher rejected; it
+is not an OSHA-specific reducer.
+
+Current OSHA seed status:
+
+```text
+fixture: osha_incident_domain_v1
+artifact root: C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix
+local-Qwen lens bundle: N=3, support>=2
+supported expected facts: 18 / 20 using constant-slot support report
+supported forbidden facts: 0 / 8
+atom-shape/signature/lens-scope blockers: 0
+boundary rows: inspection wrapper absent; establishment row 1/3
+```
+
+The first unlike retained OSHA transfer also ran under the same local settings:
+
+```text
+fixture: osha_incident_transfer_001
+artifact root: C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local
+local-Qwen lens bundle: N=3, support>=2
+supported expected facts: 12 / 15
+supported forbidden facts: 0 / 8
+atom-shape/signature/lens-scope blockers: 0
+per-run union facts: 13, 3, 16
+boundary rows: inspection wrapper absent, establishment 1/3,
+  related activity emits no/no where oracle expected not_stated/not_stated
+```
+
+OSHA strengthens the cross-family pattern without changing the research claim:
+accident/injury rows and violation table anatomy transfer better than wrapper
+rows and blank-value semantics. Keep it as fourth-family corroboration; do not
+grind the wrapper lane unless the phase-close technical note needs a stronger
+fourth-family control.
+
 Before the next technical claim:
 
 1. Keep FDA as the primary case study and keep the per-layer boundary table
@@ -296,12 +342,14 @@ Before the next technical claim:
 2. Preserve SEC Form 8-K as the clean skeleton-pack methodology example.
 3. Use NTSB as boundary evidence for what transfers, what abstains, and what
    becomes lower tier.
-4. Run answer-judge null controls and oracle-isolation checks for any
+4. Keep OSHA as fourth-family corroboration for skeleton/table transfer and
+   compile variance, not as a new row-grinding target.
+5. Run answer-judge null controls and oracle-isolation checks for any
    LLM-judged QA result that becomes claim-bearing; deterministic compile-fact
    QA still needs typed-plan and redaction replay.
-5. Report transfer, reproducibility, abstention boundaries, and failure classes
+6. Report transfer, reproducibility, abstention boundaries, and failure classes
    together; do not turn a clean sub-layer into a broad accuracy claim.
-6. Treat stale-number re-gating as a first-class research finding: older clean
+7. Treat stale-number re-gating as a first-class research finding: older clean
    cells are historical unless they survive today's gates.
 
 ## What Stays Off The Front Door

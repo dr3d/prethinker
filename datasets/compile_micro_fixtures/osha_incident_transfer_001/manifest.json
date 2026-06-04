@@ -1,0 +1,31 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "osha_incident_transfer_001",
+  "purpose": "Unlike OSHA accident/inspection skeleton transfer fixture for the closed OSHA carrier pack. It pressures a closed case, fall accident, one employee injury row, penalty reduction, informal-settlement event, and single citation item without admitting causal narrative predicates.",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_01/osha_incident_ugly_002",
+  "domain_profile": "datasets/domain_profiles/osha_incident_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "osha_inspection",
+    "osha_establishment",
+    "osha_accident",
+    "osha_injured_employee",
+    "osha_violation_count",
+    "osha_penalty_amount",
+    "osha_violation_item",
+    "osha_violation_status",
+    "osha_related_activity"
+  ],
+  "forbidden_classes": [
+    "full_inspection_table",
+    "full_address_blob",
+    "abstract_summary",
+    "probable_cause_text",
+    "count_bundle",
+    "amount_bundle",
+    "full_violation_description",
+    "full_event_cell"
+  ],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

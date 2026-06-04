@@ -6912,6 +6912,44 @@ def test_profile_registry_for_lens_filters_predicates_and_requirements() -> None
     assert filtered["active_lens"]["predicate_count"] == 3
 
 
+def test_profile_registry_for_lens_preserves_high_arity_registry_signatures() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "accident",
+                    "allowed_signatures": [
+                        "osha_accident/7",
+                        "osha_injured_employee/7",
+                        "osha_violation_item/8",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "osha_accident/7"},
+                {"signature": "osha_injured_employee/7"},
+                {"signature": "osha_violation_item/8"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "accident",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "osha_accident/7",
+        "osha_injured_employee/7",
+        "osha_violation_item/8",
+    ]
+    assert filtered["active_lens"]["candidate_signatures"] == [
+        "osha_accident/7",
+        "osha_injured_employee/7",
+        "osha_violation_item/8",
+    ]
+    assert filtered["active_lens"]["predicate_count"] == 3
+
+
 def test_profile_registry_for_lens_filters_chronology_omission_requirement() -> None:
     filtered = _profile_registry_for_lens(
         {

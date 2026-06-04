@@ -110,6 +110,16 @@ NTSB investigation pack
   read: corroborating boundary evidence; wrapper, chronology, vehicles, and
     conditions transfer more cleanly than casualty, safety-action attachment,
     findings, and probable-cause substance
+
+OSHA accident/inspection pack
+  seed micro: 18 / 20 support>=2 after high-arity registry intake fix
+  first unlike transfer: 12 / 15 support>=2
+  forbidden support: 0 in both measured cells
+  governance: registered signatures, atom-shape, and lens-scope clean
+  read: fourth-family corroboration for skeleton/table anatomy; accident,
+    employee injury, violation counts, penalties, item, and status rows transfer
+    better than wrapper/establishment rows and one related-activity blank-value
+    boundary
 ```
 
 The publishable technical shape is narrow:

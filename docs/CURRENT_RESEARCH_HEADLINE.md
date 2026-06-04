@@ -74,6 +74,15 @@ NTSB investigation pack
     all 53 exact rows pass typed-plan replay and redaction replay
   claim: boundary corroboration; wrapper, chronology, vehicles, and conditions
     transfer more cleanly than casualty, safety-action, and findings substance
+
+OSHA accident/inspection pack
+  seed micro: 18 / 20 support>=2 after the high-arity registry intake fix
+  first unlike transfer: 12 / 15 support>=2
+  forbidden support: 0 in both measured cells
+  governance: registered signatures, atom-shape, and lens-scope clean
+  claim: fourth-family corroboration; accident, employee injury, violation
+    counts, penalties, item, and status rows transfer more cleanly than
+    wrapper/establishment rows and blank-value related activity
 ```
 
 ## Current Verdict

@@ -189,6 +189,13 @@ Current high-signal evidence:
   exact and `18 / 25` support>=2, with every exact row passing typed-plan and
   redaction replay. This shows the same skeleton-vs-substance boundary while
   separating emitted fact support from reducer replay.
+- OSHA accident/inspection domain pack: fourth-family skeleton probe from
+  retained fixtures with `10` registered predicates and `4` lens-scoped
+  compile surfaces. Local LM Studio N=3 seed replay is `18 / 20`
+  support>=2; first unlike transfer is `12 / 15`, both with `0` supported
+  forbidden rows and clean atom/lens gates. This is corroborating skeleton
+  evidence, not a broad OSHA pack claim; wrapper/establishment rows and one
+  related-activity blank-value boundary remain visible.
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.

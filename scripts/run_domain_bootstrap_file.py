@@ -2841,7 +2841,7 @@ def _profile_from_signature_roster(roster: dict[str, Any]) -> dict[str, Any] | N
 
 
 def _normalized_signature(value: str) -> str:
-    match = re.fullmatch(r"\s*([a-z][a-z0-9_]*)\s*/\s*([1-6])\s*", str(value or "").casefold())
+    match = re.fullmatch(r"\s*([a-z][a-z0-9_]*)\s*/\s*([1-8])\s*", str(value or "").casefold())
     if not match:
         return ""
     return f"{match.group(1)}/{match.group(2)}"

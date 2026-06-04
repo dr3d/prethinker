@@ -1,0 +1,203 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "osha_incident_v1",
+  "source": "Closed OSHA accident/inspection skeleton carrier pack drafted from retained public OSHA fixtures under datasets/real_world_transfer.",
+  "purpose": "Constrain OSHA accident and inspection compiles to recurring wrapper, establishment, accident, employee-injury, violation-table, penalty-table, and related-activity anatomy before attempting hazard-causation or narrative responsibility substance.",
+  "selection": {
+    "mode": "fixture_bank_internal_pack",
+    "date": "2026-06-04",
+    "source_families": [
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_01/osha_incident_ugly_001",
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_01/osha_incident_ugly_002",
+      "datasets/real_world_transfer/fresh_ugly_public_20260524_02/osha_incident_ugly_004",
+      "datasets/real_world_transfer/fresh_ugly_public_20260528_01/osha_incident_ugly_006",
+      "datasets/real_world_transfer/fresh_ugly_public_20260529_01/osha_incident_ugly_007"
+    ]
+  },
+  "accountability_requirements": [
+    {
+      "id": "missing_inspection_identifier",
+      "carrier_signature": "osha_inspection/7",
+      "omission_kind": "role_missing",
+      "reason_code": "inspection_identifier_not_stated",
+      "trigger": "source_states_an_osha_inspection_but_no_inspection_number_is_stated"
+    },
+    {
+      "id": "missing_accident_summary",
+      "carrier_signature": "osha_accident/7",
+      "omission_kind": "none_found",
+      "reason_code": "accident_summary_not_stated",
+      "trigger": "source_is_osha_inspection_detail_but_no_accident_summary_or_event_date_is_stated"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "Inspection wrapper, report id, OSHA office, case status, and establishment identity.",
+      "allowed_signatures": [
+        "osha_inspection/7",
+        "osha_establishment/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "accident",
+      "purpose": "Accident summary identity and per-employee injury table rows.",
+      "allowed_signatures": [
+        "osha_accident/7",
+        "osha_injured_employee/7",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "violations",
+      "purpose": "Violation summary counts, penalty amounts, citation item rows, and citation status table cells.",
+      "allowed_signatures": [
+        "osha_violation_count/5",
+        "osha_penalty_amount/5",
+        "osha_violation_item/8",
+        "osha_violation_status/5",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "related_activity",
+      "purpose": "Related-activity table rows only.",
+      "allowed_signatures": [
+        "osha_related_activity/5",
+        "domain_omission/5"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "osha_inspection/7",
+      "args": [
+        "inspection_id",
+        "report_id",
+        "establishment_id",
+        "office_id",
+        "date_opened",
+        "case_status",
+        "source_or_scope"
+      ],
+      "category": "osha_inspection_wrapper",
+      "notes": "Identifies one source-stated OSHA inspection with report id, establishment, office, open date, and case status. Use companion OSHA carriers for establishment, accident, employee injury, violation, penalty, status, and related-activity rows."
+    },
+    {
+      "signature": "osha_establishment/5",
+      "args": [
+        "establishment_id",
+        "establishment_name",
+        "site_location",
+        "naics_code",
+        "source_or_scope"
+      ],
+      "category": "osha_establishment_identity",
+      "notes": "Preserves one source-stated establishment name, compact inspection-site location, and NAICS code. This is not a full address carrier."
+    },
+    {
+      "signature": "osha_accident/7",
+      "args": [
+        "accident_id",
+        "inspection_id",
+        "accident_summary_id",
+        "event_date",
+        "accident_kind",
+        "fatality_count",
+        "source_or_scope"
+      ],
+      "category": "osha_accident_identity",
+      "notes": "Links a source-stated accident summary to its inspection and event date with a compact accident kind and fatality count. It does not carry causal conclusions or the narrative abstract."
+    },
+    {
+      "signature": "osha_injured_employee/7",
+      "args": [
+        "accident_id",
+        "employee_index",
+        "age",
+        "sex",
+        "injury_degree",
+        "occupation",
+        "source_or_scope"
+      ],
+      "category": "osha_employee_injury_row",
+      "notes": "Preserves one employee-details table row with row index, age, sex, injury degree, and occupation."
+    },
+    {
+      "signature": "osha_violation_count/5",
+      "args": [
+        "inspection_id",
+        "count_stage",
+        "violation_class",
+        "count_value",
+        "source_or_scope"
+      ],
+      "category": "osha_violation_summary_count",
+      "notes": "Preserves one violation count from the summary table. It does not prove individual citation item details."
+    },
+    {
+      "signature": "osha_penalty_amount/5",
+      "args": [
+        "inspection_id",
+        "penalty_stage",
+        "penalty_class",
+        "amount",
+        "source_or_scope"
+      ],
+      "category": "osha_penalty_amount",
+      "notes": "Preserves one source-stated OSHA penalty amount from the violation summary or citation item table."
+    },
+    {
+      "signature": "osha_violation_item/8",
+      "args": [
+        "inspection_id",
+        "violation_id",
+        "item_number",
+        "violation_class",
+        "standard_cited",
+        "issuance_date",
+        "current_penalty",
+        "source_or_scope"
+      ],
+      "category": "osha_citation_item",
+      "notes": "Preserves one violation-item table row with citation id, item number, class, standard, issue date, and current penalty."
+    },
+    {
+      "signature": "osha_violation_status/5",
+      "args": [
+        "violation_id",
+        "contest_date",
+        "abatement_due_date",
+        "latest_event",
+        "source_or_scope"
+      ],
+      "category": "osha_citation_status",
+      "notes": "Preserves contest date, abatement due date, and compact latest-event value for a citation item."
+    },
+    {
+      "signature": "osha_related_activity/5",
+      "args": [
+        "inspection_id",
+        "activity_type",
+        "activity_number",
+        "safety_flag",
+        "health_flag"
+      ],
+      "category": "osha_related_activity",
+      "notes": "Preserves one related-activity table row. It does not assert causal or legal relationships outside the table."
+    },
+    {
+      "signature": "domain_omission/5",
+      "args": [
+        "domain_or_subject_id",
+        "carrier_signature",
+        "omission_kind",
+        "reason_code",
+        "source_or_scope"
+      ],
+      "category": "compile_accountability",
+      "notes": "Records accountable omissions for expected OSHA carrier families. It is not an answer substitute."
+    }
+  ]
+}

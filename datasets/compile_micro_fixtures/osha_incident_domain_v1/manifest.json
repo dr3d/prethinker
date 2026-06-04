@@ -1,0 +1,31 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "osha_incident_domain_v1",
+  "purpose": "Pressure a closed OSHA accident/inspection skeleton domain pack to preserve inspection wrapper, establishment, accident, employee injury, violation summary, penalty, citation item, citation status, and related-activity table anatomy without packing narrative causation or address prose into atoms.",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_01/osha_incident_ugly_001",
+  "domain_profile": "datasets/domain_profiles/osha_incident_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "osha_inspection",
+    "osha_establishment",
+    "osha_accident",
+    "osha_injured_employee",
+    "osha_violation_count",
+    "osha_penalty_amount",
+    "osha_violation_item",
+    "osha_violation_status",
+    "osha_related_activity"
+  ],
+  "forbidden_classes": [
+    "full_inspection_table",
+    "full_address_blob",
+    "abstract_summary",
+    "probable_cause_text",
+    "count_bundle",
+    "amount_bundle",
+    "full_violation_description",
+    "full_event_cell"
+  ],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

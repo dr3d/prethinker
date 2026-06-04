@@ -5,19 +5,20 @@ This report does not read source prose, QA questions, or judge outputs.
 
 ## Summary
 
-- Domains: `3`
-- Predicates: `40` (`37` domain-specific plus shared carriers)
-- Lenses: `20`
-- Associated fixtures: `16`
+- Domains: `4`
+- Predicates: `50` (`46` domain-specific plus shared carriers)
+- Lenses: `24`
+- Associated fixtures: `18`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `379`
-- Forbidden facts in associated fixtures: `137`
+- Expected facts in associated fixtures: `414`
+- Forbidden facts in associated fixtures: `153`
 - Schema status: `pass` (0 errors, 0 warnings)
 
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 291 | 79 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 2 | 38 | 28 |
+| `osha_incident_v1` | 10 | 9 | 4 | 2 | 35 | 16 |
 | `sec_form_8k_v1` | 7 | 6 | 4 | 4 | 50 | 30 |
 
 ## fda_warning_letter_v1
@@ -83,6 +84,30 @@ This report does not read source prose, QA questions, or judge outputs.
 | --- | --- | ---: | ---: | --- |
 | `ntsb_investigation_domain_v1` | `fixture_id_prefix` | 13 | 13 | `domain_omission/5`:1, `ntsb_condition/5`:4, `ntsb_injury_count/6`:2, `ntsb_occurrence/6`:1, `ntsb_occurrence_time/5`:1, `ntsb_party/5`:1, `ntsb_report/5`:1, `ntsb_safety_action/6`:1, `ntsb_vehicle/6`:1 |
 | `ntsb_investigation_transfer_surface_001` | `fixture_id_prefix` | 25 | 15 | `ntsb_condition/5`:5, `ntsb_finding/5`:2, `ntsb_injury_count/6`:3, `ntsb_occurrence/6`:1, `ntsb_occurrence_time/5`:1, `ntsb_party/5`:1, `ntsb_report/5`:1, `ntsb_safety_action/6`:3, `ntsb_timeline_event/6`:6, `ntsb_vehicle/6`:2 |
+
+## osha_incident_v1
+
+- Registry: `datasets/domain_profiles/osha_incident_v1/ontology_registry.json`
+- Predicates: `10`
+- Domain-specific predicates: `9`
+- Lenses: `4`
+- Accountability requirements: `2`
+
+### Lenses
+
+| Lens | Allowed signatures |
+| --- | --- |
+| `wrapper` | `osha_inspection/7`, `osha_establishment/5`, `domain_omission/5` |
+| `accident` | `osha_accident/7`, `osha_injured_employee/7`, `domain_omission/5` |
+| `violations` | `osha_violation_count/5`, `osha_penalty_amount/5`, `osha_violation_item/8`, `osha_violation_status/5`, `domain_omission/5` |
+| `related_activity` | `osha_related_activity/5`, `domain_omission/5` |
+
+### Fixture Oracles
+
+| Fixture | Association | Expected | Forbidden | Expected signatures |
+| --- | --- | ---: | ---: | --- |
+| `osha_incident_domain_v1` | `manifest_domain_profile` | 20 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:3, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:2, `osha_violation_count/5`:4, `osha_violation_item/8`:2, `osha_violation_status/5`:2 |
+| `osha_incident_transfer_001` | `manifest_domain_profile` | 15 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:1, `osha_violation_count/5`:4, `osha_violation_item/8`:1, `osha_violation_status/5`:1 |
 
 ## sec_form_8k_v1
 

@@ -71,9 +71,13 @@ not use them as day-one guidance unless the user names a specific artifact.
   `N>=3/support>=2`, zero supported forbidden facts, and unlike-document
   transfer. Product-style judge exact rate is diagnostic color unless it
   survives those gates.
-- FDA warning letters are the first case study; SEC Form 8-K skeletons and NTSB
-  investigations are methodology-transfer/boundary probes. Do not grind rows
-  toward a nicer score. Characterize failure classes and abstention boundaries.
+- FDA warning letters are the first case study; SEC Form 8-K skeletons, NTSB
+  investigations, and OSHA accident/inspection records are
+  methodology-transfer/boundary probes. OSHA now has a measured local N=3
+  seed/transfer skeleton probe (`18/20`, `12/15`, both `0` supported
+  forbidden), but it is fourth-family corroboration rather than a broad OSHA
+  product claim. Do not grind rows toward a nicer score. Characterize failure
+  classes and abstention boundaries.
 
 ## Fresh Context Handoff
 
