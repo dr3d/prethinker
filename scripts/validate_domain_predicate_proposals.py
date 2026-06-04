@@ -234,6 +234,10 @@ def _validate_proposal(path: Path, *, profile_root: Path) -> dict[str, Any]:
     review_results = data.get("review_results") if isinstance(data.get("review_results"), list) else []
     if _has_blocked_review(review_results) and status != "rejected":
         errors.append("blocked_review_requires_rejected_status")
+    if status == "candidate" and not review_results:
+        warnings.append("candidate_has_no_review_results")
+    if status == "promoted" and not review_results:
+        errors.append("promoted_requires_review_results")
 
     proposal_id = str(data.get("proposal_id") or "").strip()
     if not proposal_id or not ARG_RE.match(proposal_id):

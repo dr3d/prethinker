@@ -43,6 +43,17 @@ def test_domain_predicate_proposal_validator_accepts_governed_draft(tmp_path: Pa
     assert report["proposals"][0]["warnings"] == ["candidate_signature_not_yet_registered"]
 
 
+def test_domain_predicate_proposal_candidate_without_review_is_visible_warning(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["status"] = "candidate"
+    path = _write(tmp_path / "proposal.json", payload)
+
+    report = build_report([path])
+
+    assert report["summary"]["warning_count"] == 2
+    assert "candidate_has_no_review_results" in report["proposals"][0]["warnings"]
+
+
 def test_domain_predicate_proposal_validator_blocks_missing_anti_leak_guard(tmp_path: Path) -> None:
     payload = _valid_payload()
     payload["anti_leak_guards"] = ["no_source_prose"]
@@ -89,6 +100,7 @@ def test_promoted_domain_predicate_proposal_must_be_registered_and_lens_allowed(
     assert "promoted_signature_not_registered" in report["proposals"][0]["errors"]
     assert "promoted_signature_not_in_domain_profile" in report["proposals"][0]["errors"]
     assert "promoted_signature_not_in_lens_owner_allowlist" in report["proposals"][0]["errors"]
+    assert "promoted_requires_review_results" in report["proposals"][0]["errors"]
 
 
 def test_blocked_review_requires_rejected_status(tmp_path: Path) -> None:
