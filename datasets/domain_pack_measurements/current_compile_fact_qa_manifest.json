@@ -77,11 +77,11 @@
     {
       "id": "osha_incident_seed",
       "fixture_id": "osha_incident_domain_v1",
-      "description": "OSHA accident/inspection seed skeleton/table probe.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_incident_domain_probe_20260604\\osha-incident-domain-v1-r2-local-arity-fix",
+      "description": "OSHA accident/inspection seed skeleton/table probe, rerun with current related-activity blank-flag contract.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_seed_current_contract_rerun_20260604\\osha-seed-current-contract-r1",
       "expect": {
         "support.reference_count": 20,
-        "support.exact_support_ge_2": 18,
+        "support.exact_support_ge_2": 20,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

@@ -7,9 +7,9 @@ This page does not read source prose, call an LLM, or judge messy human question
 
 - Status: `pass`
 - Cells: `8` across `4` families
-- Support>=2: `117 / 138` expected typed facts
-- Per-run exact: `333 / 414` deterministic fact rows
-- Unexpected same-signature facts support>=2: `4`
+- Support>=2: `119 / 138` expected typed facts
+- Per-run exact: `335 / 414` deterministic fact rows
+- Unexpected same-signature facts support>=2: `5`
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
@@ -20,7 +20,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter` | 1 | 20 / 27 | 59 / 81 | 3 | 0 | 0 |
 | `ntsb_investigation` | 1 | 19 / 25 | 57 / 75 | 0 | 0 | 0 |
-| `osha_incident` | 2 | 33 / 35 | 89 / 105 | 0 | 0 | 0 |
+| `osha_incident` | 2 | 35 / 35 | 91 / 105 | 1 | 0 | 0 |
 | `sec_form_8k` | 4 | 45 / 51 | 128 / 153 | 1 | 0 | 0 |
 
 ## Cells
@@ -33,7 +33,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 34 / 39 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | 19 / 25 | 57 / 75 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 20 / 27 | 59 / 81 | 3 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
-| `osha_incident_seed` | `osha_incident_domain_v1` | 18 / 20 | 53 / 60 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `unification`; manifest `present` |
+| `osha_incident_seed` | `osha_incident_domain_v1` | 20 / 20 | 55 / 60 | 1 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | 15 / 15 | 36 / 45 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 
 ## Cell Notes
@@ -46,6 +46,6 @@ This page does not read source prose, call an LLM, or judge messy human question
 | `sec_form_8k_skeleton_transfer_003` | SEC Form 8-K/A skeleton transfer 003, current axis-clean item/exhibit/treatment repair rerun. |
 | `ntsb_transfer_surface_001` | NTSB first unlike transfer raw union fact support. |
 | `fda_warning_letter_transfer_002_current_pack` | FDA warning-letter transfer 002 current-pack boundary bundle. |
-| `osha_incident_seed` | OSHA accident/inspection seed skeleton/table probe. |
+| `osha_incident_seed` | OSHA accident/inspection seed skeleton/table probe, rerun with current related-activity blank-flag contract. |
 | `osha_incident_transfer_001` | OSHA accident/inspection first unlike skeleton/table transfer, with blank Safety/Health related-activity flags constrained to not_stated. |
 
