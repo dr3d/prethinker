@@ -15,6 +15,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "domain_accountability_status",
         "domain_predicate_proposal_status",
         "compile_fact_qa_manifest_sources",
+        "reference_judge_null_control_reports",
         "compile_fact_qa_manifest",
         "current_compile_fact_qa_status",
     ]

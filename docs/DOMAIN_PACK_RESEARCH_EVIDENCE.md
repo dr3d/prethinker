@@ -184,12 +184,15 @@ typed-plan replay: pass, 0 unregistered exact plans in every cell
 `scripts/run_current_research_governance.py` runs the current claim-protection
 set as one command: sign-clean, artifact-path audit, historical-score audit,
 domain predicate schema validation, compile-fact QA manifest source/settings
-audit, and the compile-fact QA manifest. The source/settings audit requires
-retained bundle roots, N>=3 run artifacts, recoverable model/settings metadata,
-and consistent settings across repeat runs. Two older SEC cells predate bundle
-`manifest.json` files; their metadata is recovered from the retained compile
-JSON artifacts and reported as warnings rather than hidden. The 2026-06-04
-governance run passed the current claim-protection set.
+audit, reference-judge null-control report audit, and the compile-fact QA
+manifest. The source/settings audit requires retained bundle roots, N>=3 run
+artifacts, recoverable model/settings metadata, and consistent settings across
+repeat runs. The null-control report audit verifies that current judged-QA
+claim handles point at retained passing null-control reports with zero exact
+null verdicts. Two older SEC cells predate bundle `manifest.json` files; their
+metadata is recovered from the retained compile JSON artifacts and reported as
+warnings rather than hidden. The 2026-06-04 governance run passed the current
+claim-protection set.
 
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:
@@ -207,6 +210,11 @@ handles in the current research docs still resolve; the 2026-06-04 audit checked
 `scripts/audit_historical_score_claims.py` checks that contaminated historical
 score tokens only appear with nearby disclaimer language; the 2026-06-04 audit
 found 18 historical-score occurrences with 0 blockers.
+`scripts/audit_reference_judge_null_control_reports.py` checks the retained
+null-control report manifest at
+`datasets/domain_pack_measurements/current_reference_judge_null_controls.json`.
+The 2026-06-04 manifest includes the FDA transfer judged-QA v2 sample3
+post-fix report: 6 sampled exact rows, 12 controls, 0 exact null verdicts.
 
 ## FDA Detail
 

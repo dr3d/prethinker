@@ -1,0 +1,17 @@
+{
+  "schema": "prethinker.reference_judge_null_control_manifest.v1",
+  "reports": [
+    {
+      "id": "fda_transfer_judged_qa_v2_sample3_post_harness_fix",
+      "description": "Post-harness-fix adversarial null controls for the FDA transfer judged-QA v2 bundle.",
+      "report_json": "C:\\prethinker_tmp_archive\\reference_judge_null_controls_20260604\\sample3_post_harness_fix_pass\\report.json",
+      "expect": {
+        "sample_per_fixture": 3,
+        "sampled_product_exact_rows_min": 6,
+        "control_judgments_min": 12,
+        "exact_null_verdicts": 0,
+        "unclassified_redaction_fields": 0
+      }
+    }
+  ]
+}

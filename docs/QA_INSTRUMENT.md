@@ -154,6 +154,13 @@ diagnostic exposed exactly that failure: sample3 produced one exact null verdict
 before the control question was neutralized, and zero exact null verdicts after
 the harness fix.
 
+Current retained null-control reports are audited by
+`scripts/audit_reference_judge_null_control_reports.py` through the manifest at
+`datasets/domain_pack_measurements/current_reference_judge_null_controls.json`.
+That report audit is part of `scripts/run_current_research_governance.py`, so a
+judged-QA score handle is not merely documented; it has to point at a retained
+passing null-control report.
+
 Older internal JSON keys may still contain the word `helper` for backward
 compatibility with archived comparison artifacts. New reports and product prose
 should prefer `support surface`, `query-only support`, or `compatibility row`

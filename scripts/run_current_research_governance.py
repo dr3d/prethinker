@@ -145,6 +145,17 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "reference_judge_null_control_reports",
+            "command": [
+                python,
+                "scripts/audit_reference_judge_null_control_reports.py",
+                "--out-json",
+                str(report_root / "reference_judge_null_control_reports.json"),
+                "--out-md",
+                str(report_root / "reference_judge_null_control_reports.md"),
+            ],
+        },
+        {
             "id": "compile_fact_qa_manifest",
             "command": [
                 python,
