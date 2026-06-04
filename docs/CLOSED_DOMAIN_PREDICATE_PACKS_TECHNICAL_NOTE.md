@@ -399,17 +399,25 @@ Possible next questions:
    a failed query. A 2026-06-04 SEC transfer_003 smoke probe initially landed at
    1-2/5 exact across repeated local strict runs, which exposed a narrower
    mapper bug: uppercase query variables emitted by the LLM were atomized into
-   lowercase constants. Preserving uppercase slot-label variables moved the same
-   five-row smoke to `5/5` exact; typed-plan replay and redacted rejudge passed
-   for all five rows, with 0 compatibility/runtime/write rows. The remaining
-   research question is planner performance inside the atom library on a larger
-   and unlike query set, not whether source-prose or fallback rescue is still
-   allowed.
+   lowercase constants. Preserving uppercase slot-label variables moved one
+   favorable single run of the same five-row smoke to `5/5` exact. A
+   pre-registered variance follow-up is the current honest number: local Qwen
+   temp-0 N=5 landed at `23/25` thesis-clean exact over the repeated five-row
+   query anchor, Qwen nonzero-temperature arms landed at `13/15` product exact,
+   and a local Gemma 4 12B Q8 dense-control arm landed at `25/25` product exact
+   and typed-plan replay but `24/25` redacted rejudge because one normalized-name
+   row was judged partial. The remaining research question is planner
+   performance inside the atom library on a larger and unlike query set, not
+   whether source-prose or fallback rescue is still allowed.
 4. **Runtime/provider question:** How much variance remains when a domain pack
    is pinned to one local or remote model/provider/settings bundle? A
    2026-06-04 local-Qwen seeded SEC probe repeated its own `10/12` aggregate
    but did not reproduce the older `12/12` historical cell, so runtime variance
    remains a live measurement condition rather than a solved bookkeeping issue.
+   The first pre-registered atom-query variance cell also found temp-0 Qwen
+   query planning stable only as a `4-5/5` band on the five-row SEC query
+   anchor, while Gemma Q8 was cleaner on raw query planning but still blocked
+   once by redacted-rejudge normalized-name strictness.
 5. **QA governance question:** Can answer-judge null controls and redaction
    replay make a QA metric claim-bearing again? The retained FDA v2
    null-control report is now audited inside the default governance command.

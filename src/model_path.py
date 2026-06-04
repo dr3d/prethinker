@@ -205,6 +205,8 @@ def local_lmstudio_model_metadata(
     if provider_family(backend=backend, base_url=base_url) != "local_lmstudio":
         return {}
     base = str(base_url or "").rstrip("/")
+    if base.endswith("/v1"):
+        base = base[: -len("/v1")]
     if not base:
         return {}
     metadata: dict[str, Any] = {

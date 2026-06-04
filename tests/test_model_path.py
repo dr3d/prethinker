@@ -142,6 +142,44 @@ def test_local_lmstudio_model_metadata_records_loaded_context_and_quantization()
     ]
 
 
+def test_local_lmstudio_model_metadata_accepts_openai_compatible_v1_base_url() -> None:
+    captured_urls: list[str] = []
+
+    class FakeResponse:
+        def __init__(self, body: bytes):
+            self.body = body
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return self.body
+
+    def fake_urlopen(request, timeout):
+        captured_urls.append(request.full_url)
+        if request.full_url.endswith("/v1/models"):
+            return FakeResponse(b'{"data":[{"id":"google/gemma-4-12b"}]}')
+        return FakeResponse(b'{"id":"google/gemma-4-12b","quantization":"Q8_0"}')
+
+    metadata = local_lmstudio_model_metadata(
+        backend="lmstudio",
+        base_url="http://127.0.0.1:1234/v1",
+        model="google/gemma-4-12b",
+        urlopen=fake_urlopen,
+    )
+
+    assert metadata["status"] == "retrieved"
+    assert metadata["v1_models"]["model_ids"] == ["google/gemma-4-12b"]
+    assert metadata["api_v0_model"]["quantization"] == "Q8_0"
+    assert captured_urls == [
+        "http://127.0.0.1:1234/v1/models",
+        "http://127.0.0.1:1234/api/v0/models/google/gemma-4-12b",
+    ]
+
+
 def test_local_lmstudio_model_metadata_skips_non_local_openai_compatible_path() -> None:
     metadata = local_lmstudio_model_metadata(
         backend="lmstudio",

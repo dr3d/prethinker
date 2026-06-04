@@ -133,6 +133,19 @@ Atom-library query grounding
   SEC transfer_003 local smoke: 5 / 5 judged exact after mapper variable
     preservation; all five exact rows pass typed-plan replay and redacted
     rejudge, with 0 compatibility/runtime/write rows
+  first pre-registered query-variance cell:
+    Qwen local temp 0 over the same five rows, N=5:
+      23 / 25 product exact; 23 / 25 typed-plan replay; 23 / 25 redacted
+      rejudge; 0 prose-dependent exact rows
+    Qwen temp sweep:
+      temp 0.2: 13 / 15 product exact, but redaction rejudge blocked one
+        normalized-name row, leaving 12 / 15 thesis exact
+      temp 0.5: 13 / 15 product exact and 13 / 15 redacted rejudge
+    Gemma 4 12B local dense control, temp 0, N=5:
+      25 / 25 product exact and typed-plan replay; redaction rejudge marked
+      24 / 25 thesis exact because one normalized-name row was judged partial
+  read: the query-over-atoms path is real but still a variance-measured query
+    lane; Gemma is a useful control, not a promoted model switch
   mapper finding: the strict path exposed that uppercase query variables emitted
     by the LLM were being atomized into lowercase constants; the mapper now
     preserves uppercase slot-label query variables while still atomizing ordinary

@@ -341,3 +341,46 @@ anchors, requires all cells to be reported, and explicitly forbids keeping the
 best model, seed, temperature, or fixture result as the claim. Gemma, when
 available, is a dense-model control. Qwen fixed-seed local LM Studio runs are a
 reference variance cell, not proof of determinism.
+
+The first completed cell under that protocol was the SEC transfer_003 five-row
+atom-query smoke, using a retained Qwen-compiled typed artifact:
+
+```text
+C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_t003_atom_query_variance_20260604
+```
+
+Result summary:
+
+```text
+Qwen local temp 0, N=5:
+  product exact: 23 / 25
+  typed-plan replay: 23 / 25, pass
+  redacted rejudge: 23 / 25, 0 prose-dependent, pass
+
+Qwen local temp 0.2, N=3:
+  product exact: 13 / 15
+  typed-plan replay: 13 / 15, pass
+  redacted rejudge: 12 / 15, blocked by one normalized-name partial
+
+Qwen local temp 0.5, N=3:
+  product exact: 13 / 15
+  typed-plan replay: 13 / 15, pass
+  redacted rejudge: 13 / 15, pass
+
+Gemma 4 12B local dense control, operator-observed Q8, temp 0, N=5:
+  product exact: 25 / 25
+  typed-plan replay: 25 / 25, pass
+  redacted rejudge: 24 / 25, blocked by one normalized-name partial
+```
+
+Read: Gemma is a useful query-planning control and may merit a Q4 arm later,
+but this tiny cell is not a model migration. The stricter finding is that Qwen
+temp-0 query planning should be reported as a 4-5/5 band on this anchor rather
+than as a single favorable 5/5 point, and nonzero temperature did not remove
+the query-surface jitter.
+
+The cell also exposed a local metadata bug: when the harness used a `/v1`
+base URL, the LM Studio metadata helper appended another `/v1` and therefore
+missed model-list and quantization details. That has been fixed for future
+artifacts. The completed cell's Gemma Q8 detail is operator-observed plus
+post-fix metadata validation, not a field recovered in the original run JSON.

@@ -134,11 +134,17 @@ The next work should strengthen the research claim rather than lift one fixture:
    constants remain deterministic query-surface gaps. A mapper fix now preserves
    model-authored uppercase query variables such as `RegistrantName` and
    `SourceOrScope` instead of atomizing them into lowercase constants; the SEC
-   transfer_003 five-row atom-query smoke reached `5/5` exact, with typed-plan
-   replay and redacted rejudge passing for all five rows and 0
-   compatibility/runtime/write rows. The next query question is measured
-   planner performance on a larger unlike set, not permission to use prose or
-   fallback rescue.
+   transfer_003 five-row atom-query smoke reached a favorable single-run
+   `5/5` exact, but the first pre-registered variance cell is the honest
+   picture: local Qwen temp-0 N=5 landed at `23/25` thesis-clean exact, with
+   all exact rows typed-plan and redaction replay clean; Qwen temp `0.2` and
+   `0.5` both landed at `13/15` product exact, with temp `0.2` blocked by one
+   redaction-rejudge normalized-name partial; local Gemma 4 12B Q8 temp-0
+   landed at `25/25` product exact and typed-plan replay but `24/25` redacted
+   rejudge because the same normalized-name display issue appeared once.
+   Gemma is therefore a useful dense-model control, not a promoted model
+   switch. The next query question is measured planner performance on a larger
+   unlike set, not permission to use prose or fallback rescue.
 7. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 

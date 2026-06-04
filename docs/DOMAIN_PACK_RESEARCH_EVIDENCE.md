@@ -129,6 +129,33 @@ sufficient for treating historical and fresh runs as interchangeable. Any
 future cross-runtime or seeded-stability claim needs its own same-condition
 cell.
 
+The first pre-registered query-variance cell then used the five-row SEC
+transfer_003 atom-library query smoke, not a fresh compile. It is retained here
+because it measures query-planner stability inside the compiled atom inventory.
+
+Retained artifact:
+
+```text
+C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_t003_atom_query_variance_20260604
+```
+
+Results:
+
+| Arm | Draws | Product exact | Typed-plan replay | Redacted rejudge | Read |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Local Qwen temp 0 | 5 | 23/25 | 23/25, 0 unregistered, pass | 23/25, 0 prose-dependent, pass | Stable band is 4-5/5 per draw, not a point `5/5`. Misses were q001 parse failure and q005 bad constant over-binding. |
+| Local Qwen temp 0.2 | 3 | 13/15 | 13/15, pass | 12/15, blocked by one normalized-name partial | Temperature did not improve the query lane; it added gate noise. |
+| Local Qwen temp 0.5 | 3 | 13/15 | 13/15, pass | 13/15, pass | Nonzero temperature remains diagnostic only, not a claim setting. |
+| Local Gemma 4 12B dense control, operator-observed Q8 | 5 | 25/25 | 25/25, 0 unregistered, pass | 24/25, blocked by one normalized-name partial | Promising as a query-planning control, but not promoted. One redacted rejudge row showed judge/rendering strictness around `blackstone_inc` versus "Blackstone Inc." |
+
+The Gemma/Qwen run artifacts were generated before a local LM Studio metadata
+URL-normalization fix, so the artifacts recorded model id and decoding settings
+but did not recover quantization from `/api/v0/models`. The metadata capture
+bug was fixed after the run; a live check then recovered `google/gemma-4-12b`
+as GGUF `Q8_0`. Treat the Q8 detail as operator-observed plus post-fix
+metadata validation, not as an in-artifact field for the completed cell. A
+Gemma Q4 comparison would need its own dated arm.
+
 ## Query Grounding Governance
 
 On 2026-06-04, atom-library query grounding was tightened so the query planner
@@ -151,9 +178,13 @@ variables such as `RegistrantName`, `ItemKind`, and `SourceOrScope` were being
 atomized into lowercase constants before deterministic execution. The mapper
 now preserves uppercase slot-label arguments as query variables while still
 leaving ordinary proper-name constants such as `Felix` and `Arthur` atomized.
-With that fix, the same five-row SEC transfer_003 atom-query smoke reached
-5/5 exact; all five exact rows passed typed-plan replay and redacted rejudge,
-with 0 prose-dependent exact rows and 0 compatibility/runtime/write rows.
+With that fix, a favorable single run of the same five-row SEC transfer_003
+atom-query smoke reached 5/5 exact; all five exact rows passed typed-plan
+replay and redacted rejudge, with 0 prose-dependent exact rows and 0
+compatibility/runtime/write rows. The follow-up pre-registered query-variance
+cell above is the current honest measurement: local Qwen temp-0 is a 4-5/5
+per-draw band, and Gemma Q8 is promising but still gated by one redacted-rejudge
+normalized-display partial.
 
 The active next question is planner performance inside the atom library on a
 larger and unlike query set, not permission to restore fallback rescue. The
