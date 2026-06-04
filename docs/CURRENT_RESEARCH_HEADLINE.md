@@ -62,11 +62,12 @@ SEC Form 8-K skeleton pack
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary.
   latest governance artifact:
-    C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
-    12 governance checks passed, including `sec_value_axis_integrity`; that
-    fixture value-axis audit checked 29 SEC
-    item/exhibit/treatment facts with 0 issues. This is guard tightening, not
-    a support increase.
+    C:\prethinker_tmp_archive\compile_fact_measurement_exclusions_20260604
+    13 governance checks passed, including `sec_value_axis_integrity` and
+    `compile_fact_qa_exclusions`; the SEC value-axis audit checked 29
+    item/exhibit/treatment facts with 0 issues, and the exclusion ledger
+    accounts for 15 associated domain fixtures not in the standing manifest.
+    This is guard tightening, not a support increase.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:

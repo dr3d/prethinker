@@ -1,0 +1,143 @@
+{
+  "schema": "prethinker.compile_fact_qa_exclusion_manifest.v1",
+  "description": "Domain-associated typed fixtures excluded from the standing compile-fact QA manifest. This ledger prevents friendly-cell cherry-picking without promoting diagnostic or component fixtures into claim-bearing cells.",
+  "exclusions": [
+    {
+      "fixture_id": "fda_warning_letter_domain_transfer_001",
+      "reason_code": "external_judged_qa_package",
+      "status": "measured_outside_standing_compile_fact_manifest",
+      "note": "Covered by the retained FDA transfer judged-QA v2 package and older gate artifact, not by the current domain-lens bundle manifest.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\fda_transfer_judged_qa_v2_20260603",
+        "C:\\prethinker_tmp_archive\\cb_gate_20260604\\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_domain_transfer_003",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "documented_boundary_cell_not_standing_manifest_cell",
+      "note": "Current-pack boundary cell documented as 19/26 support>=2 with unsupported value/detail flesh; retained as boundary evidence, not a manifest cell.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\fda_t003_current_pack_20260604\\fda-t003-r1"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_domain_v1",
+      "reason_code": "seed_or_component_micro_fixture",
+      "status": "fixture_bank_seed",
+      "note": "Seed micro used to build the FDA domain pack; current transfer evidence is represented by retained transfer cells instead.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_domain_v1"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_em_detail_micro_v1",
+      "reason_code": "component_lane_fixture",
+      "status": "component_pressure_fixture",
+      "note": "Environmental-monitoring detail pressure fixture retained for schema/lane pressure, not a standing transfer measurement.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_em_detail_micro_v1"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_insanitary_001",
+      "reason_code": "component_lane_fixture",
+      "status": "component_pressure_fixture",
+      "note": "Insanitary-condition lane pressure fixture retained as component evidence outside the standing current manifest.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_insanitary_001"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_insanitary_002",
+      "reason_code": "component_lane_fixture",
+      "status": "component_pressure_fixture",
+      "note": "Second insanitary-condition lane pressure fixture retained as component evidence outside the standing current manifest.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_insanitary_002"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_001",
+      "reason_code": "diagnostic_lane_not_promoted",
+      "status": "response_observation_diagnostic",
+      "note": "Observation-transfer response lanes are diagnostic/candidate evidence and are not promoted into the standing compile-fact QA manifest.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_observation_transfer_20260602_01\\fda_warning_letter_observation_transfer_001"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_002",
+      "reason_code": "diagnostic_lane_not_promoted",
+      "status": "response_observation_diagnostic",
+      "note": "Observation-transfer response lanes are diagnostic/candidate evidence and are not promoted into the standing compile-fact QA manifest.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_observation_transfer_20260602_01\\fda_warning_letter_observation_transfer_002"
+      ]
+    },
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_003",
+      "reason_code": "diagnostic_lane_not_promoted",
+      "status": "response_observation_diagnostic",
+      "note": "Observation-transfer response lanes are diagnostic/candidate evidence and are not promoted into the standing compile-fact QA manifest.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\fda_warning_letter_observation_transfer_20260602_01\\fda_warning_letter_observation_transfer_003"
+      ]
+    },
+    {
+      "fixture_id": "ntsb_investigation_domain_v1",
+      "reason_code": "seed_or_component_micro_fixture",
+      "status": "fixture_bank_seed",
+      "note": "NTSB seed micro validates the initial pack; current transfer boundary evidence is represented by the unlike transfer cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\ntsb_investigation_domain_v1"
+      ]
+    },
+    {
+      "fixture_id": "ntsb_investigation_report_id_omission_v1",
+      "reason_code": "accountability_control_micro_fixture",
+      "status": "omission_control",
+      "note": "Omission-control micro-fixture validates accountability behavior and is not a transfer measurement cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\ntsb_investigation_report_id_omission_v1"
+      ]
+    },
+    {
+      "fixture_id": "osha_incident_inspection_id_omission_v1",
+      "reason_code": "accountability_control_micro_fixture",
+      "status": "omission_control",
+      "note": "Omission-control micro-fixture validates OSHA inspection-id accountability and is not a transfer measurement cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\osha_incident_inspection_id_omission_v1"
+      ]
+    },
+    {
+      "fixture_id": "osha_incident_transfer_002",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "long_table_boundary_not_promoted",
+      "note": "Diagnostic OSHA long-table probe: 18/53 support>=2 with 0/8 forbidden; documents long citation/status inventory boundary.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\osha_incident_domain_probe_20260604\\osha-incident-transfer-002-r1-local-long-table-boundary"
+      ]
+    },
+    {
+      "fixture_id": "osha_incident_transfer_003",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "mixed_section_boundary_not_promoted",
+      "note": "Diagnostic OSHA mixed-section probe: 2/21 support>=2 with 0/10 forbidden after accident-omission guard; documents section-attachment boundary.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\osha_incident_domain_probe_20260604\\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore",
+        "C:\\prethinker_tmp_archive\\osha_accident_omission_guard_20260604"
+      ]
+    },
+    {
+      "fixture_id": "sec_form_8k_signature_omission_v1",
+      "reason_code": "accountability_control_micro_fixture",
+      "status": "omission_control",
+      "note": "SEC signature omission-control micro-fixture validates accountability behavior and is not a transfer measurement cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\sec_form_8k_signature_omission_v1"
+      ]
+    }
+  ]
+}

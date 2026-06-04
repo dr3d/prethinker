@@ -407,21 +407,42 @@ typed-plan replay: pass, 0 unregistered exact plans in every cell
 source/provenance warnings: 0
 ```
 
+`datasets/domain_pack_measurements/current_compile_fact_qa_exclusions.json`
+records associated domain fixtures deliberately excluded from that standing
+manifest. The exclusion audit is anti-cherry-pick governance: every associated
+fixture not measured in the manifest must be listed with an explicit reason and
+retained evidence handle. The 2026-06-04 exclusion audit passed with 23
+associated fixtures, 8 measured fixtures, 15 excluded fixtures, and 0 missing
+exclusions:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\compile_fact_measurement_exclusions_20260604
+exclusion reasons:
+  accountability_control_micro_fixture: 3
+  component_lane_fixture: 3
+  diagnostic_boundary_probe: 3
+  diagnostic_lane_not_promoted: 3
+  external_judged_qa_package: 1
+  seed_or_component_micro_fixture: 2
+```
+
 SEC note: the old `13/13`, `13/13`, `12/12`, `12/12` cells are retained as
 historical pre-axis-repair evidence, not as the current methods-anchor score.
 The current manifest points at repaired breadth roots with bundle manifests.
 
 `scripts/run_current_research_governance.py` runs the current claim-protection
 set as one command: sign-clean, artifact-path audit, historical-score audit,
-domain predicate schema validation, compile-fact QA manifest source/settings
-audit, reference-judge null-control report audit, and the compile-fact QA
-manifest. The source/settings audit requires retained bundle roots, N>=3 run
-artifacts, recoverable model/settings metadata, and consistent settings across
-repeat runs. The null-control report audit verifies that current judged-QA
-claim handles point at retained passing null-control reports with zero exact
-null verdicts. The current SEC repaired-breadth roots include bundle manifests,
-so the 2026-06-04 source/provenance warning count is `0`. The 2026-06-04
-governance run passed the current claim-protection set.
+domain predicate schema validation, domain status checks, SEC value-axis
+integrity, compile-fact QA exclusion coverage, compile-fact QA manifest
+source/settings audit, reference-judge null-control report audit, and the
+compile-fact QA manifest. The source/settings audit requires retained bundle
+roots, N>=3 run artifacts, recoverable model/settings metadata, and consistent
+settings across repeat runs. The null-control report audit verifies that
+current judged-QA claim handles point at retained passing null-control reports
+with zero exact null verdicts. The current SEC repaired-breadth roots include
+bundle manifests, so the 2026-06-04 source/provenance warning count is `0`.
+The latest 2026-06-04 governance run passed 13 checks with 0 failures.
 
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:

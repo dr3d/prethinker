@@ -161,6 +161,17 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "compile_fact_qa_exclusions",
+            "command": [
+                python,
+                "scripts/audit_compile_fact_qa_exclusions.py",
+                "--out-json",
+                str(report_root / "compile_fact_qa_exclusions.json"),
+                "--out-md",
+                str(report_root / "compile_fact_qa_exclusions.md"),
+            ],
+        },
+        {
             "id": "compile_fact_qa_manifest_sources",
             "command": [
                 python,
