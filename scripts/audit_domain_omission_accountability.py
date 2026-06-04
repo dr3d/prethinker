@@ -172,6 +172,17 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                     "self_check_omission_notes": [],
                 }
             )
+        for fact in _ntsb_finding_omission_contradictions(facts):
+            rows.append(
+                {
+                    "fixture": path.parent.name,
+                    "compile_json": str(path),
+                    "class": "domain_omission_contradicts_emitted_carrier",
+                    "fact": fact,
+                    "carrier_signature": "ntsb_finding/5",
+                    "self_check_omission_notes": [],
+                }
+            )
         if _self_check_omission_requires_domain_omission(data):
             omission_notes = [
                 text
@@ -531,6 +542,40 @@ def _ntsb_report_identifier_is_not_stated(args: list[str]) -> bool:
         "missing",
         "not_available",
     }
+
+
+def _ntsb_finding_omission_contradictions(facts: list[str]) -> list[str]:
+    occurrences_with_real_finding: set[str] = set()
+    parsed_facts: list[tuple[str, list[str], str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match:
+            continue
+        predicate = match.group(1)
+        args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+        parsed_facts.append((predicate, args, fact))
+        if predicate == "ntsb_finding" and len(args) == 5 and args[0] and not _ntsb_finding_is_not_stated(args):
+            occurrences_with_real_finding.add(args[0])
+
+    out: list[str] = []
+    for predicate, args, fact in parsed_facts:
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[0] in occurrences_with_real_finding
+            and args[1] == "ntsb_finding/5"
+            and args[2] == "none_found"
+            and args[3] == "probable_cause_or_finding_not_stated"
+        ):
+            out.append(fact)
+    return out
+
+
+def _ntsb_finding_is_not_stated(args: list[str]) -> bool:
+    if len(args) != 5:
+        return False
+    missing_values = {"not_stated", "unknown", "none_found", "missing", "not_available"}
+    return _normalize_arg(args[2]) in missing_values or _normalize_arg(args[3]) in missing_values
 
 
 @lru_cache(maxsize=1)

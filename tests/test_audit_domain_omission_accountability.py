@@ -340,6 +340,64 @@ def test_domain_omission_accountability_allows_ntsb_report_omission_different_sc
     assert report["summary"]["blocker_count"] == 0
 
 
+def test_domain_omission_accountability_blocks_ntsb_finding_omission_when_real_finding_exists(
+    tmp_path: Path,
+) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(occurrence_1, 'ntsb_finding/5', none_found, probable_cause_or_finding_not_stated, src_missing_finding).",
+                "ntsb_finding(occurrence_1, finding_1, probable_cause, pilot_loss_of_control, src_finding).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "ntsb_finding/5"
+    assert report["rows"][0]["fact"].startswith("domain_omission(")
+
+
+def test_domain_omission_accountability_allows_ntsb_finding_omission_with_not_stated_finding(
+    tmp_path: Path,
+) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(occurrence_1, 'ntsb_finding/5', none_found, probable_cause_or_finding_not_stated, src_missing_finding).",
+                "ntsb_finding(occurrence_1, finding_1, not_stated, not_stated, src_finding).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+
+
+def test_domain_omission_accountability_allows_ntsb_finding_omission_different_occurrence(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(occurrence_1, 'ntsb_finding/5', none_found, probable_cause_or_finding_not_stated, src_missing_finding).",
+                "ntsb_finding(occurrence_2, finding_1, probable_cause, pilot_loss_of_control, src_finding).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+
+
 def test_domain_omission_accountability_audits_union_artifact_with_omission_fact(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",
