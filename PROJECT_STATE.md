@@ -73,8 +73,15 @@ SEC Form 8-K skeleton pack
   transfer_002: 12 / 12
   transfer_003: 12 / 12
   forbidden support: 0 in all claim-bearing cells
+  value-axis caveat: a 2026-06-04 SEC value-axis audit found 5 issues in the
+    expected SEC item/exhibit facts themselves: Exhibit 104 expectations put
+    `embedded_ixbrl` in `exhibit_role`, and transfer_003 puts `furnished` in
+    `item_role`. The retained Qwen MoE transfer_003 artifact shows the same
+    mixed-axis pattern.
   read: strongest current methods example that a small closed skeleton pack
-    can transfer across unlike same-family official documents
+    can transfer across unlike same-family official documents, but not a
+    pristine axis-clean schema until the SEC item/exhibit role slots are split
+    or redefined and re-run under the Qwen MoE reference path.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -223,7 +230,8 @@ explain the current falsifiable result:
 - keep `docs/DOMAIN_ACCOUNTABILITY_STATUS.md` regenerated from
   `scripts/summarize_domain_accountability_status.py` so omission requirements,
   fixture coverage, and fixture-only omission patterns are visible;
-- keep SEC as the formal methods example;
+- repair the SEC item/exhibit value-axis caveat before treating SEC as the
+  formal methods example;
 - keep FDA as the richer case study with both positive transfer and boundary
   evidence;
 - keep NTSB as corroborating boundary evidence, not as a new grind target;

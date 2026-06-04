@@ -163,15 +163,16 @@ compiler proposes facts; deterministic gates decide what counts.
 
 | Family | Scope | Current result | What it supports |
 | --- | --- | --- | --- |
-| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Deterministic compile-fact QA over seed plus transfers: `144/150` per-run exact, `50/50` support>=2, all exact rows typed-plan/redaction clean | Strongest methods example: a small closed skeleton pack transfers across unlike same-family filings. Per-run misses/partials are variance evidence, not a contradiction of the support>=2 claim. |
+| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Deterministic compile-fact QA over seed plus transfers: `144/150` per-run exact, `50/50` support>=2, all exact rows typed-plan/redaction clean. A later value-axis audit found 5 axis-mixing issues in the expected item/exhibit facts themselves | Strongest transfer example: a small closed skeleton pack transfers across unlike same-family filings. It is not yet a pristine methods anchor until item/exhibit role axes are repaired and re-run. |
 | FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; raw compile-fact QA `53/75` per-run exact and `18/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. Raw fact QA separates emitted fact support from reducer replay. |
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `3/10` supported forbidden after wildcard controls | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than wrapper/establishment, blank-value semantics, long-table enumeration, and mixed-section attachment. |
 
 ## SEC Methods Example
 
-SEC Form 8-K is the cleanest current positive cell because it is deliberately
-skeleton-only.
+SEC Form 8-K is the strongest current positive transfer cell because it is
+deliberately skeleton-only. It is no longer described as the cleanest methods
+cell until the item/exhibit value-axis caveat is repaired and re-run.
 
 ```text
 profile: datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json
@@ -194,7 +195,14 @@ model-prior leak. The row was rejected before the fixture became claim-bearing.
 That is the intended governance behavior: the pack may abstain, but it may not
 fill missing source facts from model memory.
 
-SEC does not claim event-substance extraction.
+Important caveat added 2026-06-04: a SEC value-axis audit found that the
+expected item/exhibit facts are themselves axis-mixed. Exhibit 104 expectations
+place `embedded_ixbrl` in `exhibit_role`, mixing content format into a legal
+treatment slot. Transfer_003 places `furnished` in `item_role`, mixing legal
+treatment into an item-structure slot. The retained Qwen MoE transfer_003
+artifact shows the same mixed-axis pattern. SEC does not claim event-substance
+extraction, and it should not be used as the formal methods anchor until those
+role slots are split or redefined and re-run under the Qwen MoE reference path.
 
 ## FDA Case Study
 

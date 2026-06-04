@@ -407,7 +407,11 @@ nonzero temperature did not remove the query-surface jitter. The follow-up
 compile-substitution controls are the load-bearing model-swap results: Gemma Q4
 and same-family dense Qwen 27B stayed inside the closed SEC registry but did not
 reproduce the Qwen MoE transfer_003 compile cell cleanly. The model-swap compile
-robustness claim is therefore not established.
+robustness claim is therefore not established. A follow-up SEC value-axis audit
+then found the expected item/exhibit facts themselves mix axes in
+`sec_filing_item/5.item_role` and `sec_exhibit/5.exhibit_role`; the model
+excursion should therefore be read as a schema-contract diagnostic, not as a
+reason to keep shopping models.
 
 The cell also exposed a local metadata bug: when the harness used a `/v1`
 base URL, the LM Studio metadata helper appended another `/v1` and therefore

@@ -21,9 +21,12 @@ understanding.
 
 ## Primary Anchors
 
-The first variance cell is SEC Form 8-K because it is the cleanest current
-skeleton-pack methods example and already has a seed plus three unlike
-transfers.
+The first variance cell is SEC Form 8-K because it was the strongest current
+skeleton-pack transfer example and already had a seed plus three unlike
+transfers. Later on 2026-06-04, a SEC value-axis audit found item/exhibit
+role-axis mixing in the expected facts themselves, so this protocol is now read
+as a variance/model-sensitivity diagnostic rather than a pristine methods-anchor
+confirmation.
 
 Compile-fact anchors:
 
@@ -414,3 +417,34 @@ Read: same-family dense Qwen did not recover the Qwen MoE reference cell. The
 result narrows the hypothesis: the SEC transfer_003 compile substitution problem
 is not only Gemma-family mismatch, and not only MoE-vs-dense routing. It is a
 model/path-sensitive SEC role-semantics boundary under the current closed pack.
+
+## Addendum - SEC Value-Axis Diagnostic
+
+Added after Arms E/F on 2026-06-04.
+
+The dense compile controls pointed at the same two rows, but the follow-up audit
+showed that the problem is not only model choice: the SEC expected facts
+themselves use mixed value axes.
+
+Retained artifact:
+
+```text
+C:\prethinker_tmp_archive\sec_value_axis_audit_20260604
+```
+
+Result:
+
+```text
+SEC expected facts:
+  checked SEC item/exhibit facts: 17
+  issues: 5
+
+SEC transfer_003 Qwen MoE artifact:
+  checked SEC item/exhibit facts: 24
+  issues: 10
+```
+
+Read: `sec_filing_item/5.item_role` mixes structural item role with legal
+treatment (`furnished`), and `sec_exhibit/5.exhibit_role` mixes legal treatment
+with content format (`embedded_ixbrl`). The right next step is schema repair
+under the Qwen MoE reference path, not another model substitution arm.

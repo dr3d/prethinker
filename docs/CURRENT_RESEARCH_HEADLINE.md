@@ -39,13 +39,20 @@ SEC Form 8-K skeleton pack
   transfer_002: 12 / 12
   transfer_003: 12 / 12
   forbidden support: 0 in all claim-bearing cells
+  value-axis caveat: a 2026-06-04 SEC value-axis audit found 5 issues in the
+    expected item/exhibit facts themselves; Exhibit 104 uses `embedded_ixbrl`
+    inside `exhibit_role`, and transfer_003 uses `furnished` inside
+    `item_role`. The retained Qwen MoE transfer_003 artifact shows the same
+    mixed-axis pattern.
   deterministic compile-fact QA over seed plus three transfers:
     144 / 150 per-run exact
     50 / 50 support>=2
     all 144 exact rows pass typed-plan replay and redaction replay
   governance: research-integrity gate clean on retained transfer artifacts
   claim: strongest current example that a small closed predicate pack can
-    stabilize same-family official-document skeleton compilation
+    stabilize same-family official-document skeleton compilation, but not a
+    pristine axis-clean methods anchor until the item/exhibit role slots are
+    split or redefined and re-run under the Qwen MoE reference path.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -112,9 +119,9 @@ measuring, not as evidence of the current thesis.
 
 The next work should strengthen the research claim rather than lift one fixture:
 
-1. Use the SEC skeleton evidence as the formal methods example, with exact
-   fixture, gate, model, and artifact references kept in
-   DOMAIN_PACK_RESEARCH_EVIDENCE.md.
+1. Repair the SEC item/exhibit value-axis caveat before using SEC as the formal
+   methods example, with exact fixture, gate, model, and artifact references
+   kept in DOMAIN_PACK_RESEARCH_EVIDENCE.md.
 2. Keep the FDA v2 judged-QA result current and separated from messy-query
    claims; transfer_002 remains boundary evidence rather than a row-grinding
    target.
