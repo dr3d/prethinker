@@ -50,7 +50,7 @@ that older diagnostic paths can use after a no-result query. The planner must
 choose variables and constants from the compiled atom inventory itself; Python
 does not repair bad planner constants such as predicate-contract slot names
 (`title`, `jurisdiction`, `source_or_scope`) into variables. Those rows are
-query-surface gaps until the planner emits a replayable typed plan.
+blocked as query-surface gaps until the planner emits a replayable typed plan.
 
 ## The Shape
 

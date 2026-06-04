@@ -139,10 +139,12 @@ execution are unavailable. A proposed `source_record_*` query is recorded as
 `blocked_by_sign_clean_strict` rather than executed.
 
 The strict atom-library query path also disables the runtime's relaxed-constant
-fallback. A small local SEC transfer_003 smoke probe then measured the current
-planner boundary: 2/5 judged exact, with both exact rows passing typed-plan
-replay and redacted rejudge, 0 compatibility/runtime/write rows, and the three
-remaining rows classified as query-surface gaps. The earlier 4/5 probe is
+fallback and blocks constants that are absent from the compiled atom inventory
+for their predicate argument slot. A small local SEC transfer_003 smoke probe
+then measured the current planner boundary: repeated strict runs landed at
+1-2/5 judged exact, every surviving exact row passed typed-plan replay and
+redacted rejudge, compatibility/runtime/write rows stayed at 0, and the
+remaining rows were deterministic query-surface gaps. The earlier 4/5 probe is
 diagnostic only because Python had relaxed bad planner constants into variables.
 The active next question is planner performance inside the atom library, not
 permission to restore fallback rescue.

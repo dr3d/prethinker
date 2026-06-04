@@ -2300,6 +2300,34 @@ def test_anchor_filter_failure_surface_overrides_to_query_gap() -> None:
     assert surface["confidence"] == 1.0
 
 
+def test_atom_inventory_failure_surface_overrides_to_query_gap() -> None:
+    surface = qa_module._atom_inventory_failure_surface(
+        {
+            "reference_judge": {"verdict": "miss"},
+            "query_results": [
+                {
+                    "query": "sec_registrant(X, registrantname, jurisdiction, Source).",
+                    "result": {
+                        "status": "blocked_by_atom_inventory",
+                        "absent_constants": [
+                            {
+                                "predicate": "sec_registrant",
+                                "signature": "sec_registrant/4",
+                                "arg_index": 2,
+                                "value": "registrantname",
+                            }
+                        ],
+                    },
+                }
+            ],
+        }
+    )
+
+    assert surface["surface"] == "query_surface_gap"
+    assert surface["confidence"] == 1.0
+    assert surface["blocked_constants"][0]["value"] == "registrantname"
+
+
 def test_evidence_bundle_anchor_binding_synthesizes_shared_context_query() -> None:
     facts = [
         "party_role_context(case_a, named_employer_atom, employer, direct).",
@@ -11699,6 +11727,57 @@ def test_run_query_plan_can_disable_relaxed_constant_fallback_for_atom_library_g
     assert atom_grounded_results[0]["query"] == original
     assert atom_grounded_results[0]["result"]["status"] == "no_results"
     assert all("Relaxed" not in str(item.get("query", "")) for item in atom_grounded_results)
+
+
+def test_run_query_plan_blocks_constants_absent_from_atom_inventory_slots() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    facts = ["sec_registrant(sec_8k_blackstone, blackstone_inc, delaware, src_line_0012)."]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    original = "sec_registrant(X, registrantname, jurisdiction, Source)."
+    results = _run_query_plan(
+        runtime,
+        [original],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        allow_relaxed_constant_fallback=False,
+        atom_library_kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+    )
+
+    assert results == [
+        {
+            "query": original,
+            "result": {
+                "status": "blocked_by_atom_inventory",
+                "result_type": "blocked",
+                "num_rows": 0,
+                "rows": [],
+                "absent_constants": [
+                    {
+                        "predicate": "sec_registrant",
+                        "signature": "sec_registrant/4",
+                        "arg_index": 2,
+                        "value": "registrantname",
+                    },
+                    {
+                        "predicate": "sec_registrant",
+                        "signature": "sec_registrant/4",
+                        "arg_index": 3,
+                        "value": "jurisdiction",
+                    },
+                ],
+                "reasoning_basis": {
+                    "kind": "atom-library-query-grounding",
+                    "policy": (
+                        "typed query constants must exist in compiled_predicate_inventory.arg_values "
+                        "for the same predicate argument slot"
+                    ),
+                },
+            },
+            "derived_from_queries": [],
+        }
+    ]
 
 
 def test_run_query_plan_adds_typed_subject_identifier_sibling_rows() -> None:

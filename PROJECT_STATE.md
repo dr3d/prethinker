@@ -129,9 +129,10 @@ OSHA accident/inspection pack
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,
     source-record proposals are blocked, and relaxed-constant fallback is
-    disabled
-  SEC transfer_003 local smoke: 2 / 5 judged exact after fallback removal;
-    both exact rows pass typed-plan replay and redacted rejudge, with 0
+    disabled; constants absent from compiled atom slots are blocked
+  SEC transfer_003 local smoke: 1-2 / 5 judged exact across repeated strict
+    local runs after fallback removal; every surviving exact row passes
+    typed-plan replay and redacted rejudge, with 0
     compatibility/runtime/write rows
   read: query-over-atoms is governed, but messy human query planning is not yet
     solved; remaining smoke misses are query-surface gaps from bad planner
@@ -238,7 +239,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2396 passed, 59 skipped, 9 xfailed
+2398 passed, 59 skipped, 9 xfailed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

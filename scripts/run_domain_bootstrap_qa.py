@@ -904,6 +904,9 @@ def main() -> int:
                     rules=rules,
                     config=config,
                 )
+            atom_inventory_failure = _atom_inventory_failure_surface(row)
+            if atom_inventory_failure is not None:
+                row["failure_surface"] = atom_inventory_failure
             anchor_failure = _anchor_filter_failure_surface(row)
             if anchor_failure is not None:
                 row["failure_surface"] = anchor_failure
@@ -3231,6 +3234,7 @@ def run_one_question(
         sign_clean_strict=strict_query_execution,
         typed_support_companions=typed_support_companions,
         allow_relaxed_constant_fallback=(not bool(atom_library_query_grounding)),
+        atom_library_kb_inventory=(query_kb_inventory if bool(atom_library_query_grounding) else None),
     )
     evidence_plan_query_results: list[dict[str, Any]] = []
     if evidence_plan is not None and bool(execute_evidence_bundle_plan):
@@ -3243,6 +3247,7 @@ def run_one_question(
             sign_clean_strict=strict_query_execution,
             typed_support_companions=typed_support_companions,
             allow_relaxed_constant_fallback=(not bool(atom_library_query_grounding)),
+            atom_library_kb_inventory=(query_kb_inventory if bool(atom_library_query_grounding) else None),
         )
         if evidence_plan_query_results:
             query_results = list(evidence_plan_query_results)
@@ -3420,6 +3425,53 @@ def _anchor_filter_failure_surface(row: dict[str, Any]) -> dict[str, Any] | None
             "Plan an anchored party_role_context/4 query, for example one goal binding the named "
             "party/entity atom and a sibling goal binding the requested role over the same Context."
         ),
+    }
+
+
+def _atom_inventory_failure_surface(row: dict[str, Any]) -> dict[str, Any] | None:
+    judge = row.get("reference_judge")
+    verdict = str(judge.get("verdict", "")).strip() if isinstance(judge, dict) else ""
+    if verdict == "exact":
+        return None
+    blocked_constants: list[dict[str, Any]] = []
+    for item in row.get("query_results", []) or []:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("status", "")).strip() != "blocked_by_atom_inventory":
+            continue
+        for constant in result.get("absent_constants", []) or []:
+            if isinstance(constant, dict):
+                blocked_constants.append(
+                    {
+                        "predicate": str(constant.get("predicate", "")).strip(),
+                        "signature": str(constant.get("signature", "")).strip(),
+                        "arg_index": constant.get("arg_index"),
+                        "value": str(constant.get("value", "")).strip(),
+                    }
+                )
+    if not blocked_constants:
+        return None
+    examples = ", ".join(
+        f"{item.get('signature')} arg{item.get('arg_index')}={item.get('value')}"
+        for item in blocked_constants[:4]
+    )
+    return {
+        "schema_version": "qa_failure_surface_v1",
+        "surface": "query_surface_gap",
+        "confidence": 1.0,
+        "rationale": (
+            "The atom-library query planner emitted constants that are absent from the compiled "
+            f"predicate inventory for their argument slots ({examples}). The compiled atom "
+            "inventory, not source prose, blocked the plan before execution."
+        ),
+        "suggested_next_action": (
+            "Have the query planner use variables for unconstrained slots and bind only atoms "
+            "copied from compiled_predicate_inventory.arg_values for the matching predicate arity."
+        ),
+        "blocked_constants": blocked_constants,
     }
 
 
@@ -4612,6 +4664,7 @@ def run_query_plan(
     sign_clean_strict: bool = False,
     typed_support_companions: bool = False,
     allow_relaxed_constant_fallback: bool = True,
+    atom_library_kb_inventory: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
@@ -4633,6 +4686,11 @@ def run_query_plan(
                 results.append(blocked)
                 previous_queries.append(query)
                 continue
+        atom_blocked = _atom_inventory_blocked_query(query, kb_inventory=atom_library_kb_inventory)
+        if atom_blocked:
+            results.append(atom_blocked)
+            previous_queries.append(query)
+            continue
         source_record_filter = None if sign_clean_strict else _source_record_contains_filter_repair(query)
         if source_record_filter:
             results.append(
@@ -32940,6 +32998,51 @@ def _compiled_inventory_arg_values(kb_inventory: dict[str, Any], signature: str,
     return {str(value).strip() for value in arg_values[offset].keys() if str(value).strip()}
 
 
+def _atom_inventory_blocked_query(query: str, *, kb_inventory: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(kb_inventory, dict):
+        return None
+    parsed_goals = parse_prolog_query_goals(str(query or "").strip())
+    if parsed_goals is None:
+        return None
+    absent: list[dict[str, Any]] = []
+    for predicate, args in parsed_goals:
+        signature = f"{predicate}/{len(args)}"
+        for index, arg in enumerate(args, start=1):
+            item = _compiled_atom_arg_value(str(arg or ""))
+            if not item or _is_prolog_variable(item) or _is_numeric_atom(item):
+                continue
+            allowed = _compiled_inventory_arg_values(kb_inventory, signature, index)
+            if allowed and item not in allowed:
+                absent.append(
+                    {
+                        "predicate": predicate,
+                        "signature": signature,
+                        "arg_index": index,
+                        "value": item,
+                    }
+                )
+    if not absent:
+        return None
+    return {
+        "query": str(query or "").strip(),
+        "result": {
+            "status": "blocked_by_atom_inventory",
+            "result_type": "blocked",
+            "num_rows": 0,
+            "rows": [],
+            "absent_constants": absent,
+            "reasoning_basis": {
+                "kind": "atom-library-query-grounding",
+                "policy": (
+                    "typed query constants must exist in compiled_predicate_inventory.arg_values "
+                    "for the same predicate argument slot"
+                ),
+            },
+        },
+        "derived_from_queries": [],
+    }
+
+
 def _status_from_event_type(value: str) -> str:
     normalized = str(value or "").strip().lower()
     return {
@@ -32986,6 +33089,7 @@ def run_evidence_bundle_plan_queries(
     sign_clean_strict: bool = False,
     typed_support_companions: bool = False,
     allow_relaxed_constant_fallback: bool = True,
+    atom_library_kb_inventory: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
     signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
@@ -33282,6 +33386,7 @@ def run_evidence_bundle_plan_queries(
         sign_clean_strict=sign_clean_strict,
         typed_support_companions=typed_support_companions,
         allow_relaxed_constant_fallback=allow_relaxed_constant_fallback,
+        atom_library_kb_inventory=atom_library_kb_inventory,
     ):
         item = dict(item)
         result = item.get("result", {})
