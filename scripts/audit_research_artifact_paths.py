@@ -24,6 +24,7 @@ DEFAULT_DOCS = [
     Path("docs/ACTIVE_RESEARCH_LANES.md"),
     Path("docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md"),
     Path("docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md"),
+    Path("docs/CURRENT_COMPILE_FACT_QA_STATUS.md"),
     Path("docs/PUBLIC_DOCS_GUIDE.md"),
 ]
 

@@ -1,0 +1,160 @@
+import json
+from pathlib import Path
+
+from scripts.summarize_current_compile_fact_qa_status import build_report, render_markdown
+
+
+def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    md = render_markdown(report)
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["cell_count"] == 2
+    assert report["summary"]["reference_count"] == 4
+    assert report["summary"]["exact_support_ge_2"] == 3
+    assert report["summary"]["per_run_rows"] == 12
+    assert report["summary"]["per_run_exact"] == 8
+    assert report["summary"]["source_warning_count"] == 1
+    assert "Support>=2: `3 / 4`" in md
+    assert "`sec_form_8k_skeleton_seed`" in md
+    assert "missing_bundle_manifest_recovered_from_compile_json" in md
+
+
+def test_summarize_current_compile_fact_qa_status_blocks_failed_source_audit(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path, source_status="fail")
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+
+    assert report["summary"]["status"] == "fail"
+    assert "source_audit_status_not_pass" in report["summary"]["blocking_reasons"]
+
+
+def test_summarize_current_compile_fact_qa_status_blocks_prose_dependent_rows(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path, prose_dependent_exact=1)
+    source_audit = _write_source_audit(tmp_path)
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+
+    assert report["summary"]["status"] == "fail"
+    assert any("prose_dependent_exact" in reason for reason in report["summary"]["blocking_reasons"])
+
+
+def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Path:
+    path = tmp_path / "manifest_run.json"
+    path.write_text(
+        json.dumps(
+            {
+                "summary": {"status": "pass"},
+                "cells": [
+                    _cell(
+                        cell_id="sec_form_8k_skeleton_seed",
+                        fixture_id="sec_form_8k_skeleton_v1",
+                        reference_count=2,
+                        exact_support_ge_2=2,
+                        verdict_summary={
+                            "run1.json": {"exact": 2},
+                            "run2.json": {"exact": 1, "partial": 1},
+                            "run3.json": {"exact": 2},
+                        },
+                        prose_dependent_exact=prose_dependent_exact,
+                    ),
+                    _cell(
+                        cell_id="osha_incident_transfer_001",
+                        fixture_id="osha_incident_transfer_001",
+                        reference_count=2,
+                        exact_support_ge_2=1,
+                        verdict_summary={
+                            "run1.json": {"exact": 1, "miss": 1},
+                            "run2.json": {"exact": 1, "miss": 1},
+                            "run3.json": {"exact": 1, "miss": 1},
+                        },
+                        prose_dependent_exact=0,
+                    ),
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_source_audit(tmp_path: Path, *, source_status: str = "pass") -> Path:
+    path = tmp_path / "source_audit.json"
+    path.write_text(
+        json.dumps(
+            {
+                "summary": {"status": source_status},
+                "cells": [
+                    _source_cell(
+                        "sec_form_8k_skeleton_seed",
+                        warning="sec_form_8k_skeleton_seed:missing_bundle_manifest_recovered_from_compile_json",
+                    ),
+                    _source_cell("osha_incident_transfer_001"),
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _cell(
+    *,
+    cell_id: str,
+    fixture_id: str,
+    reference_count: int,
+    exact_support_ge_2: int,
+    verdict_summary: dict,
+    prose_dependent_exact: int,
+) -> dict:
+    row_count = sum(sum(counts.values()) for counts in verdict_summary.values())
+    exact = sum(int(counts.get("exact") or 0) for counts in verdict_summary.values())
+    return {
+        "id": cell_id,
+        "fixture_id": fixture_id,
+        "description": "test cell",
+        "support_summary_by_fixture": {
+            fixture_id: {
+                "reference_count": reference_count,
+                "exact_support_ge_2": exact_support_ge_2,
+                "runs_seen": 3,
+            }
+        },
+        "redaction_summary": {
+            "status": "pass",
+            "row_count": row_count,
+            "product_exact": exact,
+            "prose_dependent_exact": prose_dependent_exact,
+        },
+        "typed_plan_summary": {
+            "status": "pass",
+            "registered_typed_plan_replayed_exact": exact,
+            "unregistered_plan_exact_rows": 0,
+        },
+        "verdict_summary_by_file": verdict_summary,
+    }
+
+
+def _source_cell(cell_id: str, *, warning: str = "") -> dict:
+    warnings = [warning] if warning else []
+    return {
+        "id": cell_id,
+        "source_root": "C:\\prethinker_tmp_archive\\example",
+        "bundle_manifest_status": "present",
+        "run_count": 3,
+        "warnings": warnings,
+        "effective_settings": {
+            "backend": "lmstudio",
+            "model": "qwen/qwen3.6-35b-a3b",
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "num_ctx": 65536,
+            "support_threshold": 2,
+            "matcher": "constant_slot",
+            "quantization": "Q4_K_M",
+        },
+    }

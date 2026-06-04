@@ -13,6 +13,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "domain_predicate_schema",
         "compile_fact_qa_manifest_sources",
         "compile_fact_qa_manifest",
+        "current_compile_fact_qa_status",
     ]
 
 

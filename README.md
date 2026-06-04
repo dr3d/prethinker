@@ -37,6 +37,7 @@ propagation = visible recomputation, not hidden belief
 - [Closed domain predicate packs technical note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
 - [Domain predicate schema process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a document family becomes a customizable governed predicate pack.
 - [Domain pack research evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current evidence for the closed-domain transfer thesis.
+- [Current compile-fact QA status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with source/settings provenance and replay gates.
 - [Domain pack status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for the active closed predicate packs.
 - [Domain accountability status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
 - [Domain predicate proposal status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated review queue for candidate predicate surfaces before they become claims.
@@ -117,6 +118,7 @@ The short version:
 - [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - current work map and reset readiness.
 - [docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
 - [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current artifact ledger and family-by-family evidence.
+- [docs/CURRENT_COMPILE_FACT_QA_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with replay gates and provenance.
 - [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
 - [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission/accountability coverage for active closed predicate packs.
 - [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
@@ -158,6 +160,7 @@ Deterministic compile-fact QA bundles can be regenerated in-repo from
 ```powershell
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
+python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json
 
 python scripts\build_compile_fact_judged_qa.py --out-dir tmp\judged_qa_probe `
   --domain-lens-bundle fixture_id=tmp\domain_lens_bundle\bundle_root

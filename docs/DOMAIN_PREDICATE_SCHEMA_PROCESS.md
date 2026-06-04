@@ -53,17 +53,18 @@ datasets/compile_micro_fixtures/fda_warning_letter_insanitary_001/source.md
 datasets/compile_micro_fixtures/fda_warning_letter_insanitary_001/expected_facts.pl
 datasets/compile_micro_fixtures/fda_warning_letter_insanitary_001/forbidden_facts.pl
 src/carrier_contract_registry.py
-docs/FIXTURE_BANK_PREDICATE_PACK_WORKSHEET.md
 docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md
+docs/CURRENT_COMPILE_FACT_QA_STATUS.md
+docs/DOMAIN_PACK_STATUS.md
 ```
 
 The registry describes the domain vocabulary. The micro-fixture describes the
 source pressure. Expected and forbidden facts make the contract concrete. The
 carrier registry gives deterministic tooling one place to inspect signatures,
-value domains, and contract guidance. Current experiment summaries live in
-`docs/FIXTURE_BANK_PREDICATE_PACK_WORKSHEET.md` and
-`docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`; long run diaries belong in
-`C:\prethinker_tmp_archive`, not the public docs tree.
+value domains, and contract guidance. Current public summaries live in
+`docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`,
+`docs/CURRENT_COMPILE_FACT_QA_STATUS.md`, and generated status pages. Long run
+diaries belong in `C:\prethinker_tmp_archive`, not the public docs tree.
 
 ## Lens-Scoped Predicate Offering
 

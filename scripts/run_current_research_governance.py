@@ -114,6 +114,21 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(out_root / "compile_fact_qa_manifest"),
             ],
         },
+        {
+            "id": "current_compile_fact_qa_status",
+            "command": [
+                python,
+                "scripts/summarize_current_compile_fact_qa_status.py",
+                "--manifest-run",
+                str(out_root / "compile_fact_qa_manifest" / "summary.json"),
+                "--source-audit",
+                str(report_root / "compile_fact_qa_manifest_sources.json"),
+                "--out-json",
+                str(report_root / "current_compile_fact_qa_status.json"),
+                "--out-md",
+                str(report_root / "current_compile_fact_qa_status.md"),
+            ],
+        },
     ]
     if include_pytest:
         commands.append(
