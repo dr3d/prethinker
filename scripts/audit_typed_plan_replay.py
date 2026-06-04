@@ -84,7 +84,7 @@ def main() -> int:
         args.out_md.write_text(render_markdown(report), encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    blocked = bool(report["summary"].get("runtime_load_errors")) or report["summary"]["blocked_source_record_plan_rows"] > 0
+    blocked = bool(report["summary"]["blocking_reasons"])
     return 0 if args.exit_zero or not blocked else 1
 
 
@@ -152,6 +152,14 @@ def build_report(
     unregistered_plan_rows = sum(
         1 for row in rows if int(row.get("unregistered_query_signature_count", 0) or 0) > 0
     )
+    blocking_reasons = _blocking_reasons(
+        qa_file_count=len(qa_files),
+        product_exact=product_exact,
+        registered_plan_replayed=registered_plan_replayed,
+        blocked_source_record_plan_rows=replay_counts.get("blocked_source_record_query", 0),
+        unregistered_plan_exact_rows=unregistered_plan_rows,
+        runtime_load_errors=runtime_load_errors,
+    )
     summary = {
         "row_count": total_rows,
         "product_exact": product_exact,
@@ -171,6 +179,8 @@ def build_report(
         "verdict_counts": dict(sorted(verdict_counts.items())),
         "replay_status_counts": dict(sorted(replay_counts.items())),
         "runtime_load_errors": runtime_load_errors,
+        "blocking_reasons": blocking_reasons,
+        "status": "blocked" if blocking_reasons else "pass",
     }
     return {
         "schema_version": "typed_plan_replay_audit_v1",
@@ -183,6 +193,31 @@ def build_report(
         "by_fixture": {fixture: dict(counts) for fixture, counts in sorted(by_fixture.items())},
         "rows": rows,
     }
+
+
+def _blocking_reasons(
+    *,
+    qa_file_count: int,
+    product_exact: int,
+    registered_plan_replayed: int,
+    blocked_source_record_plan_rows: int,
+    unregistered_plan_exact_rows: int,
+    runtime_load_errors: dict[str, list[str]],
+) -> list[str]:
+    reasons: list[str] = []
+    if qa_file_count <= 0:
+        reasons.append("no_qa_files")
+    if product_exact <= 0:
+        reasons.append("no_product_exact_rows")
+    if blocked_source_record_plan_rows > 0:
+        reasons.append("blocked_source_record_plan_rows")
+    if unregistered_plan_exact_rows > 0:
+        reasons.append("unregistered_plan_exact_rows")
+    if registered_plan_replayed < product_exact:
+        reasons.append("product_exact_without_registered_typed_plan_replay")
+    if runtime_load_errors:
+        reasons.append("runtime_load_errors")
+    return reasons
 
 
 def _fixture_hint(*, data: dict[str, Any], qa_file: Path) -> str:
@@ -487,12 +522,21 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Product-exact replay survival: `{summary['product_exact_plan_replay_rate']:.2%}`",
         f"- Blocked source-record plan rows: `{summary['blocked_source_record_plan_rows']}`",
         f"- Replay statuses: `{summary['replay_status_counts']}`",
-        "",
-        "## By Fixture",
-        "",
-        "| Fixture | All queries success | Partial | None | Blocked source-record | Missing compile |",
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
+        f"- Status: `{summary['status']}`",
     ]
+    if summary["blocking_reasons"]:
+        lines.extend(["", "## Blocking Reasons", ""])
+        for reason in summary["blocking_reasons"]:
+            lines.append(f"- `{reason}`")
+    lines.extend(
+        [
+            "",
+            "## By Fixture",
+            "",
+            "| Fixture | All queries success | Partial | None | Blocked source-record | Missing compile |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
     for fixture, counts in report["by_fixture"].items():
         lines.append(
             "| `{}` | {} | {} | {} | {} | {} |".format(

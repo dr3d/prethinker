@@ -10,13 +10,13 @@ def test_typed_plan_replay_executes_product_exact_queries_over_typed_atoms(tmp_p
     compile_path.write_text(
         json.dumps(
             {
-                "source_compile": {
-                    "facts": [
-                        "case_identifier(case_a, no_2025_1705).",
-                        "source_record_text_atom(src_line_1, no_2025_1705).",
-                    ],
-                    "rules": [],
-                }
+                    "source_compile": {
+                        "facts": [
+                            "party_role_context(case_a, union_one, petitioner, direct).",
+                            "source_record_text_atom(src_line_1, union_one).",
+                        ],
+                        "rules": [],
+                    }
             }
         ),
         encoding="utf-8",
@@ -27,13 +27,13 @@ def test_typed_plan_replay_executes_product_exact_queries_over_typed_atoms(tmp_p
         json.dumps(
             {
                 "rows": [
-                    {
-                        "fixture": "fixture_a",
-                        "id": "q001",
-                        "reference_answer": "no_2025_1705",
-                        "reference_judge": {"verdict": "exact"},
-                        "queries": ["case_identifier(Case, Docket)."],
-                    }
+                        {
+                            "fixture": "fixture_a",
+                            "id": "q001",
+                            "reference_answer": "Union One",
+                            "reference_judge": {"verdict": "exact"},
+                            "queries": ["party_role_context(Context, Petitioner, petitioner, Source)."],
+                        }
                 ]
             }
         ),
@@ -44,6 +44,7 @@ def test_typed_plan_replay_executes_product_exact_queries_over_typed_atoms(tmp_p
 
     assert report["summary"]["product_exact"] == 1
     assert report["summary"]["typed_plan_replayed_exact"] == 1
+    assert report["summary"]["status"] == "pass"
     assert report["rows"][0]["status"] == "all_queries_success"
     assert report["rows"][0]["typed_fact_count"] == 1
 
@@ -77,7 +78,34 @@ def test_typed_plan_replay_blocks_source_record_query_plans(tmp_path):
 
     assert report["summary"]["typed_plan_replayed_exact"] == 0
     assert report["summary"]["blocked_source_record_plan_rows"] == 1
+    assert "blocked_source_record_plan_rows" in report["summary"]["blocking_reasons"]
     assert report["rows"][0]["status"] == "blocked_source_record_query"
+
+
+def test_typed_plan_replay_blocks_when_no_product_exact_rows(tmp_path):
+    qa_path = tmp_path / "qa.json"
+    qa_path.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "fixture": "fixture_a",
+                        "id": "q001",
+                        "reference_answer": "no_2025_1705",
+                        "reference_judge": {"verdict": "miss"},
+                        "queries": ["case_identifier(Case, Docket)."],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(qa_files=[qa_path])
+
+    assert report["summary"]["product_exact"] == 0
+    assert report["summary"]["blocking_reasons"] == ["no_product_exact_rows"]
+    assert report["summary"]["status"] == "blocked"
 
 
 def test_typed_plan_replay_excludes_prose_like_compile_atoms(tmp_path):
