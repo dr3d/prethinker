@@ -120,6 +120,25 @@ to be rescued by a retired or non-clean compatibility path. That does not mean
 the LLM was absent. It means the deterministic summary found no compatibility
 rescue pressure.
 
+## Reference Judge Null Controls
+
+Any LLM-judged QA exact-rate metric must pass adversarial null controls before
+it can become claim-bearing:
+
+```text
+empty_evidence:
+  true reference answer, no query evidence
+wrong_reference:
+  redacted typed evidence, different same-fixture reference answer
+```
+
+The wrong-reference control must also neutralize the original question text.
+Otherwise the judge can follow the original question, bless the original answer
+path, and ignore that the reference answer was swapped. The 2026-06-04 FDA v2
+diagnostic exposed exactly that failure: sample3 produced one exact null verdict
+before the control question was neutralized, and zero exact null verdicts after
+the harness fix.
+
 Older internal JSON keys may still contain the word `helper` for backward
 compatibility with archived comparison artifacts. New reports and product prose
 should prefer `support surface`, `query-only support`, or `compatibility row`

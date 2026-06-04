@@ -142,10 +142,7 @@ def build_report(
             row=row,
         )
         redacted_row, _redaction = _redacted_row(row, unclassified_fields=unclassified_fields)
-        wrong_row = {
-            **redacted_row,
-            "reference_answer": wrong_reference,
-        }
+        wrong_row = _wrong_reference_control_row(redacted_row, wrong_reference=wrong_reference)
         wrong_judge = judge_reference_answer(row=wrong_row, config=config, sign_clean_strict=True)
         controls.append(
             _control_row(
@@ -203,6 +200,22 @@ def _wrong_reference_for_row(*, fixture_rows: list[dict[str, Any]], row: dict[st
         if candidate_id != own_id and candidate_reference and candidate_reference != own_reference:
             return candidate_reference
     return "__null_control_reference_should_not_be_supported__"
+
+
+def _wrong_reference_control_row(row: dict[str, Any], *, wrong_reference: str) -> dict[str, Any]:
+    control_question = (
+        "NULL CONTROL: ignore any original QA question. Judge only whether the "
+        "query_results support the swapped reference_answer exactly."
+    )
+    return {
+        **row,
+        "utterance": control_question,
+        "question": control_question,
+        "model_decision": "",
+        "projected_decision": "",
+        "reference_answer": wrong_reference,
+        "null_control": "wrong_reference",
+    }
 
 
 def _control_row(

@@ -538,9 +538,30 @@ script: scripts/audit_reference_judge_null_controls.py
 controls:
   empty_evidence: true reference answer with no evidence
   wrong_reference: redacted typed evidence with a different same-fixture answer
+  wrong_reference question text is replaced with a neutral null-control
+    instruction, so the judge cannot follow the original question while
+    ignoring the swapped reference
 blocking condition:
   any exact verdict in either null control
 ```
+
+2026-06-04 FDA v2 local-Qwen diagnostic:
+
+```text
+pre-fix sample3:
+  6 product-exact rows sampled, 12 controls, 1 exact null verdict
+  root: C:\prethinker_tmp_archive\reference_judge_null_controls_20260604\sample3_pre_harness_fix_blocked
+fix:
+  wrong_reference controls now neutralize the original question/utterance and
+  blank model/projected decision text before calling the reference judge
+post-fix sample3:
+  6 product-exact rows sampled, 12 controls, 0 exact null verdicts
+  root: C:\prethinker_tmp_archive\reference_judge_null_controls_20260604\sample3_post_harness_fix_pass
+```
+
+This is a harness-governance result, not a new FDA score. It shows the
+null-control can catch a judge-facing question leak, and that the audit itself
+must be caged against the same scoreboard pressure it is meant to detect.
 
 Oracle changes also remain governed by source-only review: a correction is not
 claim-bearing unless a reviewer who did not see the model output can defend it
