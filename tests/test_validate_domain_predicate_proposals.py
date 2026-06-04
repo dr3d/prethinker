@@ -2,7 +2,7 @@ import copy
 import json
 from pathlib import Path
 
-from scripts.validate_domain_predicate_proposals import TEMPLATE, build_report
+from scripts.validate_domain_predicate_proposals import TEMPLATE, build_report, render_markdown
 
 
 def _write(path: Path, payload: dict) -> Path:
@@ -89,3 +89,14 @@ def test_promoted_domain_predicate_proposal_must_be_registered_and_lens_allowed(
     assert "promoted_signature_not_registered" in report["proposals"][0]["errors"]
     assert "promoted_signature_not_in_domain_profile" in report["proposals"][0]["errors"]
     assert "promoted_signature_not_in_lens_owner_allowlist" in report["proposals"][0]["errors"]
+
+
+def test_domain_predicate_proposal_status_report_disclaims_promotion(tmp_path: Path) -> None:
+    path = _write(tmp_path / "proposal.json", _valid_payload())
+    report = build_report([path])
+
+    rendered = render_markdown(report)
+
+    assert "validates proposal shape only" in rendered
+    assert "not a" in rendered
+    assert "promoted domain-pack claim" in rendered

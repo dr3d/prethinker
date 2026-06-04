@@ -166,6 +166,10 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Domain Predicate Proposal Validation",
         "",
+        "This report validates proposal shape only. A passing proposal is not a",
+        "promoted domain-pack claim until its transfer plan succeeds under the",
+        "claim-bearing gates.",
+        "",
         f"- Proposals: `{summary['proposal_count']}`",
         f"- Blocking errors: `{summary['blocking_errors']}`",
         f"- Warnings: `{summary['warning_count']}`",

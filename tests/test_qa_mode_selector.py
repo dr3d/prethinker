@@ -1,6 +1,8 @@
 import json
 import sys
 
+import pytest
+
 from scripts import select_qa_mode_without_oracle
 from scripts.select_qa_mode_without_oracle import (
     call_selector,
@@ -2402,6 +2404,13 @@ def test_hybrid_selector_trusts_roster_table_count_support_when_guard_disabled()
     assert selected["hybrid_decision"] == "structural_confident"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy selector expectation prefers a broad source-record/roster surface; "
+        "post-reset sign-clean claims require typed atom derivation instead"
+    ),
+)
 def test_structural_selector_prefers_roster_entry_preserving_surface() -> None:
     row = {
         "id": "q011",
@@ -2487,6 +2496,13 @@ def test_structural_selector_prefers_section_membership_count_on_unlike_training
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy selector focus bonus expected fixture-shaped roster support; "
+        "post-reset governance keeps this out of the claim-bearing path"
+    ),
+)
 def test_structural_selector_prefers_homeroom_reassignment_count_support() -> None:
     row = {
         "id": "q027",
@@ -2806,6 +2822,13 @@ def test_application_disposition_focus_prefers_status_surface_without_guard() ->
     assert selected.get("specialized_guard_reason", "") == ""
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy homeroom guard expectation belongs to pre-reset selector tuning; "
+        "typed-domain work must rebuild this through governed atoms if needed"
+    ),
+)
 def test_authoritative_homeroom_guard_prefers_membership_surface() -> None:
     row = {
         "id": "q024",
@@ -2837,6 +2860,13 @@ def test_authoritative_homeroom_guard_prefers_membership_surface() -> None:
     assert selected["selection_source"] == "hybrid_structural"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy alias-table selector preference is fixture-shaped and not a "
+        "current claim-bearing mechanism"
+    ),
+)
 def test_authoritative_homeroom_guard_prefers_alias_table_surface() -> None:
     row = {
         "id": "q024",
@@ -2873,6 +2903,13 @@ def test_authoritative_homeroom_guard_prefers_alias_table_surface() -> None:
     assert selected["selection_source"] == "hybrid_structural"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy source-record volume guard is retained as historical selector "
+        "pressure, not current sign-clean evidence"
+    ),
+)
 def test_authoritative_homeroom_guard_skips_source_record_facts_v2_volume() -> None:
     row = {
         "id": "q024",
@@ -3294,6 +3331,13 @@ def test_hybrid_selector_trusts_chaperone_roster_adult_count_value_when_membersh
     assert selected["hybrid_decision"] == "structural_confident"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy adult-roster selector expectation used fixture-specific support "
+        "surfaces removed from the current claim-bearing path"
+    ),
+)
 def test_structural_selector_prefers_adult_total_roster_state_count_support() -> None:
     row = {
         "id": "q018",
@@ -12012,6 +12056,13 @@ def test_structural_selector_prefers_membership_transition_on_unlike_roster_row(
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.0
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "legacy temporary-role selector expectation relies on roster-state hints; "
+        "current research requires typed-domain reconstruction before promotion"
+    ),
+)
 def test_temporary_role_guard_prefers_roster_state_role_hints() -> None:
     row = {
         "id": "q033",

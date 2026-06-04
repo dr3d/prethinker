@@ -209,6 +209,7 @@ it as a proposal and validate the proposal shape:
 ```text
 python scripts\validate_domain_predicate_proposals.py --print-template
 python scripts\validate_domain_predicate_proposals.py --proposal PATH_TO_PROPOSAL.json
+python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json
 ```
 
 The proposal validator is intentionally stricter than ordinary brainstorming.

@@ -1,0 +1,125 @@
+{
+  "schema": "domain_predicate_proposal_v1",
+  "proposal_id": "fda_warning_letter_response_assessment_item_v1",
+  "status": "candidate",
+  "domain_profile": "fda_warning_letter_v1",
+  "bounded_document_family": "FDA warning letters with numbered CGMP violation items and firm-response critiques.",
+  "candidate_signature": "fda_response_assessment_item/6",
+  "lens_owner": "response_assessment",
+  "allowed_lenses": [
+    "response_assessment"
+  ],
+  "recurring_anatomy": [
+    "FDA states whether the firm's response or corrective action is adequate for a numbered CGMP item.",
+    "FDA states that supporting documentation, protocols, records, or validation evidence were not provided.",
+    "FDA states that a discrepancy or contamination event was not investigated or not thoroughly investigated."
+  ],
+  "answer_classes": [
+    "response_assessment",
+    "corrective_action_evaluation",
+    "fda_warning_letter"
+  ],
+  "argument_roles": [
+    {
+      "name": "assessment_id",
+      "purpose": "Stable local id for one response-assessment item.",
+      "source_coordinate": false
+    },
+    {
+      "name": "violation_id",
+      "purpose": "Existing local violation_N atom from the numbered CGMP item map.",
+      "source_coordinate": false
+    },
+    {
+      "name": "cgmps_citation",
+      "purpose": "Compact CGMP citation family addressed by the response critique.",
+      "source_coordinate": false
+    },
+    {
+      "name": "assessment_kind",
+      "purpose": "Closed compact judgment about the response or corrective action.",
+      "source_coordinate": false
+    },
+    {
+      "name": "assessment_scope",
+      "purpose": "Closed compact purpose of the assessment.",
+      "source_coordinate": false
+    },
+    {
+      "name": "source_or_scope",
+      "purpose": "Source coordinate or governed scope atom.",
+      "source_coordinate": true
+    }
+  ],
+  "value_domains": {
+    "cgmps_citation": [
+      "cfr_21_211_68_b",
+      "cfr_21_211_113_b",
+      "cfr_21_211_42_c_10_iv",
+      "cfr_21_211_42_c_10_v",
+      "cfr_21_211_192",
+      "cfr_21_211_100_a",
+      "cfr_21_211_110_a"
+    ],
+    "assessment_kind": [
+      "response_inadequate",
+      "unable_to_evaluate",
+      "premature_capa_closure",
+      "not_investigated",
+      "documentation_not_provided",
+      "corrective_action_inadequate"
+    ],
+    "assessment_scope": [
+      "corrective_action_evaluation",
+      "response_review"
+    ]
+  },
+  "positive_examples": [
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_002",
+      "fact": "fda_response_assessment_item(assessment_v1_doc_gap, violation_1, cfr_21_211_113_b, documentation_not_provided, corrective_action_evaluation, src_a)."
+    },
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_002",
+      "fact": "fda_response_assessment_item(assessment_v2_investigation, violation_2, cfr_21_211_192, not_investigated, corrective_action_evaluation, src_b)."
+    }
+  ],
+  "forbidden_examples": [
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_002",
+      "fact": "fda_response_assessment_item(bad_mismatch, violation_2, cfr_21_211_113_b, not_investigated, corrective_action_evaluation, src_bad)."
+    },
+    {
+      "fixture_id": "fda_warning_letter_observation_transfer_003",
+      "fact": "fda_response_assessment_item(bad_quote, violation_1, cfr_21_211_113_b, response_inadequate, response_review, full_response_paragraph)."
+    }
+  ],
+  "unlike_transfer_plan": {
+    "minimum_fixtures": 2,
+    "n": 3,
+    "support_threshold": 2,
+    "heldout_policy": "unlike FDA warning letters not used to shape the response-assessment carrier or value domains"
+  },
+  "promotion_gates": [
+    "n_ge_3",
+    "support_ge_2",
+    "zero_forbidden",
+    "atom_shape",
+    "lens_scope",
+    "value_domain",
+    "unlike_transfer"
+  ],
+  "anti_leak_guards": [
+    "no_source_prose",
+    "no_query_text_routing",
+    "no_fixture_vocabulary",
+    "no_answer_key_influence",
+    "atom_shape_gate"
+  ],
+  "abstention_boundary": [
+    "Do not emit when the critique cannot be attached to an existing typed violation_N item and matching CGMP citation family.",
+    "Do not emit when the needed value is a source-specific missing-document title, organism name, firm's explanation, or critique sentence.",
+    "Do not use this carrier to solve wrapper-role semantics, violation category projection, or open violation-detail value questions.",
+    "Do not promote a score lift unless final projected rows survive redaction replay and typed-plan replay."
+  ]
+}

@@ -27,6 +27,7 @@ The current front-door documents are:
 - `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
 - `docs/DOMAIN_PACK_STATUS.md`
 - `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`
+- `docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md`
 - `docs/ACTIVE_RESEARCH_LANES.md`
 - `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
 - `docs/PUBLIC_DOCS_GUIDE.md`
@@ -184,6 +185,16 @@ The repo should not currently claim:
 
 ## Verification Commands
 
+Current full-suite result on 2026-06-03:
+
+```text
+2351 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
+```
+
+The strict xfails are legacy MCP/QA selector expectations from before the
+sign-clean reset. They are intentionally not claim-bearing; if one XPASSes,
+pytest fails and forces review.
+
 Common local checks:
 
 ```powershell
@@ -192,7 +203,7 @@ pytest -q
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
-python scripts\validate_domain_predicate_proposals.py
+python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json
 ```
 
 Before a public/docs cleanup commit, also run stale-claim greps over
