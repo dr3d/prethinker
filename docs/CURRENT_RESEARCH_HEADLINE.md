@@ -64,15 +64,16 @@ SEC Form 8-K skeleton pack
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary.
   latest governance artifact:
-    C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604\current_research_governance_unexpected_20260604
+    C:\prethinker_tmp_archive\sec_identifier_norm_20260604\gov_r2
     13 governance checks passed, including `sec_value_axis_integrity` and
     `compile_fact_qa_exclusions`; the standing manifest now prints
-    same-signature unexpected support (`7` rows at support>=2) as a precision
-    diagnostic. The SEC value-axis audit checked 29 expected/forbidden
-    item/exhibit/treatment facts with 0 issues, and the exclusion ledger
-    accounts for 15 associated domain fixtures not in the standing manifest.
-    This refresh is colder provenance plus precision visibility, not a support
-    increase.
+    same-signature unexpected support (`5` rows at support>=2 across all
+    standing cells) as a precision diagnostic. A typed SEC identifier-value
+    normalization pass raised only per-run exact support in transfer_002
+    (commission-file/EIN punctuation loss), not support>=2. The current
+    standing compile-fact QA status is 119/138 expected facts at support>=2
+    and 337/414 deterministic per-run exact rows, with 0 prose-dependent exact
+    rows and 0 unregistered exact typed plans.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -109,13 +110,18 @@ NTSB investigation pack
     transfer more cleanly than casualty, safety-action, and findings substance
 
 OSHA accident/inspection pack
-  seed micro: 18 / 20 support>=2 after the high-arity registry intake fix
-  first unlike transfer: 12 / 15 support>=2
+  seed micro: 20 / 20 support>=2 after the high-arity registry intake fix
+    and current related-activity blank-flag contract
+  first unlike transfer: 15 / 15 support>=2
   forbidden support: 0 in both measured cells
   governance: registered signatures, atom-shape, and lens-scope clean
+  caveat: seed emits one repeated source-true FTA penalty extra, retained as
+    an unexpected precision/adjudication target rather than folded into the
+    oracle
   claim: fourth-family corroboration; accident, employee injury, violation
-    counts, penalties, item, and status rows transfer more cleanly than
-    wrapper/establishment rows and blank-value related activity
+    counts, penalties, item, status, and related-activity rows transfer in
+    the standing cells, while larger long-table and mixed-document diagnostics
+    remain boundary evidence
 ```
 
 ## Current Verdict

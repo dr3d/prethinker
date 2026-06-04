@@ -335,9 +335,9 @@ shape with tabular counts, penalties, and incident skeleton rows.
 ```text
 profile: datasets/domain_profiles/osha_incident_v1/ontology_registry.json
 seed artifact:
-  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix
+  C:\prethinker_tmp_archive\osha_seed_current_contract_rerun_20260604\osha-seed-current-contract-r1
 transfer artifact:
-  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local
+  C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1
 diagnostic artifacts:
   C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-002-r1-local-long-table-boundary
   C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore
@@ -346,12 +346,15 @@ diagnostic artifacts:
 Current OSHA measurements:
 
 ```text
-seed: 18 / 20 support>=2, 0 / 8 supported forbidden
-transfer_001: 12 / 15 support>=2, 0 / 8 supported forbidden
+seed: 20 / 20 support>=2, 0 / 8 supported forbidden
+transfer_001: 15 / 15 support>=2, 0 / 8 supported forbidden
 transfer_002 diagnostic: 18 / 53 support>=2, 0 / 8 supported forbidden
 transfer_003 diagnostic: 2 / 21 support>=2, 0 / 10 supported forbidden
   after the typed accident-omission contradiction guard
 atom-shape / registered-signature / lens-scope blockers: 0
+standing manifest note: the seed emits one repeated source-true
+  `osha_penalty_amount(..., fta, total, usd_0, ...)` extra; it is carried as
+  a visible precision/adjudication target, not folded into the oracle
 ```
 
 The seed run exposed and fixed a general harness bug: profile-registry lens

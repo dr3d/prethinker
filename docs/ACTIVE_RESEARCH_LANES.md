@@ -354,26 +354,27 @@ Current OSHA seed status:
 
 ```text
 fixture: osha_incident_domain_v1
-artifact root: C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix
+artifact root: C:\prethinker_tmp_archive\osha_seed_current_contract_rerun_20260604\osha-seed-current-contract-r1
 local-Qwen lens bundle: N=3, support>=2
-supported expected facts: 18 / 20 using constant-slot support report
+supported expected facts: 20 / 20 using constant-slot support report
 supported forbidden facts: 0 / 8
 atom-shape/signature/lens-scope blockers: 0
-boundary rows: inspection wrapper absent; establishment row 1/3
+standing manifest note: one repeated source-true
+  osha_penalty_amount(..., fta, total, usd_0, ...) extra remains visible as
+  an unexpected precision/adjudication target
 ```
 
 The first unlike retained OSHA transfer also ran under the same local settings:
 
 ```text
 fixture: osha_incident_transfer_001
-artifact root: C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local
+artifact root: C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1
 local-Qwen lens bundle: N=3, support>=2
-supported expected facts: 12 / 15
+supported expected facts: 15 / 15
 supported forbidden facts: 0 / 8
 atom-shape/signature/lens-scope blockers: 0
-per-run union facts: 13, 3, 16
-boundary rows: inspection wrapper absent, establishment 1/3,
-  related activity emits no/no where oracle expected not_stated/not_stated
+boundary note: blank Safety/Health related-activity cells are now constrained
+  to not_stated rather than no
 ```
 
 Two additional retained OSHA probes tried to raise OSHA to the SEC transfer bar.
