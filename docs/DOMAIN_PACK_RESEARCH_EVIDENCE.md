@@ -323,6 +323,14 @@ transfer_003 stability artifact stayed at `12/13` with `0/10` supported
 forbidden; unexpected same-signature facts dropped from 2 to 0. This is
 governance cleanup, not a support lift.
 
+The omission audit has also been tightened for FDA signatory omissions and
+NTSB finding omissions: if a real `fda_correspondence_party/5` signatory row or
+a real `ntsb_finding/5` row is emitted for the same letter/occurrence, the
+matching `domain_omission/5` absence row blocks the claim. These checks are
+gate-only because typed facts alone cannot safely choose which side of a
+substance contradiction is correct. They are not support lifts and should not
+be cited as new transfer cells.
+
 The repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells was then rescored with source-faithful axis fixes and a
 typed-only SEC exchange alias reducer:
@@ -858,6 +866,8 @@ SEC interventions that count as research mechanisms:
   contradictions by preserving omissions over all-not-stated dummy signatory
   rows while dropping omission rows only when a real emitted `sec_signatory/5`
   row exists for the same filing.
+- audit-only omission contradiction gates for FDA signatory and NTSB finding
+  rows; these block impossible typed states but do not auto-repair them.
 - fenced event-substance contract registration: `sec_material_event/6` is
   available for explicit experiments but is not offered by the promoted SEC
   skeleton profile. The first temporary seed probe kept skeleton support at

@@ -97,6 +97,9 @@ micro-fixtures each support the expected `domain_omission/5` row at
 N=3/support>=2 while the corresponding forbidden carrier row stays unsupported;
 the retained artifact root is
 `C:\prethinker_tmp_archive\omission_accountability_live_20260604`.
+The audit gate also blocks same-subject typed contradictions for FDA
+signatory omissions and NTSB finding omissions. Those are claim-protection
+guards, not promoted transfer cells or support lifts.
 
 FDA warning letters remain the first wedge, but they are not "done". The
 current-gate replay picture is stricter than the older worksheet notes:
