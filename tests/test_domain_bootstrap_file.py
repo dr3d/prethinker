@@ -117,6 +117,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_ntsb_report_omission_contradiction_integrity,
     _apply_ntsb_timestamp_atom_reduction,
     _apply_osha_accident_omission_contradiction_integrity,
+    _apply_osha_inspection_omission_contradiction_integrity,
     _apply_fda_facility_subject_convergence,
     _apply_fda_lot_identifier_atom_reduction,
     _apply_fda_no_fei_omission_reduction,
@@ -8768,6 +8769,73 @@ def test_osha_accident_omission_contradiction_integrity_keeps_different_source_s
         "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, source_accident_report).",
         "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, source_accident_report).",
         "domain_omission(accident_1, 'osha_accident/7', none_found, accident_summary_not_stated, source_inspection_detail).",
+    ]
+
+
+def test_osha_inspection_omission_contradiction_integrity_keeps_omission_over_dummy_inspection() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_missing_inspection_id).",
+            "osha_inspection(inspection_1, not_stated, establishment_1, office_1, v_2026_01_01, open, src_missing_inspection_id).",
+            "osha_inspection(inspection_2, not_stated, establishment_2, office_1, v_2026_01_02, open, src_other).",
+        ]
+    }
+
+    report = _apply_osha_inspection_omission_contradiction_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 1,
+        "dropped_facts": [
+            "osha_inspection(inspection_1, not_stated, establishment_1, office_1, v_2026_01_01, open, src_missing_inspection_id)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_missing_inspection_id).",
+        "osha_inspection(inspection_2, not_stated, establishment_2, office_1, v_2026_01_02, open, src_other).",
+    ]
+    policy = source_compile["deterministic_osha_inspection_omission_contradiction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_osha_inspection_omission_contradiction_integrity_keeps_real_inspection_over_omission() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_inspection).",
+            "osha_inspection(inspection_1, inspection_1234567, establishment_1, office_1, v_2026_01_01, open, src_inspection).",
+        ]
+    }
+
+    report = _apply_osha_inspection_omission_contradiction_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 1,
+        "dropped_facts": [
+            "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_inspection)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "osha_inspection(inspection_1, inspection_1234567, establishment_1, office_1, v_2026_01_01, open, src_inspection).",
+    ]
+    policy = source_compile["deterministic_osha_inspection_omission_contradiction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_osha_inspection_omission_contradiction_integrity_keeps_different_source_scope() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_missing_inspection_id).",
+            "osha_inspection(inspection_1, inspection_1234567, establishment_1, office_1, v_2026_01_01, open, src_inspection).",
+        ]
+    }
+
+    report = _apply_osha_inspection_omission_contradiction_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_missing_inspection_id).",
+        "osha_inspection(inspection_1, inspection_1234567, establishment_1, office_1, v_2026_01_01, open, src_inspection).",
     ]
 
 

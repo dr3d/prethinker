@@ -224,6 +224,64 @@ def test_domain_omission_accountability_allows_osha_accident_omission_different_
     assert report["summary"]["blocker_count"] == 0
 
 
+def test_domain_omission_accountability_blocks_osha_inspection_dummy_with_omission(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_missing_inspection_id).",
+                "osha_inspection(inspection_1, not_stated, establishment_1, office_1, v_2026_01_01, open, src_missing_inspection_id).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "osha_inspection/7"
+    assert report["rows"][0]["fact"].startswith("osha_inspection(")
+
+
+def test_domain_omission_accountability_blocks_osha_inspection_omission_when_real_id_exists(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_inspection).",
+                "osha_inspection(inspection_1, inspection_1234567, establishment_1, office_1, v_2026_01_01, open, src_inspection).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "osha_inspection/7"
+    assert report["rows"][0]["fact"].startswith("domain_omission(")
+
+
+def test_domain_omission_accountability_allows_osha_inspection_omission_different_scope(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(inspection_1, 'osha_inspection/7', role_missing, inspection_identifier_not_stated, src_missing_inspection_id).",
+                "osha_inspection(inspection_1, inspection_1234567, establishment_1, office_1, v_2026_01_01, open, src_inspection).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["blocker_count"] == 0
+
+
 def test_domain_omission_accountability_blocks_ntsb_report_omission_contradiction(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",

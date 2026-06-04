@@ -139,6 +139,17 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                     "self_check_omission_notes": [],
                 }
             )
+        for fact in _osha_inspection_omission_contradictions(facts):
+            rows.append(
+                {
+                    "fixture": path.parent.name,
+                    "compile_json": str(path),
+                    "class": "domain_omission_contradicts_emitted_carrier",
+                    "fact": fact,
+                    "carrier_signature": "osha_inspection/7",
+                    "self_check_omission_notes": [],
+                }
+            )
         for fact in _ntsb_report_omission_contradictions(facts):
             rows.append(
                 {
@@ -361,6 +372,60 @@ def _osha_accident_omission_contradictions(facts: list[str]) -> list[str]:
         ):
             out.append(fact)
     return out
+
+
+def _osha_inspection_omission_contradictions(facts: list[str]) -> list[str]:
+    omitted_sources: set[str] = set()
+    real_inspection_sources: set[str] = set()
+    parsed_facts: list[tuple[str, list[str], str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match:
+            continue
+        predicate = match.group(1)
+        args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+        parsed_facts.append((predicate, args, fact))
+        if predicate == "osha_inspection" and len(args) == 7 and args[6] and not _osha_inspection_id_is_not_stated(args):
+            real_inspection_sources.add(args[6])
+        elif (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[1] == "osha_inspection/7"
+            and args[2] == "role_missing"
+            and args[3] == "inspection_identifier_not_stated"
+            and args[4]
+        ):
+            omitted_sources.add(args[4])
+
+    out: list[str] = []
+    for predicate, args, fact in parsed_facts:
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[4] in real_inspection_sources
+            and args[1] == "osha_inspection/7"
+            and args[2] == "role_missing"
+            and args[3] == "inspection_identifier_not_stated"
+        ):
+            out.append(fact)
+        elif (
+            predicate == "osha_inspection"
+            and len(args) == 7
+            and _osha_inspection_id_is_not_stated(args)
+            and args[6] in omitted_sources
+        ):
+            out.append(fact)
+    return out
+
+
+def _osha_inspection_id_is_not_stated(args: list[str]) -> bool:
+    return len(args) == 7 and _normalize_arg(args[1]) in {
+        "not_stated",
+        "unknown",
+        "none_found",
+        "missing",
+        "not_available",
+    }
 
 
 def _ntsb_report_omission_contradictions(facts: list[str]) -> list[str]:

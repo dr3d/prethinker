@@ -2464,6 +2464,7 @@ def main() -> int:
         _apply_domain_omission_registry_value_integrity(record["source_compile"])
         _apply_sec_signature_omission_contradiction_integrity(record["source_compile"])
         _apply_osha_accident_omission_contradiction_integrity(record["source_compile"])
+        _apply_osha_inspection_omission_contradiction_integrity(record["source_compile"])
         _apply_ntsb_report_omission_contradiction_integrity(record["source_compile"])
         _apply_active_lens_scope_integrity(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -8659,6 +8660,89 @@ def _apply_osha_accident_omission_contradiction_integrity(source_compile: dict[s
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_osha_inspection_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Resolve OSHA inspection-id omissions against typed inspection rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    omitted_sources: set[str] = set()
+    real_inspection_sources: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "osha_inspection" and len(args) == 7 and args[6] and not _osha_inspection_id_is_not_stated(args):
+            real_inspection_sources.add(args[6])
+        elif (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and _canonical_registered_signature_reference(args[1]) == "osha_inspection/7"
+            and _strip_fact_atom_quotes(args[2]) == "role_missing"
+            and _strip_fact_atom_quotes(args[3]) == "inspection_identifier_not_stated"
+            and args[4]
+        ):
+            omitted_sources.add(args[4])
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        should_drop = False
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "domain_omission"
+                and len(args) == 5
+                and args[4] in real_inspection_sources
+                and _canonical_registered_signature_reference(args[1]) == "osha_inspection/7"
+                and _strip_fact_atom_quotes(args[2]) == "role_missing"
+                and _strip_fact_atom_quotes(args[3]) == "inspection_identifier_not_stated"
+            ):
+                should_drop = True
+            elif (
+                predicate == "osha_inspection"
+                and len(args) == 7
+                and _osha_inspection_id_is_not_stated(args)
+                and args[6] in omitted_sources
+            ):
+                should_drop = True
+        if should_drop:
+            dropped.append(fact)
+            continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_osha_inspection_omission_contradiction_dropped_count"] = len(dropped)
+    source_compile["deterministic_osha_inspection_omission_contradiction_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_osha_inspection_omission_contradiction_policy"] = {
+        "schema_version": "deterministic_osha_inspection_omission_contradiction_v1",
+        "authority": "typed_fact_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops domain_omission/5 inspection_identifier_not_stated rows only when a real "
+            "osha_inspection/7 identifier row is already present for the same source/scope, and "
+            "drops not-stated osha_inspection/7 rows when the matching omission exists for the "
+            "same source/scope. It does not create replacement facts or read source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _osha_inspection_id_is_not_stated(args: list[str]) -> bool:
+    return len(args) == 7 and _strip_fact_atom_quotes(args[1]) in {
+        "not_stated",
+        "unknown",
+        "none_found",
+        "missing",
+        "not_available",
+    }
 
 
 def _apply_ntsb_report_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
