@@ -1,7 +1,11 @@
 import json
 from pathlib import Path
 
-from scripts.summarize_current_compile_fact_qa_status import build_report, render_markdown
+from scripts.summarize_current_compile_fact_qa_status import (
+    apply_markdown_freshness_check,
+    build_report,
+    render_markdown,
+)
 
 
 def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_path: Path) -> None:
@@ -41,6 +45,37 @@ def test_summarize_current_compile_fact_qa_status_blocks_prose_dependent_rows(tm
 
     assert report["summary"]["status"] == "fail"
     assert any("prose_dependent_exact" in reason for reason in report["summary"]["blocking_reasons"])
+
+
+def test_compile_fact_status_markdown_freshness_check_passes_matching_doc(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    rendered = render_markdown(report)
+    expected = tmp_path / "CURRENT_COMPILE_FACT_QA_STATUS.md"
+    expected.write_text(rendered, encoding="utf-8")
+
+    apply_markdown_freshness_check(report=report, expected_path=expected, rendered_md=rendered)
+
+    assert report["summary"]["status"] == "pass"
+    assert not report["summary"]["blocking_reasons"]
+
+
+def test_compile_fact_status_markdown_freshness_check_blocks_stale_doc(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    expected = tmp_path / "CURRENT_COMPILE_FACT_QA_STATUS.md"
+    expected.write_text("# old\n", encoding="utf-8")
+
+    apply_markdown_freshness_check(
+        report=report,
+        expected_path=expected,
+        rendered_md=render_markdown(report),
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert any("expected_markdown_stale" in reason for reason in report["summary"]["blocking_reasons"])
 
 
 def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Path:

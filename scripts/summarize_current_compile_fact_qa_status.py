@@ -30,6 +30,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source-audit", type=Path, default=DEFAULT_SOURCE_AUDIT)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
+    parser.add_argument(
+        "--expect-md",
+        type=Path,
+        default=None,
+        help="Fail if this markdown file differs from the freshly rendered report.",
+    )
     parser.add_argument("--exit-zero", action="store_true")
     return parser.parse_args()
 
@@ -40,16 +46,44 @@ def main() -> int:
         manifest_run_path=args.manifest_run,
         source_audit_path=args.source_audit,
     )
+    rendered_md = render_markdown(report)
+    if args.expect_md:
+        apply_markdown_freshness_check(
+            report=report,
+            expected_path=args.expect_md,
+            rendered_md=rendered_md,
+        )
+        rendered_md = render_markdown(report)
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.out_md:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
-        args.out_md.write_text(render_markdown(report), encoding="utf-8")
+        args.out_md.write_text(rendered_md, encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
     blocked = report["summary"]["status"] != "pass"
     return 0 if args.exit_zero or not blocked else 1
+
+
+def apply_markdown_freshness_check(
+    *,
+    report: dict[str, Any],
+    expected_path: Path,
+    rendered_md: str,
+) -> None:
+    expected_text = _read_optional_text(expected_path)
+    reason = ""
+    if expected_text is None:
+        reason = f"expected_markdown_missing:{expected_path}"
+    elif _normalize_markdown(expected_text) != _normalize_markdown(rendered_md):
+        reason = f"expected_markdown_stale:{expected_path}"
+    if not reason:
+        return
+    summary = report.setdefault("summary", {})
+    blockers = summary.setdefault("blocking_reasons", [])
+    blockers.append(reason)
+    summary["status"] = "fail"
 
 
 def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[str, Any]:
@@ -317,6 +351,17 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise SystemExit(f"JSON file must contain an object: {path}")
     return payload
+
+
+def _read_optional_text(path: Path) -> str | None:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def _normalize_markdown(text: str) -> str:
+    return text.replace("\r\n", "\n").rstrip() + "\n"
 
 
 if __name__ == "__main__":

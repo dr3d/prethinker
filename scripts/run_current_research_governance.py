@@ -127,6 +127,8 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(report_root / "current_compile_fact_qa_status.json"),
                 "--out-md",
                 str(report_root / "current_compile_fact_qa_status.md"),
+                "--expect-md",
+                "docs/CURRENT_COMPILE_FACT_QA_STATUS.md",
             ],
         },
     ]
