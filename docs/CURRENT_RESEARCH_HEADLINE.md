@@ -129,8 +129,10 @@ The next work should strengthen the research claim rather than lift one fixture:
    redaction replay.
 6. Treat atom-library query grounding as the strict query path: planner payloads
    expose emitted typed atoms, and proposed `source_record_*` queries are
-   blocked rather than executed. The next query question is measured planner
-   performance, not permission to use prose fallback.
+   blocked rather than executed. The path also disables relaxed-constant
+   fallback, so bad planner constants remain query-surface gaps. The next query
+   question is measured planner performance, not permission to use prose or
+   fallback rescue.
 7. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 

@@ -393,9 +393,13 @@ Possible next questions:
    question-text routing? The current harness now makes atom-library grounding
    strict: source-record predicates/header inventories are filtered from the
    planner payload, evidence-bundle plans see the same filtered inventory, and
-   proposed `source_record_*` queries are blocked instead of executed. The
-   remaining research question is planner performance, not whether the source
-   prose fallback is still allowed.
+   proposed `source_record_*` queries are blocked instead of executed. It also
+   disables relaxed-constant fallback, so Python no longer turns bad planner
+   constants into variables in the atom-library path. A 2026-06-04 SEC
+   transfer_003 smoke probe landed at 2/5 exact after this tightening; both
+   exact rows passed typed-plan replay and redacted rejudge. The remaining
+   research question is planner performance inside the atom library, not
+   whether source-prose or fallback rescue is still allowed.
 4. **Runtime/provider question:** How much variance remains when a domain pack
    is pinned to one local or remote model/provider/settings bundle? A
    2026-06-04 local-Qwen seeded SEC probe repeated its own `10/12` aggregate

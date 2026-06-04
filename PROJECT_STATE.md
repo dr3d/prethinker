@@ -125,6 +125,17 @@ OSHA accident/inspection pack
     employee injury, violation counts, penalties, item, and status rows transfer
     better than wrapper/establishment rows, long-table enumeration, mixed-source
     section attachment, and one related-activity blank-value boundary
+
+Atom-library query grounding
+  strict path: source-record predicates/header inventories are filtered out,
+    source-record proposals are blocked, and relaxed-constant fallback is
+    disabled
+  SEC transfer_003 local smoke: 2 / 5 judged exact after fallback removal;
+    both exact rows pass typed-plan replay and redacted rejudge, with 0
+    compatibility/runtime/write rows
+  read: query-over-atoms is governed, but messy human query planning is not yet
+    solved; remaining smoke misses are query-surface gaps from bad planner
+    constants
 ```
 
 The publishable technical shape is narrow:
@@ -227,7 +238,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2395 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2396 passed, 59 skipped, 9 xfailed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

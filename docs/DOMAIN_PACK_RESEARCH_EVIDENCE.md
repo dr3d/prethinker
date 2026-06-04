@@ -138,6 +138,21 @@ inventories, source prose, profile-only predicates, and source-record fallback
 execution are unavailable. A proposed `source_record_*` query is recorded as
 `blocked_by_sign_clean_strict` rather than executed.
 
+The strict atom-library query path also disables the runtime's relaxed-constant
+fallback. A small local SEC transfer_003 smoke probe then measured the current
+planner boundary: 2/5 judged exact, with both exact rows passing typed-plan
+replay and redacted rejudge, 0 compatibility/runtime/write rows, and the three
+remaining rows classified as query-surface gaps. The earlier 4/5 probe is
+diagnostic only because Python had relaxed bad planner constants into variables.
+The active next question is planner performance inside the atom library, not
+permission to restore fallback rescue.
+
+Retained diagnostic artifact:
+
+```text
+C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_smoke_20260604
+```
+
 Retained governance artifact:
 
 ```text

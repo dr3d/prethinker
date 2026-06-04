@@ -3103,6 +3103,7 @@ def run_one_question(
                 "The planner may propose query operations only over compiled_predicate_inventory.signatures.",
                 "Source-record predicates and source-record header inventories are unavailable in atom-library mode.",
                 "compiled_predicate_inventory.arg_values lists compact constants actually present in each argument slot. If the question names a status, type, or value not present in that slot, leave the slot as a variable rather than substituting a nearby value.",
+                "Predicate-contract argument names describe slots; they are not data constants. Never use role labels such as registrant_id, jurisdiction, item_kind, item_role, signatory, title, date, source, or source_or_scope as query constants unless the exact atom appears in compiled_predicate_inventory.arg_values for that argument position.",
                 "When several predicates share a status word, choose the predicate whose argument slots match the requested answer type. If the question asks for item numbers or ranges, prefer predicates with item/range slots over argument-treatment predicates.",
                 "When an outcome/status predicate and a list/range inventory predicate share a set/list id, join them with the shared variable so the answer comes from typed member/range slots, not from a compressed set label.",
                 "For numbered inventory, preserve full arity: list_member/4 uses set/list id, member value, member kind, and source/scope; claim_range/4 and item_range/4 use set id, start, end, and source/scope.",
@@ -3229,6 +3230,7 @@ def run_one_question(
         include_legacy_native_helpers=include_legacy_native_helper_adapters,
         sign_clean_strict=strict_query_execution,
         typed_support_companions=typed_support_companions,
+        allow_relaxed_constant_fallback=(not bool(atom_library_query_grounding)),
     )
     evidence_plan_query_results: list[dict[str, Any]] = []
     if evidence_plan is not None and bool(execute_evidence_bundle_plan):
@@ -3240,6 +3242,7 @@ def run_one_question(
             include_legacy_native_helpers=include_legacy_native_helper_adapters,
             sign_clean_strict=strict_query_execution,
             typed_support_companions=typed_support_companions,
+            allow_relaxed_constant_fallback=(not bool(atom_library_query_grounding)),
         )
         if evidence_plan_query_results:
             query_results = list(evidence_plan_query_results)
@@ -4608,6 +4611,7 @@ def run_query_plan(
     include_legacy_native_helpers: bool = False,
     sign_clean_strict: bool = False,
     typed_support_companions: bool = False,
+    allow_relaxed_constant_fallback: bool = True,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
@@ -4849,7 +4853,11 @@ def run_query_plan(
                     if fallback_query and fallback_query not in previous_queries:
                         previous_queries.append(fallback_query)
                 last_result = source_slot_fallbacks[-1].get("result", {})
-        if isinstance(last_result, dict) and last_result.get("status") != "success":
+        if (
+            allow_relaxed_constant_fallback
+            and isinstance(last_result, dict)
+            and last_result.get("status") != "success"
+        ):
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
                 if (
@@ -32977,6 +32985,7 @@ def run_evidence_bundle_plan_queries(
     include_legacy_native_helpers: bool = False,
     sign_clean_strict: bool = False,
     typed_support_companions: bool = False,
+    allow_relaxed_constant_fallback: bool = True,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
     signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
@@ -33272,6 +33281,7 @@ def run_evidence_bundle_plan_queries(
         include_legacy_native_helpers=include_legacy_native_helpers,
         sign_clean_strict=sign_clean_strict,
         typed_support_companions=typed_support_companions,
+        allow_relaxed_constant_fallback=allow_relaxed_constant_fallback,
     ):
         item = dict(item)
         result = item.get("result", {})

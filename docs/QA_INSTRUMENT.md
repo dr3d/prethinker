@@ -45,6 +45,13 @@ result instead of executing a source-record fallback. Evidence-bundle planning
 uses the same filtered inventory. This makes "query over the KB atom library"
 a biting constraint rather than a prompt preference.
 
+In atom-library mode the runtime also disables the relaxed-constant fallback
+that older diagnostic paths can use after a no-result query. The planner must
+choose variables and constants from the compiled atom inventory itself; Python
+does not repair bad planner constants such as predicate-contract slot names
+(`title`, `jurisdiction`, `source_or_scope`) into variables. Those rows are
+query-surface gaps until the planner emits a replayable typed plan.
+
 ## The Shape
 
 ```text

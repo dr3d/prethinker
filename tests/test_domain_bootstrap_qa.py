@@ -296,6 +296,9 @@ def test_atom_library_query_grounding_forces_strict_typed_execution(monkeypatch:
     kb_context_pack = captured["kb_context_pack"]
     inventory = kb_context_pack["compiled_predicate_inventory"]
     assert inventory["signatures"] == ["document_date/2"]
+    atom_policy = "\n".join(kb_context_pack["atom_library_query_grounding"]["policy"])
+    assert "Predicate-contract argument names describe slots; they are not data constants." in atom_policy
+    assert "Never use role labels" in atom_policy
     assert "source_record_field_headers" not in kb_context_pack
     assert all("source_record_" not in clause for clause in kb_context_pack["relevant_clauses"])
     assert row["query_results"][0]["result"]["status"] == "blocked_by_sign_clean_strict"
@@ -11668,6 +11671,34 @@ def test_run_query_plan_replaces_overbound_parent_with_relaxed_success() -> None
     assert relaxed["derived_from_queries"] == [original]
     assert relaxed["result"]["reasoning_basis"]["original_query"] == original
     assert all(item["result"].get("status") != "no_results" for item in results)
+
+
+def test_run_query_plan_can_disable_relaxed_constant_fallback_for_atom_library_grounding() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("sec_registrant(sec_8k_blackstone, blackstone_inc, delaware, src_line_0012).").get(
+        "status"
+    ) == "success"
+
+    original = "sec_registrant(X, registrantname, jurisdiction, Source)."
+    legacy_results = _run_query_plan(
+        runtime,
+        [original],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+    )
+    assert legacy_results[0]["query"] == "sec_registrant(X, Relaxed2, Relaxed3, Source)."
+    assert legacy_results[0]["result"]["status"] == "success"
+
+    atom_grounded_results = _run_query_plan(
+        runtime,
+        [original],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        allow_relaxed_constant_fallback=False,
+    )
+    assert atom_grounded_results[0]["query"] == original
+    assert atom_grounded_results[0]["result"]["status"] == "no_results"
+    assert all("Relaxed" not in str(item.get("query", "")) for item in atom_grounded_results)
 
 
 def test_run_query_plan_adds_typed_subject_identifier_sibling_rows() -> None:
