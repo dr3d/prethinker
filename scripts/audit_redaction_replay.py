@@ -100,7 +100,7 @@ def main() -> int:
         args.out_md.write_text(render_markdown(report), encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    blocked = report["summary"]["prose_dependent_exact"] > 0 or bool(report["summary"]["unclassified_fields"])
+    blocked = bool(report["summary"]["blocking_reasons"])
     return 0 if args.exit_zero or not blocked else 1
 
 
@@ -155,6 +155,12 @@ def build_report(*, qa_files: list[Path], config: SemanticIRCallConfig | None = 
     total_rows = sum(verdict_counts.values())
     product_exact = verdict_counts.get("exact", 0)
     thesis_exact = thesis_counts.get("survived", 0)
+    blocking_reasons = _blocking_reasons(
+        qa_file_count=len(qa_files),
+        product_exact=product_exact,
+        prose_dependent_exact=thesis_counts.get("prose_dependent", 0),
+        unclassified_fields=sorted(unclassified_fields),
+    )
     report = {
         "schema_version": "redaction_replay_audit_v1",
         "qa_file_count": len(qa_files),
@@ -169,6 +175,8 @@ def build_report(*, qa_files: list[Path], config: SemanticIRCallConfig | None = 
             "prose_crutch_points": _share(product_exact - thesis_exact, total_rows),
             "verdict_counts": dict(sorted(verdict_counts.items())),
             "unclassified_fields": sorted(unclassified_fields),
+            "blocking_reasons": blocking_reasons,
+            "status": "blocked" if blocking_reasons else "pass",
         },
         "by_fixture": {fixture: dict(counts) for fixture, counts in sorted(by_fixture.items())},
         "kept_predicate_counts": dict(predicate_counts.most_common(40)),
@@ -176,6 +184,25 @@ def build_report(*, qa_files: list[Path], config: SemanticIRCallConfig | None = 
         "rows": rows,
     }
     return report
+
+
+def _blocking_reasons(
+    *,
+    qa_file_count: int,
+    product_exact: int,
+    prose_dependent_exact: int,
+    unclassified_fields: list[str],
+) -> list[str]:
+    reasons: list[str] = []
+    if qa_file_count <= 0:
+        reasons.append("no_qa_files")
+    if product_exact <= 0:
+        reasons.append("no_product_exact_rows")
+    if prose_dependent_exact > 0:
+        reasons.append("prose_dependent_exact_rows")
+    if unclassified_fields:
+        reasons.append("unclassified_redaction_fields")
+    return reasons
 
 
 def _iter_qa_files(path: Path) -> list[Path]:
@@ -424,6 +451,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Thesis exact: `{summary['thesis_exact']}` / `{summary['row_count']}` = `{summary['thesis_exact_rate']:.2%}`",
         f"- Prose-dependent exact rows: `{summary['prose_dependent_exact']}`",
         f"- Prose crutch points: `{summary['prose_crutch_points']:.2%}`",
+        f"- Status: `{summary['status']}`",
         "",
         "## By Fixture",
         "",
@@ -436,6 +464,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.extend(["", "## Unclassified Fields", ""])
         for field in summary["unclassified_fields"]:
             lines.append(f"- `{field}`")
+    if summary["blocking_reasons"]:
+        lines.extend(["", "## Blocking Reasons", ""])
+        for reason in summary["blocking_reasons"]:
+            lines.append(f"- `{reason}`")
     examples = [row for row in report["rows"] if row["thesis_verdict"] == "prose_dependent"][:40]
     if examples:
         lines.extend(["", "## Prose-Dependent Exact Rows", "", "| Fixture | Row | Reason |", "| --- | --- | --- |"])

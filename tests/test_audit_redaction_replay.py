@@ -70,9 +70,38 @@ def test_redaction_replay_proxy_separates_typed_from_prose_exact(tmp_path):
     assert report["summary"]["product_exact"] == 2
     assert report["summary"]["thesis_exact"] == 1
     assert report["summary"]["prose_dependent_exact"] == 1
+    assert report["summary"]["status"] == "blocked"
     rows = {row["id"]: row for row in report["rows"]}
     assert rows["q001"]["thesis_verdict"] == "survived"
     assert rows["q002"]["thesis_verdict"] == "prose_dependent"
+
+
+def test_redaction_replay_blocks_when_no_product_exact_rows(tmp_path):
+    qa_dir = tmp_path / "fixture_a"
+    qa_dir.mkdir()
+    qa_file = qa_dir / "qa.json"
+    qa_file.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "id": "q001",
+                        "utterance": "What is A?",
+                        "reference_answer": "A",
+                        "reference_judge": {"verdict": "miss"},
+                        "query_results": [],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(qa_files=[qa_file])
+
+    assert report["summary"]["product_exact"] == 0
+    assert report["summary"]["blocking_reasons"] == ["no_product_exact_rows"]
+    assert report["summary"]["status"] == "blocked"
 
 
 def test_redaction_replay_redacts_control_plane_prose_fields(tmp_path):

@@ -81,7 +81,7 @@ def main() -> int:
         args.out_md.write_text(render_markdown(report), encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    blocked = report["summary"]["exact_null_verdicts"] > 0
+    blocked = bool(report["summary"]["blocking_reasons"])
     return 0 if args.exit_zero or not blocked else 1
 
 
@@ -159,6 +159,11 @@ def build_report(
 
     counts = Counter(str(row["verdict"]) for row in controls)
     exact_controls = [row for row in controls if row["verdict"] == "exact"]
+    blocking_reasons = _blocking_reasons(
+        qa_file_count=len(qa_files),
+        sampled_product_exact_rows=len(sampled),
+        exact_null_verdicts=len(exact_controls),
+    )
     return {
         "schema_version": "reference_judge_null_control_audit_v1",
         "qa_file_count": len(qa_files),
@@ -170,10 +175,23 @@ def build_report(
             "exact_null_verdicts": len(exact_controls),
             "verdict_counts": dict(sorted(counts.items())),
             "unclassified_redaction_fields": sorted(unclassified_fields),
+            "blocking_reasons": blocking_reasons,
+            "status": "blocked" if blocking_reasons else "pass",
         },
         "exact_null_rows": exact_controls,
         "controls": controls,
     }
+
+
+def _blocking_reasons(*, qa_file_count: int, sampled_product_exact_rows: int, exact_null_verdicts: int) -> list[str]:
+    reasons: list[str] = []
+    if qa_file_count <= 0:
+        reasons.append("no_qa_files")
+    if sampled_product_exact_rows <= 0:
+        reasons.append("no_sampled_product_exact_rows")
+    if exact_null_verdicts > 0:
+        reasons.append("exact_null_verdicts")
+    return reasons
 
 
 def _wrong_reference_for_row(*, fixture_rows: list[dict[str, Any]], row: dict[str, Any]) -> str:
@@ -219,7 +237,12 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Control judgments: `{summary['control_judgments']}`",
         f"- Exact null verdicts: `{summary['exact_null_verdicts']}`",
         f"- Verdict counts: `{summary['verdict_counts']}`",
+        f"- Status: `{summary['status']}`",
     ]
+    if summary["blocking_reasons"]:
+        lines.extend(["", "## Blocking Reasons", ""])
+        for reason in summary["blocking_reasons"]:
+            lines.append(f"- `{reason}`")
     if summary["unclassified_redaction_fields"]:
         lines.extend(["", "## Unclassified Redaction Fields", ""])
         for field in summary["unclassified_redaction_fields"]:
