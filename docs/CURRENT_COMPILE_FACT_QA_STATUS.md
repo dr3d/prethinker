@@ -9,7 +9,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Cells: `8` across `4` families
 - Support>=2: `117 / 138` expected typed facts
 - Per-run exact: `333 / 414` deterministic fact rows
-- Unexpected same-signature facts support>=2: `6`
+- Unexpected same-signature facts support>=2: `4`
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
@@ -18,7 +18,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 
 | Family | Cells | Support>=2 | Per-run exact | Unexpected>=2 | Prose-dependent | Unregistered plans |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `fda_warning_letter` | 1 | 20 / 27 | 59 / 81 | 5 | 0 | 0 |
+| `fda_warning_letter` | 1 | 20 / 27 | 59 / 81 | 3 | 0 | 0 |
 | `ntsb_investigation` | 1 | 19 / 25 | 57 / 75 | 0 | 0 | 0 |
 | `osha_incident` | 2 | 33 / 35 | 89 / 105 | 0 | 0 | 0 |
 | `sec_form_8k` | 4 | 45 / 51 | 128 / 153 | 1 | 0 | 0 |
@@ -32,7 +32,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | 11 / 12 | 30 / 36 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 34 / 39 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | 19 / 25 | 57 / 75 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 20 / 27 | 59 / 81 | 5 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 20 / 27 | 59 / 81 | 3 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 | `osha_incident_seed` | `osha_incident_domain_v1` | 18 / 20 | 53 / 60 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `unification`; manifest `present` |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | 15 / 15 | 36 / 45 | 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; manifest `present` |
 

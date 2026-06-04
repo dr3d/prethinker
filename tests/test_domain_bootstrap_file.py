@@ -136,6 +136,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_consultant_citation_scope_reduction,
     _apply_fda_office_atom_reduction,
     _apply_fda_correspondence_party_name_reduction,
+    _apply_fda_correspondence_party_role_integrity,
     _apply_fda_cgmp_violation_item_projection,
     _apply_fda_cgmp_bundle_subject_integrity,
     _apply_fda_violation_detail_subject_integrity,
@@ -8095,6 +8096,28 @@ def test_fda_violation_detail_subject_integrity_drops_letter_level_details() -> 
     assert policy["not_query_interpretation"] is True
 
 
+def test_fda_violation_detail_subject_integrity_drops_observation_on_investigation_failure() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation(violation_2, letter_1, violation_2, investigation_failure, src_line_1).",
+            "fda_violation(violation_4, letter_1, violation_4, facility_equipment_control, src_line_2).",
+            "fda_violation_detail(violation_2, observation_subject, persistent_contamination, violation_scope, src_line_3).",
+            "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_4).",
+            "fda_violation_detail(violation_4, observation_subject, peeling_paint_ceiling, violation_scope, src_line_5).",
+        ]
+    }
+
+    report = _apply_fda_violation_detail_subject_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_violation(violation_2, letter_1, violation_2, investigation_failure, src_line_1).",
+        "fda_violation(violation_4, letter_1, violation_4, facility_equipment_control, src_line_2).",
+        "fda_violation_detail(violation_2, record_review_subject, environmental_monitoring_excursion, violation_scope, src_line_4).",
+        "fda_violation_detail(violation_4, observation_subject, peeling_paint_ceiling, violation_scope, src_line_5).",
+    ]
+
+
 def test_fda_violation_number_atom_reduction_canonicalizes_numeric_numbers() -> None:
     source_compile = {
         "facts": [
@@ -9702,6 +9725,29 @@ def test_fda_correspondence_party_name_reduction_strips_honorific_prefixes_and_c
         "fda_correspondence_party(letter_2, compounding_inspections_contact, contact, compoundinginspections_fda_hhs_gov, src_line_4).",
     ]
     policy = source_compile["deterministic_fda_correspondence_party_name_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_correspondence_party_role_integrity_drops_recipient_conflicting_with_wrapper() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(letter_1, cder, acme_inc, v_2025_04_30, src_letter).",
+            "fda_correspondence_party(letter_1, acme_inc, recipient, acme_inc, src_recipient).",
+            "fda_correspondence_party(letter_1, jane_smith, recipient, jane_smith, src_duplicate).",
+            "fda_correspondence_party(letter_1, alex_jones, signatory, alex_jones, src_signatory).",
+        ]
+    }
+
+    report = _apply_fda_correspondence_party_role_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_1, cder, acme_inc, v_2025_04_30, src_letter).",
+        "fda_correspondence_party(letter_1, acme_inc, recipient, acme_inc, src_recipient).",
+        "fda_correspondence_party(letter_1, alex_jones, signatory, alex_jones, src_signatory).",
+    ]
+    policy = source_compile["deterministic_fda_correspondence_party_role_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 

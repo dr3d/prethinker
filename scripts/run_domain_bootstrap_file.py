@@ -2300,6 +2300,7 @@ def main() -> int:
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
         _apply_fda_correspondence_party_name_reduction(record["source_compile"])
+        _apply_fda_correspondence_party_role_integrity(record["source_compile"])
         _apply_fda_no_fei_omission_reduction(record["source_compile"])
         _apply_fda_adulteration_basis_authority_reduction(record["source_compile"])
         _apply_ntsb_timestamp_atom_reduction(record["source_compile"])
@@ -2435,6 +2436,7 @@ def main() -> int:
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
         _apply_fda_office_atom_reduction(record["source_compile"])
         _apply_fda_correspondence_party_name_reduction(record["source_compile"])
+        _apply_fda_correspondence_party_role_integrity(record["source_compile"])
         _apply_fda_no_fei_omission_reduction(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
         _apply_fda_adulteration_basis_authority_reduction(record["source_compile"])
@@ -8930,13 +8932,16 @@ def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
     violation_ids: set[str] = set()
+    violation_category_by_id: dict[str, str] = {}
     for fact in facts:
         parsed = _parse_fact_clause(fact)
         if parsed is None:
             continue
         predicate, args = parsed
         if predicate == "fda_violation" and len(args) == 5 and str(args[0]).strip():
-            violation_ids.add(str(args[0]).strip())
+            violation_id = str(args[0]).strip()
+            violation_ids.add(violation_id)
+            violation_category_by_id[violation_id] = str(args[3]).strip()
     dropped: list[str] = []
     out: list[str] = []
     seen: set[str] = set()
@@ -8956,6 +8961,14 @@ def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]
             ):
                 dropped.append(fact)
                 continue
+            if (
+                predicate == "fda_violation_detail"
+                and len(args) == 5
+                and violation_category_by_id.get(args[0]) == "investigation_failure"
+                and args[1] == "observation_subject"
+            ):
+                dropped.append(fact)
+                continue
         if fact not in seen:
             out.append(fact)
             seen.add(fact)
@@ -8970,7 +8983,9 @@ def _apply_fda_violation_detail_subject_integrity(source_compile: dict[str, Any]
         "not_query_interpretation": True,
         "description": (
             "Drops fda_violation_detail/5 and fda_violation_detail_slot/4 rows whose subject is not an emitted fda_violation/5 id. "
-            "It does not infer missing details or inspect source prose."
+            "It also drops observation_subject detail rows on typed investigation_failure violations because the closed FDA "
+            "contract reserves those investigation subjects for record_review_subject. It does not infer missing details or "
+            "inspect source prose."
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
@@ -11774,6 +11789,61 @@ def _apply_fda_correspondence_party_name_reduction(source_compile: dict[str, Any
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_fda_correspondence_party_role_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop FDA correspondence-party recipient rows that conflict with the typed wrapper recipient."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    recipient_entities_by_letter: dict[str, set[str]] = {}
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_warning_letter" and len(args) == 5:
+            letter_id = str(args[0]).strip()
+            recipient_entity = str(args[2]).strip()
+            if letter_id and recipient_entity:
+                recipient_entities_by_letter.setdefault(letter_id, set()).add(recipient_entity)
+
+    dropped: list[str] = []
+    out: list[str] = []
+    seen: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "fda_correspondence_party" and len(args) == 5:
+                letter_id = str(args[0]).strip()
+                party_name = str(args[3]).strip()
+                if (
+                    str(args[2]).strip() == "recipient"
+                    and party_name
+                    and recipient_entities_by_letter.get(letter_id)
+                    and party_name not in recipient_entities_by_letter[letter_id]
+                ):
+                    dropped.append(fact)
+                    continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_correspondence_party_role_integrity_count"] = len(dropped)
+    source_compile["deterministic_fda_correspondence_party_role_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_correspondence_party_role_integrity_policy"] = {
+        "schema_version": "deterministic_fda_correspondence_party_role_integrity_v1",
+        "authority": "typed_role_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops fda_correspondence_party/5 recipient rows when the same letter already has a typed "
+            "fda_warning_letter/5 recipient entity and the correspondence-party recipient name is a different atom. "
+            "It does not infer missing roles or inspect source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
 
 
 def _enforce_fda_correspondence_party_placeholder_contract(source_compile: dict[str, Any]) -> dict[str, Any]:

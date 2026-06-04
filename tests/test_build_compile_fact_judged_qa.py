@@ -53,22 +53,20 @@ def test_build_compile_fact_judged_qa_exact_partial_miss_and_forbidden(tmp_path:
         created_utc="2026-06-04T00:00:00Z",
     )
 
-    assert payload["verdict_summary"] == {"exact": 1, "miss": 2, "partial": 1}
+    assert payload["verdict_summary"] == {"exact": 1, "miss": 3}
     assert payload["forbidden_emissions"] == [
         {
             "forbidden_fact": "fda_warning_letter(Letter, cber, apothecary_pharma_llc, v_2025_12_01, SrcLetter).",
             "compiled_fact": "fda_warning_letter(wl_999999, cber, apothecary_pharma_llc, v_2025_12_01, source_url).",
         }
     ]
-    assert payload["unexpected_same_signature_emissions"] == [
-        "fda_correspondence_party(wl_717972, roland_holmqvist, recipient, roland_holmqvist, direct)."
-    ]
+    assert payload["domain_reducer_reports"]["fda_correspondence_party_role_integrity"]["dropped_count"] == 1
+    assert payload["unexpected_same_signature_emissions"] == []
 
     rows = {row["id"].rsplit("__", 1)[-1]: row for row in payload["rows"]}
     assert rows["r001"]["reference_judge"]["verdict"] == "exact"
     assert rows["r001"]["query_results"][0]["result"]["rows"][0]["Letter"] == "wl_717972"
-    assert rows["r002"]["reference_judge"]["verdict"] == "partial"
-    assert "oracle 'rechon_life_science_ab' vs compile 'roland_holmqvist'" in rows["r002"]["reference_judge"]["rationale"]
+    assert rows["r002"]["reference_judge"]["verdict"] == "miss"
     assert rows["r003"]["reference_judge"]["verdict"] == "miss"
     assert rows["r004"]["reference_judge"]["verdict"] == "miss"
     assert "all-variable facts are not answer-bearing" in rows["r004"]["reference_judge"]["rationale"]
