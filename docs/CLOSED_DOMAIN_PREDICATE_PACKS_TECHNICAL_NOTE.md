@@ -165,8 +165,8 @@ compiler proposes facts; deterministic gates decide what counts.
 | --- | --- | --- | --- |
 | SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, item treatment, exhibits, signature block | Historical pre-axis-repair cells: seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Repaired axis-clean breadth: seed `12/13`, transfer_001 `11/13`, transfer_002 `11/12`, transfer_003 `12/13` then `11/13`; a pre-registered transfer_003 stability rerun and omission-accountability guard rescore landed at `12/13`, but the latest fresh manifest refresh is `11/13` with `34/39` per-run exact. All repaired cells have clean governance | Useful skeleton-transfer and boundary evidence, not a pristine methods anchor. The repaired schema exposes exhibit treatment ambiguity, wrapper/telephone recall gaps, duplicate file-number instability, item-treatment recall, and MoE jitter. |
 | FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Fresh current-pack transfer_003: `19/26`, `0/10` supported forbidden, clean atom/lens/signature gates | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
-| NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `19/25` in the current reducer-aligned manifest; compile-fact QA `57/75` per-run exact and `19/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. The earlier raw/no-reducer view was `18/25` support>=2. |
-| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `0/10` supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than wrapper/establishment, blank-value semantics, long-table enumeration, and mixed-section attachment. |
+| NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `22/25` in the current scoped injury-count manifest; compile-fact QA `60/75` per-run exact and `22/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, conditions, and scoped injury-count partitions transfer more cleanly than findings/probable-cause substance. One timeline sequence-role row remains unstable. The earlier raw/no-reducer view was `18/25` support>=2. |
+| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `20/20` support>=2 after a high-arity registry intake fix and blank-flag contract; first unlike transfer `15/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `0/10` supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than long-table enumeration and mixed-section attachment; one repeated source-true FTA penalty extra remains visible as a precision target. |
 
 ## SEC Methods Example
 
@@ -300,13 +300,14 @@ boundary appears outside FDA/SEC.
 
 ```text
 profile: datasets/domain_profiles/ntsb_investigation_v1/ontology_registry.json
-artifact: C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1
+artifact: C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\ntsb-transfer-casualty-partition-r1
 ```
 
 Current transfer:
 
 ```text
-current reducer-aligned manifest: 19 / 25 expected, 0 / 15 supported forbidden
+current scoped injury-count manifest: 22 / 25 expected, 0 / 15 supported forbidden
+earlier reducer-aligned diagnostic: 19 / 25 expected
 earlier raw/no-reducer diagnostic: 18 / 25 expected
 atom-shape / registered-signature / lens-scope blockers: 0
 ```
@@ -318,9 +319,9 @@ Per-layer boundary:
 | Wrapper / occurrence identity | `3/3` | Stable skeleton. |
 | Asset and party | `3/3` | Core vehicle/operator rows transfer. |
 | Conditions | `5/5` after typed reducer replay | Compact categorical condition layer works. |
-| Timeline | `6/6` | Strong chronological event layer. |
-| Safety action | `2/3` | Actor/organization attachment remains unstable. |
-| Casualty | `0/3` | Numeric/table transfer boundary in this cell. |
+| Timeline | `6/7` | Strong chronological event layer; the distress-call sequence-role row remains unstable. |
+| Safety action | `3/3` | Roadway, after-action, and training rows transfer at support>=2 in the current manifest. |
+| Casualty | `3/3` | Scoped injury-count partitions transfer after the contract clarified single-severity rows with zeroes for unstated severity slots. |
 | Findings / probable cause | `0/2` | Open causal substance should abstain or remain lower tier. |
 
 NTSB corroborates the skeleton-vs-substance boundary; it is not a promoted

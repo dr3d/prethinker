@@ -160,7 +160,8 @@ stronger manual diagnostic, and a deterministic lens union built from those
 historical focused runs reached 23/25. Those numbers are now treated only as
 diagnostic history: a fresh scripted same-condition lens-bundle harness
 reproduced at 18/25 before reducers, then 19/25 after a typed-only
-condition-value reducer. The current manifest is reducer-aligned.
+condition-value reducer. The current manifest adds a general scoped
+injury-count partition contract and reaches 22/25.
 
 Current harnessed NTSB transfer status:
 
@@ -171,34 +172,36 @@ ntsb_occurrence_time: 1 / 1
 ntsb_party:           1 / 1
 ntsb_vehicle:         2 / 2
 ntsb_condition:       5 / 5
-ntsb_timeline_event:  6 / 6
-ntsb_safety_action:   2 / 3
-ntsb_injury_count:    0 / 3
+ntsb_timeline_event:  6 / 7
+ntsb_safety_action:   3 / 3
+ntsb_injury_count:    3 / 3
 ntsb_finding:         0 / 2
 ```
 
-Current reducer-aligned compile-fact QA over the same first unlike NTSB
+Current scoped injury-count compile-fact QA over the same first unlike NTSB
 transfer:
 
 ```text
-rows: 57 / 75 exact
-support>=2: 19 / 25
-redaction replay: 57 / 57 exact rows survive, 0 prose-dependent
-typed-plan replay: 57 / 57 exact rows replay through registered carriers
+rows: 60 / 75 exact
+support>=2: 22 / 25
+redaction replay: 60 / 60 exact rows survive, 0 prose-dependent
+typed-plan replay: 60 / 60 exact rows replay through registered carriers
 ```
 
 The earlier raw/no-reducer view was `18 / 25` support>=2 and `53 / 75`
-per-run exact. The difference is the weather atom variant
-(`dry_clear_nighttime` vs related compact weather atoms), not prose support.
+per-run exact. The reducer-aligned diagnostic then reached `19 / 25` by
+normalizing the compact weather atom. The current scoped injury-count contract
+adds the three casualty rows without repeated unexpected same-signature support.
 
 That is the current claim-bearing research floor for the first NTSB transfer
 fixture. It says the skeleton, chronology, vehicles, and conditions are alive,
-but casualty and safety-action recall are not yet stable under the fresh
-harness, and findings/probable-cause substance should likely abstain or move to
-Tier 2 unless a compact, reproducible finding taxonomy transfers on fresh
-documents without prose-shaped slots. The compiler atom-shape gate was also
-aligned with the external audit so numeric-leading registered-carrier atoms are
-dropped in-path rather than merely reported after the run.
+scoped injury-count partitions now transfer, and findings/probable-cause
+substance should likely abstain or move to Tier 2 unless a compact,
+reproducible finding taxonomy transfers on fresh documents without prose-shaped
+slots. One distress-call sequence-role row remains unstable. The compiler
+atom-shape gate was also aligned with the external audit so numeric-leading
+registered-carrier atoms are dropped in-path rather than merely reported after
+the run.
 
 SEC Form 8-K is the third fixture-bank candidate under review. Current status
 update, 2026-06-04: the old SEC `13/13, 13/13, 12/12, 12/12` cells below are

@@ -1123,6 +1123,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "fatal_count, serious_count, and minor_count are integer count values; use 0 when the source states zero, not the atom zero.",
             "Always emit the full six-slot shape ntsb_injury_count(occurrence_id, subject_scope, fatal_count, serious_count, minor_count, source_or_scope); do not pack the three counts into one value like 5_8_3.",
             "For a table value such as Bystanders: 5 fatal, 8 serious, and 3 minor, emit ntsb_injury_count(Occurrence, bystander, 5, 8, 3, SourceScope).",
+            "For a source-stated scoped single-severity injury such as a driver listed as serious, emit that partition with the stated severity count and 0 for the other severity slots, for example ntsb_injury_count(Occurrence, driver, 0, 1, 0, SourceScope).",
             "Emit one row per source-stated partition; do not collapse multiple table rows into one prose summary when the table separates them.",
             "Do not emit a duplicate not_stated partition for counts whose subject_scope is source-stated, such as first_responder or bystander.",
             "Do not use this row to enumerate named victims or injury narratives; use only counts by source-stated scope.",

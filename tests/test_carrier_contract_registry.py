@@ -338,6 +338,7 @@ def test_ntsb_investigation_contracts_keep_skeleton_and_prose_separate() -> None
     assert "one source-stated casualty table row" in injuries_text
     assert "full six-slot shape" in injuries_text
     assert "5_8_3" in injuries_text
+    assert "driver, 0, 1, 0" in injuries_text
     assert "duplicate not_stated partition" in injuries_text
     assert "victim_narrative" in injuries_text
 

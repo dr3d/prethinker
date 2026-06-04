@@ -132,19 +132,21 @@ FDA warning-letter pack
 
 NTSB investigation pack
   seed micro: 13 / 13
-  first unlike transfer, current reducer-aligned manifest: 19 / 25
+  first unlike transfer, current scoped injury-count manifest: 22 / 25
   deterministic compile-fact QA over first unlike transfer:
-    57 / 75 per-run exact
-    19 / 25 support>=2
-    all 57 exact rows pass typed-plan replay and redaction replay
+    60 / 75 per-run exact
+    22 / 25 support>=2
+    all 60 exact rows pass typed-plan replay and redaction replay
   forbidden support: 0 / 15
   read: corroborating boundary evidence; wrapper, chronology, vehicles, and
-    conditions transfer more cleanly than casualty, safety-action attachment,
-    findings, and probable-cause substance
+    conditions transfer more cleanly than findings/probable-cause substance;
+    scoped injury-count partitions now clear, with one timeline sequence-role
+    row still unstable
 
 OSHA accident/inspection pack
-  seed micro: 18 / 20 support>=2 after high-arity registry intake fix
-  first unlike transfer: 12 / 15 support>=2
+  seed micro: 20 / 20 support>=2 after high-arity registry intake fix and
+    current related-activity blank-flag contract
+  first unlike transfer: 15 / 15 support>=2
   forbidden support: 0 in both measured cells
   new transfer diagnostics:
     transfer_002 long violation table: 18 / 53 support>=2, 0 / 8 forbidden
@@ -154,11 +156,11 @@ OSHA accident/inspection pack
   governance: registered signatures, atom-shape, and lens-scope clean
   read: fourth-family corroboration for skeleton/table anatomy; accident,
     employee injury, violation counts, penalties, item, and status rows transfer
-    better than wrapper/establishment rows, long-table enumeration, mixed-source
-    section attachment, and one related-activity blank-value boundary. The
-    transfer_003 guard is cleanup only: support stays 2 / 21 while the current
-    news-release accident/injury rows are blocked from contaminating the prior
-    inspection detail.
+    better than long-table enumeration and mixed-source section attachment. The
+    seed still emits one repeated source-true FTA penalty extra, carried as a
+    visible precision/adjudication target. The transfer_003 guard is cleanup
+    only: support stays 2 / 21 while the current news-release accident/injury
+    rows are blocked from contaminating the prior inspection detail.
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,

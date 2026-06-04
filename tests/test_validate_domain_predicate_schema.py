@@ -38,7 +38,7 @@ def test_sec_form_8k_domain_predicate_schema_registry_matches_contracts():
 
     assert report["summary"]["status"] == "pass"
     assert report["summary"]["registry_count"] == 1
-    assert report["summary"]["predicate_count"] == 7
+    assert report["summary"]["predicate_count"] == 8
     assert report["registries"][0]["accountability_requirement_count"] == 1
     assert report["registries"][0]["lens_count"] == 4
     assert report["registries"][0]["errors"] == []

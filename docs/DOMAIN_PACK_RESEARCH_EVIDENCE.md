@@ -36,7 +36,7 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 | Family | Pack scope | Seed / transfer status | Current result | Claim status |
 | --- | --- | --- | --- | --- |
 | FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Deterministic judged-QA v2 across transfer_001 and transfer_002: 137/159 exact; all 137 exact rows pass typed-plan replay and redaction replay. Fresh current-pack transfer_003 is 19/26 with 0/10 supported forbidden and clean atom/lens/signature gates | Strongest domain-pack work, but not finished; current claim is compile-fact transfer with clear boundary rows, not broad FDA completion or messy-query competence |
-| NTSB investigations | Skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | One micro and one unlike transfer | Micro 13/13; current reducer-aligned transfer manifest 19/25, 0 forbidden, clean governance. Deterministic compile-fact QA over the unlike transfer is 57/75 per-run exact and 19/25 support>=2; all exact rows pass typed-plan and redaction replay | Transfer confirms skeleton/conditions/chronology; casualty, safety-action, and finding lanes remain weak |
+| NTSB investigations | Skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | One micro and one unlike transfer | Micro 13/13; current scoped injury-count transfer manifest 22/25, 0 forbidden, clean governance. Deterministic compile-fact QA over the unlike transfer is 60/75 per-run exact and 22/25 support>=2; all exact rows pass typed-plan and redaction replay | Transfer confirms skeleton/conditions/chronology and scoped injury counts; findings remain weak and one timeline sequence-role row is unstable |
 | SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers, now under axis-clean repair | Historical pre-axis-repair cells were seed 13/13 and transfers 13/13, 12/12, 12/12. Repaired axis-clean breadth is seed 12/13, transfer_001 11/13, transfer_002 11/12, transfer_003 12/13 then 11/13; a pre-registered stability rerun and omission-accountability guard rescore landed at 12/13, but the latest fresh manifest refresh is 11/13 with 34/39 per-run exact. All repaired cells have 0 supported forbidden and clean atom/lens/value gates | Useful evidence that small closed skeleton packs transfer, but not a pristine methods anchor yet. Current boundary is exhibit treatment ambiguity, wrapper/telephone recall, duplicate file-number support, item-treatment recall, and ordinary MoE jitter, not prose leakage |
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, item, status, related activity | One seed micro plus one unlike retained transfer, plus two diagnostic transfer probes | Standing manifest: seed micro 20/20 support>=2 and first unlike transfer 15/15 support>=2; both have 0 supported forbidden and clean atom/lens governance. The seed has one repeated source-true FTA penalty extra kept as an unexpected precision target. Diagnostic transfer_002 is 18/53 with 0 forbidden; diagnostic transfer_003 is 2/21 with 0/10 supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a full promoted pack. Accident/injury and violation table rows transfer in bounded cells; long-table enumeration and mixed-document section attachment remain boundary rows |
 
@@ -50,7 +50,7 @@ gap, not from whichever worksheet row is most recent.
 | --- | --- | --- | --- | --- | --- |
 | FDA warning-letter skeleton and CGMP numbered-item layer | FDA warning-letter micro plus transfer fixtures | Closed FDA registry, lens-scoped compile, N>=3/support>=2, 0 forbidden, clean atom/lens/value gates | Judged-QA v2: transfer_001 78/78 exact across N=3; transfer_002 59/81 exact across N=3 with 7 partial and 15 miss; combined 137/159 exact. All exact rows pass registered typed-plan replay and redaction replay with 0 prose-dependent exact rows. Fresh current-pack transfer_003: 19/26, 0/10 supported forbidden, clean atom/lens/signature gates | FDA is promising but not broadly transfer-clean; transfer_002 and transfer_003 expose wrapper role semantics, context-dependent category/substance, and value-detail boundaries. V2 is oracle-shaped compile-fact QA, not messy human query planning | Stop lifting transfer rows one by one; summarize the boundary unless a new compact layer is pre-registered and tested on unlike letters |
 | FDA response assessment | Three-fixture observation-transfer response lanes | Same gates plus fresh same-condition composition, not historical lane mixing | 16/17 composed diagnostic with one repeated unexpected final row | Typed attachment/taxonomy conflict; not safe for more row grinding | Keep frozen unless a broader FDA case-study checkpoint makes response coverage load-bearing |
-| NTSB skeleton/chronology/condition pack | UPS aviation micro plus unlike highway/hazmat transfer | Closed NTSB registry, N>=3/support>=2, lens-scope and atom-shape clean | Micro 13/13; current reducer-aligned transfer manifest 19/25, 0 forbidden. Compile-fact QA: 57/75 per-run exact, 19/25 support>=2, 0 prose-dependent exact rows | Casualty instability, one safety-action actor/organization attachment miss, weather atom normalization, and findings/probable-cause substance should abstain or Tier 2 | Use NTSB as boundary evidence; do not grind toward a promoted pack before FDA is summarized |
+| NTSB skeleton/chronology/condition pack | UPS aviation micro plus unlike highway/hazmat transfer | Closed NTSB registry, N>=3/support>=2, lens-scope and atom-shape clean | Micro 13/13; current scoped injury-count transfer manifest 22/25, 0 forbidden. Compile-fact QA: 60/75 per-run exact, 22/25 support>=2, 0 prose-dependent exact rows | Findings/probable-cause substance should abstain or Tier 2; one distress-call timeline sequence-role row remains unstable | Use NTSB as boundary evidence; do not grind toward a promoted pack before FDA is summarized |
 | SEC Form 8-K skeleton pack | One seed micro plus three unlike retained Form 8-K/8-K/A transfers | Closed SEC skeleton registry, local-Qwen N>=3/support>=2, integrity gates clean plus value-axis integrity for methods-anchor use | Historical pre-axis-repair cells: seed 13/13; transfers 13/13, 12/12, 12/12, all 0 supported forbidden. Axis-clean repair split `sec_filing_item/5`, `sec_filing_item_treatment/4`, and `sec_exhibit/5`; repaired breadth is seed 12/13, transfer_001 11/13, transfer_002 11/12, transfer_003 12/13 then 11/13; a follow-up transfer_003 stability rerun and omission-accountability guard rescore landed at 12/13, but the latest fresh manifest refresh is 11/13 with 34/39 per-run exact. All repaired cells have clean gates | Skeleton transfers; event-substance intentionally untested. Current caveat is exhibit treatment ambiguity, wrapper/telephone recall, duplicate file-number support, item-treatment recall, and MoE jitter under the repaired schema, not prose leakage | Use SEC as a boundary-aware skeleton case study; do not promote it to a pristine methods anchor from a favorable same-condition draw |
 | OSHA accident/inspection skeleton pack | Retained OSHA accident/inspection fixtures from the fixture bank | Closed OSHA registry, local-Qwen N=3/support>=2, atom/lens gates clean | Standing manifest seed 20/20 and first unlike transfer 15/15, both 0 supported forbidden. Seed carries one repeated source-true FTA penalty extra as an unexpected precision target. Transfer_002 diagnostic: 18/53, 0 forbidden, clean atom/lens gates. Transfer_003 diagnostic after the typed accident-omission contradiction guard: 2/21, 0/10 supported forbidden, atom/lens gates clean | Skeleton/table lanes transfer in the bounded standing cells. Diagnostics still expose a long citation/status table enumeration boundary and a clean mixed-source current-news/prior-inspection section-attachment boundary | Keep as fourth-family corroboration; do not grind long-table or mixed-document rows unless a named research question requires section/scope carriers |
 
@@ -109,7 +109,7 @@ historical unless they are re-gated here or in a newer note.
 | FDA | `fda_warning_letter_domain_transfer_002` | `C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` | Clean boundary transfer cell, 20/27 |
 | FDA | `fda_warning_letter_domain_transfer_003` | `C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1` | Clean boundary transfer cell, 19/26; 0/10 supported forbidden; all seven unsupported rows are value/detail flesh |
 | FDA | `fda_transfer_judged_qa_v2` | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` | Deterministic compile-fact QA across transfer_001 and transfer_002, 137/159; every exact row typed-plan and redaction replay clean |
-| NTSB | `ntsb_investigation_transfer_surface_001` | `C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, current reducer-aligned manifest 19/25; compile-fact QA 57/75 per-run exact and 19/25 support>=2 |
+| NTSB | `ntsb_investigation_transfer_surface_001` | `C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\ntsb-transfer-casualty-partition-r1` | Boundary transfer cell, current scoped injury-count manifest 22/25; compile-fact QA 60/75 per-run exact and 22/25 support>=2 |
 | OSHA | `osha_incident_domain_v1` seed micro | `C:\prethinker_tmp_archive\osha_seed_current_contract_rerun_20260604\osha-seed-current-contract-r1` | Fourth-family seed skeleton evidence, 20/20; 0/8 forbidden; atom/lens gates clean; one repeated source-true FTA penalty extra remains an unexpected precision target |
 | OSHA | `osha_incident_transfer_001` | `C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1` | Unlike transfer evidence, 15/15; 0/8 forbidden; atom/lens gates clean |
 | OSHA | `osha_incident_transfer_002` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-002-r1-local-long-table-boundary` | Diagnostic boundary probe, 18/53; 0/8 forbidden; atom/lens gates clean; not promoted |
@@ -406,12 +406,12 @@ python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fac
 The 2026-06-04 manifest run passed across all eight cells:
 
 ```text
-overall support>=2: 114/138
+overall support>=2: 122/138
 SEC seed/transfer support>=2: 12/13, 11/13, 11/12, 11/13
-NTSB transfer support>=2: 19/25
+NTSB transfer support>=2: 22/25
 FDA transfer_002 support>=2: 20/27
-OSHA seed/transfer support>=2: 18/20, 12/15
-per-run exact: 324/414
+OSHA seed/transfer support>=2: 20/20, 15/15
+per-run exact: 340/414
 redaction replay: pass, 0 prose-dependent exact rows in every cell
 typed-plan replay: pass, 0 unregistered exact plans in every cell
 source/provenance warnings: 0
@@ -672,17 +672,19 @@ ntsb_investigation_domain_v1
 
 ntsb_investigation_transfer_surface_001
   artifact root:
-    C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1
+    C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\ntsb-transfer-casualty-partition-r1
   settings:
     local LM Studio qwen/qwen3.6-35b-a3b, temperature=0, top_p=1.0,
     num_ctx=65536
   repeat:
     N=3, support>=2, lens-scoped bundle
-  current reducer-aligned manifest result:
-    19 / 25 expected, 0 / 15 supported forbidden
+  current scoped injury-count manifest result:
+    22 / 25 expected, 0 / 15 supported forbidden
     atom-shape blockers: 0
     registered-signature/lens-scope blockers: 0
-    unexpected typed rows: 19
+    unexpected same-signature rows at support>=2: 0
+  earlier reducer-aligned diagnostic:
+    19 / 25 expected
   earlier raw/no-reducer diagnostic:
     18 / 25 expected, unexpected typed rows: 23
 ```
@@ -694,9 +696,9 @@ Current NTSB per-layer read:
 | Wrapper / occurrence identity | `ntsb_report` 1/1, `ntsb_occurrence` 1/1, `ntsb_occurrence_time` 1/1 | Stable document/occurrence skeleton. |
 | Asset and party | `ntsb_vehicle` 2/2, `ntsb_party` 1/1 | Core vehicle/operator rows transfer; extra struck-object/driver rows appear as precision/adjudication targets, not promoted facts. |
 | Conditions | `ntsb_condition` 5/5 after R2 reducer replay | Categorical condition layer is strong after compact typed normalization. |
-| Timeline | `ntsb_timeline_event` 6/6 | Strong chronological event layer under lens-scoped compile. |
-| Safety action | `ntsb_safety_action` 2/3 | Roadway and after-action rows transfer; training actor/organization attachment remains unstable. |
-| Casualty | `ntsb_injury_count` 0/3 | Main numeric/table boundary in this transfer cell; not promoted despite earlier isolated-lens improvement. |
+| Timeline | `ntsb_timeline_event` 6/7 | Strong chronological event layer; the distress-call sequence-role row remains unstable. |
+| Safety action | `ntsb_safety_action` 3/3 | Roadway, after-action, and training rows transfer at support>=2 in the current manifest. |
+| Casualty | `ntsb_injury_count` 3/3 | Scoped injury-count partitions transfer after the contract clarified single-severity rows with zeroes for unstated severity slots. |
 | Findings / probable cause | `ntsb_finding` 0/2 | Open causal/probable-cause substance should abstain or remain lower tier unless a compact finding taxonomy transfers. |
 
 NTSB interventions that count as research mechanisms:
@@ -711,14 +713,15 @@ NTSB interventions that count as research mechanisms:
 
 NTSB open blockers:
 
-- keep casualty as a boundary until numeric injury-count rows reproduce inside
-  a fresh full lens-bundle transfer, not just an isolated lens;
+- keep casualty watched until another unlike NTSB transfer reproduces the
+  scoped injury-count partition contract;
 - do not promote findings/probable-cause rows without a compact finding schema
   and unlike-transfer evidence;
-- keep safety-action actor attachment as a targeted boundary, not a row-grind
-  campaign;
-- treat the 19/25 reducer-aligned manifest as deterministic boundary evidence,
-  while the earlier raw/no-reducer 18/25 view remains diagnostic history.
+- keep the remaining timeline sequence-role row as a targeted boundary, not a
+  row-grind campaign;
+- treat the 22/25 scoped injury-count manifest as deterministic boundary
+  evidence, while the earlier 19/25 reducer-aligned and 18/25 raw/no-reducer
+  views remain diagnostic history.
 
 ## SEC Detail
 

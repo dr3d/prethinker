@@ -53,11 +53,11 @@
     {
       "id": "ntsb_transfer_surface_001",
       "fixture_id": "ntsb_investigation_transfer_surface_001",
-      "description": "NTSB first unlike transfer raw union fact support.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\ntsb-transfer-surface-001-bundle-harness-r1",
+      "description": "NTSB first unlike transfer, rerun with scoped injury-count partition contract.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\ntsb_casualty_partition_contract_20260604\\ntsb-transfer-casualty-partition-r1",
       "expect": {
         "support.reference_count": 25,
-        "support.exact_support_ge_2": 19,
+        "support.exact_support_ge_2": 22,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

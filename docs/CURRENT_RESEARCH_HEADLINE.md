@@ -64,15 +64,16 @@ SEC Form 8-K skeleton pack
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary.
   latest governance artifact:
-    C:\prethinker_tmp_archive\sec_identifier_norm_20260604\gov_r2
-    13 governance checks passed, including `sec_value_axis_integrity` and
+    C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\gov_r3
+    14 governance checks passed, including full pytest,
+    `sec_value_axis_integrity`, and
     `compile_fact_qa_exclusions`; the standing manifest now prints
     same-signature unexpected support (`5` rows at support>=2 across all
     standing cells) as a precision diagnostic. A typed SEC identifier-value
     normalization pass raised only per-run exact support in transfer_002
     (commission-file/EIN punctuation loss), not support>=2. The current
-    standing compile-fact QA status is 119/138 expected facts at support>=2
-    and 337/414 deterministic per-run exact rows, with 0 prose-dependent exact
+    standing compile-fact QA status is 122/138 expected facts at support>=2
+    and 340/414 deterministic per-run exact rows, with 0 prose-dependent exact
     rows and 0 unregistered exact typed plans.
 
 FDA warning-letter pack
@@ -100,14 +101,16 @@ FDA warning-letter pack
 
 NTSB investigation pack
   seed micro: 13 / 13
-  first unlike transfer: 19 / 25 in the current reducer-aligned manifest;
+  first unlike transfer: 22 / 25 in the current scoped injury-count manifest;
     0 forbidden
   deterministic compile-fact QA over first unlike transfer:
-    57 / 75 per-run exact
-    19 / 25 support>=2
-    all 57 exact rows pass typed-plan replay and redaction replay
+    60 / 75 per-run exact
+    22 / 25 support>=2
+    all 60 exact rows pass typed-plan replay and redaction replay
   claim: boundary corroboration; wrapper, chronology, vehicles, and conditions
-    transfer more cleanly than casualty, safety-action, and findings substance
+    transfer more cleanly than findings/probable-cause substance; scoped
+    injury-count partitions now clear, while one timeline sequence-role row
+    remains unstable
 
 OSHA accident/inspection pack
   seed micro: 20 / 20 support>=2 after the high-arity registry intake fix
@@ -158,8 +161,8 @@ The next work should strengthen the research claim rather than lift one fixture:
 2. Keep the FDA v2 judged-QA result current and separated from messy-query
    claims; transfer_002 remains boundary evidence rather than a row-grinding
    target.
-3. Keep NTSB as corroborating boundary evidence, with manifest and reducer
-   replay numbers separated.
+3. Keep NTSB as corroborating boundary evidence, with the current scoped
+   injury-count manifest separated from older reducer-aligned diagnostics.
 4. Keep OSHA as fourth-family corroborating evidence inside the standing
    compile-fact QA manifest; do not turn the wrapper boundary into a grind
    target.

@@ -126,7 +126,7 @@
       "signature": "ntsb_injury_count/6",
       "args": ["occurrence_id", "subject_scope", "fatal_count", "serious_count", "minor_count", "source_or_scope"],
       "category": "ntsb_casualty_summary",
-      "notes": "Casualty table/count partition. Use separate fatal, serious, and minor integer slots; never pack the count triple into one atom. If the source states scope, use that scope rather than duplicate not_stated. No injury narratives or named-victim enumeration."
+      "notes": "Casualty table/count partition. Use separate fatal, serious, and minor integer slots; never pack the count triple into one atom. If the source states scope, use that scope rather than duplicate not_stated. Single-severity scoped injuries use 0 for the unstated severity slots. No injury narratives."
     },
     {
       "signature": "ntsb_timeline_event/6",

@@ -96,8 +96,8 @@ FDA warning-letter pack:
 
 NTSB investigation pack:
   seed micro 13 / 13
-  first unlike transfer 19 / 25 in the current reducer-aligned manifest
-  boundary: casualty, safety-action, and findings substance
+  first unlike transfer 22 / 25 in the current scoped injury-count manifest
+  boundary: one timeline sequence-role row and findings/probable-cause substance
 ```
 
 ## Current State
@@ -110,7 +110,8 @@ The short version:
   predicate profile, freeze the typed artifacts, then test hard-clean transfer
   on unlike same-family documents.
 - The active claim-bearing profiles are FDA warning letters, SEC Form 8-K
-  skeletons, and NTSB investigation skeleton/boundary probes.
+  skeletons, NTSB investigation skeleton/boundary probes, and OSHA
+  accident/inspection skeleton-table probes.
 - Query and compile must meet on governed typed atoms; source-record prose,
   display strings, and question-text regex routing are not allowed to carry a
   claim.
@@ -205,20 +206,22 @@ Current high-signal evidence:
   evidence, not messy-query competence; transfer_002 remains boundary evidence
   rather than a row-grinding target.
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
-  `19 / 25` in the current reducer-aligned manifest, `0` forbidden. The
-  manifest replays `57 / 75` per-run exact over the transfer, with every exact
+  `22 / 25` in the current scoped injury-count manifest, `0` forbidden. The
+  manifest replays `60 / 75` per-run exact over the transfer, with every exact
   row passing typed-plan and redaction replay. This shows the same
-  skeleton-vs-substance boundary under the current reducer-aligned gate.
+  skeleton-vs-substance boundary under the current gate: injury-count
+  partitions now clear, while findings/probable-cause substance and one
+  timeline sequence-role row remain unsupported.
 - OSHA accident/inspection domain pack: fourth-family skeleton probe from
   retained fixtures with `10` registered predicates and `4` lens-scoped
-  compile surfaces. Local LM Studio N=3 seed replay is `18 / 20`
-  support>=2; first unlike transfer is `12 / 15`, both with `0` supported
+  compile surfaces. Local LM Studio N=3 seed replay is `20 / 20`
+  support>=2; first unlike transfer is `15 / 15`, both with `0` supported
   forbidden rows and clean atom/lens gates. The standing compile-fact QA
-  manifest now replays those cells at `53 / 60` seed per-run exact and
-  `27 / 45` transfer per-run exact, with every exact row passing typed-plan and
+  manifest now replays those cells at `55 / 60` seed per-run exact and
+  `36 / 45` transfer per-run exact, with every exact row passing typed-plan and
   redaction replay. This is corroborating skeleton evidence, not a broad OSHA
-  pack claim; wrapper/establishment rows and one related-activity blank-value
-  boundary remain visible.
+  pack claim; one repeated source-true FTA penalty extra remains visible as an
+  unexpected precision/adjudication target.
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.
