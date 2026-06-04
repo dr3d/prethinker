@@ -51,6 +51,8 @@ SEC Form 8-K skeleton pack
       12 / 13, 0 / 10 supported forbidden
     R3 omission-accountability guard rescore:
       12 / 13, 0 / 10 supported forbidden; unexpected facts 2 -> 0
+    R4 fresh manifest refresh:
+      11 / 13, 0 / 10 supported forbidden; per-run exact 34 / 39
     axis/value/atom/lens gates clean in the repaired cells
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     12 / 13; 11 / 13; 11 / 12
@@ -62,12 +64,13 @@ SEC Form 8-K skeleton pack
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary.
   latest governance artifact:
-    C:\prethinker_tmp_archive\compile_fact_measurement_exclusions_20260604
+    C:\prethinker_tmp_archive\sec_axis_stability_20260604\current_research_governance_sec_r4_20260604_r2
     13 governance checks passed, including `sec_value_axis_integrity` and
     `compile_fact_qa_exclusions`; the SEC value-axis audit checked 29
-    item/exhibit/treatment facts with 0 issues, and the exclusion ledger
-    accounts for 15 associated domain fixtures not in the standing manifest.
-    This is guard tightening, not a support increase.
+    expected/forbidden item/exhibit/treatment facts with 0 issues, and the
+    exclusion ledger accounts for 15 associated domain fixtures not in the
+    standing manifest. This refresh is a colder provenance update, not a
+    support increase.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:

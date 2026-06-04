@@ -212,9 +212,11 @@ only from `exhibit_table_row_*` handles and cover-page IXBRL legal-treatment
 inference. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
 `11/13`, both with `0` supported forbidden and clean axis/value/atom gates. A
 pre-registered stability rerun then landed at `12/13`, again with `0`
-supported forbidden and clean atom/signature/lens/value-axis gates. Treat this
-as a same-condition `11-12/13` band, not a fixed single score. Do not use the
-older SEC cells as a pristine methods-anchor claim without this caveat. A
+supported forbidden and clean atom/signature/lens/value-axis gates. A later
+fresh r4 manifest refresh landed at `11/13`, `0/10` supported forbidden, and
+`34/39` per-run exact. Treat this as a same-condition `11-12/13` band, not a
+fixed single score. Do not use the older SEC cells as a pristine methods-anchor
+claim without this caveat. A
 repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
 supported forbidden and clean atom/lens gates. The remaining boundary is
@@ -225,10 +227,11 @@ guard now blocks/drops contradictory SEC signatory omissions and unregistered
 omission kind/reason triples; rescoring the repaired transfer_003 stability
 artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
 same-signature facts dropped from 2 to 0.
-The latest guard artifact is
-`C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604`; its fixture
-value-axis audit checked 29 SEC item/exhibit/treatment facts with 0 issues.
-This is governance cleanup, not a support lift.
+The latest guard and manifest artifacts are
+`C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604` and
+`C:\prethinker_tmp_archive\sec_axis_stability_20260604`; the latest full
+governance run passed 13 checks. This is governance cleanup and colder
+provenance refresh, not a support lift.
 
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,
