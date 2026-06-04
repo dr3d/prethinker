@@ -37,7 +37,7 @@ sec_form_8k_skeleton_transfer_002
 sec_form_8k_skeleton_transfer_003
 ```
 
-Current reference measurement:
+Historical pre-axis-repair reference measurement:
 
 ```text
 support>=2: 50 / 50
@@ -46,6 +46,12 @@ forbidden support: 0
 redaction replay: 144 / 144 exact rows survive
 typed-plan replay: 144 / 144 exact rows replay through registered carriers
 ```
+
+Current repaired SEC transfer_003 measurement is lower (`12/13` then `11/13`
+under Qwen MoE) because the schema now separates item structure, item legal
+treatment, and exhibit legal treatment. Use the historical measurement only as
+the baseline that motivated the model-variance diagnostic, not as today's
+axis-clean claim.
 
 Query anchor:
 
@@ -448,3 +454,13 @@ Read: `sec_filing_item/5.item_role` mixes structural item role with legal
 treatment (`furnished`), and `sec_exhibit/5.exhibit_role` mixes legal treatment
 with content format (`embedded_ixbrl`). The right next step is schema repair
 under the Qwen MoE reference path, not another model substitution arm.
+
+Repair follow-up, same date: the SEC schema was split so
+`sec_filing_item/5.item_role` is structural only,
+`sec_filing_item_treatment/4` carries source-stated item legal treatment, and
+`sec_exhibit/5.exhibit_role` carries exhibit legal treatment. A typed guard now
+blocks Item 9.01 item-treatment misattachments. Repaired Qwen MoE
+transfer_003 reruns landed at `12/13` and then `11/13`, both with `0`
+supported forbidden and clean axis/value/atom gates. The current comparison
+target is therefore not the old `12/12` SEC cell; it is the repaired schema
+with an unstable item-treatment row.

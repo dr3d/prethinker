@@ -312,6 +312,21 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.extend(["", "## Source Warnings", ""])
         lines.extend(f"- `{warning}`" for warning in warnings)
         lines.append("")
+    described_cells = [cell for cell in report["cells"] if cell.get("description")]
+    if described_cells:
+        lines.extend(
+            [
+                "",
+                "## Cell Notes",
+                "",
+                "| Cell | Note |",
+                "| --- | --- |",
+            ]
+        )
+        for cell in described_cells:
+            note = str(cell["description"]).replace("|", "\\|")
+            lines.append(f"| `{cell['id']}` | {note} |")
+        lines.append("")
     return "\n".join(lines) + "\n"
 
 

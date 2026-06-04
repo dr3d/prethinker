@@ -72,9 +72,14 @@ skeleton anatomy can stabilize under closed, lens-scoped predicate packs:
 
 ```text
 SEC Form 8-K skeleton pack:
-  seed micro 13 / 13
-  three unlike transfers: 13 / 13, 12 / 12, 12 / 12
-  forbidden support: 0 in all claim-bearing cells
+  historical pre-axis-repair cells:
+    seed micro 13 / 13; transfers 13 / 13, 12 / 12, 12 / 12
+  current axis-clean schema:
+    item structure, item legal treatment, and exhibit legal treatment are split
+    transfer_003 repaired reruns: 12 / 13 then 11 / 13
+    forbidden support: 0 in repaired cells
+  boundary: unstable item-treatment recall and ordinary MoE wrapper jitter;
+    SEC is useful skeleton evidence, not a pristine methods anchor
 
 FDA warning-letter pack:
   deterministic judged-QA v2: 137 / 159 exact
@@ -182,12 +187,15 @@ model/settings metadata.
 
 Current high-signal evidence:
 
-- SEC Form 8-K skeleton domain pack: seed micro `13 / 13`; three unlike
-  retained transfers `13 / 13`, `12 / 12`, and `12 / 12`, with `0` supported
-  forbidden rows and clean atom/lens governance in claim-bearing cells. A
-  deterministic compile-fact QA replay over the seed plus three transfers is
-  `144 / 150` per-run exact and `50 / 50` support>=2, with every exact row
-  passing typed-plan and redaction replay.
+- SEC Form 8-K skeleton domain pack: historical pre-axis-repair retained cells
+  were seed `13 / 13` and three transfers `13 / 13`, `12 / 12`, and `12 / 12`.
+  A later value-axis audit split item structure, item legal treatment, and
+  exhibit legal treatment. The current manifest-backed compile-fact QA status
+  now reports SEC at `46 / 51` support>=2 and `135 / 153` per-run exact with
+  `0` prose-dependent exact rows and `0` unregistered typed plans. Repaired
+  transfer_003 reruns landed at `12 / 13` then `11 / 13`, both with `0`
+  supported forbidden; this is boundary-aware skeleton evidence, not the old
+  pristine anchor claim.
 - FDA warning-letter domain pack: deterministic judged-QA v2 across
   transfer_001 and transfer_002 is `137 / 159` exact; all `137` exact rows pass
   typed-plan replay and redaction replay. This is compile-fact transfer

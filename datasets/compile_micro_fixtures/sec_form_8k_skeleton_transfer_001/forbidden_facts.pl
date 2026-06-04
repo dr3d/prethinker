@@ -4,5 +4,5 @@ sec_registrant_identifier(Filing, servicenow_inc, identifier_bundle, file_001_35
 sec_registrant_identifier(Filing, Registrant, cik, CikValue, SrcCik).
 sec_filing_item(Filing, item_5_02, employment_agreement_amendment_with_william_r_mcdermott_and_executive_severance_policy_terms, substantive, SrcItem502).
 sec_exhibit(Filing, exhibit_10_1, amendment_no_3_to_employment_agreement_between_the_registrant_and_william_r_mcdermott, filed, SrcExhibit101).
-sec_exhibit(Filing, exhibit_104, cover_page_interactive_data_file_the_cover_page_xbrl_tags_are_embedded_within_the_inline_xbrl_document, embedded_ixbrl, SrcExhibit104).
+sec_exhibit(Filing, exhibit_104, cover_page_interactive_data_file_the_cover_page_xbrl_tags_are_embedded_within_the_inline_xbrl_document, not_stated, SrcExhibit104).
 sec_signatory(Filing, servicenow_inc_by_s_russell_s_elmer_russell_s_elmer_general_counsel_date_december_23_2025, general_counsel, v_2025_12_23, SrcSignature).

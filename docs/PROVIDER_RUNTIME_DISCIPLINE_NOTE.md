@@ -411,7 +411,11 @@ robustness claim is therefore not established. A follow-up SEC value-axis audit
 then found the expected item/exhibit facts themselves mix axes in
 `sec_filing_item/5.item_role` and `sec_exhibit/5.exhibit_role`; the model
 excursion should therefore be read as a schema-contract diagnostic, not as a
-reason to keep shopping models.
+reason to keep shopping models. The same-day schema repair split item
+structure, item legal treatment, and exhibit legal treatment; repaired Qwen MoE
+transfer_003 reruns landed at `12/13` and `11/13` with clean axis/value/atom
+gates. The remaining SEC comparison target is an unstable item-treatment row,
+not the old pre-repair `12/12` cell.
 
 The cell also exposed a local metadata bug: when the harness used a `/v1`
 base URL, the LM Studio metadata helper appended another `/v1` and therefore

@@ -38,6 +38,7 @@
       "purpose": "Form 8-K item headings and their structural roles.",
       "allowed_signatures": [
         "sec_filing_item/5",
+        "sec_filing_item_treatment/4",
         "domain_omission/5"
       ]
     },
@@ -105,7 +106,18 @@
         "source_or_scope"
       ],
       "category": "sec_filing_item",
-      "notes": "Preserves one Form 8-K item heading as compact structural anatomy, not the body text. Item roles and allowed item kinds are governed by the carrier contract."
+      "notes": "Preserves one Form 8-K item heading as compact structural anatomy, not the body text. item_role is structural only. Source-stated filed/furnished/not-filed legal treatment belongs in sec_filing_item_treatment/4."
+    },
+    {
+      "signature": "sec_filing_item_treatment/4",
+      "args": [
+        "filing_id",
+        "item_code",
+        "item_treatment",
+        "source_or_scope"
+      ],
+      "category": "sec_filing_item_treatment",
+      "notes": "Preserves source-stated legal treatment for a Form 8-K item or item information, such as furnished or not_deemed_filed. Attach treatment statements in Item 2.02 or Item 7.01 bodies to those substantive items, not to Item 9.01 merely because an exhibit table lists the same exhibit. Does not replace the structural sec_filing_item/5 row."
     },
     {
       "signature": "sec_exhibit/5",
@@ -117,7 +129,7 @@
         "source_or_scope"
       ],
       "category": "sec_exhibit",
-      "notes": "Preserves one exhibit table row with compact number, kind, and role; policy/plan rows use other_exhibit unless a narrower closed kind exists."
+      "notes": "Preserves one exhibit table row with compact number, kind, and legal-treatment role. Cover-page Inline XBRL is carried by exhibit_kind=cover_page_ixbrl; exhibit_role uses not_stated unless the source states filed, furnished, or incorporated_by_reference."
     },
     {
       "signature": "sec_signatory/5",

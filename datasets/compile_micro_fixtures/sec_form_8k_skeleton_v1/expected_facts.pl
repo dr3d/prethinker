@@ -13,6 +13,6 @@ sec_filing_item(Filing, item_2_03, direct_financial_obligation, substantive, Src
 sec_filing_item(Filing, item_9_01, financial_statements_exhibits, exhibit, SrcItem901).
 
 sec_exhibit(Filing, exhibit_10_1, agreement, filed, SrcExhibit101).
-sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, embedded_ixbrl, SrcExhibit104).
+sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, not_stated, SrcExhibit104).
 
 sec_signatory(Filing, lydia_a_gavalis, general_counsel_and_secretary, v_2025_10_06, SrcSignature).

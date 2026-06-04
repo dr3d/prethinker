@@ -13,6 +13,6 @@ sec_filing_item(Filing, item_9_01, financial_statements_exhibits, exhibit, SrcIt
 
 sec_exhibit(Filing, exhibit_10_1, agreement, filed, SrcExhibit101).
 sec_exhibit(Filing, exhibit_10_2, other_exhibit, filed, SrcExhibit102).
-sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, embedded_ixbrl, SrcExhibit104).
+sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, not_stated, SrcExhibit104).
 
 sec_signatory(Filing, russell_s_elmer, general_counsel, v_2025_12_23, SrcSignature).

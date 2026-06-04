@@ -6,11 +6,11 @@ This report does not read source prose, QA questions, or judge outputs.
 ## Summary
 
 - Domains: `4`
-- Predicates: `50` (`46` domain-specific plus shared carriers)
+- Predicates: `51` (`47` domain-specific plus shared carriers)
 - Lenses: `24`
 - Associated fixtures: `23`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `491`
+- Expected facts in associated fixtures: `492`
 - Forbidden facts in associated fixtures: `174`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 291 | 79 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 110 | 35 |
-| `sec_form_8k_v1` | 7 | 6 | 4 | 5 | 51 | 31 |
+| `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 31 |
 
 ## fda_warning_letter_v1
 
@@ -117,8 +117,8 @@ This report does not read source prose, QA questions, or judge outputs.
 ## sec_form_8k_v1
 
 - Registry: `datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json`
-- Predicates: `7`
-- Domain-specific predicates: `6`
+- Predicates: `8`
+- Domain-specific predicates: `7`
 - Lenses: `4`
 - Accountability requirements: `1`
 
@@ -127,7 +127,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Lens | Allowed signatures |
 | --- | --- |
 | `wrapper` | `sec_filing/6`, `sec_registrant/4`, `sec_registrant_identifier/5`, `domain_omission/5` |
-| `items` | `sec_filing_item/5`, `domain_omission/5` |
+| `items` | `sec_filing_item/5`, `sec_filing_item_treatment/4`, `domain_omission/5` |
 | `exhibits` | `sec_exhibit/5`, `domain_omission/5` |
 | `signature` | `sec_signatory/5`, `domain_omission/5` |
 
@@ -138,7 +138,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `sec_form_8k_signature_omission_v1` | `manifest_domain_profile` | 1 | 1 | `domain_omission/5`:1 |
 | `sec_form_8k_skeleton_transfer_001` | `manifest_domain_profile` | 13 | 8 | `sec_exhibit/5`:3, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_transfer_002` | `manifest_domain_profile` | 12 | 6 | `sec_exhibit/5`:1, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:6, `sec_signatory/5`:1 |
-| `sec_form_8k_skeleton_transfer_003` | `fixture_id_prefix` | 12 | 10 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
+| `sec_form_8k_skeleton_transfer_003` | `fixture_id_prefix` | 13 | 10 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_filing_item_treatment/4`:1, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_v1` | `manifest_domain_profile` | 13 | 6 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:3, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 
 ## Unassigned Typed Micro-Fixtures

@@ -191,6 +191,18 @@ documents without prose-shaped slots. The compiler atom-shape gate was also
 aligned with the external audit so numeric-leading registered-carrier atoms are
 dropped in-path rather than merely reported after the run.
 
+SEC Form 8-K is the third fixture-bank candidate under review. Current status
+update, 2026-06-04: the old SEC `13/13, 13/13, 12/12, 12/12` cells below are
+historical pre-axis-repair measurements. A later value-axis audit found mixed
+item/exhibit role semantics. The schema now splits item structure
+(`sec_filing_item/5`), item legal treatment
+(`sec_filing_item_treatment/4`), and exhibit legal treatment
+(`sec_exhibit/5`), with a typed guard against Item 9.01 item-treatment
+misattachments. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
+`11/13`, both with `0` supported forbidden and clean axis/value/atom gates. Do
+not use the older SEC cells as a pristine methods-anchor claim without this
+caveat.
+
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,
 item headings, exhibits, and signature block. It is a methodology probe for the
@@ -366,7 +378,8 @@ Before the next technical claim:
 
 1. Keep FDA as the primary case study and keep the per-layer boundary table
    current before reopening any row-level lane.
-2. Preserve SEC Form 8-K as the clean skeleton-pack methodology example.
+2. Preserve SEC Form 8-K as a boundary-aware skeleton-pack case study unless
+   the repaired axis-clean schema reproduces beyond the current treatment row.
 3. Use NTSB as boundary evidence for what transfers, what abstains, and what
    becomes lower tier.
 4. Keep OSHA as fourth-family corroboration for skeleton/table transfer and

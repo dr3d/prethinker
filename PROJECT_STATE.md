@@ -68,20 +68,25 @@ them.
 
 ```text
 SEC Form 8-K skeleton pack
-  seed micro: 13 / 13
-  transfer_001: 13 / 13
-  transfer_002: 12 / 12
-  transfer_003: 12 / 12
-  forbidden support: 0 in all claim-bearing cells
-  value-axis caveat: a 2026-06-04 SEC value-axis audit found 5 issues in the
-    expected SEC item/exhibit facts themselves: Exhibit 104 expectations put
-    `embedded_ixbrl` in `exhibit_role`, and transfer_003 puts `furnished` in
-    `item_role`. The retained Qwen MoE transfer_003 artifact shows the same
-    mixed-axis pattern.
-  read: strongest current methods example that a small closed skeleton pack
-    can transfer across unlike same-family official documents, but not a
-    pristine axis-clean schema until the SEC item/exhibit role slots are split
-    or redefined and re-run under the Qwen MoE reference path.
+  historical pre-axis-repair cells:
+    seed micro: 13 / 13
+    transfer_001: 13 / 13
+    transfer_002: 12 / 12
+    transfer_003: 12 / 12
+  current axis-clean schema:
+    `sec_filing_item/5.item_role` is structural only
+    `sec_filing_item_treatment/4` carries source-stated item legal treatment
+    `sec_exhibit/5.exhibit_role` is legal treatment only
+    Item 9.01 item-treatment misattachments are blocked by typed governance
+  repaired transfer_003 Qwen MoE reruns:
+    R1: 12 / 13, 0 / 11 supported forbidden, clean axis/value/atom gates
+    R2 after treatment-contract tightening and typed Item 9.01 guard:
+      11 / 13, 0 / 10 supported forbidden, clean axis/value/atom gates
+  read: SEC remains useful evidence that small closed skeleton packs transfer,
+    but the formal SEC methods-anchor claim is no longer the old 12/12 cell.
+    The current honest boundary is unstable `sec_filing_item_treatment/4`
+    recall plus ordinary MoE wrapper jitter; do not inflate it with prompt
+    polishing.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -169,6 +174,8 @@ Atom-library query grounding
       atom-shape, and lens-scope all clean; 3 unexpected same-signature facts
     Qwen reference for the same cell:
       12 / 12 support>=2; 0 / 10 supported forbidden; 1 unexpected fact
+      (historical pre-axis-repair reference; current repaired transfer_003
+      reruns are 12 / 13 and 11 / 13)
     read: dense controls can stay inside the closed SEC language, but they did
       not reproduce the SEC compile cell cleanly. The model-swap robustness
       claim is therefore not established; dirty rows are SEC role/key semantics
@@ -230,8 +237,9 @@ explain the current falsifiable result:
 - keep `docs/DOMAIN_ACCOUNTABILITY_STATUS.md` regenerated from
   `scripts/summarize_domain_accountability_status.py` so omission requirements,
   fixture coverage, and fixture-only omission patterns are visible;
-- repair the SEC item/exhibit value-axis caveat before treating SEC as the
-  formal methods example;
+- treat SEC as a boundary-aware skeleton case study until the repaired
+  axis-clean schema reproduces beyond the current transfer_003
+  item-treatment-recall boundary;
 - keep FDA as the richer case study with both positive transfer and boundary
   evidence;
 - keep NTSB as corroborating boundary evidence, not as a new grind target;

@@ -459,6 +459,15 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "officer_departure_appointment" in item["value_domains"]["item_kind"]
     assert "substantive" in item["value_domains"]["item_role"]
 
+    treatment = carrier_contract("sec_filing_item_treatment/4")
+    assert treatment is not None
+    assert treatment["args"] == ["filing_id", "item_code", "item_treatment", "source_or_scope"]
+    treatment_text = " ".join(treatment["contract"] + treatment["forbidden_uses"])
+    assert "Item 2.02 or Item 7.01" in treatment_text
+    assert "not to Item 9.01" in treatment_text
+    assert "exhibit-row treatment belongs in sec_exhibit/5" in treatment_text
+    assert "furnished" in treatment["value_domains"]["item_treatment"]
+
     assert exhibit is not None
     assert exhibit["args"] == ["filing_id", "exhibit_number", "exhibit_kind", "exhibit_role", "source_or_scope"]
     exhibit_text = " ".join(exhibit["contract"] + exhibit["forbidden_uses"])

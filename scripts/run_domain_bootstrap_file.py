@@ -11182,6 +11182,14 @@ def _carrier_value_tuple_issue(signature: str, args: list[str], arg_names: list[
             value = str(args[index] or "").strip().strip("'\"")
             if value and re.match(r"^\d", value):
                 return ("identifier_value", args[index], "identifier_numeric_leading")
+    if signature == "sec_filing_item_treatment/4":
+        values = {
+            arg_name: args[index]
+            for index, arg_name in enumerate(arg_names)
+            if index < len(args)
+        }
+        if values.get("item_code") == "item_9_01":
+            return ("item_code", values["item_code"], "exhibit_item_treatment_misattached")
     return "", "", ""
 
 

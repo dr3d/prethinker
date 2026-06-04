@@ -27,6 +27,7 @@ ITEM_STRUCTURAL_ROLES = {
 ITEM_TREATMENT_VALUES = {
     "filed",
     "furnished",
+    "incorporated_by_reference",
     "not_deemed_filed",
     "not_stated",
 }
@@ -103,6 +104,9 @@ def build_report(
             elif parsed["predicate"] == "sec_exhibit" and len(parsed["args"]) == 5:
                 checked_fact_count += 1
                 issues.extend(_audit_sec_exhibit(source, fact, parsed["args"]))
+            elif parsed["predicate"] == "sec_filing_item_treatment" and len(parsed["args"]) == 4:
+                checked_fact_count += 1
+                issues.extend(_audit_sec_filing_item_treatment(source, fact, parsed["args"]))
 
     return {
         "schema_version": "sec_value_axis_integrity_audit_v1",
@@ -124,7 +128,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Sources: `{summary['sources']}`",
         f"- Facts: `{summary['fact_count']}`",
-        f"- Checked SEC item/exhibit facts: `{summary['checked_sec_fact_count']}`",
+        f"- Checked SEC item/exhibit/treatment facts: `{summary['checked_sec_fact_count']}`",
         f"- Issues: `{summary['issue_count']}`",
         f"- Status: `{summary['status']}`",
         "",
@@ -198,6 +202,37 @@ def _audit_sec_exhibit(source: dict[str, Any], fact: str, args: list[str]) -> li
                 slot="exhibit_role",
                 value=role,
                 issue="unknown_exhibit_role_axis",
+                expected_axis="legal_treatment",
+            )
+        )
+    return issues
+
+
+def _audit_sec_filing_item_treatment(source: dict[str, Any], fact: str, args: list[str]) -> list[dict[str, Any]]:
+    item_code = _normalize_arg(args[1])
+    treatment = _normalize_arg(args[2])
+    issues: list[dict[str, Any]] = []
+    if item_code == "item_9_01":
+        issues.append(
+            _issue(
+                source=source,
+                fact=fact,
+                predicate="sec_filing_item_treatment/4",
+                slot="item_code",
+                value=item_code,
+                issue="exhibit_item_treatment_misattached",
+                expected_axis="substantive_item_treatment",
+            )
+        )
+    if treatment not in ITEM_TREATMENT_VALUES:
+        issues.append(
+            _issue(
+                source=source,
+                fact=fact,
+                predicate="sec_filing_item_treatment/4",
+                slot="item_treatment",
+                value=treatment,
+                issue="unknown_item_treatment_axis",
                 expected_axis="legal_treatment",
             )
         )
