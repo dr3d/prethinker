@@ -502,6 +502,23 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     signatory_text = " ".join(signatory["contract"] + signatory["forbidden_uses"])
     assert "full_signature_block" in signatory_text
 
+    event = carrier_contract("sec_material_event/6")
+    assert event is not None
+    assert event["args"] == [
+        "filing_id",
+        "event_id",
+        "event_kind",
+        "event_subject",
+        "event_date",
+        "source_or_scope",
+    ]
+    event_text = " ".join(event["contract"] + event["forbidden_uses"])
+    assert "fenced SEC event lens" in event_text
+    assert "must not be the event paragraph" in event_text
+    assert "Do not add this carrier to the promoted SEC skeleton profile" in event_text
+    assert "body_summary" in event_text
+    assert "material_definitive_agreement" in event["value_domains"]["event_kind"]
+
 
 def test_ntsb_domain_profile_registry_matches_registered_contracts() -> None:
     registry_path = REPO_ROOT / "datasets" / "domain_profiles" / "ntsb_investigation_v1" / "ontology_registry.json"

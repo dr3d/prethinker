@@ -238,6 +238,14 @@ same-signature rows as a standing precision diagnostic. This is governance
 cleanup, colder provenance refresh, and precision visibility, not a support
 lift.
 
+A fenced SEC event-substance probe then registered `sec_material_event/6` in
+the global carrier contract registry but did not offer it in the promoted SEC
+skeleton profile. A temporary seed profile with one extra `event_substance_probe`
+lens landed at `12/13` skeleton support and `0/6` supported forbidden with
+clean atom/lens gates, while the emitted event rows varied across runs and had
+no support>=2 row. This is negative evidence for promoting an SEC event carrier
+from the seed alone; keep the skeleton profile frozen.
+
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,
 item headings, exhibits, and signature block. It is a methodology probe for the

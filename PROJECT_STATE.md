@@ -93,6 +93,12 @@ SEC Form 8-K skeleton pack
     seed: 12 / 13, 0 / 6 supported forbidden, clean atom/lens gates
     transfer_001: 11 / 13, 0 / 8 supported forbidden, clean atom/lens gates
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
+  fenced event-substance probe:
+    `sec_material_event/6` is registered for experiments but not offered by the
+      promoted SEC skeleton profile
+    seed probe with a temporary event lens: 12 / 13 skeleton support, 0 / 6
+      supported forbidden, clean atom/lens gates; event-substance rows did not
+      reproduce at support>=2
   read: SEC remains useful evidence that small closed skeleton packs transfer,
     but the formal SEC methods-anchor claim is no longer the old 12/12 cell.
     The current honest boundary is exhibit legal-treatment ambiguity, wrapper

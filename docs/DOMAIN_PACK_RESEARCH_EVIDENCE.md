@@ -830,6 +830,11 @@ SEC interventions that count as research mechanisms:
   `domain_omission/5` kind/reason triples and drop contradictory SEC signatory
   omissions when an emitted `sec_signatory/5` already exists for the same
   filing.
+- fenced event-substance contract registration: `sec_material_event/6` is
+  available for explicit experiments but is not offered by the promoted SEC
+  skeleton profile. The first temporary seed probe kept skeleton support at
+  `12/13` with `0/6` supported forbidden and clean atom/lens gates, but
+  `sec_material_event/6` rows did not reproduce at support>=2.
 
 SEC interventions that were not used:
 
@@ -837,7 +842,7 @@ SEC interventions that were not used:
 - no source-prose parsing;
 - no fixture-name or company-specific reducer;
 - no posthoc rewrite of unsupported facts into expected facts;
-- no event-substance carrier;
+- no event-substance carrier in the promoted SEC skeleton profile;
 - no prompt-polishing claim from the unstable item-treatment row.
 
 ## What This Supports

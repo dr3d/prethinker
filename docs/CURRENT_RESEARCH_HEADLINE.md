@@ -62,7 +62,10 @@ SEC Form 8-K skeleton pack
     ambiguity, wrapper/telephone recall, duplicate commission-file value, and
     MoE jitter plus unstable item-treatment recall, not prose leakage. Bad
     SEC omission-accounting rows are now guarded as governance noise rather
-    than counted as an open support boundary.
+    than counted as an open support boundary. The fenced
+    `sec_material_event/6` seed probe kept skeleton support at 12 / 13 but
+    produced no event row at support>=2, so the promoted skeleton profile
+    remains event-substance-free.
   latest governance artifact:
     C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\gov_r3
     14 governance checks passed, including full pytest,
