@@ -283,7 +283,7 @@ architecture repair.
 The only current decoding hypothesis worth carrying forward is source-fidelity
 pressure from `top_p`.
 
-Current observed defaults:
+Legacy observed defaults from the variance investigation:
 
 ```text
 temperature: 0.0
@@ -307,7 +307,7 @@ If tested, run only the smallest useful A/B:
 
 1. Freeze code, model slug, provider path, source corpus, prompt/schema
    versions, cache policy, and judge settings.
-2. Compare current `top_p=0.82` against `top_p=1.0`.
+2. Compare legacy `top_p=0.82` against the current claim-lane `top_p=1.0`.
 3. Do not treat `top_k` as an OpenRouter/LM Studio audit-lane lever unless the
    payload actually sends it; on recent measured paths it was a no-op.
 4. Keep thinking/reasoning off for benchmark claims. If thinking is tested,

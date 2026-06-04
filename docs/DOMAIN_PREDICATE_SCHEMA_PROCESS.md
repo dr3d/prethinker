@@ -552,7 +552,7 @@ python scripts\audit_kb_atom_inventory.py --compile-root PATH --enforce-atom-sha
 python scripts\summarize_typed_micro_series.py --fixture FIXTURE_ID --support-threshold 2 --matcher constant_slot --enforce-supported --enforce-no-forbidden --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
 python scripts\audit_typed_plan_replay.py --qa-json PATH --compile-root PATH
 python scripts\audit_redaction_replay.py --qa-json PATH
-python scripts\audit_reference_judge_null_controls.py --qa-json PATH
+python scripts\audit_reference_judge_null_controls.py PATH
 python scripts\run_domain_transfer_gate.py --fixture FIXTURE_ID --compile-root COMPILE_ROOT --compile-json RUN1 --compile-json RUN2 --compile-json RUN3
 ```
 

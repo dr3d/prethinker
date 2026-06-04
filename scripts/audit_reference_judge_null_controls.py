@@ -43,7 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", default="https://openrouter.ai/api/v1")
     parser.add_argument("--timeout", type=int, default=420)
     parser.add_argument("--temperature", type=float, default=0.0)
-    parser.add_argument("--top-p", type=float, default=0.82)
+    parser.add_argument("--top-p", type=float, default=1.0)
     parser.add_argument("--max-tokens", type=int, default=900)
     parser.add_argument("--api-key", default=openrouter_api_key())
     parser.add_argument("--out-json", type=Path, default=None)
