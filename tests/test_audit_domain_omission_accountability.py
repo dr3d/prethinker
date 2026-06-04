@@ -164,6 +164,26 @@ def test_domain_omission_accountability_blocks_sec_signature_omission_contradict
     assert report["rows"][0]["carrier_signature"] == "sec_signatory/5"
 
 
+def test_domain_omission_accountability_blocks_sec_dummy_signatory_with_omission(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "sec_signatory(filing_1, not_stated, not_stated, not_stated, src_signature).",
+                "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_signature).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "sec_signatory/5"
+    assert report["rows"][0]["fact"].startswith("sec_signatory(")
+
+
 def test_domain_omission_accountability_blocks_osha_accident_omission_contradiction(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",
@@ -193,6 +213,44 @@ def test_domain_omission_accountability_allows_osha_accident_omission_different_
                 "domain_omission(accident_1, 'osha_accident/7', none_found, accident_summary_not_stated, source_inspection_detail).",
                 "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, source_accident_report).",
                 "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, source_accident_report).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["blocker_count"] == 0
+
+
+def test_domain_omission_accountability_blocks_ntsb_report_omission_contradiction(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
+                "ntsb_report(report_not_stated, preliminary_report, preliminary, v_2026_03_03, src_missing_report_id).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "ntsb_report/5"
+    assert report["rows"][0]["fact"].startswith("ntsb_report(")
+
+
+def test_domain_omission_accountability_allows_ntsb_report_omission_different_scope(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
+                "ntsb_report(report_123, final_report, final, v_2026_04_01, src_final_report).",
             ],
             notes=[],
         ),

@@ -139,6 +139,17 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                     "self_check_omission_notes": [],
                 }
             )
+        for fact in _ntsb_report_omission_contradictions(facts):
+            rows.append(
+                {
+                    "fixture": path.parent.name,
+                    "compile_json": str(path),
+                    "class": "domain_omission_contradicts_emitted_carrier",
+                    "fact": fact,
+                    "carrier_signature": "ntsb_report/5",
+                    "self_check_omission_notes": [],
+                }
+            )
         if _self_check_omission_requires_domain_omission(data):
             omission_notes = [
                 text
@@ -264,7 +275,8 @@ def _ordinary_omission_placeholder(fact: str) -> str:
 
 
 def _sec_signature_omission_contradictions(facts: list[str]) -> list[str]:
-    filings_with_signatory: set[str] = set()
+    filings_with_real_signatory: set[str] = set()
+    omitted_signature_scopes: set[tuple[str, str]] = set()
     parsed_facts: list[tuple[str, list[str], str]] = []
     for fact in facts:
         match = FACT_RE.match(str(fact).strip())
@@ -273,21 +285,42 @@ def _sec_signature_omission_contradictions(facts: list[str]) -> list[str]:
         predicate = match.group(1)
         args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
         parsed_facts.append((predicate, args, fact))
-        if predicate == "sec_signatory" and len(args) == 5 and args[0]:
-            filings_with_signatory.add(args[0])
+        if predicate == "sec_signatory" and len(args) == 5 and args[0] and not _sec_signatory_is_not_stated(args):
+            filings_with_real_signatory.add(args[0])
+        elif (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[1] == "sec_signatory/5"
+            and args[2] == "role_missing"
+            and args[3] == "signature_block_not_stated"
+            and args[0]
+            and args[4]
+        ):
+            omitted_signature_scopes.add((args[0], args[4]))
 
     out: list[str] = []
     for predicate, args, fact in parsed_facts:
         if (
             predicate == "domain_omission"
             and len(args) == 5
-            and args[0] in filings_with_signatory
+            and args[0] in filings_with_real_signatory
             and args[1] == "sec_signatory/5"
             and args[2] == "role_missing"
             and args[3] == "signature_block_not_stated"
         ):
             out.append(fact)
+        elif (
+            predicate == "sec_signatory"
+            and len(args) == 5
+            and _sec_signatory_is_not_stated(args)
+            and (args[0], args[4]) in omitted_signature_scopes
+        ):
+            out.append(fact)
     return out
+
+
+def _sec_signatory_is_not_stated(args: list[str]) -> bool:
+    return len(args) == 5 and all(_normalize_arg(value) == "not_stated" for value in args[1:4])
 
 
 def _osha_accident_omission_contradictions(facts: list[str]) -> list[str]:
@@ -326,6 +359,33 @@ def _osha_accident_omission_contradictions(facts: list[str]) -> list[str]:
         elif predicate == "osha_injured_employee" and len(args) == 7 and (
             (args[0], args[6]) in contradicted_accidents_by_scope or (args[0], args[6]) in omitted_subjects_by_scope
         ):
+            out.append(fact)
+    return out
+
+
+def _ntsb_report_omission_contradictions(facts: list[str]) -> list[str]:
+    omitted_sources: set[str] = set()
+    parsed_facts: list[tuple[str, list[str], str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match:
+            continue
+        predicate = match.group(1)
+        args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+        parsed_facts.append((predicate, args, fact))
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[1] == "ntsb_report/5"
+            and args[2] == "role_missing"
+            and args[3] == "report_identifier_not_stated"
+            and args[4]
+        ):
+            omitted_sources.add(args[4])
+
+    out: list[str] = []
+    for predicate, args, fact in parsed_facts:
+        if predicate == "ntsb_report" and len(args) == 5 and args[4] in omitted_sources:
             out.append(fact)
     return out
 
