@@ -47,7 +47,7 @@ dataset label. Promote only when the principle survives unlike probes.
 | 4 | Atom-shape and carrier governance | Can compiled atoms stay compact, typed, and contract-governed instead of hiding prose in names or slots? | `scripts/audit_kb_atom_inventory.py`, carrier registry |
 | 5 | Fixture-bank predicate packs | Which retained official-document families can become closed, lens-scoped predicate packs without collecting new documents or grinding rows? | `docs/DOMAIN_PACK_STATUS.md`, `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`, `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`, domain registries |
 | 6 | Overlay discipline | Can ACH and future lenses read compiled evidence without mutating KB truth, QA verdicts, or compile metrics? | `docs/OVERLAY_ARCHITECTURE.md`, `docs/ACH_OVERLAY_PROBE.md` |
-| 7 | Provider/runtime discipline | Which model/provider/settings conditions are comparable enough for claims? | `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md` |
+| 7 | Provider/runtime discipline | Which model/provider/settings conditions are comparable enough for claims? | `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`, `docs/MODEL_VARIANCE_PRE_REGISTRATION_20260604.md` |
 | 8 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete claims or generated artifact strata? | `README.md`, `docs/PUBLIC_DOCS_GUIDE.md` |
 
 ## Current Architecture Pressure

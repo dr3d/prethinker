@@ -326,3 +326,18 @@ If tested, run only the smallest useful A/B:
 Stop the settings lane if movement is uniform, random, or mostly churn between
 previously exact rows. The goal is not to tune prose. The goal is to preserve
 source-contained facts more faithfully.
+
+## 2026-06-04 Model Variance Pre-Registration
+
+The next Qwen/Gemma/runtime excursion is pre-registered in:
+
+```text
+docs/MODEL_VARIANCE_PRE_REGISTRATION_20260604.md
+```
+
+That protocol treats model/runtime variation as a robustness measurement, not a
+model-selection contest. It freezes SEC Form 8-K compile-fact and atom-query
+anchors, requires all cells to be reported, and explicitly forbids keeping the
+best model, seed, temperature, or fixture result as the claim. Gemma, when
+available, is a dense-model control. Qwen fixed-seed local LM Studio runs are a
+reference variance cell, not proof of determinism.

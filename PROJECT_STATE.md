@@ -223,6 +223,9 @@ The repo should not currently claim:
   local-domain experiments when speed and reproducibility are adequate.
 - Provider/backend, quantization, context, routing, and prompt packing are
   measurement conditions; see `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
+- The next model/runtime variance excursion is pre-registered in
+  `docs/MODEL_VARIANCE_PRE_REGISTRATION_20260604.md`; it must report all Qwen,
+  Gemma, seed, and temperature cells rather than keeping the best result.
 - `PRETHINKER_LLM_SEED`, when supplied, is now recorded in compile
   `model_serving_path.decoding`; a recorded seed is a reproducibility surface,
   not proof that historical and fresh runs are interchangeable.
