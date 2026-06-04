@@ -234,3 +234,27 @@ PROJECT_STATE.md
 The update should state the measured variance band and whether the SEC methods
 example appears stable across the tested runtime/model arms. If the result is
 negative, say so plainly and narrow the current research claim accordingly.
+
+## Addendum - Gemma Q4 Query Control
+
+Added before execution on 2026-06-04 after the local runtime was switched from
+Gemma Q8 to Gemma Q4.
+
+Arm D:
+
+```text
+model: google/gemma-4-12b
+provider: local LM Studio
+observed quantization before run: GGUF Q4_K_M
+loaded context before run: 65536
+temperature: 0.0
+seed: local GUI set to random; harness does not request a seed
+anchor: SEC transfer_003 five-row atom-library query smoke
+draws: N=5
+```
+
+This is a query-control arm only. It does not replace the Q8 Gemma control and
+does not test fresh compile stability. Report product exact, typed-plan replay,
+redacted rejudge, prose-dependent rows, latency, and metadata completeness. If
+Q4 is faster or cleaner than Q8 on this small anchor, treat that as a candidate
+follow-up hypothesis, not as a promoted model migration.
