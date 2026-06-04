@@ -136,6 +136,9 @@ N-cycle evidence can be read from the manifest instead of inferred manually.
 `scripts/audit_research_artifact_paths.py` checks that inline local evidence
 handles in the current research docs still resolve; the 2026-06-04 audit checked
 24 handles with 0 missing.
+`scripts/audit_historical_score_claims.py` checks that contaminated historical
+score tokens only appear with nearby disclaimer language; the 2026-06-04 audit
+found 18 historical-score occurrences with 0 blockers.
 
 ## FDA Detail
 

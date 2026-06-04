@@ -206,7 +206,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2371 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
+2374 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
@@ -222,6 +222,7 @@ python scripts\validate_domain_predicate_schema.py --root datasets\domain_profil
 python scripts\build_compile_fact_judged_qa.py --help
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 python scripts\audit_research_artifact_paths.py
+python scripts\audit_historical_score_claims.py
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json
