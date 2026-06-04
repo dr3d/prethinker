@@ -3878,6 +3878,8 @@ def _term_from_arg(value: Any, *, entity_names: dict[str, str], for_query: bool)
         raw = entity_names[raw]
     if for_query and raw.startswith("?"):
         return _variable_name(raw[1:] or "X")
+    if for_query and _query_arg_looks_like_variable_label(raw):
+        return _variable_name(raw)
     if for_query and re.fullmatch(r"[A-Z][A-Za-z0-9]*(_[A-Z][A-Za-z0-9]*)+", raw):
         return _variable_name(raw)
     if for_query and re.fullmatch(r"[A-Z]", raw):
@@ -4024,6 +4026,36 @@ def _is_query_placeholder_arg(raw: str) -> bool:
     ):
         return True
     return False
+
+
+QUERY_VARIABLE_LABEL_ATOMS = {
+    "answer",
+    "date",
+    "filing",
+    "jurisdiction",
+    "name",
+    "registrant_name",
+    "registrantname",
+    "signature_date",
+    "signaturedate",
+    "signatory",
+    "source_or_scope",
+    "sourceorscope",
+    "sourcescope",
+    "source",
+    "title",
+    "item_code",
+    "itemcode",
+    "item_kind",
+    "item_role",
+    "itemkind",
+    "itemrole",
+}
+
+
+def _query_arg_looks_like_variable_label(raw: str) -> bool:
+    text = str(raw or "").strip()
+    return bool(text and text[0].isupper() and _atomize(text) in QUERY_VARIABLE_LABEL_ATOMS)
 
 
 def _placeholder_variable_name(raw: str) -> str:

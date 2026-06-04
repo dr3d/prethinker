@@ -130,17 +130,15 @@ Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,
     source-record proposals are blocked, and relaxed-constant fallback is
     disabled; constants absent from compiled atom slots are blocked
-  SEC transfer_003 local smoke: 1-2 / 5 judged exact across repeated strict
-    local runs after fallback removal; every surviving exact row passes
-    typed-plan replay and redacted rejudge, with 0
-    compatibility/runtime/write rows
-  validation retry smoke: optional one-shot LLM re-planning after atom-slot
-    validation failure remained governance-clean but did not repair the blocked
-    rows; it stayed at 2 / 5 exact, with the exact rows passing typed-plan
-    replay and redacted rejudge
+  SEC transfer_003 local smoke: 5 / 5 judged exact after mapper variable
+    preservation; all five exact rows pass typed-plan replay and redacted
+    rejudge, with 0 compatibility/runtime/write rows
+  mapper finding: the strict path exposed that uppercase query variables emitted
+    by the LLM were being atomized into lowercase constants; the mapper now
+    preserves uppercase slot-label query variables while still atomizing ordinary
+    proper-name constants
   read: query-over-atoms is governed, but messy human query planning is not yet
-    solved; remaining smoke misses are query-surface gaps from bad planner
-    constants
+    solved; the next test needs a larger and unlike query set
 ```
 
 The publishable technical shape is narrow:
@@ -243,7 +241,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2399 passed, 59 skipped, 9 xfailed
+2400 passed, 59 skipped, 9 xfailed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

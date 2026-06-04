@@ -48,9 +48,12 @@ a biting constraint rather than a prompt preference.
 In atom-library mode the runtime also disables the relaxed-constant fallback
 that older diagnostic paths can use after a no-result query. The planner must
 choose variables and constants from the compiled atom inventory itself; Python
-does not repair bad planner constants such as predicate-contract slot names
-(`title`, `jurisdiction`, `source_or_scope`) into variables. Those rows are
-blocked as query-surface gaps until the planner emits a replayable typed plan.
+does not repair blocked constants after a failed query. The mapper does preserve
+LLM-authored uppercase query variables such as `RegistrantName`, `ItemKind`, and
+`SourceOrScope` before execution, while ordinary proper-name constants remain
+atoms. Lowercase or otherwise invalid constants absent from the matching
+compiled atom slot are blocked as query-surface gaps until the planner emits a
+replayable typed plan.
 
 The optional `--atom-library-query-validation-retry` lane keeps that same
 boundary. When deterministic atom-inventory validation blocks a first plan, the

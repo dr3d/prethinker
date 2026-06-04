@@ -146,23 +146,26 @@ then measured the current planner boundary: repeated strict runs landed at
 redacted rejudge, compatibility/runtime/write rows stayed at 0, and the
 remaining rows were deterministic query-surface gaps. The earlier 4/5 probe is
 diagnostic only because Python had relaxed bad planner constants into variables.
-The active next question is planner performance inside the atom library, not
-permission to restore fallback rescue. An opt-in
-`--atom-library-query-validation-retry` lane now allows one second LLM planner
-call after deterministic atom-slot validation blocks a plan. The retry receives
-the blocked constants and the same atom inventory; Python still does not repair
-constants, parse the question, or inspect source prose, and the retried plan
-must pass the same validation. A first local retry smoke on the same five SEC
-transfer_003 questions landed at 2/5 exact; both exact rows passed typed-plan
-replay and redacted rejudge with zero prose-dependent exact rows, but the retry
-did not repair the three blocked rows because the planner repeated the same
-slot-name constants. This keeps the next query blocker narrow: planner feedback
-needs to change the proposed plan, not loosen validation.
+Inspection then found the narrower mapper bug: model-authored uppercase query
+variables such as `RegistrantName`, `ItemKind`, and `SourceOrScope` were being
+atomized into lowercase constants before deterministic execution. The mapper
+now preserves uppercase slot-label arguments as query variables while still
+leaving ordinary proper-name constants such as `Felix` and `Arthur` atomized.
+With that fix, the same five-row SEC transfer_003 atom-query smoke reached
+5/5 exact; all five exact rows passed typed-plan replay and redacted rejudge,
+with 0 prose-dependent exact rows and 0 compatibility/runtime/write rows.
+
+The active next question is planner performance inside the atom library on a
+larger and unlike query set, not permission to restore fallback rescue. The
+optional `--atom-library-query-validation-retry` lane remains LLM-proposes /
+deterministic-code-validates: one second planner call can see the atom-slot
+validation failure, but Python still cannot rewrite a blocked query.
 
 Retained diagnostic artifact:
 
 ```text
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_smoke_20260604
+C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_variable_fix_smoke_20260604_r2
 ```
 
 Retained governance artifact:

@@ -395,18 +395,16 @@ Possible next questions:
    planner payload, evidence-bundle plans see the same filtered inventory, and
    proposed `source_record_*` queries are blocked instead of executed. It also
    disables relaxed-constant fallback and blocks constants absent from compiled
-   atom slots, so Python no longer turns bad planner constants into variables in
-   the atom-library path. A 2026-06-04 SEC transfer_003 smoke probe landed at
-   1-2/5 exact across repeated local strict runs; every surviving exact row
-   passed typed-plan replay and redacted rejudge. The remaining research
-   question is planner performance inside the atom library, not whether
-   source-prose or fallback rescue is still allowed. The opt-in validation
-   retry lane keeps the same authority split: the LLM may re-plan once after
-   seeing deterministic atom-slot validation failures, but deterministic code
-   still refuses absent constants instead of repairing them. Its first SEC
-   transfer_003 smoke stayed at `2/5` exact with typed-plan and redacted-rejudge
-   survival for those exact rows, while the blocked rows remained blocked
-   because the planner repeated the same invalid constants.
+   atom slots, so Python no longer turns blocked constants into variables after
+   a failed query. A 2026-06-04 SEC transfer_003 smoke probe initially landed at
+   1-2/5 exact across repeated local strict runs, which exposed a narrower
+   mapper bug: uppercase query variables emitted by the LLM were atomized into
+   lowercase constants. Preserving uppercase slot-label variables moved the same
+   five-row smoke to `5/5` exact; typed-plan replay and redacted rejudge passed
+   for all five rows, with 0 compatibility/runtime/write rows. The remaining
+   research question is planner performance inside the atom library on a larger
+   and unlike query set, not whether source-prose or fallback rescue is still
+   allowed.
 4. **Runtime/provider question:** How much variance remains when a domain pack
    is pinned to one local or remote model/provider/settings bundle? A
    2026-06-04 local-Qwen seeded SEC probe repeated its own `10/12` aggregate

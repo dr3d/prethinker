@@ -951,6 +951,35 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual([row["skip_reason"] for row in skipped], ["ungrounded_argument_atom", "ungrounded_argument_atom"])
 
+    def test_mapper_preserves_uppercase_query_args_as_prolog_variables(self) -> None:
+        ir = _ir(
+            decision="answer",
+            turn_type="query",
+            candidate_operations=[
+                {
+                    "operation": "query",
+                    "predicate": "sec_registrant",
+                    "args": ["Filing", "RegistrantName", "Jurisdiction", "SourceOrScope"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+        )
+
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["sec_registrant/4"],
+        )
+
+        assert warnings == []
+        assert parsed["admission_diagnostics"]["clauses"]["queries"] == [
+            "sec_registrant(Filing, RegistrantName, Jurisdiction, SourceOrScope)."
+        ]
+        operation = parsed["admission_diagnostics"]["operations"][0]
+        assert operation["args"] == ["Filing", "RegistrantName", "Jurisdiction", "SourceOrScope"]
+        assert operation["effect"] == "query"
+
     def test_mapper_collapses_duplicate_candidate_operations(self) -> None:
         ir = _ir(
             candidate_operations=[
