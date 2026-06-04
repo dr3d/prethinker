@@ -25,9 +25,10 @@ whether writes are blocked, and how the row is recorded.
 
 Current language boundary: messy human query language should enter the
 deterministic QA layer through Semantic IR / structured `query_intents[]` or
-structured query templates. Python source-record support may parse admitted
-artifacts and source-row structure, but it should not grow new English regex
-switchboards over raw user questions.
+structured query templates. Python query support may consume typed atoms,
+registered predicates, source coordinates, and explicit structural fields. It
+must not parse source-record prose, display strings, model-authored prose
+fields, or raw user questions to recover meaning.
 
 ## The Shape
 

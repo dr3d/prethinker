@@ -9,16 +9,18 @@ Read these in order before changing code:
 1. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 2. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 3. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
-4. [docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md)
-5. [docs/CTO_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md)
-6. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
-7. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
-8. [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
-9. [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
-10. [docs/QA_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
-11. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-12. [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
-13. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
+4. [docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
+5. [docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
+6. [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+7. [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md)
+8. [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md)
+9. [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md)
+10. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+11. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
+12. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
+13. [docs/QA_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
+14. [docs/OVERLAY_ARCHITECTURE.md](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
+15. [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 
 Treat worksheets, generated reports, prompt snapshots, and long run journals as
 archive material. Git history and `C:\prethinker_tmp_archive` preserve them; do
@@ -56,18 +58,22 @@ not use them as day-one guidance unless the user names a specific artifact.
   release blockers; diagnostic holds are instrument signals. Do not silently
   relax the old headline, and do not treat every diagnostic hold as a release
   failure.
-- Current public measurement anchor: native restamp `1997 / 46 / 120` over
-  `2163` rows (`92.33%` exact), fresh ugly public 2026-05-28 R2 `198 / 2 / 0`
-  over `200` rows (`99.0%` exact, with row-churn caveat), fresh ugly public
-  Batch 03 latest guarded
-  slices `291 / 6 / 3` over `300` rows as a slice-combined regression view,
-  real-world four-fixture spotcheck `160 / 0 / 0`, and sealed unseen authored
-  transfer `152 / 1 / 6`. Treat Batch 03 as transfer/regression evidence, not a
-  single fresh 300-row benchmark. All current guarded QA measurements held `0`
-  compatibility rows, runtime load errors, and QA write proposals. The May 28
-  compile gate still held `2 / 6` old-style pass/hold with `4 / 6 / 0`
-  blocking/diagnostic/advisory holds, so do not confuse the QA score with a
-  clean compile gate.
+- Current claim-bearing research question: can a closed, lens-scoped predicate
+  domain built from a small seed set transfer hard-clean to unlike messy
+  official documents in the same family under strict governance?
+- Older `80.5%`, `92%+`, `95%`, `98%+`, and `99%` scorecards are historical
+  contamination evidence, not current accuracy claims. Some were inflated by
+  prose/source-record routing, question-shape routing, and judge-facing answer
+  tokens. If an old number is cited, say why it is false or non-claim-bearing.
+- Current claim-bearing cells are domain-pack transfer cells that pass the
+  gate suite: registered signatures, lens scope, atom shape, carrier value
+  domains, redaction replay or typed-plan replay where applicable,
+  `N>=3/support>=2`, zero supported forbidden facts, and unlike-document
+  transfer. Product-style judge exact rate is diagnostic color unless it
+  survives those gates.
+- FDA warning letters are the first case study; SEC Form 8-K skeletons and NTSB
+  investigations are methodology-transfer/boundary probes. Do not grind rows
+  toward a nicer score. Characterize failure classes and abstention boundaries.
 
 ## Fresh Context Handoff
 
@@ -76,12 +82,16 @@ worksheets or old commit narratives. If a stale public surface, fixture-shaped
 vocabulary leak, or active prompt/config drift appears, clean it up or record
 the current lesson in a compact active doc.
 
-The current fresh package request lives at
-`docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. Validate the priority fresh
-ugly package with `--package-profile extended`; validate the heldout ACH stress
-package with `--package-profile ach`.
-ACH remains overlay-only: it may propose and score evidence matrices, but it
-must not mutate KB facts, QA verdicts, or compile artifacts.
+The active FDA documentation-gap proposal lane is waiting on blind oracle
+review before any fixture oracle changes. The handoff is local-only:
+
+```text
+C:\prethinker\tmp\fda_response_documentation_gap_oracle_review_work_order_20260603.md
+```
+
+Do not inspect candidate compile outputs while authoring that oracle. ACH
+remains overlay-only: it may propose and score evidence matrices, but it must
+not mutate KB facts, QA verdicts, or compile artifacts.
 
 Do not set cadence timers unless the user explicitly asks. The user prefers
 continuous autonomous progress within the current session and will interrupt
@@ -93,8 +103,9 @@ when priorities change.
 - Model output is proposal material until mapper/runtime gates admit it.
 - LLM/router/Semantic IR owns messy human language. Deterministic query support
   may consume structured `query_intents[]`, query templates, predicates,
-  identifiers, and source artifacts; it must not add new English keyword gates
-  over raw user questions.
+  identifiers, source coordinates, and typed atoms. It must not add new English
+  keyword gates over raw user questions, source-record prose, source/display
+  strings, or model-authored prose fields.
 - Keep source claims, established facts, uncertainty, corrections, and derived
   conclusions separate.
 - Do not teach the harness fixture names, row IDs, answer strings, local people,

@@ -415,11 +415,11 @@ diagnostics.json  skipped, blocked, and coverage notes
 ```
 
 The source remains available for audit and recompilation, but ordinary QA is
-supposed to answer from the compiled package. Admitted source-record display
-rows inside `ledgers.pl` are part of that package; hidden rereading of raw
-source prose outside the artifact is not. If QA can only answer by going back
-to raw source prose, that is evidence that the compile did not preserve the
-right answer-bearing surface yet.
+supposed to answer from the compiled package. Source-record coordinates and
+display rows inside `ledgers.pl` are receipt/provenance material; they are not a
+license for Python to recover meaning by parsing prose. If QA can only answer
+by reading source-record text or raw source prose, that is evidence that the
+compile did not preserve the right typed answer-bearing surface yet.
 
 ### 7. Run Governed QA
 
@@ -641,9 +641,12 @@ If an answer is wrong, we can ask where the failure happened:
 If not, this is not a compiler failure. The source simply does not support the
 answer.
 
-### Did The Compiler Preserve The Source Text?
+### Did The Compiler Preserve Typed Evidence?
 
-If yes, the source-record ledger can prove the sentence was seen.
+If it only preserved source text, the ledger can prove the sentence was seen
+but not that the answer was derived. Claim-bearing answers need typed facts,
+registered atoms, source coordinates, or deterministic derivation plans that
+survive the redaction/typed replay gates.
 
 ### Did The Compiler Emit A Direct Fact?
 

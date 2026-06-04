@@ -99,19 +99,20 @@ question text
 
 The deterministic side may inspect `intent_type`, `target_terms`, and
 `answer_constraints`. It should not add new English keyword triggers over the
-raw user question. If a source-record support route needs to know whether the
-question is asking for a note marker, source-order roster, heading scope,
-contact/reply information, signatory, date, count, or status, that signal
-belongs in `query_intents[]` or in a structured query template, not in a Python
-phrase list.
+raw user question. If a typed support route needs to know whether the question
+is asking for a note marker, source-order roster, heading scope, contact/reply
+information, signatory, date, count, or status, that signal belongs in
+`query_intents[]` or in a structured query template, not in a Python phrase
+list.
 
 For heading/source-location queries, a generic `heading_scope` intent with
 source-local `target_terms` is enough to activate nearest-heading support.
 Special relations such as an immediately preceding heading should be expressed
 as structured `answer_constraints` like `immediately_precedes` or
 `preceding_heading`. The deterministic side may match those target terms
-against admitted source-record rows, but it must not rediscover the user's
-meaning by regexing the raw utterance.
+against typed identifiers, registered atoms, and source-coordinate fields, but
+it must not rediscover the user's meaning by regexing the raw utterance or by
+parsing source-record/display prose.
 
 `query_intents[]` does not authorize writes, does not become a KB fact, and
 does not bypass mapper/runtime predicate checks. It is the query-side analogue
