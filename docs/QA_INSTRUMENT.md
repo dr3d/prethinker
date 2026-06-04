@@ -52,6 +52,14 @@ does not repair bad planner constants such as predicate-contract slot names
 (`title`, `jurisdiction`, `source_or_scope`) into variables. Those rows are
 blocked as query-surface gaps until the planner emits a replayable typed plan.
 
+The optional `--atom-library-query-validation-retry` lane keeps that same
+boundary. When deterministic atom-inventory validation blocks a first plan, the
+runner may make one second planner call with only the blocked query details and
+the same compiled atom inventory. Python still does not rewrite constants,
+select predicates from question wording, or inspect source prose; the second
+plan must pass the same typed execution and atom-slot validation or remain a
+query-surface gap.
+
 ## The Shape
 
 ```text

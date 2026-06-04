@@ -106,9 +106,11 @@ def test_qa_batch_command_forwards_atom_library_query_grounding(tmp_path: Path) 
         classify_failure_surfaces=True,
         cache=False,
         atom_library_query_grounding=True,
+        atom_library_query_validation_retry=True,
     )
 
     assert "--atom-library-query-grounding" in command
+    assert "--atom-library-query-validation-retry" in command
 
 
 def test_qa_batch_command_forwards_openrouter_provider_controls(tmp_path: Path) -> None:

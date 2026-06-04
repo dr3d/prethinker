@@ -134,6 +134,10 @@ Atom-library query grounding
     local runs after fallback removal; every surviving exact row passes
     typed-plan replay and redacted rejudge, with 0
     compatibility/runtime/write rows
+  validation retry smoke: optional one-shot LLM re-planning after atom-slot
+    validation failure remained governance-clean but did not repair the blocked
+    rows; it stayed at 2 / 5 exact, with the exact rows passing typed-plan
+    replay and redacted rejudge
   read: query-over-atoms is governed, but messy human query planning is not yet
     solved; remaining smoke misses are query-surface gaps from bad planner
     constants
@@ -239,7 +243,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2398 passed, 59 skipped, 9 xfailed
+2399 passed, 59 skipped, 9 xfailed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

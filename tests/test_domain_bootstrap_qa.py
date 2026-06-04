@@ -305,6 +305,88 @@ def test_atom_library_query_grounding_forces_strict_typed_execution(monkeypatch:
     assert row["query_results"][0]["result"]["blocked_predicates"] == ["source_record_text_atom"]
 
 
+def test_atom_library_query_validation_retry_replans_after_inventory_block(monkeypatch: pytest.MonkeyPatch) -> None:
+    facts = ["sec_registrant(filing_a, north_star_sample_holdings_inc, delaware, src_registrant)."]
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    calls: list[dict[str, object]] = []
+
+    def fake_call_semantic_ir(**kwargs):
+        calls.append(kwargs)
+        attempt = "first" if len(calls) == 1 else "retry"
+        if attempt == "retry":
+            feedback = kwargs["kb_context_pack"]["atom_library_query_validation_feedback"]
+            assert feedback["blocked_queries"][0]["absent_constants"][0]["value"] == "registrantname"
+        return {
+            "parsed": {
+                "decision": "query",
+                "attempt": attempt,
+                "clarification_questions": [],
+                "self_check": {},
+            }
+        }
+
+    def fake_semantic_ir_to_legacy_parse(ir, *_args, **_kwargs):
+        query = (
+            "sec_registrant(Filing, registrantname, jurisdiction, Source)."
+            if ir.get("attempt") == "first"
+            else "sec_registrant(Filing, Name, Jurisdiction, Source)."
+        )
+        return (
+            {
+                "admission_diagnostics": {
+                    "projected_decision": "query",
+                    "clauses": {"queries": [query]},
+                }
+            },
+            [],
+        )
+
+    monkeypatch.setattr(qa_module, "call_semantic_ir", fake_call_semantic_ir)
+    monkeypatch.setattr(qa_module, "semantic_ir_to_legacy_parse", fake_semantic_ir_to_legacy_parse)
+
+    row = qa_module.run_one_question(
+        item={"id": "q001", "utterance": "What is the registrant name and jurisdiction?"},
+        config=qa_module.SemanticIRCallConfig(),
+        allowed_predicates=["sec_registrant/4"],
+        predicate_contracts=compiled_kb_contracts(["sec_registrant/4"]),
+        domain_context=[],
+        kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        facts=facts,
+        rules=[],
+        runtime=runtime,
+        oracle={"reference_answer": "north_star_sample_holdings_inc; delaware"},
+        include_model_input=False,
+        evidence_bundle_plan=False,
+        execute_evidence_bundle_plan=False,
+        evidence_bundle_context_filter=False,
+        evidence_bundle_context_max_clauses=220,
+        evidence_bundle_context_broad_floor=80,
+        helper_companion_row_limit=None,
+        include_legacy_native_helper_adapters=False,
+        sign_clean_strict=True,
+        atom_library_query_grounding=True,
+        atom_library_query_validation_retry=True,
+    )
+
+    assert len(calls) == 2
+    retry = row["atom_library_query_validation_retry"]
+    assert retry["initial_blocked_results"][0]["absent_constants"][0]["value"] == "registrantname"
+    assert retry["replan_blocked_results"] == []
+    assert row["queries"] == ["sec_registrant(Filing, Name, Jurisdiction, Source)."]
+    assert row["query_results"][0]["result"]["status"] == "success"
+    assert row["query_results"][0]["result"]["rows"] == [
+        {
+            "Filing": "filing_a",
+            "Name": "north_star_sample_holdings_inc",
+            "Jurisdiction": "delaware",
+            "Source": "src_registrant",
+        }
+    ]
+
+
 def test_sign_clean_query_guidance_prefers_item_range_slots_over_status_word_match() -> None:
     policy = "\n".join(_sign_clean_strict_query_strategy()["sign_clean_strict_delivery_policy"])
 

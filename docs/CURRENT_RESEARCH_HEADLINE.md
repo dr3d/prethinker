@@ -133,6 +133,12 @@ The next work should strengthen the research claim rather than lift one fixture:
    fallback and blocks constants absent from compiled atom slots, so bad planner
    constants remain deterministic query-surface gaps. The next query question is
    measured planner performance, not permission to use prose or fallback rescue.
+   The optional validation-retry lane is still LLM-proposes / deterministic-code
+   validates: one second planner call can see the atom-slot validation failure,
+   but Python cannot rewrite the query. The first SEC transfer_003 retry smoke
+   stayed at `2/5` exact with clean typed-plan/redacted-rejudge survival for
+   those exact rows; retry did not fix the rows where the planner repeated bad
+   slot-name constants.
 7. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 

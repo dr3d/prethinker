@@ -674,6 +674,15 @@ def parse_args() -> argparse.Namespace:
             "Planner still proposes; runtime still executes deterministically."
         ),
     )
+    parser.add_argument(
+        "--atom-library-query-validation-retry",
+        action="store_true",
+        help=(
+            "Experimental atom-library lane: if deterministic atom-inventory validation blocks the first "
+            "LLM query plan, make one second planner call with the validation errors and the same atom "
+            "inventory. Python still cannot rewrite bad constants."
+        ),
+    )
     parser.set_defaults(sign_clean_strict=True)
     parser.add_argument(
         "--judge-reference-answers",
@@ -853,6 +862,7 @@ def main() -> int:
         sign_clean_strict=bool(args.sign_clean_strict),
         typed_support_companions=bool(args.typed_support_companions),
         atom_library_query_grounding=bool(args.atom_library_query_grounding),
+        atom_library_query_validation_retry=bool(args.atom_library_query_validation_retry),
     )
     for item in questions:
         question_oracle = oracle.get(item["id"], {})
@@ -889,6 +899,7 @@ def main() -> int:
                 sign_clean_strict=bool(args.sign_clean_strict),
                 typed_support_companions=bool(args.typed_support_companions),
                 atom_library_query_grounding=bool(args.atom_library_query_grounding),
+                atom_library_query_validation_retry=bool(args.atom_library_query_validation_retry),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
@@ -929,6 +940,8 @@ def main() -> int:
         "qa_file": str(qa_path),
         "model": str(args.model),
         "sign_clean_strict": bool(args.sign_clean_strict),
+        "atom_library_query_grounding": bool(args.atom_library_query_grounding),
+        "atom_library_query_validation_retry": bool(args.atom_library_query_validation_retry),
         "model_serving_path": model_serving_path_metadata(
             backend=str(args.backend),
             base_url=str(args.base_url),
@@ -1011,6 +1024,7 @@ def build_cache_context(
     sign_clean_strict: bool = False,
     typed_support_companions: bool = False,
     atom_library_query_grounding: bool = False,
+    atom_library_query_validation_retry: bool = False,
 ) -> dict[str, Any]:
     return {
         "schema_version": CACHE_SCHEMA_VERSION,
@@ -1067,6 +1081,7 @@ def build_cache_context(
         "sign_clean_strict": bool(sign_clean_strict),
         "typed_support_companions": bool(typed_support_companions),
         "atom_library_query_grounding": bool(atom_library_query_grounding),
+        "atom_library_query_validation_retry": bool(atom_library_query_validation_retry),
     }
 
 
@@ -3047,6 +3062,7 @@ def run_one_question(
     sign_clean_strict: bool = False,
     typed_support_companions: bool = False,
     atom_library_query_grounding: bool = False,
+    atom_library_query_validation_retry: bool = False,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     strict_query_execution = bool(sign_clean_strict or atom_library_query_grounding)
@@ -3260,6 +3276,130 @@ def run_one_question(
                     ),
                 ]
             )
+    atom_inventory_retry_record: dict[str, Any] | None = None
+    atom_inventory_blocks = _atom_inventory_blocked_query_results(query_results)
+    if (
+        bool(atom_library_query_grounding)
+        and bool(atom_library_query_validation_retry)
+        and atom_inventory_blocks
+        and not evidence_plan_query_results
+    ):
+        retry_context_pack = {
+            **kb_context_pack,
+            "atom_library_query_validation_feedback": {
+                "schema_version": "atom_library_query_validation_feedback_v1",
+                "blocked_queries": atom_inventory_blocks,
+                "policy": [
+                    "The previous candidate query plan failed deterministic atom-inventory validation.",
+                    "Do not repair by inventing replacement constants.",
+                    "Use uppercase variables for unconstrained slots.",
+                    "Bind only constants copied exactly from compiled_predicate_inventory.arg_values for the same predicate signature and argument position.",
+                ],
+            },
+        }
+        retry_domain_context = [
+            *domain_context,
+            (
+                "Atom-library validation retry: the previous query plan was blocked by deterministic "
+                "atom-inventory validation. Re-plan over the same compiled atom inventory; do not use "
+                "source prose and do not invent constants absent from the matching argument slot."
+            ),
+        ]
+        retry_record: dict[str, Any] = {
+            "schema_version": "atom_library_query_validation_retry_v1",
+            "attempted": True,
+            "initial_queries": list(queries),
+            "initial_blocked_results": atom_inventory_blocks,
+        }
+        try:
+            retry_result = call_semantic_ir(
+                utterance=utterance,
+                config=config,
+                context=[],
+                domain_context=retry_domain_context,
+                allowed_predicates=query_allowed_predicates,
+                predicate_contracts=query_predicate_contracts,
+                kb_context_pack=retry_context_pack,
+                domain="post_ingestion_qa",
+                include_model_input=include_model_input,
+            )
+        except Exception as exc:
+            retry_record["error"] = str(exc)
+        else:
+            retry_ir = retry_result.get("parsed") if isinstance(retry_result, dict) else None
+            if isinstance(retry_result, dict) and retry_result.get("openrouter_generation_metadata"):
+                retry_metadata = retry_result.get("openrouter_generation_metadata")
+                retry_record["semantic_ir_openrouter_generation_metadata"] = retry_metadata
+                if isinstance(retry_metadata, dict):
+                    OPENROUTER_CALL_METADATA_LOG.append(retry_metadata)
+            if include_model_input and isinstance(retry_result, dict):
+                retry_record["model_input"] = retry_result.get("model_input", {})
+            if not isinstance(retry_ir, dict):
+                retry_record["parse_error"] = str(retry_result.get("parse_error", "")) if isinstance(retry_result, dict) else ""
+                retry_record["raw_content"] = str(retry_result.get("content", ""))[:4000] if isinstance(retry_result, dict) else ""
+            else:
+                retry_mapped, retry_warnings = semantic_ir_to_legacy_parse(
+                    retry_ir,
+                    allowed_predicates=query_allowed_predicates,
+                    predicate_contracts=query_predicate_contracts,
+                )
+                retry_diagnostics = (
+                    retry_mapped.get("admission_diagnostics", {}) if isinstance(retry_mapped, dict) else {}
+                )
+                retry_clauses = (
+                    retry_diagnostics.get("clauses", {})
+                    if isinstance(retry_diagnostics.get("clauses"), dict)
+                    else {}
+                )
+                retry_model_queries = [
+                    str(q).strip() for q in retry_clauses.get("queries", []) if str(q).strip()
+                ]
+                if not retry_model_queries:
+                    retry_model_queries = _fallback_queries_from_semantic_ir(
+                        retry_ir,
+                        allowed_predicates={
+                            str(predicate).split("/", 1)[0]
+                            for predicate in query_allowed_predicates
+                            if str(predicate).strip()
+                        },
+                    )
+                retry_queries = _ordered_query_unique(retry_model_queries)
+                retry_query_results = run_query_plan(
+                    runtime,
+                    retry_queries,
+                    helper_companions_enabled=(
+                        False if strict_query_execution else _helper_companions_enabled(helper_companion_row_limit)
+                    ),
+                    include_legacy_native_helpers=include_legacy_native_helper_adapters,
+                    sign_clean_strict=strict_query_execution,
+                    typed_support_companions=typed_support_companions,
+                    allow_relaxed_constant_fallback=False,
+                    atom_library_kb_inventory=query_kb_inventory,
+                )
+                retry_record.update(
+                    {
+                        "warnings": retry_warnings,
+                        "replan_queries": retry_queries,
+                        "replan_query_results": retry_query_results,
+                        "replan_blocked_results": _atom_inventory_blocked_query_results(retry_query_results),
+                    }
+                )
+                queries = retry_queries
+                query_results = retry_query_results
+                query_intents = _query_intents_from_semantic_ir(
+                    retry_ir,
+                    queries=retry_model_queries,
+                    evidence_plan=evidence_plan,
+                )
+                facts_out = [str(q).strip() for q in retry_clauses.get("facts", []) if str(q).strip()]
+                rules_out = [str(q).strip() for q in retry_clauses.get("rules", []) if str(q).strip()]
+                ir = retry_ir
+                diagnostics = retry_diagnostics
+                warnings = retry_warnings
+                if include_model_input:
+                    retry_record["semantic_ir"] = retry_ir
+                    retry_record["mapper_diagnostics"] = retry_diagnostics
+        atom_inventory_retry_record = retry_record
     # Sign-clean recovery: do not route raw human utterance text through
     # Python-side semantic companions. Query understanding must come from the
     # Semantic IR query compiler or from deterministic execution of compiled
@@ -3316,6 +3456,8 @@ def run_one_question(
             "self_check": ir.get("self_check", {}),
         }
     )
+    if atom_inventory_retry_record is not None:
+        row["atom_library_query_validation_retry"] = atom_inventory_retry_record
     if strict_claim_path_filter:
         row["strict_claim_path_filter"] = {
             "schema_version": "strict_claim_path_filter_v1",
@@ -33041,6 +33183,35 @@ def _atom_inventory_blocked_query(query: str, *, kb_inventory: dict[str, Any] | 
         },
         "derived_from_queries": [],
     }
+
+
+def _atom_inventory_blocked_query_results(query_results: Any) -> list[dict[str, Any]]:
+    blocked: list[dict[str, Any]] = []
+    for item in query_results or []:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("status", "")).strip() != "blocked_by_atom_inventory":
+            continue
+        absent_constants = [
+            {
+                "predicate": str(constant.get("predicate", "")).strip(),
+                "signature": str(constant.get("signature", "")).strip(),
+                "arg_index": constant.get("arg_index"),
+                "value": str(constant.get("value", "")).strip(),
+            }
+            for constant in result.get("absent_constants", []) or []
+            if isinstance(constant, dict)
+        ]
+        blocked.append(
+            {
+                "query": str(item.get("query", "")).strip(),
+                "absent_constants": absent_constants,
+            }
+        )
+    return blocked
 
 
 def _status_from_event_type(value: str) -> str:

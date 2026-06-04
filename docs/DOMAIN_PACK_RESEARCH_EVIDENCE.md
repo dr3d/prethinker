@@ -147,7 +147,17 @@ redacted rejudge, compatibility/runtime/write rows stayed at 0, and the
 remaining rows were deterministic query-surface gaps. The earlier 4/5 probe is
 diagnostic only because Python had relaxed bad planner constants into variables.
 The active next question is planner performance inside the atom library, not
-permission to restore fallback rescue.
+permission to restore fallback rescue. An opt-in
+`--atom-library-query-validation-retry` lane now allows one second LLM planner
+call after deterministic atom-slot validation blocks a plan. The retry receives
+the blocked constants and the same atom inventory; Python still does not repair
+constants, parse the question, or inspect source prose, and the retried plan
+must pass the same validation. A first local retry smoke on the same five SEC
+transfer_003 questions landed at 2/5 exact; both exact rows passed typed-plan
+replay and redacted rejudge with zero prose-dependent exact rows, but the retry
+did not repair the three blocked rows because the planner repeated the same
+slot-name constants. This keeps the next query blocker narrow: planner feedback
+needs to change the proposed plan, not loosen validation.
 
 Retained diagnostic artifact:
 
