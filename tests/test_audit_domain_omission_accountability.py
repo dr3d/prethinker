@@ -230,7 +230,7 @@ def test_domain_omission_accountability_blocks_ntsb_report_omission_contradictio
         _compile_payload(
             facts=[
                 "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
-                "ntsb_report(report_not_stated, preliminary_report, preliminary, v_2026_03_03, src_missing_report_id).",
+                "ntsb_report(not_stated, preliminary_report, preliminary, v_2026_03_03, src_missing_report_id).",
             ],
             notes=[],
         ),
@@ -242,6 +242,26 @@ def test_domain_omission_accountability_blocks_ntsb_report_omission_contradictio
     assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
     assert report["rows"][0]["carrier_signature"] == "ntsb_report/5"
     assert report["rows"][0]["fact"].startswith("ntsb_report(")
+
+
+def test_domain_omission_accountability_blocks_ntsb_report_omission_when_real_report_exists(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_report).",
+                "ntsb_report(hwym24fh001, final_report, final, v_2026_04_01, src_report).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "ntsb_report/5"
+    assert report["rows"][0]["fact"].startswith("domain_omission(")
 
 
 def test_domain_omission_accountability_allows_ntsb_report_omission_different_scope(tmp_path: Path) -> None:

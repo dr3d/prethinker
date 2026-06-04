@@ -8662,22 +8662,26 @@ def _apply_osha_accident_omission_contradiction_integrity(source_compile: dict[s
 
 
 def _apply_ntsb_report_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
-    """Drop NTSB report rows contradicted by typed missing-report omissions.
+    """Resolve NTSB report-id omissions against typed report rows.
 
     This is a typed-fact consistency guard. It does not decide whether the
-    source contains a report identifier. It only enforces that a bundle cannot
-    simultaneously emit a domain_omission/5 row saying the NTSB report
-    identifier is missing and an ntsb_report/5 row for that same source/scope.
+    source contains a report identifier. It resolves only emitted typed
+    contradictions for the same source/scope: a real report identifier beats an
+    omission row, while a not-stated report identifier row loses to an omission
+    row.
     """
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
     omitted_sources: set[str] = set()
+    real_report_sources: set[str] = set()
     for fact in facts:
         parsed = _parse_fact_clause(fact)
         if parsed is None:
             continue
         predicate, args = parsed
-        if (
+        if predicate == "ntsb_report" and len(args) == 5 and args[4] and not _ntsb_report_identifier_is_not_stated(args):
+            real_report_sources.add(args[4])
+        elif (
             predicate == "domain_omission"
             and len(args) == 5
             and _canonical_registered_signature_reference(args[1]) == "ntsb_report/5"
@@ -8695,7 +8699,21 @@ def _apply_ntsb_report_omission_contradiction_integrity(source_compile: dict[str
         should_drop = False
         if parsed is not None:
             predicate, args = parsed
-            if predicate == "ntsb_report" and len(args) == 5 and args[4] in omitted_sources:
+            if (
+                predicate == "domain_omission"
+                and len(args) == 5
+                and args[4] in real_report_sources
+                and _canonical_registered_signature_reference(args[1]) == "ntsb_report/5"
+                and _strip_fact_atom_quotes(args[2]) == "role_missing"
+                and _strip_fact_atom_quotes(args[3]) == "report_identifier_not_stated"
+            ):
+                should_drop = True
+            elif (
+                predicate == "ntsb_report"
+                and len(args) == 5
+                and _ntsb_report_identifier_is_not_stated(args)
+                and args[4] in omitted_sources
+            ):
                 should_drop = True
         if should_drop:
             dropped.append(fact)
@@ -8714,12 +8732,23 @@ def _apply_ntsb_report_omission_contradiction_integrity(source_compile: dict[str
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Drops ntsb_report/5 rows only when a domain_omission/5 row for ntsb_report/5 "
-            "says report_identifier_not_stated for the same typed source/scope. It does not "
-            "create replacement facts or read source prose."
+            "Drops domain_omission/5 report_identifier_not_stated rows only when a real "
+            "ntsb_report/5 identifier row is already present for the same source/scope, and drops "
+            "not-stated ntsb_report/5 rows when the matching omission exists for the same "
+            "source/scope. It does not create replacement facts or read source prose."
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _ntsb_report_identifier_is_not_stated(args: list[str]) -> bool:
+    return len(args) == 5 and _strip_fact_atom_quotes(args[0]) in {
+        "not_stated",
+        "unknown",
+        "none_found",
+        "missing",
+        "not_available",
+    }
 
 
 def _apply_fda_no_fei_omission_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
