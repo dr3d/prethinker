@@ -179,10 +179,10 @@ Claim-bearing artifacts:
 
 | Cell | Artifact |
 | --- | --- |
-| Seed micro | `tmp/domain_lens_bundle/sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer` |
-| Transfer 001 | `tmp/domain_lens_bundle/sec8k-transfer-r3-phone-reducer`; gate `tmp/research_integrity_gate_sec8k_t001_r3` |
-| Transfer 002 | `tmp/domain_lens_bundle/sec8k-t002-r3-date`; gate `tmp/research_integrity_gate_sec8k_t002_r3` |
-| Transfer 003 | `tmp/domain_lens_bundle/sec8k-t003-r1`; gate `tmp/research_integrity_gate_sec8k_t003_r1` |
+| Seed micro | `C:\prethinker_tmp_archive\cb_lens_20260604\sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer` |
+| Transfer 001 | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-transfer-r3-phone-reducer`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t001_r3` |
+| Transfer 002 | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t002-r3-date`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t002_r3` |
+| Transfer 003 | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t003_r1` |
 
 Important negative evidence: transfer_001 initially exposed an unstated-CIK
 model-prior leak. The row was rejected before the fixture became claim-bearing.
@@ -205,10 +205,10 @@ Claim-bearing and boundary artifacts:
 
 | Cell | Result | Artifact |
 | --- | --- | --- |
-| Transfer 001 current replay | `26/26`, `0/9` supported forbidden, integrity pass | `tmp/domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` |
-| Transfer 002 fresh current pack | `20/27`, `0/7` supported forbidden, atom/lens gates clean | `tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` |
+| Transfer 001 current replay | `26/26`, `0/9` supported forbidden, integrity pass | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` |
+| Transfer 002 fresh current pack | `20/27`, `0/7` supported forbidden, atom/lens gates clean | `C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` |
 | Transfer judged-QA v2 | transfer_001 `78/78`; transfer_002 `59/81`; combined `137/159`; typed-plan replay `137/137`; redaction replay `137/137` with 0 prose-dependent exact rows | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` |
-| Transfer 003 archived replay | `18/26`, `0/10` supported forbidden, current integrity fail | `tmp/domain_transfer_gate_fda_t003_current_rescore_fixed_20260603` |
+| Transfer 003 archived replay | `18/26`, `0/10` supported forbidden, current integrity fail | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t003_current_rescore_fixed_20260603` |
 
 The transfer_001 `26/26` cell is legitimate under the current gate, but it is
 not a pristine first-pass compile. It depends on post-reset deterministic
@@ -251,7 +251,7 @@ boundary appears outside FDA/SEC.
 
 ```text
 profile: datasets/domain_profiles/ntsb_investigation_v1/ontology_registry.json
-artifact: tmp/domain_lens_bundle/ntsb-transfer-surface-001-bundle-harness-r1
+artifact: C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1
 ```
 
 Current transfer:

@@ -109,7 +109,7 @@ fda_transfer_judged_qa_v2 deterministic compile-fact QA:
 
 transfer_002 fresh current-pack lens-scoped bundle:
   artifact root:
-    tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
+    C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
   20 / 27 expected, 0 / 7 supported forbidden
   atom-shape / registered-signature / lens-scope blockers: 0
   boundary residue:
@@ -211,8 +211,8 @@ The first unlike retained SEC Form 8-K skeleton transfer has also run:
 
 ```text
 fixture: sec_form_8k_skeleton_transfer_001
-artifact root: tmp\domain_lens_bundle\sec8k-transfer-r3-phone-reducer
-gate: tmp\research_integrity_gate_sec8k_t001_r3
+artifact root: C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-transfer-r3-phone-reducer
+gate: C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t001_r3
 local-Qwen lens bundle: N=3, support>=2
 initial transfer: 5 / 13, 0 / 7 forbidden
 fresh R3 after CIK containment: 12 / 13, 0 / 8 forbidden
@@ -232,7 +232,7 @@ Qwen N=3/support>=2:
 
 ```text
 fixture: sec_form_8k_skeleton_transfer_002
-artifact root: tmp\domain_lens_bundle\sec8k-t002-r3-date
+artifact root: C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t002-r3-date
 supported expected facts: 12 / 12
 supported forbidden facts: 0 / 6
 unexpected same-signature facts: 1
@@ -253,7 +253,7 @@ Form 8-K/A amendment and also passed:
 
 ```text
 fixture: sec_form_8k_skeleton_transfer_003
-artifact root: tmp\domain_lens_bundle\sec8k-t003-r1
+artifact root: C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1
 supported expected facts: 12 / 12
 supported forbidden facts: 0 / 10
 unexpected same-signature facts: 1

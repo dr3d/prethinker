@@ -89,14 +89,14 @@ historical unless they are re-gated here or in a newer note.
 
 | Family | Fixture / cell | Artifact root | Current use |
 | --- | --- | --- | --- |
-| SEC | `sec_form_8k_skeleton_v1` seed micro | `tmp/domain_lens_bundle/sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer` | Skeleton seed evidence, 13/13 |
-| SEC | `sec_form_8k_skeleton_transfer_001` | `tmp/domain_lens_bundle/sec8k-transfer-r3-phone-reducer`; gate `tmp/research_integrity_gate_sec8k_t001_r3` | Unlike transfer evidence, 13/13 |
-| SEC | `sec_form_8k_skeleton_transfer_002` | `tmp/domain_lens_bundle/sec8k-t002-r3-date`; gate `tmp/research_integrity_gate_sec8k_t002_r3` | Unlike transfer evidence, 12/12 |
-| SEC | `sec_form_8k_skeleton_transfer_003` | `tmp/domain_lens_bundle/sec8k-t003-r1`; gate `tmp/research_integrity_gate_sec8k_t003_r1` | Unlike transfer evidence, 12/12 |
-| FDA | `fda_warning_letter_domain_transfer_001` | `tmp/domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` | Clean richer-domain transfer cell, 26/26 |
-| FDA | `fda_warning_letter_domain_transfer_002` | `tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` | Clean boundary transfer cell, 20/27 |
+| SEC | `sec_form_8k_skeleton_v1` seed micro | `C:\prethinker_tmp_archive\cb_lens_20260604\sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer` | Skeleton seed evidence, 13/13 |
+| SEC | `sec_form_8k_skeleton_transfer_001` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-transfer-r3-phone-reducer`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t001_r3` | Unlike transfer evidence, 13/13 |
+| SEC | `sec_form_8k_skeleton_transfer_002` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t002-r3-date`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t002_r3` | Unlike transfer evidence, 12/12 |
+| SEC | `sec_form_8k_skeleton_transfer_003` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t003_r1` | Unlike transfer evidence, 12/12 |
+| FDA | `fda_warning_letter_domain_transfer_001` | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` | Clean richer-domain transfer cell, 26/26 |
+| FDA | `fda_warning_letter_domain_transfer_002` | `C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` | Clean boundary transfer cell, 20/27 |
 | FDA | `fda_transfer_judged_qa_v2` | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` | Deterministic compile-fact QA across transfer_001 and transfer_002, 137/159; every exact row typed-plan and redaction replay clean |
-| NTSB | `ntsb_investigation_transfer_surface_001` | `tmp/domain_lens_bundle/ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, 18/25 manifest; 19/25 R2 reducer replay; raw compile-fact QA 53/75 per-run exact and 18/25 support>=2 |
+| NTSB | `ntsb_investigation_transfer_surface_001` | `C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, 18/25 manifest; 19/25 R2 reducer replay; raw compile-fact QA 53/75 per-run exact and 18/25 support>=2 |
 | OSHA | `osha_incident_domain_v1` seed micro | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix` | Fourth-family seed skeleton evidence, 18/20 using constant-slot support report; 0/8 forbidden; atom/lens gates clean |
 | OSHA | `osha_incident_transfer_001` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local` | Unlike transfer evidence, 12/15; 0/8 forbidden; atom/lens gates clean |
 
@@ -134,8 +134,13 @@ typed-plan replay: pass, 0 unregistered exact plans in every cell
 
 `scripts/run_current_research_governance.py` runs the current claim-protection
 set as one command: sign-clean, artifact-path audit, historical-score audit,
-domain predicate schema validation, and the compile-fact QA manifest. The
-2026-06-04 governance run passed all 5 checks.
+domain predicate schema validation, compile-fact QA manifest source/settings
+audit, and the compile-fact QA manifest. The source/settings audit requires
+retained bundle roots, N>=3 run artifacts, recoverable model/settings metadata,
+and consistent settings across repeat runs. Two older SEC cells predate bundle
+`manifest.json` files; their metadata is recovered from the retained compile
+JSON artifacts and reported as warnings rather than hidden. The 2026-06-04
+governance run passed all 6 checks.
 
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:
@@ -197,7 +202,7 @@ fda_warning_letter_domain_transfer_002
 
   fresh current-pack local LM Studio lens bundle:
     artifact root:
-      tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
+      C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
     settings:
       qwen/qwen3.6-35b-a3b, temperature=0, top_p=1.0, num_ctx=65536
     repeat:
@@ -312,7 +317,7 @@ ntsb_investigation_domain_v1
 
 ntsb_investigation_transfer_surface_001
   artifact root:
-    tmp/domain_lens_bundle/ntsb-transfer-surface-001-bundle-harness-r1
+    C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1
   settings:
     local LM Studio qwen/qwen3.6-35b-a3b, temperature=0, top_p=1.0,
     num_ctx=65536

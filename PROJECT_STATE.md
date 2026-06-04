@@ -232,6 +232,7 @@ python scripts\run_current_research_governance.py --out-root tmp\current_researc
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\build_compile_fact_judged_qa.py --help
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
+python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
 python scripts\audit_research_artifact_paths.py
 python scripts\audit_historical_score_claims.py
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json

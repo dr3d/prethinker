@@ -6,7 +6,7 @@
       "id": "sec_form_8k_skeleton_seed",
       "fixture_id": "sec_form_8k_skeleton_v1",
       "description": "SEC Form 8-K skeleton seed micro, current reducer bundle.",
-      "domain_lens_bundle": "tmp/domain_lens_bundle/sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer",
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 13,
@@ -18,7 +18,7 @@
       "id": "sec_form_8k_skeleton_transfer_001",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
       "description": "SEC Form 8-K skeleton transfer 001, phone reducer bundle.",
-      "domain_lens_bundle": "tmp/domain_lens_bundle/sec8k-transfer-r3-phone-reducer",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec8k-transfer-r3-phone-reducer",
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 13,
@@ -30,7 +30,7 @@
       "id": "sec_form_8k_skeleton_transfer_002",
       "fixture_id": "sec_form_8k_skeleton_transfer_002",
       "description": "SEC Form 8-K skeleton transfer 002, date-boundary bundle.",
-      "domain_lens_bundle": "tmp/domain_lens_bundle/sec8k-t002-r3-date",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec8k-t002-r3-date",
       "expect": {
         "support.reference_count": 12,
         "support.exact_support_ge_2": 12,
@@ -42,7 +42,7 @@
       "id": "sec_form_8k_skeleton_transfer_003",
       "fixture_id": "sec_form_8k_skeleton_transfer_003",
       "description": "SEC Form 8-K/A skeleton transfer 003.",
-      "domain_lens_bundle": "tmp/domain_lens_bundle/sec8k-t003-r1",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec8k-t003-r1",
       "expect": {
         "support.reference_count": 12,
         "support.exact_support_ge_2": 12,
@@ -54,7 +54,7 @@
       "id": "ntsb_transfer_surface_001",
       "fixture_id": "ntsb_investigation_transfer_surface_001",
       "description": "NTSB first unlike transfer raw union fact support.",
-      "domain_lens_bundle": "tmp/domain_lens_bundle/ntsb-transfer-surface-001-bundle-harness-r1",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\ntsb-transfer-surface-001-bundle-harness-r1",
       "expect": {
         "support.reference_count": 25,
         "support.exact_support_ge_2": 18,
@@ -66,7 +66,7 @@
       "id": "fda_warning_letter_transfer_002_current_pack",
       "fixture_id": "fda_warning_letter_domain_transfer_002",
       "description": "FDA warning-letter transfer 002 current-pack boundary bundle.",
-      "domain_lens_bundle": "tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon",
       "expect": {
         "support.reference_count": 27,
         "support.exact_support_ge_2": 20,

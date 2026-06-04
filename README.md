@@ -157,6 +157,7 @@ Deterministic compile-fact QA bundles can be regenerated in-repo from
 
 ```powershell
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
+python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
 
 python scripts\build_compile_fact_judged_qa.py --out-dir tmp\judged_qa_probe `
   --domain-lens-bundle fixture_id=tmp\domain_lens_bundle\bundle_root
@@ -169,6 +170,9 @@ for compile artifacts that are not stored as `unions\run*` domain-lens bundles.
 The current manifest lives at
 `datasets\domain_pack_measurements\current_compile_fact_qa_manifest.json` and
 checks the locally reproducible SEC, NTSB, FDA-transfer-002, and OSHA cells.
+`audit_compile_fact_qa_manifest_sources.py` verifies that those cells still
+point at retained roots with N>=3 compile artifacts and recoverable, consistent
+model/settings metadata.
 
 Current high-signal evidence:
 
