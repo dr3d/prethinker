@@ -35,7 +35,7 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 
 | Family | Pack scope | Seed / transfer status | Current result | Claim status |
 | --- | --- | --- | --- | --- |
-| FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Deterministic judged-QA v2 across transfer_001 and transfer_002: 137/159 exact; all 137 exact rows pass typed-plan replay and redaction replay. Archived transfer_003 replay fails current gates | Strongest domain-pack work, but not finished; current claim is compile-fact transfer with clear boundary rows, not broad FDA completion or messy-query competence |
+| FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Deterministic judged-QA v2 across transfer_001 and transfer_002: 137/159 exact; all 137 exact rows pass typed-plan replay and redaction replay. Fresh current-pack transfer_003 is 19/26 with 0/10 supported forbidden and clean atom/lens/signature gates | Strongest domain-pack work, but not finished; current claim is compile-fact transfer with clear boundary rows, not broad FDA completion or messy-query competence |
 | NTSB investigations | Skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | One micro and one unlike transfer | Micro 13/13; fresh transfer manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden, clean governance. Deterministic compile-fact QA over the unlike transfer is 53/75 per-run exact and 18/25 support>=2; all exact rows pass typed-plan and redaction replay | Transfer confirms skeleton/conditions/chronology; casualty, safety-action, and finding lanes remain weak |
 | SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers, now under axis-clean repair | Historical pre-axis-repair cells were seed 13/13 and transfers 13/13, 12/12, 12/12. The repaired schema splits item structure, item legal treatment, and exhibit legal treatment. Current repaired transfer_003 Qwen MoE reruns are R1 12/13 with 0/11 supported forbidden and R2 11/13 with 0/10 supported forbidden after the typed Item 9.01 guard; axis/value/atom gates are clean | Useful evidence that small closed skeleton packs transfer, but not a pristine methods anchor yet. Current boundary is unstable `sec_filing_item_treatment/4` recall plus ordinary MoE wrapper jitter, not prose leakage |
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, item, status, related activity | One seed micro plus one unlike retained transfer, plus two diagnostic transfer probes | Seed micro 18/20 support>=2 after high-arity registry intake fix; first unlike transfer 12/15 support>=2; both have 0 supported forbidden and clean atom/lens governance. Diagnostic transfer_002 is 18/53 with 0 forbidden; diagnostic transfer_003 is 2/21 with 3 supported forbidden after stricter cross-section controls | Fourth-family corroboration, not a promoted pack. Accident/injury and violation table rows transfer in bounded cells; wrapper/establishment, blank-value related activity, long-table enumeration, and mixed-document section attachment remain boundary rows |
@@ -48,7 +48,7 @@ gap, not from whichever worksheet row is most recent.
 
 | Family / layer | Fixture basis | Claim-bearing condition | Current measurement | Failure class / boundary | Next measurement |
 | --- | --- | --- | --- | --- | --- |
-| FDA warning-letter skeleton and CGMP numbered-item layer | FDA warning-letter micro plus transfer fixtures | Closed FDA registry, lens-scoped compile, N>=3/support>=2, 0 forbidden, clean atom/lens/value gates | Judged-QA v2: transfer_001 78/78 exact across N=3; transfer_002 59/81 exact across N=3 with 7 partial and 15 miss; combined 137/159 exact. All exact rows pass registered typed-plan replay and redaction replay with 0 prose-dependent exact rows. Archived transfer_003 replay: 18/26, integrity fail | FDA is promising but not broadly transfer-clean; transfer_002 cleanly exposes wrapper role semantics, context-dependent category/substance, and value-detail boundaries. V2 is oracle-shaped compile-fact QA, not messy human query planning | Stop lifting transfer_002 row-by-row; summarize the boundary and use a second family or transfer_003 only if the research question requires another boundary point |
+| FDA warning-letter skeleton and CGMP numbered-item layer | FDA warning-letter micro plus transfer fixtures | Closed FDA registry, lens-scoped compile, N>=3/support>=2, 0 forbidden, clean atom/lens/value gates | Judged-QA v2: transfer_001 78/78 exact across N=3; transfer_002 59/81 exact across N=3 with 7 partial and 15 miss; combined 137/159 exact. All exact rows pass registered typed-plan replay and redaction replay with 0 prose-dependent exact rows. Fresh current-pack transfer_003: 19/26, 0/10 supported forbidden, clean atom/lens/signature gates | FDA is promising but not broadly transfer-clean; transfer_002 and transfer_003 expose wrapper role semantics, context-dependent category/substance, and value-detail boundaries. V2 is oracle-shaped compile-fact QA, not messy human query planning | Stop lifting transfer rows one by one; summarize the boundary unless a new compact layer is pre-registered and tested on unlike letters |
 | FDA response assessment | Three-fixture observation-transfer response lanes | Same gates plus fresh same-condition composition, not historical lane mixing | 16/17 composed diagnostic with one repeated unexpected final row | Typed attachment/taxonomy conflict; not safe for more row grinding | Keep frozen unless a broader FDA case-study checkpoint makes response coverage load-bearing |
 | NTSB skeleton/chronology/condition pack | UPS aviation micro plus unlike highway/hazmat transfer | Closed NTSB registry, N>=3/support>=2, lens-scope and atom-shape clean | Micro 13/13; scripted lens-bundle manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden. Compile-fact QA: 53/75 per-run exact, 18/25 support>=2, 0 prose-dependent exact rows | Casualty instability, one safety-action actor/organization attachment miss, weather atom normalization, and findings/probable-cause substance should abstain or Tier 2 | Use NTSB as boundary evidence; do not grind toward a promoted pack before FDA is summarized |
 | SEC Form 8-K skeleton pack | One seed micro plus three unlike retained Form 8-K/8-K/A transfers | Closed SEC skeleton registry, local-Qwen N>=3/support>=2, integrity gates clean plus value-axis integrity for methods-anchor use | Historical pre-axis-repair cells: seed 13/13; transfers 13/13, 12/12, 12/12, all 0 supported forbidden. Axis-clean repair split `sec_filing_item/5`, `sec_filing_item_treatment/4`, and `sec_exhibit/5`; transfer_003 reruns now land at 12/13 then 11/13 with 0 supported forbidden and clean axis/value/atom/lens gates | Skeleton transfers; event-substance intentionally untested. Current caveat is unstable item-treatment recall and MoE jitter under the repaired schema, not prose leakage | Decide whether SEC remains the methods anchor by rerunning the repaired schema broadly, or use SEC as a boundary case and anchor on a more reproducible family |
@@ -65,9 +65,11 @@ worksheet, but the cross-family pattern:
   Transfer_003 now exposes unstable item-treatment recall and ordinary MoE
   wrapper jitter; SEC is a boundary-aware case study, not a pristine anchor.
 - FDA shows the richer case-study path and the failure boundary: one unlike
-  transfer cell is clean under current gates, one fresh current-pack transfer
-  is governance-clean but incomplete, and an archived third transfer still
-  exposes atom-shape and recall blockers under the stricter current gate.
+  transfer cell is clean under current gates, and two fresh current-pack
+  transfer cells are governance-clean but incomplete. Transfer_003 no longer
+  needs the older archived integrity-fail story to make the point; its current
+  clean run lands at 19/26 with every unsupported expected row in
+  `fda_violation_detail/5`.
 - NTSB shows the same boundary from another family: wrapper, chronology,
   vehicles, and conditions are easier to stabilize than findings, causal prose,
   and dense relational substance.
@@ -98,6 +100,7 @@ historical unless they are re-gated here or in a newer note.
 | SEC | `sec_form_8k_skeleton_transfer_003` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t003_r1` | Historical pre-axis-repair unlike transfer evidence, 12/12; current repaired reruns are 12/13 and 11/13 |
 | FDA | `fda_warning_letter_domain_transfer_001` | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` | Clean richer-domain transfer cell, 26/26 |
 | FDA | `fda_warning_letter_domain_transfer_002` | `C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` | Clean boundary transfer cell, 20/27 |
+| FDA | `fda_warning_letter_domain_transfer_003` | `C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1` | Clean boundary transfer cell, 19/26; 0/10 supported forbidden; all seven unsupported rows are value/detail flesh |
 | FDA | `fda_transfer_judged_qa_v2` | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` | Deterministic compile-fact QA across transfer_001 and transfer_002, 137/159; every exact row typed-plan and redaction replay clean |
 | NTSB | `ntsb_investigation_transfer_surface_001` | `C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, 18/25 manifest; 19/25 R2 reducer replay; raw compile-fact QA 53/75 per-run exact and 18/25 support>=2 |
 | OSHA | `osha_incident_domain_v1` seed micro | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix` | Fourth-family seed skeleton evidence, 18/20 using constant-slot support report; 0/8 forbidden; atom/lens gates clean |
@@ -461,13 +464,22 @@ fda_warning_letter_domain_transfer_002
     target.
 
 fda_warning_letter_domain_transfer_003
-  current replay over archived single-lens roots:
-    18 / 26, 0 / 10 supported forbidden, transfer gate fail
-    research integrity gate fail:
-      atom-shape: numeric-leading warning-letter IDs and one numeric-leading
-        detail value
-  note: older 23 / 26 worksheet values are historical and are not current-gate
-    claim-bearing
+  fresh current-pack local LM Studio lens bundle:
+    artifact root:
+      C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1
+    settings:
+      qwen/qwen3.6-35b-a3b, temperature=0, top_p=1.0, num_ctx=65536
+    repeat:
+      N=3, support>=2
+    result:
+      19 / 26 expected, 0 / 10 supported forbidden
+      atom-shape blockers: 0
+      registered-signature/lens-scope blockers: 0
+      unexpected same-signature rows: 28
+  note: older 23 / 26 worksheet values and the archived 18 / 26
+    integrity-fail replay are historical. The current run is clean but
+    incomplete: all seven unsupported rows are `fda_violation_detail/5`
+    value/detail flesh.
 
 fda_warning_letter_insanitary_001/_002
   insanitary-condition carrier transfer: 6 / 6 condition rows stable at
@@ -488,7 +500,7 @@ Current FDA per-layer read:
 | CGMP citations | `fda_violation_citation` 6/6 | 4/4 | Strongest FDA layer; numbered item/citation bundle is a real mechanism. |
 | Legal basis, conclusion, response requirement | `fda_adulteration_basis` 2/2, `fda_conclusion_scope` 2/2, `fda_response_requirement` 1/1, `fda_consultant_recommendation` 1/1 | `fda_adulteration_basis` 1/1, `fda_conclusion_scope` 2/2, `fda_response_requirement` 1/1, `domain_omission` 1/1 | Recurring regulatory boilerplate and accountability rows transfer better than open detail. |
 | Detail / value flesh | `fda_violation_detail` 2/2 | 2/6 | Main abstention boundary: response-status, process-area, and procedure-scope values are not yet a promoted hard-clean layer. |
-| Archived transfer_003 replay | n/a | n/a | 18/26 with 0/10 supported forbidden, but current integrity gate fails atom-shape; use as stale-gate/boundary evidence only. |
+| Transfer_003 fresh current pack | n/a | n/a | 19/26 with 0/10 supported forbidden and clean atom/lens/signature gates; all seven unsupported rows are `fda_violation_detail/5`, reinforcing the value/detail boundary. |
 
 Fenced value-detail probe, 2026-06-04:
 
@@ -502,8 +514,9 @@ transfer_002: 2 / 6 support>=2, 0 / 1 supported forbidden,
   14 unexpected same-signature rows
   tmp summary archived at:
   C:\prethinker_tmp_archive\fda_violation_detail_fenced_probe_20260604\summary.md
-transfer_003: not used as a clean value-detail support cell because the
-  retained replay is lens-level/stale and the current integrity gate fails
+transfer_003: current fresh bundle is clean enough to count as boundary
+  evidence; it supports none of the seven expected `fda_violation_detail/5`
+  rows at support>=2
 ```
 
 Stop-rule read: do not add a new value-detail mechanism from this probe alone.
@@ -544,8 +557,9 @@ FDA open blockers:
   that fixture and should not be promoted from transfer_002;
 - leave transfer_002 as boundary evidence unless a new FDA transfer fixture
   shows the same failure class and makes a general mechanism worth testing;
-- remeasure transfer_003 as a fresh current-pack bundle only if we deliberately
-  want a second FDA boundary point beyond transfer_002;
+- transfer_003 has now been remeasured as the second FDA boundary point:
+  keep it as clean evidence for the value/detail-flesh limit, not as a
+  row-grinding target;
 - keep response assessment frozen unless it becomes load-bearing for the FDA
   case-study claim;
 - keep value-level violation detail as the main abstention/Tier-2 boundary

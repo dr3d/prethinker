@@ -97,8 +97,11 @@ FDA warning-letter pack
     support>=2 view:
       transfer_001: 26 / 26
       transfer_002: 20 / 27
-  transfer_003 archived replay: 18 / 26, 0 / 10 supported forbidden,
-    current integrity fail
+  transfer_003 fresh current-pack local rerun:
+    19 / 26 support>=2, 0 / 10 supported forbidden
+    atom-shape / registered-signature / lens-scope blockers: 0
+    read: clean second boundary cell; the seven unsupported rows are
+      `fda_violation_detail/5` value/detail flesh
   read: primary richer case study; skeleton/citation/regulatory boilerplate
     transfer better than wrapper role semantics, context-dependent categories,
     response/detail value flesh, and other substance lanes

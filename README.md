@@ -86,6 +86,8 @@ FDA warning-letter pack:
   all 137 exact rows pass typed-plan and redaction replay
   transfer_001: 78 / 78 exact across N=3
   transfer_002: 59 / 81 exact across N=3
+  transfer_003 fresh current-pack boundary: 19 / 26 support>=2,
+    0 / 10 forbidden, clean atom/lens gates
   boundary: wrapper role semantics, context-dependent category/substance,
     response/detail value flesh
 

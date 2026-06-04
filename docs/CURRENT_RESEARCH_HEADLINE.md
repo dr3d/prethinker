@@ -57,7 +57,11 @@ FDA warning-letter pack
     transfer_001: 78 / 78 exact across N=3
     transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
     support>=2: transfer_001 26 / 26; transfer_002 20 / 27
-  transfer_003 archived replay: 18 / 26, 0 / 10 forbidden, integrity fail
+  transfer_003 fresh current-pack local rerun:
+    19 / 26 support>=2, 0 / 10 forbidden
+    atom-shape / registered-signature / lens-scope blockers: 0
+    boundary: the seven unsupported rows are `fda_violation_detail/5`
+      value/detail flesh
   documentation-gap candidate review: 0 expected / 13 forbidden on
     transfer_002; stable candidate emissions for violations 1, 2, and 3 are
     false positives

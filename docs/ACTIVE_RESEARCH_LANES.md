@@ -118,9 +118,14 @@ transfer_002 fresh current-pack lens-scoped bundle:
     response/detail value flesh
     documentation-gap candidate false positives confirmed by blind review
 
-transfer_003 archived single-lens replay:
-  18 / 26 expected, 0 / 10 supported forbidden
-  research integrity fail: atom-shape
+transfer_003 fresh current-pack local lens bundle:
+  artifact root:
+    C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1
+  19 / 26 expected, 0 / 10 supported forbidden
+  atom-shape / registered-signature / lens-scope blockers: 0
+  boundary residue:
+    all seven unsupported expected rows are `fda_violation_detail/5`
+    value/detail flesh
 ```
 
 The v2 judged-QA bundle is the cleanest current FDA compile-fact measurement:
@@ -130,14 +135,14 @@ messy human QA. The package is now reproducible locally with
 `scripts/build_compile_fact_judged_qa.py`, which compares `expected_facts.pl`
 against compile JSON typed facts and prints support>=2 summaries by fixture.
 The `transfer_001` replay is the clean FDA transfer cell.
-`transfer_002` is now the clean boundary cell: current gates hold, but the
-richer rows do not all transfer. A blind candidate review of
+`transfer_002` and `transfer_003` are clean boundary cells: current gates hold,
+but the richer rows do not all transfer. A blind candidate review of
 `fda_response_documentation_gap/5` on `transfer_002` found 0 expected facts and
 13 forbidden boundaries, so retained stable documentation-gap emissions for
 violations 1, 2, and 3 are false positives. Do not grind `transfer_002` upward
 row-by-row; use it to name the current abstention boundary. `transfer_003`
-remains archived boundary/blocker evidence until it is rerun as a fresh
-current-pack bundle or deliberately left out of the claim. The
+now corroborates the same value/detail-flesh boundary under clean atom/lens
+governance, not the older archived integrity-fail story. The
 response-assessment lane remains a 16/17 composed diagnostic rather than a
 promoted fresh-compile claim. NTSB investigations are the second fixture-bank
 pack candidate. The R1 NTSB micro skeleton currently

@@ -164,7 +164,7 @@ compiler proposes facts; deterministic gates decide what counts.
 | Family | Scope | Current result | What it supports |
 | --- | --- | --- | --- |
 | SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, item treatment, exhibits, signature block | Historical pre-axis-repair cells: seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Repaired axis-clean transfer_003 reruns: `12/13` then `11/13`, both `0` supported forbidden with clean axis/value/atom gates | Useful skeleton-transfer and boundary evidence, not a pristine methods anchor. The repaired schema exposes unstable item-treatment recall and MoE wrapper jitter. |
-| FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
+| FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Fresh current-pack transfer_003: `19/26`, `0/10` supported forbidden, clean atom/lens/signature gates | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; raw compile-fact QA `53/75` per-run exact and `18/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. Raw fact QA separates emitted fact support from reducer replay. |
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `3/10` supported forbidden after wildcard controls | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than wrapper/establishment, blank-value semantics, long-table enumeration, and mixed-section attachment. |
 
@@ -225,7 +225,7 @@ Claim-bearing and boundary artifacts:
 | Transfer 001 current replay | `26/26`, `0/9` supported forbidden, integrity pass | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` |
 | Transfer 002 fresh current pack | `20/27`, `0/7` supported forbidden, atom/lens gates clean | `C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` |
 | Transfer judged-QA v2 | transfer_001 `78/78`; transfer_002 `59/81`; combined `137/159`; typed-plan replay `137/137`; redaction replay `137/137` with 0 prose-dependent exact rows | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` |
-| Transfer 003 archived replay | `18/26`, `0/10` supported forbidden, current integrity fail | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t003_current_rescore_fixed_20260603` |
+| Transfer 003 fresh current pack | `19/26`, `0/10` supported forbidden, atom/lens/signature gates clean | `C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1` |
 
 The transfer_001 `26/26` cell is legitimate under the current gate, but it is
 not a pristine first-pass compile. It depends on post-reset deterministic
@@ -251,6 +251,10 @@ Per-layer boundary:
 | CGMP citations | `6/6` | `4/4` | Strongest FDA layer. |
 | Legal basis, conclusion, response requirement | stable | stable | Recurring regulatory boilerplate transfers better than detail flesh. |
 | Detail/value flesh | `2/2` | `2/6` | Main abstention boundary. |
+
+Fresh transfer_003 corroborates that boundary rather than closing it:
+`19/26` with `0/10` supported forbidden and clean atom/lens/signature gates;
+all seven unsupported rows are `fda_violation_detail/5` value/detail flesh.
 
 The 2026-06-04 fenced `fda_violation_detail/5` probe deliberately avoided new
 mechanisms and scored only value-detail rows. It confirmed the boundary:
