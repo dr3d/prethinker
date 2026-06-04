@@ -35,7 +35,7 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 
 | Family | Pack scope | Seed / transfer status | Current result | Claim status |
 | --- | --- | --- | --- | --- |
-| FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Current replay of transfer_001 local N=3 all-lens union passes at 26/26 with clean integrity gates; fresh current-pack transfer_002 lens bundle holds 20/27 with 0 forbidden and clean atom/lens gates; archived transfer_003 replay fails current gates | Strongest domain-pack work, but not finished; current claim is one clean unlike transfer plus one clean boundary transfer, not broad FDA completion |
+| FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Deterministic judged-QA v2 across transfer_001 and transfer_002: 137/159 exact; all 137 exact rows pass typed-plan replay and redaction replay. Archived transfer_003 replay fails current gates | Strongest domain-pack work, but not finished; current claim is compile-fact transfer with clear boundary rows, not broad FDA completion or messy-query competence |
 | NTSB investigations | Skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | One micro and one unlike transfer | Micro 13/13; fresh transfer manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden, clean governance | Transfer confirms skeleton/conditions/chronology; casualty, safety-action, and finding lanes remain weak |
 | SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers | Seed micro 13/13; transfers 13/13, 12/12, 12/12 with 0 supported forbidden and clean atom/lens governance | Best current evidence that a small closed skeleton pack can transfer within one official-document family |
 
@@ -47,7 +47,7 @@ gap, not from whichever worksheet row is most recent.
 
 | Family / layer | Fixture basis | Claim-bearing condition | Current measurement | Failure class / boundary | Next measurement |
 | --- | --- | --- | --- | --- | --- |
-| FDA warning-letter skeleton and CGMP numbered-item layer | FDA warning-letter micro plus transfer fixtures | Closed FDA registry, lens-scoped compile, N>=3/support>=2, 0 forbidden, clean atom/lens/value gates | Current transfer_001 local all-lens union replay: 26/26, 0/9 supported forbidden, research integrity pass. Fresh current-pack transfer_002 lens-scoped run: 20/27, 0/7 supported forbidden, 0 atom-shape/lens-scope blockers. Archived transfer_003 replay: 18/26, integrity fail | FDA is promising but not broadly transfer-clean; transfer_002 cleanly exposes wrapper role semantics, context-dependent category/substance, and value-detail boundaries | Stop lifting transfer_002 row-by-row; summarize the boundary and decide whether the next FDA measurement is a new unlike letter or a formal case-study table |
+| FDA warning-letter skeleton and CGMP numbered-item layer | FDA warning-letter micro plus transfer fixtures | Closed FDA registry, lens-scoped compile, N>=3/support>=2, 0 forbidden, clean atom/lens/value gates | Judged-QA v2: transfer_001 78/78 exact across N=3; transfer_002 59/81 exact across N=3 with 7 partial and 15 miss; combined 137/159 exact. All exact rows pass registered typed-plan replay and redaction replay with 0 prose-dependent exact rows. Archived transfer_003 replay: 18/26, integrity fail | FDA is promising but not broadly transfer-clean; transfer_002 cleanly exposes wrapper role semantics, context-dependent category/substance, and value-detail boundaries. V2 is oracle-shaped compile-fact QA, not messy human query planning | Stop lifting transfer_002 row-by-row; summarize the boundary and use a second family or transfer_003 only if the research question requires another boundary point |
 | FDA response assessment | Three-fixture observation-transfer response lanes | Same gates plus fresh same-condition composition, not historical lane mixing | 16/17 composed diagnostic with one repeated unexpected final row | Typed attachment/taxonomy conflict; not safe for more row grinding | Keep frozen unless a broader FDA case-study checkpoint makes response coverage load-bearing |
 | NTSB skeleton/chronology/condition pack | UPS aviation micro plus unlike highway/hazmat transfer | Closed NTSB registry, N>=3/support>=2, lens-scope and atom-shape clean | Micro 13/13; scripted lens-bundle manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden | Casualty instability, one safety-action actor/organization attachment miss, and findings/probable-cause substance should abstain or Tier 2 | Use NTSB as boundary evidence; do not grind toward a promoted pack before FDA is summarized |
 | SEC Form 8-K skeleton pack | One seed micro plus three unlike retained Form 8-K/8-K/A transfers | Closed SEC skeleton registry, local-Qwen N>=3/support>=2, integrity gates clean | Seed 13/13; transfers 13/13, 12/12, 12/12, all 0 supported forbidden | Skeleton transfers; event-substance intentionally untested | Use as the methods example in the phase-close technical note |
@@ -90,6 +90,7 @@ historical unless they are re-gated here or in a newer note.
 | SEC | `sec_form_8k_skeleton_transfer_003` | `tmp/domain_lens_bundle/sec8k-t003-r1`; gate `tmp/research_integrity_gate_sec8k_t003_r1` | Unlike transfer evidence, 12/12 |
 | FDA | `fda_warning_letter_domain_transfer_001` | `tmp/domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` | Clean richer-domain transfer cell, 26/26 |
 | FDA | `fda_warning_letter_domain_transfer_002` | `tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` | Clean boundary transfer cell, 20/27 |
+| FDA | `fda_transfer_judged_qa_v2` | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` | Deterministic compile-fact QA across transfer_001 and transfer_002, 137/159; every exact row typed-plan and redaction replay clean |
 | NTSB | `ntsb_investigation_transfer_surface_001` | `tmp/domain_lens_bundle/ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, 18/25 manifest; 19/25 R2 reducer replay |
 
 ## FDA Detail
@@ -112,6 +113,12 @@ Measured FDA cells to keep distinct:
 
 ```text
 fda_warning_letter_domain_transfer_001
+  deterministic judged-QA v2:
+    78 / 78 exact across N=3
+    all 78 exact rows pass registered typed-plan replay
+    all 78 exact rows survive redaction replay
+    scope: oracle-shaped Prolog fact QA, not messy human query planning
+
   historical OpenRouter R85 cell: 25 / 26, 0 forbidden, clean gates
   current replay of local LM Studio all-lens union archive:
     26 / 26, 0 / 9 supported forbidden, research integrity gate pass
@@ -121,6 +128,12 @@ fda_warning_letter_domain_transfer_001
     current-gate evidence but not a pristine first-pass compile.
 
 fda_warning_letter_domain_transfer_002
+  deterministic judged-QA v2:
+    59 / 81 exact across N=3, with 7 partial and 15 miss
+    all 59 exact rows pass registered typed-plan replay
+    all 59 exact rows survive redaction replay
+    scope: oracle-shaped Prolog fact QA, not messy human query planning
+
   fresh current-pack local LM Studio lens bundle:
     artifact root:
       tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
@@ -395,8 +408,9 @@ measurements: expected facts supported at N>=3/support>=2, forbidden facts not
 supported, and integrity gates clean. They are not QA reference-judge exact
 rates, so the answer judge cannot inflate these numbers.
 
-If a future QA metric becomes claim-bearing, it must pass the reference-judge
-null-control audit first:
+If a future LLM-judged QA metric becomes claim-bearing, it must pass the
+reference-judge null-control audit first. Deterministic compile-fact QA, like
+the FDA v2 bundle, instead has to pass typed-plan replay and redaction replay:
 
 ```text
 script: scripts/audit_reference_judge_null_controls.py
@@ -422,7 +436,7 @@ Do not claim:
 - self-serve domain-pack induction;
 - that a single transfer fixture proves a domain pack transfers;
 - that composed historical runs are equivalent to fresh same-condition bundles;
-- any QA exact-rate claim that has not passed judge null controls.
+- any LLM-judged QA exact-rate claim that has not passed judge null controls.
 
 ## Research Direction
 
@@ -434,8 +448,9 @@ The next technical work should serve one of four purposes:
    model, and artifact references retained here.
 3. Deliberately test whether adding a narrow SEC event-substance carrier breaks
    skeleton stability, with the skeleton pack frozen as the control.
-4. Run answer-judge null controls before any QA exact-rate metric becomes
-   claim-bearing.
+4. Run answer-judge null controls before any LLM-judged QA exact-rate metric
+   becomes claim-bearing; deterministic compile-fact QA remains governed by
+   typed-plan replay and redaction replay.
 
 Avoid row-grinding. The technical result gets stronger through reproducible
 transfer, clear abstention boundaries, and honest failure classes.

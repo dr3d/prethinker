@@ -153,7 +153,7 @@ compiler proposes facts; deterministic gates decide what counts.
 | Family | Scope | Current result | What it supports |
 | --- | --- | --- | --- |
 | SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden | Strongest methods example: a small closed skeleton pack transfers across unlike same-family filings. |
-| FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Transfer_001 current replay `26/26`; transfer_002 fresh current pack `20/27`; transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. |
+| FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. |
 
 ## SEC Methods Example
@@ -200,6 +200,7 @@ Claim-bearing and boundary artifacts:
 | --- | --- | --- |
 | Transfer 001 current replay | `26/26`, `0/9` supported forbidden, integrity pass | `tmp/domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` |
 | Transfer 002 fresh current pack | `20/27`, `0/7` supported forbidden, atom/lens gates clean | `tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon` |
+| Transfer judged-QA v2 | transfer_001 `78/78`; transfer_002 `59/81`; combined `137/159`; typed-plan replay `137/137`; redaction replay `137/137` with 0 prose-dependent exact rows | `C:\prethinker_tmp_archive\fda_transfer_judged_qa_v2_20260603` |
 | Transfer 003 archived replay | `18/26`, `0/10` supported forbidden, current integrity fail | `tmp/domain_transfer_gate_fda_t003_current_rescore_fixed_20260603` |
 
 The transfer_001 `26/26` cell is legitimate under the current gate, but it is
@@ -208,6 +209,13 @@ cleanup, including a destructive-reducer bug fix and removal of an ambiguous,
 context-dependent CGMP citation/category projection from deterministic category
 mapping. Treat it as evidence that the current gated pack can support that
 cell, not as evidence that all FDA warning-letter substance is solved.
+
+The judged-QA v2 bundle is a stricter compile-fact support measurement for
+transfer_001 and transfer_002. Its verdicts are deterministic matches against
+compiled Prolog facts, and every exact row survives registered typed-plan replay
+and source/display prose redaction. That makes it useful evidence for the
+domain-pack thesis, but only for oracle-shaped carrier-fact QA. It does not
+show that open-ended human query planning is solved.
 
 Per-layer boundary:
 
@@ -292,7 +300,7 @@ This note does not claim:
 - a promoted full NTSB pack;
 - that a single transfer fixture proves a domain pack transfers;
 - that composed historical runs are equivalent to fresh same-condition bundles;
-- any QA exact-rate claim that has not passed judge null controls.
+- any LLM-judged QA exact-rate claim that has not passed judge null controls.
 
 ## Next Research Questions
 

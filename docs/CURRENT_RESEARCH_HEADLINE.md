@@ -44,8 +44,11 @@ SEC Form 8-K skeleton pack
     stabilize same-family official-document skeleton compilation
 
 FDA warning-letter pack
-  transfer_001 current-gate replay: 26 / 26, 0 / 9 forbidden
-  transfer_002 fresh current-pack lens bundle: 20 / 27, 0 / 7 forbidden
+  deterministic judged-QA v2 across transfer_001 and transfer_002:
+    137 / 159 exact = 86.16%
+    all 137 exact rows pass typed-plan replay and redaction replay
+    transfer_001: 78 / 78 exact across N=3
+    transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
   transfer_003 archived replay: 18 / 26, 0 / 10 forbidden, integrity fail
   documentation-gap candidate review: 0 expected / 13 forbidden on
     transfer_002; stable candidate emissions for violations 1, 2, and 3 are
@@ -53,6 +56,8 @@ FDA warning-letter pack
   claim: primary richer case study; skeleton and recurring regulatory anatomy
     transfer better than wrapper role semantics, context-dependent categories,
     response/detail value flesh, and other substance lanes
+  scope note: v2 measures oracle-shaped compile-fact support, not messy human
+    query planning
 
 NTSB investigation pack
   seed micro: 13 / 13
@@ -92,12 +97,14 @@ The next work should strengthen the research claim rather than lift one fixture:
 1. Use the SEC skeleton evidence as the formal methods example, with exact
    fixture, gate, model, and artifact references kept in
    DOMAIN_PACK_RESEARCH_EVIDENCE.md.
-2. Summarize FDA per-layer evidence as the richer case study, including
-   transfer_002 as boundary evidence rather than a row-grinding target.
+2. Keep the FDA v2 judged-QA result current and separated from messy-query
+   claims; transfer_002 remains boundary evidence rather than a row-grinding
+   target.
 3. Keep NTSB as corroborating boundary evidence, with manifest and reducer
    replay numbers separated.
-4. Run answer-judge null controls and oracle-isolation checks before any QA
-   metric becomes claim-bearing.
+4. Run answer-judge null controls and oracle-isolation checks before any
+   LLM-judged QA metric becomes claim-bearing; deterministic compile-fact QA
+   still needs typed-plan and redaction replay.
 5. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 

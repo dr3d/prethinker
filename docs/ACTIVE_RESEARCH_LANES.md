@@ -98,6 +98,14 @@ current-gate replay picture is stricter than the older worksheet notes:
 transfer_001 local all-lens union replay:
   26 / 26 expected, 0 / 9 supported forbidden, research integrity pass
 
+fda_transfer_judged_qa_v2 deterministic compile-fact QA:
+  transfer_001: 78 / 78 exact across N=3
+  transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
+  combined: 137 / 159 exact = 86.16%
+  typed-plan replay: 137 / 137 exact rows replay through registered carriers
+  redaction replay: 137 / 137 exact rows survive with 0 prose-dependent rows
+  scope: oracle-shaped Prolog fact QA, not messy human query planning
+
 transfer_002 fresh current-pack lens-scoped bundle:
   artifact root:
     tmp/domain_lens_bundle/fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
@@ -114,17 +122,21 @@ transfer_003 archived single-lens replay:
   research integrity fail: atom-shape
 ```
 
-The `transfer_001` replay is the clean FDA transfer cell. `transfer_002` is now
-the clean boundary cell: current gates hold, but the richer rows do not all
-transfer. A blind candidate review of `fda_response_documentation_gap/5` on
-`transfer_002` found 0 expected facts and 13 forbidden boundaries, so retained
-stable documentation-gap emissions for violations 1, 2, and 3 are false
-positives. Do not grind `transfer_002` upward row-by-row; use it to name the
-current abstention boundary. `transfer_003` remains archived boundary/blocker
-evidence until it is rerun as a fresh current-pack bundle or deliberately left
-out of the claim. The response-assessment lane remains a 16/17 composed
-diagnostic rather than a promoted fresh-compile claim. NTSB investigations are
-the second fixture-bank pack candidate. The R1 NTSB micro skeleton currently
+The v2 judged-QA bundle is the cleanest current FDA compile-fact measurement:
+the exact rows replay through registered typed plans and survive redaction, but
+the queries are oracle-shaped carrier facts. It should not be described as
+messy human QA. The `transfer_001` replay is the clean FDA transfer cell.
+`transfer_002` is now the clean boundary cell: current gates hold, but the
+richer rows do not all transfer. A blind candidate review of
+`fda_response_documentation_gap/5` on `transfer_002` found 0 expected facts and
+13 forbidden boundaries, so retained stable documentation-gap emissions for
+violations 1, 2, and 3 are false positives. Do not grind `transfer_002` upward
+row-by-row; use it to name the current abstention boundary. `transfer_003`
+remains archived boundary/blocker evidence until it is rerun as a fresh
+current-pack bundle or deliberately left out of the claim. The
+response-assessment lane remains a 16/17 composed diagnostic rather than a
+promoted fresh-compile claim. NTSB investigations are the second fixture-bank
+pack candidate. The R1 NTSB micro skeleton currently
 holds at 13/13 expected facts with 0/13 forbidden facts under local Qwen
 N>=3/support>=2 and clean atom-shape/signature/lens-scope gates. That is a
 micro-pack result, not a transfer or product claim.
@@ -249,8 +261,9 @@ Before the next technical claim:
 2. Preserve SEC Form 8-K as the clean skeleton-pack methodology example.
 3. Use NTSB as boundary evidence for what transfers, what abstains, and what
    becomes lower tier.
-4. Run answer-judge null controls and oracle-isolation checks for any QA result
-   that becomes claim-bearing.
+4. Run answer-judge null controls and oracle-isolation checks for any
+   LLM-judged QA result that becomes claim-bearing; deterministic compile-fact
+   QA still needs typed-plan and redaction replay.
 5. Report transfer, reproducibility, abstention boundaries, and failure classes
    together; do not turn a clean sub-layer into a broad accuracy claim.
 6. Treat stale-number re-gating as a first-class research finding: older clean

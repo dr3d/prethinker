@@ -30,7 +30,7 @@ FDA and NTSB pack work:
 
 | Candidate family | QA-style fixtures | Typed micro-fixtures | Read |
 | --- | ---: | ---: | --- |
-| FDA warning letters | 12+ | 8+ | First wedge; useful but not done. Current replay of transfer_001 local all-lens union is clean at 26/26 with integrity pass; fresh current-pack transfer_002 is a clean boundary cell at 20/27 with 0 forbidden; archived transfer_003 replay fails current integrity gates and is blocker evidence. |
+| FDA warning letters | 12+ | 8+ | First wedge; useful but not done. Deterministic judged-QA v2 across transfer_001 and transfer_002 is 137/159 exact, with every exact row passing typed-plan and redaction replay. Transfer_002 remains the clean boundary cell; archived transfer_003 replay fails current integrity gates and is blocker evidence. |
 | NTSB investigations | 16 | 2 | Second pack-process test. Skeleton/chronology/conditions transfer, but fresh harness manifest is 18/25 and deterministic R2 reducer replay is 19/25, with casualty/safety instability and findings abstention. |
 | SEC / corporate disclosure | 14 | 4 | Strong official-document scaffold; Form 8-K skeleton micro reaches 13/13 and three unlike retained transfers now hold at 13/13, 12/12, and 12/12 under hard governance. |
 | OSHA / workplace enforcement | 11 | 0 | Good regulatory table/narrative pressure; less current schema machinery. |
@@ -316,20 +316,23 @@ Status:
   value-domain governance. This is not yet a transfer claim.
 - FDA is not "done." The FDA warning-letter pack remains the strongest current
   wedge, but its evidence must stay separated by provider, transfer cell, and
-  current-gate status: transfer_001 local all-lens union currently replays at
-  26/26 with 0/9 supported forbidden and research-integrity pass; fresh
-  current-pack transfer_002 is governance-clean at 20/27 with 0/7 supported
-  forbidden and documents the current boundary; archived transfer_003 replays
-  at 18/26 with atom-shape integrity failure. Response-assessment is parked at
-  16/17 composed diagnostic recall rather than promoted.
+  current-gate status. The deterministic judged-QA v2 bundle across
+  transfer_001 and transfer_002 is 137/159 exact; all exact rows replay through
+  registered typed plans and survive redaction. This is compile-fact transfer
+  evidence, not messy-query competence. Transfer_002 still documents the
+  current boundary; archived transfer_003 replays at 18/26 with atom-shape
+  integrity failure. Response-assessment is parked at 16/17 composed diagnostic
+  recall rather than promoted.
 
-Next blocker:
+Current next decision:
 
-- Build or select one unlike NTSB transfer micro from retained `datasets/`
-  fixtures. Run the closed `ntsb_investigation_v1` registry against it with the
-  same local-Qwen settings. Promotion requires support>=2 over N>=3,
-  atom-shape/signature/lens-scope clean, value-domain clean, no forbidden
-  support, and no source-prose/query-prose route.
+- Do not reopen FDA `transfer_002` for row grinding.
+- Treat SEC as the clean skeleton-methods example.
+- Treat NTSB as boundary corroboration unless a new research question requires
+  a deterministic compile-fact QA bundle comparable to the FDA v2 package.
+- If the next work needs another replication measurement, use retained
+  `datasets/compile_micro_fixtures` first; no new external fixture order is
+  currently needed.
 
 R7 unlike NTSB transfer fixture selected:
 

@@ -76,8 +76,10 @@ SEC Form 8-K skeleton pack:
   forbidden support: 0 in all claim-bearing cells
 
 FDA warning-letter pack:
-  transfer_001 current-gate replay: 26 / 26
-  transfer_002 fresh current-pack bundle: 20 / 27
+  deterministic judged-QA v2: 137 / 159 exact
+  all 137 exact rows pass typed-plan and redaction replay
+  transfer_001: 78 / 78 exact across N=3
+  transfer_002: 59 / 81 exact across N=3
   boundary: wrapper role semantics, context-dependent category/substance,
     response/detail value flesh
 
@@ -154,10 +156,11 @@ Current high-signal evidence:
 - SEC Form 8-K skeleton domain pack: seed micro `13 / 13`; three unlike
   retained transfers `13 / 13`, `12 / 12`, and `12 / 12`, with `0` supported
   forbidden rows and clean atom/lens governance in claim-bearing cells.
-- FDA warning-letter domain pack: transfer_001 current-gate replay `26 / 26`;
-  transfer_002 fresh current-pack bundle `20 / 27`, `0 / 7` forbidden, clean
-  atom/lens governance, now treated as boundary evidence rather than a
-  row-grinding target.
+- FDA warning-letter domain pack: deterministic judged-QA v2 across
+  transfer_001 and transfer_002 is `137 / 159` exact; all `137` exact rows pass
+  typed-plan replay and redaction replay. This is compile-fact transfer
+  evidence, not messy-query competence; transfer_002 remains boundary evidence
+  rather than a row-grinding target.
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
   `18 / 25` in the manifest and `19 / 25` after deterministic reducer replay,
   `0` forbidden, showing the same skeleton-vs-substance boundary.

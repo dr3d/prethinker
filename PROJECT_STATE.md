@@ -76,8 +76,11 @@ SEC Form 8-K skeleton pack
     can transfer across unlike same-family official documents
 
 FDA warning-letter pack
-  transfer_001 current replay: 26 / 26, 0 / 9 supported forbidden
-  transfer_002 fresh current-pack bundle: 20 / 27, 0 / 7 supported forbidden
+  deterministic judged-QA v2 across transfer_001 and transfer_002:
+    137 / 159 exact = 86.16%
+    all 137 exact rows pass typed-plan replay and redaction replay
+    transfer_001: 78 / 78 exact across N=3
+    transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
   transfer_003 archived replay: 18 / 26, 0 / 10 supported forbidden,
     current integrity fail
   read: primary richer case study; skeleton/citation/regulatory boilerplate
@@ -86,6 +89,8 @@ FDA warning-letter pack
   proposal review: `fda_response_documentation_gap/5` blind review on
     transfer_002 found 0 expected / 13 forbidden; stable candidate emissions
     for violations 1, 2, and 3 are false positives
+  scope note: v2 is oracle-shaped compile-fact QA, not evidence that messy
+    human query planning is solved
 
 NTSB investigation pack
   seed micro: 13 / 13
