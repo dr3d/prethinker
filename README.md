@@ -148,6 +148,7 @@ Focused local verification for the current domain-pack and governance work:
 
 ```powershell
 python -m pytest -q
+python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 ```
 

@@ -206,7 +206,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-04:
 
 ```text
-2374 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
+2377 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
@@ -218,6 +218,7 @@ Common local checks:
 ```powershell
 $env:PYTHONPATH='.'
 pytest -q
+python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\build_compile_fact_judged_qa.py --help
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run

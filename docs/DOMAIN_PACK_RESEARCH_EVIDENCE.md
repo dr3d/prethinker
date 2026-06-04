@@ -123,6 +123,11 @@ redaction replay: pass, 0 prose-dependent exact rows in every cell
 typed-plan replay: pass, 0 unregistered exact plans in every cell
 ```
 
+`scripts/run_current_research_governance.py` runs the current claim-protection
+set as one command: sign-clean, artifact-path audit, historical-score audit,
+domain predicate schema validation, and the compile-fact QA manifest. The
+2026-06-04 governance run passed all 5 checks.
+
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:
 
