@@ -1,7 +1,7 @@
 {
   "schema": "domain_predicate_proposal_v1",
   "proposal_id": "fda_warning_letter_response_documentation_gap_v1",
-  "status": "candidate",
+  "status": "rejected",
   "domain_profile": "fda_warning_letter_v1",
   "bounded_document_family": "FDA warning letters with numbered CGMP violation items and missing-response-documentation critiques.",
   "candidate_signature": "fda_response_documentation_gap/5",

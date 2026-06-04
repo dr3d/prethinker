@@ -231,6 +231,9 @@ def _validate_proposal(path: Path, *, profile_root: Path) -> dict[str, Any]:
     status = str(data.get("status") or "").strip()
     if status not in VALID_STATUSES:
         errors.append("invalid_status")
+    review_results = data.get("review_results") if isinstance(data.get("review_results"), list) else []
+    if _has_blocked_review(review_results) and status != "rejected":
+        errors.append("blocked_review_requires_rejected_status")
 
     proposal_id = str(data.get("proposal_id") or "").strip()
     if not proposal_id or not ARG_RE.match(proposal_id):
@@ -332,7 +335,7 @@ def _validate_proposal(path: Path, *, profile_root: Path) -> dict[str, Any]:
             errors.append("promoted_signature_not_in_domain_profile")
         if profile and lens_owner and signature not in _lens_allowed_signatures(profile, lens_owner):
             errors.append("promoted_signature_not_in_lens_owner_allowlist")
-    elif carrier_contract(signature) is None:
+    elif status in {"draft", "candidate"} and carrier_contract(signature) is None:
         warnings.append("candidate_signature_not_yet_registered")
 
     return _row(path=path, data=data, errors=errors, warnings=warnings)
@@ -391,6 +394,18 @@ def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[
         "errors": errors,
         "warnings": warnings,
     }
+
+
+def _has_blocked_review(value: Any) -> bool:
+    if not isinstance(value, list):
+        return False
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        result = str(item.get("result") or "").strip()
+        if result.startswith("blocked"):
+            return True
+    return False
 
 
 def _review_summary(value: Any) -> str:

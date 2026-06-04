@@ -91,6 +91,40 @@ def test_promoted_domain_predicate_proposal_must_be_registered_and_lens_allowed(
     assert "promoted_signature_not_in_lens_owner_allowlist" in report["proposals"][0]["errors"]
 
 
+def test_blocked_review_requires_rejected_status(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["review_results"] = [
+        {
+            "fixture_id": "fda_warning_letter_domain_transfer_002",
+            "result": "blocked_forbidden",
+        }
+    ]
+    path = _write(tmp_path / "proposal.json", payload)
+
+    report = build_report([path])
+
+    assert report["summary"]["status"] == "fail"
+    assert "blocked_review_requires_rejected_status" in report["proposals"][0]["errors"]
+
+
+def test_rejected_blocked_review_does_not_warn_about_unregistered_signature(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["status"] = "rejected"
+    payload["review_results"] = [
+        {
+            "fixture_id": "fda_warning_letter_domain_transfer_002",
+            "result": "blocked_forbidden",
+        }
+    ]
+    path = _write(tmp_path / "proposal.json", payload)
+
+    report = build_report([path])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["proposals"][0]["errors"] == []
+    assert report["proposals"][0]["warnings"] == []
+
+
 def test_domain_predicate_proposal_status_report_disclaims_promotion(tmp_path: Path) -> None:
     path = _write(tmp_path / "proposal.json", _valid_payload())
     report = build_report([path])
