@@ -96,6 +96,8 @@ def build_report(
         errors.append("missing_fixture")
     if not compile_paths:
         errors.append("missing_compile_artifacts")
+    if not proposal_paths:
+        errors.append("missing_proposal_files")
     for path in proposal_paths:
         data = _load_json(path)
         signature = str(data.get("candidate_signature") or "").strip()

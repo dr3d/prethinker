@@ -51,6 +51,26 @@ def test_proposal_evidence_marks_stable_unexpected_as_candidate_signal_not_score
     assert "Supported unexpected facts require independent oracle review" in rendered
 
 
+def test_proposal_evidence_blocks_when_no_proposal_files(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    run1 = _compile(tmp_path / "run1" / "compile.json", ["demo_candidate(row_1, alpha, src_a)."])
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[],
+        micro_root=micro_root,
+        compile_paths=[run1],
+        support_threshold=1,
+        matcher="constant_slot",
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert report["errors"] == ["missing_proposal_files"]
+
+
 def test_proposal_evidence_blocks_supported_forbidden_facts(tmp_path: Path) -> None:
     micro_root = tmp_path / "micro"
     fixture = micro_root / "demo_fixture"
