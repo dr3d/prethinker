@@ -8,10 +8,10 @@ This report does not read source prose, QA questions, or judge outputs.
 - Domains: `4`
 - Predicates: `50` (`46` domain-specific plus shared carriers)
 - Lenses: `24`
-- Associated fixtures: `18`
+- Associated fixtures: `20`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `414`
-- Forbidden facts in associated fixtures: `153`
+- Expected facts in associated fixtures: `488`
+- Forbidden facts in associated fixtures: `171`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
 
@@ -19,7 +19,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 291 | 79 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 2 | 38 | 28 |
-| `osha_incident_v1` | 10 | 9 | 4 | 2 | 35 | 16 |
+| `osha_incident_v1` | 10 | 9 | 4 | 4 | 109 | 34 |
 | `sec_form_8k_v1` | 7 | 6 | 4 | 4 | 50 | 30 |
 
 ## fda_warning_letter_v1
@@ -109,6 +109,8 @@ This report does not read source prose, QA questions, or judge outputs.
 | --- | --- | ---: | ---: | --- |
 | `osha_incident_domain_v1` | `manifest_domain_profile` | 20 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:3, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:2, `osha_violation_count/5`:4, `osha_violation_item/8`:2, `osha_violation_status/5`:2 |
 | `osha_incident_transfer_001` | `manifest_domain_profile` | 15 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:1, `osha_violation_count/5`:4, `osha_violation_item/8`:1, `osha_violation_status/5`:1 |
+| `osha_incident_transfer_002` | `manifest_domain_profile` | 53 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:8, `osha_related_activity/5`:2, `osha_violation_count/5`:8, `osha_violation_item/8`:16, `osha_violation_status/5`:16 |
+| `osha_incident_transfer_003` | `manifest_domain_profile` | 21 | 10 | `domain_omission/5`:1, `osha_establishment/5`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:6, `osha_related_activity/5`:1, `osha_violation_count/5`:5, `osha_violation_item/8`:3, `osha_violation_status/5`:3 |
 
 ## sec_form_8k_v1
 

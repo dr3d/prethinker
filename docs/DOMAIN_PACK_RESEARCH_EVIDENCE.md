@@ -38,7 +38,7 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 | FDA warning letters | Warning-letter wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Primary case study with multiple transfer fixtures | Deterministic judged-QA v2 across transfer_001 and transfer_002: 137/159 exact; all 137 exact rows pass typed-plan replay and redaction replay. Archived transfer_003 replay fails current gates | Strongest domain-pack work, but not finished; current claim is compile-fact transfer with clear boundary rows, not broad FDA completion or messy-query competence |
 | NTSB investigations | Skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | One micro and one unlike transfer | Micro 13/13; fresh transfer manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden, clean governance. Deterministic compile-fact QA over the unlike transfer is 53/75 per-run exact and 18/25 support>=2; all exact rows pass typed-plan and redaction replay | Transfer confirms skeleton/conditions/chronology; casualty, safety-action, and finding lanes remain weak |
 | SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers | Seed micro 13/13; transfers 13/13, 12/12, 12/12 with 0 supported forbidden and clean atom/lens governance. Deterministic compile-fact QA over the seed plus three transfers is 144/150 per-run exact, while support>=2 remains 50/50 and all exact rows pass typed-plan and redaction replay | Best current evidence that a small closed skeleton pack can transfer within one official-document family |
-| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, item, status, related activity | One seed micro plus one unlike retained transfer | Seed micro 18/20 support>=2 after high-arity registry intake fix; first unlike transfer 12/15 support>=2; both have 0 supported forbidden and clean atom/lens governance | Fourth-family corroboration. Accident/injury and violation table rows transfer; wrapper/establishment rows and blank-value related activity remain boundary rows |
+| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, item, status, related activity | One seed micro plus one unlike retained transfer, plus two diagnostic transfer probes | Seed micro 18/20 support>=2 after high-arity registry intake fix; first unlike transfer 12/15 support>=2; both have 0 supported forbidden and clean atom/lens governance. Diagnostic transfer_002 is 18/53 with 0 forbidden; diagnostic transfer_003 is 2/21 with 3 supported forbidden after stricter cross-section controls | Fourth-family corroboration, not a promoted pack. Accident/injury and violation table rows transfer in bounded cells; wrapper/establishment, blank-value related activity, long-table enumeration, and mixed-document section attachment remain boundary rows |
 
 ## Case-Study Matrix
 
@@ -52,7 +52,7 @@ gap, not from whichever worksheet row is most recent.
 | FDA response assessment | Three-fixture observation-transfer response lanes | Same gates plus fresh same-condition composition, not historical lane mixing | 16/17 composed diagnostic with one repeated unexpected final row | Typed attachment/taxonomy conflict; not safe for more row grinding | Keep frozen unless a broader FDA case-study checkpoint makes response coverage load-bearing |
 | NTSB skeleton/chronology/condition pack | UPS aviation micro plus unlike highway/hazmat transfer | Closed NTSB registry, N>=3/support>=2, lens-scope and atom-shape clean | Micro 13/13; scripted lens-bundle manifest 18/25, deterministic R2 reducer replay 19/25, 0 forbidden. Compile-fact QA: 53/75 per-run exact, 18/25 support>=2, 0 prose-dependent exact rows | Casualty instability, one safety-action actor/organization attachment miss, weather atom normalization, and findings/probable-cause substance should abstain or Tier 2 | Use NTSB as boundary evidence; do not grind toward a promoted pack before FDA is summarized |
 | SEC Form 8-K skeleton pack | One seed micro plus three unlike retained Form 8-K/8-K/A transfers | Closed SEC skeleton registry, local-Qwen N>=3/support>=2, integrity gates clean | Seed 13/13; transfers 13/13, 12/12, 12/12, all 0 supported forbidden. Local deterministic compile-fact QA: 144/150 per-run exact, 50/50 support>=2, 0 prose-dependent exact rows | Skeleton transfers; event-substance intentionally untested. The per-run misses/partials are useful variance evidence, not a contradiction of the support>=2 claim | Use as the methods example in the phase-close technical note |
-| OSHA accident/inspection skeleton pack | Retained OSHA accident/inspection fixtures from the fixture bank | Closed OSHA registry, local-Qwen N=3/support>=2, atom/lens gates clean | Seed 18/20 after the high-arity registry intake fix; first unlike transfer 12/15; both 0 supported forbidden. Transfer run has visible per-run fact-count variance: 13, 3, and 16 union facts | Skeleton/table lanes transfer better than wrapper rows. The blank related-activity fields need an explicit `not_stated` versus `no` policy before promotion | Keep as fourth-family corroboration; do not grind wrapper rows unless the phase-close note needs a stronger fourth-family cell |
+| OSHA accident/inspection skeleton pack | Retained OSHA accident/inspection fixtures from the fixture bank | Closed OSHA registry, local-Qwen N=3/support>=2, atom/lens gates clean | Seed 18/20 after the high-arity registry intake fix; first unlike transfer 12/15; both 0 supported forbidden. Transfer_002 diagnostic: 18/53, 0 forbidden, clean atom/lens gates. Transfer_003 diagnostic after wildcard forbidden rescore: 2/21, 3/10 supported forbidden, atom/lens gates clean | Skeleton/table lanes transfer better than wrapper rows. New diagnostics expose a long citation/status table enumeration boundary and a mixed-source current-news/prior-inspection section-attachment integrity failure | Keep as fourth-family corroboration; do not grind wrapper or mixed-document rows unless a named research question requires section/scope carriers |
 
 ## Current Research Verdict
 
@@ -99,6 +99,8 @@ historical unless they are re-gated here or in a newer note.
 | NTSB | `ntsb_investigation_transfer_surface_001` | `C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-bundle-harness-r1` | Boundary transfer cell, 18/25 manifest; 19/25 R2 reducer replay; raw compile-fact QA 53/75 per-run exact and 18/25 support>=2 |
 | OSHA | `osha_incident_domain_v1` seed micro | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix` | Fourth-family seed skeleton evidence, 18/20 using constant-slot support report; 0/8 forbidden; atom/lens gates clean |
 | OSHA | `osha_incident_transfer_001` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local` | Unlike transfer evidence, 12/15; 0/8 forbidden; atom/lens gates clean |
+| OSHA | `osha_incident_transfer_002` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-002-r1-local-long-table-boundary` | Diagnostic boundary probe, 18/53; 0/8 forbidden; atom/lens gates clean; not promoted |
+| OSHA | `osha_incident_transfer_003` | `C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore` | Diagnostic integrity probe, 2/21 with 3/10 supported forbidden after wildcard cross-section controls; not promoted |
 
 ## Compile-Fact QA Reproduction
 
@@ -140,7 +142,7 @@ retained bundle roots, N>=3 run artifacts, recoverable model/settings metadata,
 and consistent settings across repeat runs. Two older SEC cells predate bundle
 `manifest.json` files; their metadata is recovered from the retained compile
 JSON artifacts and reported as warnings rather than hidden. The 2026-06-04
-governance run passed all 6 checks.
+governance run passed the current claim-protection set.
 
 The generated bundles are still governed by the same two checks used for the
 external FDA v2 package:
@@ -515,7 +517,8 @@ The next technical work should serve one of four purposes:
    CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md, with exact fixture, gate,
    model, and artifact references retained here.
 3. Keep NTSB and OSHA as corroborating boundary evidence unless a named
-   research question requires one more transfer fixture.
+   research question requires one more transfer fixture or a fenced
+   section/scope carrier experiment.
 4. Deliberately test whether adding a narrow SEC event-substance carrier breaks
    skeleton stability, with the skeleton pack frozen as the control.
 5. Run answer-judge null controls before any LLM-judged QA exact-rate metric

@@ -10,9 +10,9 @@ This page shows which omission contracts exist and which typed fixture oracles e
 
 - Domains: `4`
 - Registry accountability requirements: `8`
-- Requirements covered by fixture omissions: `4`
-- Requirements not yet covered by fixture omissions: `4`
-- Fixture omission facts: `7`
+- Requirements covered by fixture omissions: `5`
+- Requirements not yet covered by fixture omissions: `3`
+- Fixture omission facts: `8`
 - Fixture-only omission patterns: `0`
 - Status: `pass`
 
@@ -20,7 +20,7 @@ This page shows which omission contracts exist and which typed fixture oracles e
 | --- | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 3 | 3 | 6 | 0 |
 | `ntsb_investigation_v1` | 2 | 1 | 1 | 0 |
-| `osha_incident_v1` | 2 | 0 | 0 | 0 |
+| `osha_incident_v1` | 2 | 1 | 1 | 0 |
 | `sec_form_8k_v1` | 1 | 0 | 0 | 0 |
 
 ## fda_warning_letter_v1
@@ -72,17 +72,18 @@ Uncovered registry requirements:
 | ID | Carrier | Kind | Reason | Fixture support |
 | --- | --- | --- | --- | ---: |
 | `missing_inspection_identifier` | `osha_inspection/7` | `role_missing` | `inspection_identifier_not_stated` | 0 |
-| `missing_accident_summary` | `osha_accident/7` | `none_found` | `accident_summary_not_stated` | 0 |
+| `missing_accident_summary` | `osha_accident/7` | `none_found` | `accident_summary_not_stated` | 1 |
 
 ### Fixture Omission Patterns
 
-_No expected `domain_omission/5` facts in associated fixtures._
+| Carrier | Kind | Reason | Count | Registry status | Fixtures |
+| --- | --- | --- | ---: | --- | --- |
+| `osha_accident/7` | `none_found` | `accident_summary_not_stated` | 1 | `declared` | `osha_incident_transfer_003` |
 
 ### Accountability Read
 
 Uncovered registry requirements:
 - `missing_inspection_identifier`: `osha_inspection/7` / `role_missing` / `inspection_identifier_not_stated`
-- `missing_accident_summary`: `osha_accident/7` / `none_found` / `accident_summary_not_stated`
 
 ## sec_form_8k_v1
 

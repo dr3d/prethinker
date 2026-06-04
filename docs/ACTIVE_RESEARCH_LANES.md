@@ -329,11 +329,38 @@ boundary rows: inspection wrapper absent, establishment 1/3,
   related activity emits no/no where oracle expected not_stated/not_stated
 ```
 
+Two additional retained OSHA probes tried to raise OSHA to the SEC transfer bar.
+They should be read as diagnostics, not promoted cells:
+
+```text
+fixture: osha_incident_transfer_002
+artifact root:
+  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-002-r1-local-long-table-boundary
+local-Qwen lens bundle: N=3, support>=2
+supported expected facts: 18 / 53
+supported forbidden facts: 0 / 8
+atom-shape/signature/lens-scope blockers: 0
+read: clean long-table boundary; summary counts, penalties, related activity,
+  and first four citation items stabilize, but the 16-item citation/status
+  inventory does not.
+
+fixture: osha_incident_transfer_003
+artifact root:
+  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore
+local-Qwen lens bundle: N=3, support>=2
+supported expected facts: 2 / 21
+supported forbidden facts: 3 / 10 after stricter wildcard controls
+atom-shape/signature/lens-scope blockers: 0
+read: mixed-document integrity failure; the accident lens attaches the current
+  news-release trench accident to the appended prior-inspection id. This is a
+  section/scope boundary, not a clean transfer cell.
+```
+
 OSHA strengthens the cross-family pattern without changing the research claim:
 accident/injury rows and violation table anatomy transfer better than wrapper
-rows and blank-value semantics. Keep it as fourth-family corroboration; do not
-grind the wrapper lane unless the phase-close technical note needs a stronger
-fourth-family control.
+rows, blank-value semantics, long-table enumeration, and mixed-source section
+attachment. Keep it as fourth-family corroboration; do not grind the wrapper
+or mixed-document lanes unless a named research question requires it.
 
 Before the next technical claim:
 

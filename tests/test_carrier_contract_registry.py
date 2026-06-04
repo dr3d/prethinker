@@ -651,6 +651,13 @@ def test_carrier_contract_prompt_lines_render_value_domains() -> None:
     assert "cited_violations_not_exhaustive" in text
 
 
+def test_osha_violation_status_contract_includes_formal_settlement_event() -> None:
+    status = carrier_contract("osha_violation_status/5")
+
+    assert status is not None
+    assert "formal_settlement" in status["value_domains"]["latest_event"]
+
+
 def test_fda_violation_detail_contract_names_record_review_subject_trigger() -> None:
     lines = carrier_contract_prompt_lines(["fda_violation_detail/5"])
     text = "\n".join(lines)

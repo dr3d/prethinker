@@ -485,6 +485,40 @@ def test_typed_micro_series_cli_enforce_no_forbidden_bites(tmp_path: Path, monke
     assert main() == 1
 
 
+def test_typed_micro_series_forbidden_constant_slot_allows_wildcard_guards(tmp_path: Path) -> None:
+    root = tmp_path / "micro"
+    fixture = root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(
+        fixture / "forbidden_facts.pl",
+        "demo_accident(_, _, _, v_2025_11_18, trench_collapse, 1, _).\n",
+    )
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        [
+            "demo_accident(accident_yarmouth, inspection_1794687, accident_summary_yarmouth, v_2025_11_18, trench_collapse, 1, direct).",
+        ],
+    )
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        root=root,
+        compile_paths=[run1],
+        support_threshold=1,
+        matcher="constant_slot",
+    )
+
+    assert report["summary"]["supported_forbidden_fact_count"] == 1
+    assert report["forbidden_rows"] == [
+        {
+            "forbidden_fact": "demo_accident(_, _, _, v_2025_11_18, trench_collapse, 1, _).",
+            "support_count": 1,
+            "support_runs": ["run1"],
+            "supported": True,
+        }
+    ]
+
+
 def test_typed_micro_series_cli_enforce_no_unexpected_bites(tmp_path: Path, monkeypatch) -> None:
     root = tmp_path / "micro"
     fixture = root / "demo_fixture"

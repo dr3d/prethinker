@@ -1490,7 +1490,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "Do not infer final legal status from a contest or settlement event unless the source states that status.",
         ],
         "value_domains": {
-            "latest_event": ["contested", "informal_settlement", "not_stated", "other_event"],
+            "latest_event": ["contested", "informal_settlement", "formal_settlement", "not_stated", "other_event"],
         },
         "forbidden_uses": ["source_excerpt", "full_event_cell", "unstated_final_order", "legal_conclusion"],
         "micro_fixtures": ["osha_incident_domain_v1"],

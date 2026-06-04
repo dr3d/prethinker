@@ -161,7 +161,7 @@ compiler proposes facts; deterministic gates decide what counts.
 | SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | Seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Deterministic compile-fact QA over seed plus transfers: `144/150` per-run exact, `50/50` support>=2, all exact rows typed-plan/redaction clean | Strongest methods example: a small closed skeleton pack transfers across unlike same-family filings. Per-run misses/partials are variance evidence, not a contradiction of the support>=2 claim. |
 | FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Transfer_003 archived replay `18/26` but current integrity fail | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; raw compile-fact QA `53/75` per-run exact and `18/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. Raw fact QA separates emitted fact support from reducer replay. |
-| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates | Fourth-family corroboration: accident/injury rows and violation tables transfer better than wrapper/establishment rows and blank-value related activity. Transfer also shows visible compile variance. |
+| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `3/10` supported forbidden after wildcard controls | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than wrapper/establishment, blank-value semantics, long-table enumeration, and mixed-section attachment. |
 
 ## SEC Methods Example
 
@@ -289,6 +289,9 @@ seed artifact:
   C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-domain-v1-r2-local-arity-fix
 transfer artifact:
   C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-001-r1-local
+diagnostic artifacts:
+  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-002-r1-local-long-table-boundary
+  C:\prethinker_tmp_archive\osha_incident_domain_probe_20260604\osha-incident-transfer-003-r1-local-mixed-doc-forbidden-rescore
 ```
 
 Current OSHA measurements:
@@ -296,6 +299,9 @@ Current OSHA measurements:
 ```text
 seed: 18 / 20 support>=2, 0 / 8 supported forbidden
 transfer_001: 12 / 15 support>=2, 0 / 8 supported forbidden
+transfer_002 diagnostic: 18 / 53 support>=2, 0 / 8 supported forbidden
+transfer_003 diagnostic: 2 / 21 support>=2, 3 / 10 supported forbidden
+  after wildcard mixed-section forbidden controls
 atom-shape / registered-signature / lens-scope blockers: 0
 ```
 
@@ -315,10 +321,13 @@ Per-layer boundary:
 | Violation item and status | `4/4` | `2/2` | Citation/item/status rows transfer. |
 | Related activity | `2/2` | `0/1` | Blank-value semantics need an explicit `not_stated` versus `no` policy. |
 | Wrapper / establishment | `0/2` at support>=2 | `0/2` at support>=2 | Wrapper rows are unstable in this first OSHA pack. |
+| Long violation/status table | not tested | transfer_002 `18/53` overall | Summary counts, penalties, related activity, and first four items stabilize; full 16-item citation/status inventory does not. |
+| Mixed source sections | not tested | transfer_003 `3/10` supported forbidden | The accident lens attaches a current news-release accident to an appended prior-inspection id; section/scope attachment is not solved. |
 
 OSHA strengthens the cross-family skeleton/table claim while preserving the
-boundary: compact official-document anatomy transfers before wrapper semantics
-and open-ended substance. It is not a promoted OSHA product pack.
+boundary: compact official-document anatomy transfers before wrapper semantics,
+long-table enumeration, mixed-source section attachment, and open-ended
+substance. It is not a promoted OSHA product pack.
 
 ## What Was Learned
 

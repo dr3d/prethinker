@@ -116,11 +116,15 @@ OSHA accident/inspection pack
   seed micro: 18 / 20 support>=2 after high-arity registry intake fix
   first unlike transfer: 12 / 15 support>=2
   forbidden support: 0 in both measured cells
+  new transfer diagnostics:
+    transfer_002 long violation table: 18 / 53 support>=2, 0 / 8 forbidden
+    transfer_003 mixed news-release/prior-inspection fixture: 2 / 21 support>=2
+      with 3 / 10 supported forbidden after wildcard cross-section controls
   governance: registered signatures, atom-shape, and lens-scope clean
   read: fourth-family corroboration for skeleton/table anatomy; accident,
     employee injury, violation counts, penalties, item, and status rows transfer
-    better than wrapper/establishment rows and one related-activity blank-value
-    boundary
+    better than wrapper/establishment rows, long-table enumeration, mixed-source
+    section attachment, and one related-activity blank-value boundary
 ```
 
 The publishable technical shape is narrow:
