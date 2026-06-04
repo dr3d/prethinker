@@ -240,6 +240,13 @@ Per-layer boundary:
 | Legal basis, conclusion, response requirement | stable | stable | Recurring regulatory boilerplate transfers better than detail flesh. |
 | Detail/value flesh | `2/2` | `2/6` | Main abstention boundary. |
 
+The 2026-06-04 fenced `fda_violation_detail/5` probe deliberately avoided new
+mechanisms and scored only value-detail rows. It confirmed the boundary:
+transfer_001 has two stable expected details, but transfer_002 remains `2/6`
+with substantial unexpected same-signature pressure. This is evidence for
+abstention/Tier-2 treatment of value-level detail, not evidence that FDA detail
+is solved.
+
 FDA supports the richer-domain path, but not broad FDA completion.
 
 A blind candidate review also rejected the

@@ -284,6 +284,28 @@ Current FDA per-layer read:
 | Detail / value flesh | `fda_violation_detail` 2/2 | 2/6 | Main abstention boundary: response-status, process-area, and procedure-scope values are not yet a promoted hard-clean layer. |
 | Archived transfer_003 replay | n/a | n/a | 18/26 with 0/10 supported forbidden, but current integrity gate fails atom-shape; use as stale-gate/boundary evidence only. |
 
+Fenced value-detail probe, 2026-06-04:
+
+```text
+signature: fda_violation_detail/5 only
+transfer_001: 2 / 2 support>=2, 0 / 1 supported forbidden,
+  7 unexpected same-signature rows
+  tmp summary archived at:
+  C:\prethinker_tmp_archive\fda_violation_detail_fenced_probe_20260604\transfer_001_summary.md
+transfer_002: 2 / 6 support>=2, 0 / 1 supported forbidden,
+  14 unexpected same-signature rows
+  tmp summary archived at:
+  C:\prethinker_tmp_archive\fda_violation_detail_fenced_probe_20260604\summary.md
+transfer_003: not used as a clean value-detail support cell because the
+  retained replay is lens-level/stale and the current integrity gate fails
+```
+
+Stop-rule read: do not add a new value-detail mechanism from this probe alone.
+The layer has clean narrow pockets, but richer same-family transfer still shows
+detail-value drift and oracle incompleteness. Treat value-detail as
+abstention/Tier-2 until a compact detail taxonomy transfers on unlike letters
+with low unexpected same-signature pressure.
+
 FDA interventions that count as research mechanisms:
 
 - numbered CGMP bundle before category population:
@@ -321,7 +343,9 @@ FDA open blockers:
 - keep response assessment frozen unless it becomes load-bearing for the FDA
   case-study claim;
 - keep value-level violation detail as the main abstention/Tier-2 boundary
-  unless a compact detail taxonomy transfers on unlike letters.
+  unless a compact detail taxonomy transfers on unlike letters; the 2026-06-04
+  fenced `fda_violation_detail/5` probe supports the boundary rather than a
+  new mechanism.
 
 ## NTSB Detail
 
