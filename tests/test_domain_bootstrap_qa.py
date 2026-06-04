@@ -811,6 +811,34 @@ def test_sign_clean_strict_strategy_removes_free_text_source_record_guidance() -
     assert "footnote_content/3" in encoded
 
 
+def test_failure_surface_payload_does_not_treat_source_display_as_typed_derivation() -> None:
+    payload = _failure_surface_payload(
+        row={
+            "id": "q001",
+            "utterance": "What is the printed docket?",
+            "query_results": [
+                {
+                    "query": "source_record_text_display(Row, Text).",
+                    "result": {
+                        "predicate": "source_record_text_display",
+                        "rows": [{"Row": "src_line_1", "Text": "Docket No. 123"}],
+                    },
+                }
+            ],
+        },
+        reference="Docket No. 123",
+        judge={"verdict": "miss"},
+        kb_inventory={"signatures": ["source_record_text_display/2"], "counts": {}, "examples": {}},
+        facts=["source_record_text_display(src_line_1, 'Docket No. 123')."],
+        rules=[],
+    )
+    encoded_policy = json.dumps(payload.get("classification_policy", []), ensure_ascii=False).casefold()
+
+    assert "not proof of typed derivation" in encoded_policy
+    assert "if they plainly contain the support but the judge missed it, prefer answer_surface_gap" not in encoded_policy
+    assert "can fully support a reference answer" not in encoded_policy
+
+
 def test_atom_library_and_bundle_planner_warn_about_identifier_alias_subjects() -> None:
     source = Path("scripts/run_domain_bootstrap_qa.py").read_text(encoding="utf-8")
 
@@ -2568,8 +2596,7 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "cn_2026_04_15" in source
     assert "Date-display policy" in source
     assert "2025_01_02" in source
-    assert "Identifier-metadata policy" in source
-    assert "driver_license/2" in source
+    assert "Legacy non-sign-clean identifier-metadata policy" in source
 
 
 def test_negative_reference_supported_by_negative_query_results() -> None:
