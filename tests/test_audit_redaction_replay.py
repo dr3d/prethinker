@@ -318,6 +318,150 @@ def test_redaction_replay_proxy_accepts_compact_citation_atom(tmp_path):
     assert report["summary"]["prose_dependent_exact"] == 0
 
 
+def test_redaction_replay_proxy_accepts_prolog_reference_constants_from_compiled_fact(tmp_path):
+    qa_path = tmp_path / "fixture_a" / "qa.json"
+    qa_path.parent.mkdir()
+    qa_path.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "id": "q001",
+                        "reference_answer": (
+                            "fda_warning_letter(Letter, cder, "
+                            "apothecary_pharma_llc, v_2025_12_01, SrcLetter)."
+                        ),
+                        "reference_judge": {"verdict": "exact"},
+                        "query_results": [
+                            {
+                                "query": (
+                                    "fda_warning_letter(Letter, cder, "
+                                    "apothecary_pharma_llc, v_2025_12_01, SrcLetter)."
+                                ),
+                                "result": {
+                                    "predicate": "fda_warning_letter",
+                                    "status": "answered",
+                                    "rows": [
+                                        {
+                                            "compiled_fact": (
+                                                "fda_warning_letter(wl_717972, cder, "
+                                                "apothecary_pharma_llc, v_2025_12_01, source_url)."
+                                            ),
+                                            "Letter": "wl_717972",
+                                            "SrcLetter": "source_url",
+                                        }
+                                    ],
+                                },
+                            }
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(qa_files=[qa_path])
+
+    assert report["summary"]["thesis_exact"] == 1
+    assert report["summary"]["prose_dependent_exact"] == 0
+
+
+def test_redaction_replay_proxy_rejects_wrong_prolog_compiled_fact(tmp_path):
+    qa_path = tmp_path / "fixture_a" / "qa.json"
+    qa_path.parent.mkdir()
+    qa_path.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "id": "q001",
+                        "reference_answer": (
+                            "fda_warning_letter(Letter, cder, "
+                            "apothecary_pharma_llc, v_2025_12_01, SrcLetter)."
+                        ),
+                        "reference_judge": {"verdict": "exact"},
+                        "query_results": [
+                            {
+                                "query": (
+                                    "fda_warning_letter(Letter, cder, "
+                                    "apothecary_pharma_llc, v_2025_12_01, SrcLetter)."
+                                ),
+                                "result": {
+                                    "predicate": "fda_warning_letter",
+                                    "status": "answered",
+                                    "rows": [
+                                        {
+                                            "compiled_fact": (
+                                                "fda_warning_letter(wl_717972, cber, "
+                                                "apothecary_pharma_llc, v_2025_12_01, source_url)."
+                                            ),
+                                            "Letter": "wl_717972",
+                                            "SrcLetter": "source_url",
+                                        }
+                                    ],
+                                },
+                            }
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(qa_files=[qa_path])
+
+    assert report["summary"]["thesis_exact"] == 0
+    assert report["summary"]["prose_dependent_exact"] == 1
+
+
+def test_redaction_replay_proxy_rejects_all_variable_prolog_reference(tmp_path):
+    qa_path = tmp_path / "fixture_a" / "qa.json"
+    qa_path.parent.mkdir()
+    qa_path.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "id": "q001",
+                        "reference_answer": "fda_warning_letter(Letter, Center, Firm, Date, Source).",
+                        "reference_judge": {"verdict": "exact"},
+                        "query_results": [
+                            {
+                                "query": "fda_warning_letter(Letter, Center, Firm, Date, Source).",
+                                "result": {
+                                    "predicate": "fda_warning_letter",
+                                    "status": "answered",
+                                    "rows": [
+                                        {
+                                            "compiled_fact": (
+                                                "fda_warning_letter(wl_717972, cder, "
+                                                "apothecary_pharma_llc, v_2025_12_01, source_url)."
+                                            ),
+                                            "Letter": "wl_717972",
+                                            "Center": "cder",
+                                            "Firm": "apothecary_pharma_llc",
+                                            "Date": "v_2025_12_01",
+                                            "Source": "source_url",
+                                        }
+                                    ],
+                                },
+                            }
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(qa_files=[qa_path])
+
+    assert report["summary"]["thesis_exact"] == 0
+    assert report["summary"]["prose_dependent_exact"] == 1
+
+
 def test_redaction_replay_prefers_row_fixture_over_file_parent(tmp_path):
     qa_path = tmp_path / "combined" / "qa.json"
     qa_path.parent.mkdir()

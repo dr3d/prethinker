@@ -264,6 +264,8 @@ def _redact_value(value: Any, *, unclassified_fields: set[str], field_name: str 
                 continue
             if isinstance(inner, (dict, list)):
                 out[key_text] = _redact_value(inner, unclassified_fields=unclassified_fields, field_name=key_text)
+            elif key_text == "compiled_fact" and isinstance(inner, str) and _parse_prolog_fact(inner) is not None:
+                out[key_text] = inner
             elif _is_metadata_field(key_text) or _is_typed_scalar(inner):
                 out[key_text] = inner
             else:
@@ -319,6 +321,8 @@ def _collect_typed_scalars(value: Any, *, field_name: str = "") -> set[str]:
     elif isinstance(value, list):
         for inner in value:
             out.update(_collect_typed_scalars(inner, field_name=field_name))
+    elif str(field_name or "") == "compiled_fact" and isinstance(value, str):
+        out.update(_prolog_fact_parts(value))
     elif _is_typed_scalar(value):
         if _is_prose_field(field_name):
             return out
@@ -329,6 +333,9 @@ def _collect_typed_scalars(value: Any, *, field_name: str = "") -> set[str]:
 
 
 def _reference_answer_parts(reference: str) -> set[str]:
+    prolog_parts = _prolog_reference_parts(reference)
+    if prolog_parts is not None:
+        return prolog_parts
     parts: set[str] = set()
     for chunk in re.split(r"[;,]|\band\b|\balso\b", str(reference or ""), flags=re.IGNORECASE):
         normalized = _normalize(chunk).strip(".")
@@ -348,6 +355,97 @@ def _reference_answer_parts(reference: str) -> set[str]:
             continue
         parts.add(normalized)
     return parts
+
+
+def _prolog_reference_parts(reference: str) -> set[str] | None:
+    parsed = _parse_prolog_fact(reference)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    constant_parts: set[str] = set()
+    for arg in args:
+        if _is_prolog_variable(arg):
+            continue
+        constant_parts.update(_prolog_arg_variants(arg))
+    if not constant_parts:
+        return set()
+    return {_normalize(predicate), *constant_parts}
+
+
+def _prolog_fact_parts(value: str) -> set[str]:
+    parsed = _parse_prolog_fact(value)
+    if parsed is None:
+        return set()
+    predicate, args = parsed
+    parts = {_normalize(predicate)}
+    for arg in args:
+        if _is_prolog_variable(arg):
+            continue
+        parts.update(_prolog_arg_variants(arg))
+    return {part for part in parts if part}
+
+
+def _parse_prolog_fact(value: str) -> tuple[str, list[str]] | None:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"([a-z][A-Za-z0-9_]*)\((.*)\)\.?", text)
+    if not match:
+        return None
+    args = _split_top_level_args(match.group(2))
+    if not args:
+        return None
+    return match.group(1), args
+
+
+def _split_top_level_args(text: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote: str | None = None
+    escaped = False
+    for char in text:
+        if quote is not None:
+            current.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            current.append(char)
+            continue
+        if char == "(":
+            depth += 1
+            current.append(char)
+            continue
+        if char == ")":
+            depth = max(0, depth - 1)
+            current.append(char)
+            continue
+        if char == "," and depth == 0:
+            arg = "".join(current).strip()
+            if arg:
+                args.append(arg)
+            current = []
+            continue
+        current.append(char)
+    arg = "".join(current).strip()
+    if arg:
+        args.append(arg)
+    return args
+
+
+def _is_prolog_variable(value: str) -> bool:
+    return bool(re.fullmatch(r"_?[A-Z][A-Za-z0-9_]*|_", str(value or "").strip()))
+
+
+def _prolog_arg_variants(value: str) -> set[str]:
+    text = str(value or "").strip()
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+        text = text[1:-1]
+    return _typed_scalar_normalization_variants(text)
 
 
 def _reference_identifier_tokens(value: str) -> set[str]:
