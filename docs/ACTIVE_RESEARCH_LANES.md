@@ -229,9 +229,11 @@ artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
 same-signature facts dropped from 2 to 0.
 The latest guard and manifest artifacts are
 `C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604` and
-`C:\prethinker_tmp_archive\sec_axis_stability_20260604`; the latest full
-governance run passed 13 checks. This is governance cleanup and colder
-provenance refresh, not a support lift.
+`C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`; the
+latest full governance run passed 13 checks and now prints repeated unexpected
+same-signature rows as a standing precision diagnostic. This is governance
+cleanup, colder provenance refresh, and precision visibility, not a support
+lift.
 
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,

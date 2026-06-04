@@ -88,6 +88,7 @@ def build_bundle(
     files: list[dict[str, Any]] = []
     verdict_summary_by_file: dict[str, dict[str, int]] = {}
     forbidden_emissions_by_file: dict[str, list[dict[str, str]]] = {}
+    unexpected_emissions_by_file: dict[str, list[str]] = {}
     blocking_reasons: list[str] = []
     if not run_specs:
         blocking_reasons.append("no_fixture_runs")
@@ -108,6 +109,8 @@ def build_bundle(
         verdict_summary_by_file[filename] = dict(run_payload["verdict_summary"])
         if run_payload["forbidden_emissions"]:
             forbidden_emissions_by_file[filename] = list(run_payload["forbidden_emissions"])
+        if run_payload["unexpected_same_signature_emissions"]:
+            unexpected_emissions_by_file[filename] = list(run_payload["unexpected_same_signature_emissions"])
 
     return {
         "schema": "prethinker.judged_qa_bundle.v1",
@@ -121,6 +124,8 @@ def build_bundle(
         "support_summary_by_fixture": _support_summary_by_fixture(files),
         "verdict_summary_by_file": verdict_summary_by_file,
         "forbidden_emissions_by_file": forbidden_emissions_by_file,
+        "unexpected_same_signature_summary_by_fixture": _unexpected_same_signature_summary_by_fixture(files),
+        "unexpected_same_signature_emissions_by_file": unexpected_emissions_by_file,
         "files": files,
     }
 
@@ -158,6 +163,11 @@ def build_run_payload(
         for match in [_exact_match(forbidden_fact, compile_facts)]
         if match is not None
     ]
+    unexpected_same_signature_emissions = _unexpected_same_signature_emissions(
+        compile_facts=compile_facts,
+        expected_facts=expected_facts,
+        forbidden_facts=forbidden_facts,
+    )
     return {
         "id": f"{fixture_id}__{run_id}__judged_qa",
         "schema": "prethinker.judged_qa.v1",
@@ -172,6 +182,7 @@ def build_run_payload(
         "domain_reducer_reports": domain_reducer_reports,
         "verdict_summary": dict(sorted(verdicts.items())),
         "forbidden_emissions": forbidden_emissions,
+        "unexpected_same_signature_emissions": unexpected_same_signature_emissions,
         "rows": rows,
     }
 
@@ -566,6 +577,59 @@ def _support_summary_by_fixture(files: list[dict[str, Any]]) -> dict[str, dict[s
     return out
 
 
+def _unexpected_same_signature_emissions(
+    *,
+    compile_facts: list[str],
+    expected_facts: list[str],
+    forbidden_facts: list[str],
+) -> list[str]:
+    oracle_signatures = {
+        signature
+        for fact in [*expected_facts, *forbidden_facts]
+        for signature in [_fact_signature(fact)]
+        if signature
+    }
+    unexpected: list[str] = []
+    for fact in sorted(set(compile_facts)):
+        signature = _fact_signature(fact)
+        if signature not in oracle_signatures:
+            continue
+        if any(_exact_match(expected_fact, [fact]) is not None for expected_fact in expected_facts):
+            continue
+        if any(_exact_match(forbidden_fact, [fact]) is not None for forbidden_fact in forbidden_facts):
+            continue
+        unexpected.append(fact)
+    return unexpected
+
+
+def _unexpected_same_signature_summary_by_fixture(files: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    by_fixture: dict[str, Counter[str]] = defaultdict(Counter)
+    runs_by_fixture: dict[str, set[str]] = defaultdict(set)
+    for item in files:
+        payload = item["payload"]
+        fixture_id = str(payload["fixture"])
+        run_id = str(payload["run_id"])
+        runs_by_fixture[fixture_id].add(run_id)
+        for fact in payload.get("unexpected_same_signature_emissions", []):
+            by_fixture[fixture_id][str(fact)] += 1
+    out: dict[str, dict[str, int]] = {}
+    for fixture_id in sorted(runs_by_fixture):
+        counter = by_fixture.get(fixture_id, Counter())
+        out[fixture_id] = {
+            "runs_seen": len(runs_by_fixture[fixture_id]),
+            "unexpected_same_signature_ge_2": sum(1 for count in counter.values() if count >= 2),
+            "unexpected_same_signature_ge_1": sum(1 for count in counter.values() if count >= 1),
+        }
+    return out
+
+
+def _fact_signature(fact: str) -> str:
+    parsed = _parse_fact(fact)
+    if parsed is None:
+        return ""
+    return _signature(parsed)
+
+
 def _readme_text(manifest: dict[str, Any]) -> str:
     return (
         "# Compile-Fact Judged QA Bundle\n\n"
@@ -577,7 +641,10 @@ def _readme_text(manifest: dict[str, Any]) -> str:
         "are reported as bindings. `partial` means the primary oracle constant "
         "matched but at least one other constant slot differed. `miss` means no "
         "supporting compiled fact matched the primary constant. The manifest also "
-        "prints a compact support>=2 summary by fixture for N-cycle compile work.\n\n"
+        "prints a compact support>=2 summary by fixture for N-cycle compile work. "
+        "`unexpected_same_signature` rows are emitted typed facts in measured "
+        "carriers that matched neither expected nor forbidden facts; they are a "
+        "precision diagnostic, not an automatic truth judgment.\n\n"
         f"Files: {', '.join(manifest.get('files', []))}\n"
     )
 

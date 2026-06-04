@@ -59,6 +59,11 @@ def test_run_compile_fact_judged_qa_manifest_end_to_end(tmp_path: Path) -> None:
 
     assert summary["summary"]["status"] == "pass"
     assert summary["cells"][0]["support_summary_by_fixture"]["fixture_a"]["exact_support_ge_2"] == 1
+    assert summary["cells"][0]["unexpected_same_signature_summary_by_fixture"]["fixture_a"] == {
+        "runs_seen": 2,
+        "unexpected_same_signature_ge_1": 0,
+        "unexpected_same_signature_ge_2": 0,
+    }
     assert summary["cells"][0]["redaction_summary"]["prose_dependent_exact"] == 0
     assert summary["cells"][0]["typed_plan_summary"]["unregistered_plan_exact_rows"] == 0
     assert (out_root / "summary.json").exists()

@@ -106,6 +106,9 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
             "exact_support_ge_2": sum(int(cell["exact_support_ge_2"]) for cell in cells),
             "per_run_rows": sum(int(cell["per_run_rows"]) for cell in cells),
             "per_run_exact": sum(int(cell["per_run_exact"]) for cell in cells),
+            "unexpected_same_signature_ge_2": sum(
+                int(cell["unexpected_same_signature_ge_2"]) for cell in cells
+            ),
             "prose_dependent_exact": sum(int(cell["prose_dependent_exact"]) for cell in cells),
             "unregistered_plan_exact_rows": sum(
                 int(cell["unregistered_plan_exact_rows"]) for cell in cells
@@ -121,6 +124,9 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
     cell_id = str(cell.get("id") or "")
     fixture_id = str(cell.get("fixture_id") or "")
     support = dict((cell.get("support_summary_by_fixture") or {}).get(fixture_id) or {})
+    unexpected = dict(
+        (cell.get("unexpected_same_signature_summary_by_fixture") or {}).get(fixture_id) or {}
+    )
     redaction = dict(cell.get("redaction_summary") or {})
     typed_plan = dict(cell.get("typed_plan_summary") or {})
     per_run_counts = _per_run_counts(cell.get("verdict_summary_by_file") or {})
@@ -137,6 +143,8 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
         "per_run_exact": int(per_run_counts["exact"]),
         "per_run_partial": int(per_run_counts["partial"]),
         "per_run_miss": int(per_run_counts["miss"]),
+        "unexpected_same_signature_ge_2": int(unexpected.get("unexpected_same_signature_ge_2") or 0),
+        "unexpected_same_signature_ge_1": int(unexpected.get("unexpected_same_signature_ge_1") or 0),
         "redaction_status": str(redaction.get("status") or ""),
         "prose_dependent_exact": int(redaction.get("prose_dependent_exact") or 0),
         "typed_plan_status": str(typed_plan.get("status") or ""),
@@ -192,6 +200,7 @@ def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "exact_support_ge_2": 0,
                 "per_run_rows": 0,
                 "per_run_exact": 0,
+                "unexpected_same_signature_ge_2": 0,
                 "prose_dependent_exact": 0,
                 "unregistered_plan_exact_rows": 0,
             },
@@ -201,6 +210,7 @@ def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
         row["exact_support_ge_2"] += int(cell["exact_support_ge_2"])
         row["per_run_rows"] += int(cell["per_run_rows"])
         row["per_run_exact"] += int(cell["per_run_exact"])
+        row["unexpected_same_signature_ge_2"] += int(cell["unexpected_same_signature_ge_2"])
         row["prose_dependent_exact"] += int(cell["prose_dependent_exact"])
         row["unregistered_plan_exact_rows"] += int(cell["unregistered_plan_exact_rows"])
     return [families[key] for key in sorted(families)]
@@ -246,6 +256,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Cells: `{summary['cell_count']}` across `{summary['family_count']}` families",
         f"- Support>=2: `{summary['exact_support_ge_2']} / {summary['reference_count']}` expected typed facts",
         f"- Per-run exact: `{summary['per_run_exact']} / {summary['per_run_rows']}` deterministic fact rows",
+        f"- Unexpected same-signature facts support>=2: `{summary['unexpected_same_signature_ge_2']}`",
         f"- Prose-dependent exact rows: `{summary['prose_dependent_exact']}`",
         f"- Unregistered exact typed plans: `{summary['unregistered_plan_exact_rows']}`",
         f"- Source/provenance warnings: `{summary['source_warning_count']}`",
@@ -259,19 +270,20 @@ def render_markdown(report: dict[str, Any]) -> str:
         [
             "## By Family",
             "",
-            "| Family | Cells | Support>=2 | Per-run exact | Prose-dependent | Unregistered plans |",
-            "| --- | ---: | ---: | ---: | ---: | ---: |",
+            "| Family | Cells | Support>=2 | Per-run exact | Unexpected>=2 | Prose-dependent | Unregistered plans |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for family in report["families"]:
         lines.append(
-            "| `{}` | {} | {} / {} | {} / {} | {} | {} |".format(
+            "| `{}` | {} | {} / {} | {} / {} | {} | {} | {} |".format(
                 family["family"],
                 family["cell_count"],
                 family["exact_support_ge_2"],
                 family["reference_count"],
                 family["per_run_exact"],
                 family["per_run_rows"],
+                family["unexpected_same_signature_ge_2"],
                 family["prose_dependent_exact"],
                 family["unregistered_plan_exact_rows"],
             )
@@ -281,8 +293,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
             "## Cells",
             "",
-            "| Cell | Fixture | Support>=2 | Per-run exact | Replay gates | Source metadata |",
-            "| --- | --- | ---: | ---: | --- | --- |",
+            "| Cell | Fixture | Support>=2 | Per-run exact | Unexpected>=2 | Replay gates | Source metadata |",
+            "| --- | --- | ---: | ---: | ---: | --- | --- |",
         ]
     )
     for cell in report["cells"]:
@@ -296,13 +308,14 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"manifest `{cell['bundle_manifest_status']}`"
         )
         lines.append(
-            "| `{}` | `{}` | {} / {} | {} / {} | {} | {} |".format(
+            "| `{}` | `{}` | {} / {} | {} / {} | {} | {} | {} |".format(
                 cell["id"],
                 cell["fixture_id"],
                 cell["exact_support_ge_2"],
                 cell["reference_count"],
                 cell["per_run_exact"],
                 cell["per_run_rows"],
+                cell["unexpected_same_signature_ge_2"],
                 replay,
                 source,
             )

@@ -141,6 +141,14 @@ def run_cell(
         "reports_dir": str(reports_dir),
         "verdict_summary_by_file": bundle["verdict_summary_by_file"],
         "support_summary_by_fixture": bundle["support_summary_by_fixture"],
+        "unexpected_same_signature_summary_by_fixture": bundle.get(
+            "unexpected_same_signature_summary_by_fixture",
+            {},
+        ),
+        "unexpected_same_signature_emissions_by_file": bundle.get(
+            "unexpected_same_signature_emissions_by_file",
+            {},
+        ),
         "redaction_summary": redaction.get("summary", {}),
         "typed_plan_summary": typed_plan.get("summary", {}),
         "expect": cell.get("expect", {}),

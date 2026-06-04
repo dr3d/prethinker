@@ -60,6 +60,9 @@ def test_build_compile_fact_judged_qa_exact_partial_miss_and_forbidden(tmp_path:
             "compiled_fact": "fda_warning_letter(wl_999999, cber, apothecary_pharma_llc, v_2025_12_01, source_url).",
         }
     ]
+    assert payload["unexpected_same_signature_emissions"] == [
+        "fda_correspondence_party(wl_717972, roland_holmqvist, recipient, roland_holmqvist, direct)."
+    ]
 
     rows = {row["id"].rsplit("__", 1)[-1]: row for row in payload["rows"]}
     assert rows["r001"]["reference_judge"]["verdict"] == "exact"
@@ -154,6 +157,11 @@ def test_build_compile_fact_judged_qa_writes_bundle(tmp_path: Path) -> None:
     assert manifest["schema"] == "prethinker.judged_qa_bundle.v1"
     assert manifest["files"] == ["fixture_a__run1__judged_qa.json"]
     assert manifest["verdict_summary_by_file"]["fixture_a__run1__judged_qa.json"] == {"exact": 1}
+    assert manifest["unexpected_same_signature_summary_by_fixture"]["fixture_a"] == {
+        "runs_seen": 1,
+        "unexpected_same_signature_ge_1": 0,
+        "unexpected_same_signature_ge_2": 0,
+    }
     assert manifest["support_summary_by_fixture"]["fixture_a"] == {
         "exact_support_ge_1": 1,
         "exact_support_ge_2": 0,

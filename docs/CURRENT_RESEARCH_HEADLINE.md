@@ -64,13 +64,15 @@ SEC Form 8-K skeleton pack
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary.
   latest governance artifact:
-    C:\prethinker_tmp_archive\sec_axis_stability_20260604\current_research_governance_sec_r4_20260604_r2
+    C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604\current_research_governance_unexpected_20260604
     13 governance checks passed, including `sec_value_axis_integrity` and
-    `compile_fact_qa_exclusions`; the SEC value-axis audit checked 29
-    expected/forbidden item/exhibit/treatment facts with 0 issues, and the
-    exclusion ledger accounts for 15 associated domain fixtures not in the
-    standing manifest. This refresh is a colder provenance update, not a
-    support increase.
+    `compile_fact_qa_exclusions`; the standing manifest now prints
+    same-signature unexpected support (`7` rows at support>=2) as a precision
+    diagnostic. The SEC value-axis audit checked 29 expected/forbidden
+    item/exhibit/treatment facts with 0 issues, and the exclusion ledger
+    accounts for 15 associated domain fixtures not in the standing manifest.
+    This refresh is colder provenance plus precision visibility, not a support
+    increase.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:

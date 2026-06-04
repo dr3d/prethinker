@@ -267,10 +267,13 @@ inference; its artifact is
 `C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604`, where the fixture
 value-axis audit checked 29 SEC item/exhibit/treatment facts with 0 issues and
 the 12-command governance run passed. A later r4 manifest refresh is archived at
-`C:\prethinker_tmp_archive\sec_axis_stability_20260604`; its 13-command
-governance run also passed, and the fresh `transfer_003` manifest root landed
-at `11/13` with `34/39` per-run exact. This is guard tightening and colder
-provenance refresh, not a support
+`C:\prethinker_tmp_archive\sec_axis_stability_20260604`; a newer governance
+refresh is archived at
+`C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`. Its
+13-command governance run also passed, the fresh `transfer_003` manifest root
+landed at `11/13` with `34/39` per-run exact, and the standing manifest now
+prints repeated unexpected same-signature rows as a precision diagnostic. This
+is guard tightening, colder provenance refresh, and precision visibility, not a support
 increase. Repaired Qwen MoE transfer_003 reruns landed at `12/13` and
 then `11/13`, both with `0` supported forbidden and clean axis/value/atom gates.
 A pre-registered follow-up stability rerun landed at `12/13`, again with `0`
@@ -422,7 +425,7 @@ exclusions:
 
 ```text
 artifact:
-  C:\prethinker_tmp_archive\sec_axis_stability_20260604\current_research_governance_sec_r4_20260604_r2
+  C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604\current_research_governance_unexpected_20260604
 exclusion reasons:
   accountability_control_micro_fixture: 3
   component_lane_fixture: 3

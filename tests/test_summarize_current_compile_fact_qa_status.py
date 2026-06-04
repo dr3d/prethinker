@@ -21,8 +21,10 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert report["summary"]["exact_support_ge_2"] == 3
     assert report["summary"]["per_run_rows"] == 12
     assert report["summary"]["per_run_exact"] == 8
+    assert report["summary"]["unexpected_same_signature_ge_2"] == 1
     assert report["summary"]["source_warning_count"] == 1
     assert "Support>=2: `3 / 4`" in md
+    assert "Unexpected same-signature facts support>=2: `1`" in md
     assert "`sec_form_8k_skeleton_seed`" in md
     assert "missing_bundle_manifest_recovered_from_compile_json" in md
 
@@ -96,6 +98,7 @@ def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Pa
                             "run3.json": {"exact": 2},
                         },
                         prose_dependent_exact=prose_dependent_exact,
+                        unexpected_same_signature_ge_2=1,
                     ),
                     _cell(
                         cell_id="osha_incident_transfer_001",
@@ -108,6 +111,7 @@ def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Pa
                             "run3.json": {"exact": 1, "miss": 1},
                         },
                         prose_dependent_exact=0,
+                        unexpected_same_signature_ge_2=0,
                     ),
                 ],
             }
@@ -145,6 +149,7 @@ def _cell(
     exact_support_ge_2: int,
     verdict_summary: dict,
     prose_dependent_exact: int,
+    unexpected_same_signature_ge_2: int,
 ) -> dict:
     row_count = sum(sum(counts.values()) for counts in verdict_summary.values())
     exact = sum(int(counts.get("exact") or 0) for counts in verdict_summary.values())
@@ -157,6 +162,13 @@ def _cell(
                 "reference_count": reference_count,
                 "exact_support_ge_2": exact_support_ge_2,
                 "runs_seen": 3,
+            }
+        },
+        "unexpected_same_signature_summary_by_fixture": {
+            fixture_id: {
+                "runs_seen": 3,
+                "unexpected_same_signature_ge_1": unexpected_same_signature_ge_2,
+                "unexpected_same_signature_ge_2": unexpected_same_signature_ge_2,
             }
         },
         "redaction_summary": {
