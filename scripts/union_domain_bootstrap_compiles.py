@@ -64,9 +64,11 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_sec_exhibit_number_atom_reduction,
     _apply_sec_filing_id_atom_reduction,
     _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
     _apply_atom_shape_integrity,
     _apply_carrier_value_domain_integrity,
+    _apply_domain_omission_registry_value_integrity,
     _apply_source_scope_payload_integrity,
     _enforce_fda_correspondence_party_placeholder_contract,
 )
@@ -168,6 +170,8 @@ def main() -> int:
             ("atom_shape_integrity", _apply_atom_shape_integrity),
             ("fda_correspondence_party_placeholder_contract", _enforce_fda_correspondence_party_placeholder_contract),
             ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),
+            ("domain_omission_registry_value_integrity", _apply_domain_omission_registry_value_integrity),
+            ("sec_signature_omission_contradiction_integrity", _apply_sec_signature_omission_contradiction_integrity),
         ):
             reducer_reports[name] = reducer(reduced_compile)
         facts = _ordered_unique(_compile_items({"source_compile": reduced_compile}, "facts"))

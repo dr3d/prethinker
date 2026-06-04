@@ -214,8 +214,12 @@ repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
 supported forbidden and clean atom/lens gates. The remaining boundary is
 exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
-duplicate commission-file value, bad omission-accountability noise, and MoE
-jitter rather than prose leakage.
+duplicate commission-file value, unstable item-treatment recall, and MoE
+jitter rather than prose leakage. A follow-up typed omission-accountability
+guard now blocks/drops contradictory SEC signatory omissions and unregistered
+omission kind/reason triples; rescoring the repaired transfer_003 stability
+artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
+same-signature facts dropped from 2 to 0.
 
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,

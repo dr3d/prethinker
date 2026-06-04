@@ -19,6 +19,7 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -2458,6 +2459,8 @@ def main() -> int:
         _apply_atom_shape_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
+        _apply_domain_omission_registry_value_integrity(record["source_compile"])
+        _apply_sec_signature_omission_contradiction_integrity(record["source_compile"])
         _apply_active_lens_scope_integrity(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
@@ -8332,6 +8335,13 @@ def _canonical_registered_signature_reference(value: str) -> str:
     return ""
 
 
+def _strip_fact_atom_quotes(value: str) -> str:
+    text = str(value or "").strip()
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+        return text[1:-1].strip()
+    return text
+
+
 def _apply_domain_omission_carrier_signature_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
     """Canonicalize registry signature references inside domain_omission/5 rows.
 
@@ -8395,6 +8405,151 @@ def _apply_domain_omission_carrier_signature_reduction(source_compile: dict[str,
         "reductions": reductions[:100],
         "invalid_facts": invalid[:100],
     }
+
+
+def _apply_domain_omission_registry_value_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop domain_omission/5 rows whose kind/reason triple is not registered.
+
+    domain_omission/5 is compact typed accountability, not an open vocabulary.
+    The allowed (carrier_signature, omission_kind, reason_code) triples come
+    from datasets/domain_profiles/*/ontology_registry.json. This reducer reads
+    only the closed registries and emitted typed facts; it does not inspect
+    source prose or query text.
+    """
+
+    allowed = _registered_domain_omission_triples()
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "domain_omission" and len(args) == 5:
+            carrier_signature = _canonical_registered_signature_reference(args[1])
+            omission_kind = _strip_fact_atom_quotes(args[2])
+            reason_code = _strip_fact_atom_quotes(args[3])
+            if (carrier_signature, omission_kind, reason_code) not in allowed:
+                dropped.append(
+                    {
+                        "fact": fact,
+                        "carrier_signature": carrier_signature,
+                        "omission_kind": omission_kind,
+                        "reason_code": reason_code,
+                    }
+                )
+                continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_domain_omission_registry_value_dropped_count"] = len(dropped)
+    source_compile["deterministic_domain_omission_registry_value_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_domain_omission_registry_value_policy"] = {
+        "schema_version": "deterministic_domain_omission_registry_value_integrity_v1",
+        "authority": "closed_registry_value_domain_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops domain_omission/5 rows whose carrier_signature/omission_kind/reason_code triple is "
+            "not declared by a domain profile accountability requirement. It does not create omissions or "
+            "read source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+@lru_cache(maxsize=1)
+def _registered_domain_omission_triples() -> frozenset[tuple[str, str, str]]:
+    triples: set[tuple[str, str, str]] = set()
+    root = REPO_ROOT / "datasets" / "domain_profiles"
+    if not root.exists():
+        return frozenset()
+    for path in sorted(root.glob("*/ontology_registry.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        requirements = data.get("accountability_requirements")
+        if not isinstance(requirements, list):
+            continue
+        for item in requirements:
+            if not isinstance(item, dict):
+                continue
+            carrier_signature = _canonical_registered_signature_reference(str(item.get("carrier_signature") or ""))
+            omission_kind = _strip_fact_atom_quotes(str(item.get("omission_kind") or ""))
+            reason_code = _strip_fact_atom_quotes(str(item.get("reason_code") or ""))
+            if carrier_signature and omission_kind and reason_code:
+                triples.add((carrier_signature, omission_kind, reason_code))
+    return frozenset(triples)
+
+
+def _apply_sec_signature_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop SEC signature-block omission rows contradicted by typed signatory rows.
+
+    This is a narrow typed-fact consistency guard. It does not infer whether a
+    source contains a signature block. It only removes a domain_omission/5 row
+    that says the SEC signature block is not stated when a sec_signatory/5 row
+    for the same filing id is already present in the emitted typed facts.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    filings_with_signatory: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "sec_signatory" and len(args) == 5 and args[0]:
+            filings_with_signatory.add(args[0])
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        should_drop = False
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "domain_omission"
+                and len(args) == 5
+                and args[0] in filings_with_signatory
+                and _canonical_registered_signature_reference(args[1]) == "sec_signatory/5"
+                and _strip_fact_atom_quotes(args[2]) == "role_missing"
+                and _strip_fact_atom_quotes(args[3]) == "signature_block_not_stated"
+            ):
+                should_drop = True
+        if should_drop:
+            dropped.append(fact)
+            continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_signature_omission_contradiction_dropped_count"] = len(dropped)
+    source_compile["deterministic_sec_signature_omission_contradiction_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_sec_signature_omission_contradiction_policy"] = {
+        "schema_version": "deterministic_sec_signature_omission_contradiction_v1",
+        "authority": "typed_fact_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops domain_omission/5 signature_block_not_stated rows only when a sec_signatory/5 "
+            "row for the same filing id is already present. It does not create signatory facts or "
+            "read source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
 
 
 def _apply_fda_no_fei_omission_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:

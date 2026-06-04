@@ -47,6 +47,8 @@ SEC Form 8-K skeleton pack
       11 / 13, 0 / 10 supported forbidden
     R3 pre-registered stability rerun:
       12 / 13, 0 / 10 supported forbidden
+    R3 omission-accountability guard rescore:
+      12 / 13, 0 / 10 supported forbidden; unexpected facts 2 -> 0
     axis/value/atom/lens gates clean in the repaired cells
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     12 / 13; 11 / 13; 11 / 12
@@ -54,7 +56,9 @@ SEC Form 8-K skeleton pack
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
     methods anchor yet. The current boundary is exhibit legal-treatment
     ambiguity, wrapper/telephone recall, duplicate commission-file value, and
-    MoE jitter plus bad omission-accountability noise, not prose leakage.
+    MoE jitter plus unstable item-treatment recall, not prose leakage. Bad
+    SEC omission-accounting rows are now guarded as governance noise rather
+    than counted as an open support boundary.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:

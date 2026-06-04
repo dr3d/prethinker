@@ -108,6 +108,24 @@ def test_domain_omission_accountability_blocks_invalid_carrier_signature(tmp_pat
     assert report["rows"][0]["carrier_signature"] == "fda_correspondence_party_5"
 
 
+def test_domain_omission_accountability_blocks_unregistered_omission_kind_reason(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(blackstone_inc, 'sec_signatory/5', subject_missing, former_name_address_not_applicable, src_line_1)."
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "invalid_domain_omission_registry_value"
+    assert report["rows"][0]["carrier_signature"] == "sec_signatory/5"
+
+
 def test_domain_omission_accountability_blocks_ordinary_placeholder_carrier(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",
@@ -125,6 +143,63 @@ def test_domain_omission_accountability_blocks_ordinary_placeholder_carrier(tmp_
     assert report["summary"]["status"] == "fail"
     assert report["rows"][0]["class"] == "ordinary_carrier_omission_placeholder"
     assert report["rows"][0]["carrier_signature"] == "fda_correspondence_party/5"
+
+
+def test_domain_omission_accountability_blocks_sec_signature_omission_contradiction(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "sec_signatory(filing_1, michael_s_chae, chief_financial_officer, v_2025_10_23, src_signature).",
+                "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_signature).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+    assert report["rows"][0]["carrier_signature"] == "sec_signatory/5"
+
+
+def test_domain_omission_accountability_audits_union_artifact_with_omission_fact(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        {
+            "parsed": {"candidate_predicates": [{"signature": "sec_signatory/5"}]},
+            "source_compile": {
+                "facts": [
+                    "sec_signatory(filing_1, michael_s_chae, chief_financial_officer, v_2025_10_23, src_signature).",
+                    "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_signature).",
+                ],
+                "self_check": {},
+            },
+        },
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "domain_omission_contradicts_emitted_carrier"
+
+
+def test_domain_omission_accountability_allows_fda_signatory_omission_with_recipient(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "fda_correspondence_party(letter, acme_inc, recipient, acme_inc, src_recipient).",
+                "domain_omission(letter, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
 
 
 def test_domain_omission_accountability_ignores_profiles_without_domain_omission(tmp_path: Path) -> None:

@@ -14,6 +14,7 @@ import argparse
 import json
 import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -69,9 +70,10 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
         source_compile = data.get("source_compile") if isinstance(data, dict) else {}
         if not isinstance(source_compile, dict):
             continue
-        if not _domain_omission_available(data):
-            continue
         facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()] if isinstance(source_compile.get("facts"), list) else []
+        domain_omission_available = _domain_omission_available(data) or _facts_include_domain_omission(facts)
+        if not domain_omission_available:
+            continue
         for fact in facts:
             placeholder = _ordinary_omission_placeholder(fact)
             if placeholder:
@@ -87,6 +89,7 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                 )
         domain_omission_rows = _domain_omission_rows(facts)
         has_domain_omission = bool(domain_omission_rows)
+        allowed_omissions = _registered_domain_omission_triples()
         for row in domain_omission_rows:
             if carrier_contract(str(row.get("carrier_signature", ""))) is None:
                 rows.append(
@@ -99,6 +102,32 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                         "self_check_omission_notes": [],
                     }
                 )
+            elif (
+                str(row.get("carrier_signature", "")),
+                str(row.get("omission_kind", "")),
+                str(row.get("reason_code", "")),
+            ) not in allowed_omissions:
+                rows.append(
+                    {
+                        "fixture": path.parent.name,
+                        "compile_json": str(path),
+                        "class": "invalid_domain_omission_registry_value",
+                        "fact": row.get("fact", ""),
+                        "carrier_signature": row.get("carrier_signature", ""),
+                        "self_check_omission_notes": [],
+                    }
+                )
+        for fact in _sec_signature_omission_contradictions(facts):
+            rows.append(
+                {
+                    "fixture": path.parent.name,
+                    "compile_json": str(path),
+                    "class": "domain_omission_contradicts_emitted_carrier",
+                    "fact": fact,
+                    "carrier_signature": "sec_signatory/5",
+                    "self_check_omission_notes": [],
+                }
+            )
         if _self_check_omission_requires_domain_omission(data):
             omission_notes = [
                 text
@@ -153,6 +182,14 @@ def _domain_omission_available(data: dict[str, Any]) -> bool:
     )
 
 
+def _facts_include_domain_omission(facts: list[str]) -> bool:
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if match and match.group(1) == "domain_omission":
+            return True
+    return False
+
+
 def _self_check_omission_requires_domain_omission(data: dict[str, Any]) -> bool:
     active_lens = data.get("active_profile_registry_lens")
     if not isinstance(active_lens, dict) or not active_lens:
@@ -188,7 +225,14 @@ def _domain_omission_rows(facts: list[str]) -> list[dict[str, str]]:
         if len(args) != 5:
             rows.append({"fact": fact, "carrier_signature": ""})
             continue
-        rows.append({"fact": fact, "carrier_signature": _normalize_arg(args[1])})
+        rows.append(
+            {
+                "fact": fact,
+                "carrier_signature": _normalize_arg(args[1]),
+                "omission_kind": _normalize_arg(args[2]),
+                "reason_code": _normalize_arg(args[3]),
+            }
+        )
     return rows
 
 
@@ -206,6 +250,58 @@ def _ordinary_omission_placeholder(fact: str) -> str:
         ):
             return "fda_correspondence_party/5"
     return ""
+
+
+def _sec_signature_omission_contradictions(facts: list[str]) -> list[str]:
+    filings_with_signatory: set[str] = set()
+    parsed_facts: list[tuple[str, list[str], str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match:
+            continue
+        predicate = match.group(1)
+        args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+        parsed_facts.append((predicate, args, fact))
+        if predicate == "sec_signatory" and len(args) == 5 and args[0]:
+            filings_with_signatory.add(args[0])
+
+    out: list[str] = []
+    for predicate, args, fact in parsed_facts:
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and args[0] in filings_with_signatory
+            and args[1] == "sec_signatory/5"
+            and args[2] == "role_missing"
+            and args[3] == "signature_block_not_stated"
+        ):
+            out.append(fact)
+    return out
+
+
+@lru_cache(maxsize=1)
+def _registered_domain_omission_triples() -> frozenset[tuple[str, str, str]]:
+    triples: set[tuple[str, str, str]] = set()
+    root = ROOT / "datasets" / "domain_profiles"
+    if not root.exists():
+        return frozenset()
+    for path in sorted(root.glob("*/ontology_registry.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        requirements = data.get("accountability_requirements")
+        if not isinstance(requirements, list):
+            continue
+        for item in requirements:
+            if not isinstance(item, dict):
+                continue
+            carrier_signature = _normalize_arg(str(item.get("carrier_signature") or ""))
+            omission_kind = _normalize_arg(str(item.get("omission_kind") or ""))
+            reason_code = _normalize_arg(str(item.get("reason_code") or ""))
+            if carrier_contract(carrier_signature) is not None and omission_kind and reason_code:
+                triples.add((carrier_signature, omission_kind, reason_code))
+    return frozenset(triples)
 
 
 def _normalize_arg(value: str) -> str:

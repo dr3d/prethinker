@@ -59,9 +59,11 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_sec_exhibit_number_atom_reduction,
     _apply_sec_filing_id_atom_reduction,
     _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
     _apply_atom_shape_integrity,
     _apply_carrier_value_domain_integrity,
+    _apply_domain_omission_registry_value_integrity,
     _apply_source_scope_payload_integrity,
     _enforce_fda_correspondence_party_placeholder_contract,
 )
@@ -551,6 +553,8 @@ def _apply_domain_reducers(source_compile: dict[str, Any]) -> dict[str, Any]:
         ("atom_shape_integrity", _apply_atom_shape_integrity),
         ("fda_correspondence_party_placeholder_contract", _enforce_fda_correspondence_party_placeholder_contract),
         ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),
+        ("domain_omission_registry_value_integrity", _apply_domain_omission_registry_value_integrity),
+        ("sec_signature_omission_contradiction_integrity", _apply_sec_signature_omission_contradiction_integrity),
         ("active_lens_scope_integrity", _apply_active_lens_scope_integrity),
     ):
         reports[name] = reducer(source_compile)

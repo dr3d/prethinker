@@ -102,12 +102,14 @@ from scripts.run_domain_bootstrap_file import (
     _fda_response_assessment_context_lines,
     _apply_fda_response_assessment_followup_pass,
     _apply_domain_omission_carrier_signature_reduction,
+    _apply_domain_omission_registry_value_integrity,
     _apply_fda_warning_letter_subject_convergence,
     _apply_fda_date_atom_reduction,
     _apply_registered_date_slot_atom_reduction,
     _apply_sec_exhibit_number_atom_reduction,
     _apply_sec_filing_id_atom_reduction,
     _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
     _apply_ntsb_actor_id_atom_reduction,
     _apply_ntsb_condition_atom_reduction,
@@ -8582,6 +8584,67 @@ def test_sec_filing_id_atom_reduction_canonicalizes_numeric_leading_ids_only() -
         "fda_violation(001_39898, cfr_21_211_192, data_integrity, observation, src).",
     ]
     policy = source_compile["deterministic_sec_filing_id_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_signature_omission_contradiction_integrity_drops_only_matching_sec_omission() -> None:
+    source_compile = {
+        "facts": [
+            "sec_signatory(filing_1, michael_s_chae, chief_financial_officer, v_2025_10_23, src_signature).",
+            "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_signature).",
+            "domain_omission(filing_2, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+            "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+            "fda_correspondence_party(letter_1, acme_inc, recipient, acme_inc, src_recipient).",
+        ]
+    }
+
+    report = _apply_sec_signature_omission_contradiction_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 1,
+        "dropped_facts": [
+            "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_signature)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "sec_signatory(filing_1, michael_s_chae, chief_financial_officer, v_2025_10_23, src_signature).",
+        "domain_omission(filing_2, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+        "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+        "fda_correspondence_party(letter_1, acme_inc, recipient, acme_inc, src_recipient).",
+    ]
+    policy = source_compile["deterministic_sec_signature_omission_contradiction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_domain_omission_registry_value_integrity_drops_unregistered_kind_reason() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+            "domain_omission(blackstone_inc, 'sec_signatory/5', subject_missing, former_name_address_not_applicable, src_line_1).",
+            "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+        ]
+    }
+
+    report = _apply_domain_omission_registry_value_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 1,
+        "dropped_facts": [
+            {
+                "carrier_signature": "sec_signatory/5",
+                "fact": "domain_omission(blackstone_inc, 'sec_signatory/5', subject_missing, former_name_address_not_applicable, src_line_1).",
+                "omission_kind": "subject_missing",
+                "reason_code": "former_name_address_not_applicable",
+            }
+        ],
+    }
+    assert source_compile["facts"] == [
+        "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+        "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_omission).",
+    ]
+    policy = source_compile["deterministic_domain_omission_registry_value_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 
