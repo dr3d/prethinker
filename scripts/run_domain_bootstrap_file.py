@@ -2464,6 +2464,7 @@ def main() -> int:
         _apply_domain_omission_registry_value_integrity(record["source_compile"])
         _apply_sec_signature_omission_contradiction_integrity(record["source_compile"])
         _apply_osha_accident_omission_contradiction_integrity(record["source_compile"])
+        _apply_ntsb_report_omission_contradiction_integrity(record["source_compile"])
         _apply_active_lens_scope_integrity(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
@@ -8495,23 +8496,35 @@ def _registered_domain_omission_triples() -> frozenset[tuple[str, str, str]]:
 
 
 def _apply_sec_signature_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
-    """Drop SEC signature-block omission rows contradicted by typed signatory rows.
+    """Resolve SEC signature-block omissions against typed signatory rows.
 
     This is a narrow typed-fact consistency guard. It does not infer whether a
-    source contains a signature block. It only removes a domain_omission/5 row
-    that says the SEC signature block is not stated when a sec_signatory/5 row
-    for the same filing id is already present in the emitted typed facts.
+    source contains a signature block. It resolves only emitted typed
+    contradictions for the same filing/source: a real signatory row beats an
+    omission row, while an all-not-stated dummy signatory row loses to an
+    omission row.
     """
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
-    filings_with_signatory: set[str] = set()
+    filings_with_real_signatory: set[str] = set()
+    omitted_signature_scopes: set[tuple[str, str]] = set()
     for fact in facts:
         parsed = _parse_fact_clause(fact)
         if parsed is None:
             continue
         predicate, args = parsed
-        if predicate == "sec_signatory" and len(args) == 5 and args[0]:
-            filings_with_signatory.add(args[0])
+        if predicate == "sec_signatory" and len(args) == 5 and args[0] and not _sec_signatory_is_not_stated(args):
+            filings_with_real_signatory.add(args[0])
+        elif (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and _canonical_registered_signature_reference(args[1]) == "sec_signatory/5"
+            and _strip_fact_atom_quotes(args[2]) == "role_missing"
+            and _strip_fact_atom_quotes(args[3]) == "signature_block_not_stated"
+            and args[0]
+            and args[4]
+        ):
+            omitted_signature_scopes.add((args[0], args[4]))
 
     out: list[str] = []
     seen: set[str] = set()
@@ -8524,10 +8537,17 @@ def _apply_sec_signature_omission_contradiction_integrity(source_compile: dict[s
             if (
                 predicate == "domain_omission"
                 and len(args) == 5
-                and args[0] in filings_with_signatory
+                and args[0] in filings_with_real_signatory
                 and _canonical_registered_signature_reference(args[1]) == "sec_signatory/5"
                 and _strip_fact_atom_quotes(args[2]) == "role_missing"
                 and _strip_fact_atom_quotes(args[3]) == "signature_block_not_stated"
+            ):
+                should_drop = True
+            elif (
+                predicate == "sec_signatory"
+                and len(args) == 5
+                and _sec_signatory_is_not_stated(args)
+                and (args[0], args[4]) in omitted_signature_scopes
             ):
                 should_drop = True
         if should_drop:
@@ -8547,12 +8567,17 @@ def _apply_sec_signature_omission_contradiction_integrity(source_compile: dict[s
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Drops domain_omission/5 signature_block_not_stated rows only when a sec_signatory/5 "
-            "row for the same filing id is already present. It does not create signatory facts or "
-            "read source prose."
+            "Drops domain_omission/5 signature_block_not_stated rows only when a real sec_signatory/5 "
+            "row for the same filing id is already present, and drops all-not-stated dummy "
+            "sec_signatory/5 rows when the matching omission row exists for the same filing/source. "
+            "It does not create signatory facts or read source prose."
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _sec_signatory_is_not_stated(args: list[str]) -> bool:
+    return len(args) == 5 and all(_strip_fact_atom_quotes(value) == "not_stated" for value in args[1:4])
 
 
 def _apply_osha_accident_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
@@ -8631,6 +8656,67 @@ def _apply_osha_accident_omission_contradiction_integrity(source_compile: dict[s
             "domain_omission/5 row for osha_accident/7 says accident_summary_not_stated for the "
             "same accident or inspection subject and the same typed source/scope. It does not create "
             "replacement facts or read source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
+def _apply_ntsb_report_omission_contradiction_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop NTSB report rows contradicted by typed missing-report omissions.
+
+    This is a typed-fact consistency guard. It does not decide whether the
+    source contains a report identifier. It only enforces that a bundle cannot
+    simultaneously emit a domain_omission/5 row saying the NTSB report
+    identifier is missing and an ntsb_report/5 row for that same source/scope.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    omitted_sources: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if (
+            predicate == "domain_omission"
+            and len(args) == 5
+            and _canonical_registered_signature_reference(args[1]) == "ntsb_report/5"
+            and _strip_fact_atom_quotes(args[2]) == "role_missing"
+            and _strip_fact_atom_quotes(args[3]) == "report_identifier_not_stated"
+            and args[4]
+        ):
+            omitted_sources.add(args[4])
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        should_drop = False
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate == "ntsb_report" and len(args) == 5 and args[4] in omitted_sources:
+                should_drop = True
+        if should_drop:
+            dropped.append(fact)
+            continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_ntsb_report_omission_contradiction_dropped_count"] = len(dropped)
+    source_compile["deterministic_ntsb_report_omission_contradiction_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_ntsb_report_omission_contradiction_policy"] = {
+        "schema_version": "deterministic_ntsb_report_omission_contradiction_v1",
+        "authority": "typed_fact_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops ntsb_report/5 rows only when a domain_omission/5 row for ntsb_report/5 "
+            "says report_identifier_not_stated for the same typed source/scope. It does not "
+            "create replacement facts or read source prose."
         ),
     }
     return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}

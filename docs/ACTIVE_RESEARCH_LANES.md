@@ -91,6 +91,13 @@ numbers because they depended on source-record prose paths, open predicate
 drift, or judge-facing surface tokens. The current claim-bearing move is closed
 domain schemas measured by hard-clean gates.
 
+Omission accountability is now live-tested as well as schema-covered:
+SEC signature-block, OSHA inspection-id, and NTSB report-id omission
+micro-fixtures each support the expected `domain_omission/5` row at
+N=3/support>=2 while the corresponding forbidden carrier row stays unsupported;
+the retained artifact root is
+`C:\prethinker_tmp_archive\omission_accountability_live_20260604`.
+
 FDA warning letters remain the first wedge, but they are not "done". The
 current-gate replay picture is stricter than the older worksheet notes:
 

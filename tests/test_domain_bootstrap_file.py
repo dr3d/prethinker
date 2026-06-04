@@ -114,6 +114,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_ntsb_actor_id_atom_reduction,
     _apply_ntsb_condition_atom_reduction,
     _apply_ntsb_injury_count_scope_specificity,
+    _apply_ntsb_report_omission_contradiction_integrity,
     _apply_ntsb_timestamp_atom_reduction,
     _apply_osha_accident_omission_contradiction_integrity,
     _apply_fda_facility_subject_convergence,
@@ -8648,6 +8649,31 @@ def test_sec_signature_omission_contradiction_integrity_drops_only_matching_sec_
     assert policy["not_query_interpretation"] is True
 
 
+def test_sec_signature_omission_contradiction_integrity_keeps_omission_over_dummy_signatory() -> None:
+    source_compile = {
+        "facts": [
+            "sec_signatory(filing_1, not_stated, not_stated, not_stated, src_missing_signature).",
+            "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+            "sec_signatory(filing_2, not_stated, not_stated, not_stated, src_other).",
+            "domain_omission(filing_2, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+        ]
+    }
+
+    report = _apply_sec_signature_omission_contradiction_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 1,
+        "dropped_facts": [
+            "sec_signatory(filing_1, not_stated, not_stated, not_stated, src_missing_signature)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "domain_omission(filing_1, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+        "sec_signatory(filing_2, not_stated, not_stated, not_stated, src_other).",
+        "domain_omission(filing_2, 'sec_signatory/5', role_missing, signature_block_not_stated, src_missing_signature).",
+    ]
+
+
 def test_domain_omission_registry_value_integrity_drops_unregistered_kind_reason() -> None:
     source_compile = {
         "facts": [
@@ -8742,6 +8768,51 @@ def test_osha_accident_omission_contradiction_integrity_keeps_different_source_s
         "osha_accident(accident_1, inspection_1, accident_summary_1, v_2025_11_18, trench_collapse, 1, source_accident_report).",
         "osha_injured_employee(accident_1, employee_1, not_stated, not_stated, fatality, construction_worker, source_accident_report).",
         "domain_omission(accident_1, 'osha_accident/7', none_found, accident_summary_not_stated, source_inspection_detail).",
+    ]
+
+
+def test_ntsb_report_omission_contradiction_integrity_drops_matching_report_rows() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
+            "ntsb_report(report_not_stated, preliminary_report, preliminary, v_2026_03_03, src_missing_report_id).",
+            "ntsb_occurrence(occurrence_1, not_stated, aviation_accident, v_2026_03_03, lakeview_ohio, src_missing_report_id).",
+            "domain_omission(occurrence_1, 'ntsb_finding/5', none_found, probable_cause_or_finding_not_stated, src_missing_finding).",
+        ]
+    }
+
+    report = _apply_ntsb_report_omission_contradiction_integrity(source_compile)
+
+    assert report == {
+        "dropped_count": 1,
+        "dropped_facts": [
+            "ntsb_report(report_not_stated, preliminary_report, preliminary, v_2026_03_03, src_missing_report_id)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
+        "ntsb_occurrence(occurrence_1, not_stated, aviation_accident, v_2026_03_03, lakeview_ohio, src_missing_report_id).",
+        "domain_omission(occurrence_1, 'ntsb_finding/5', none_found, probable_cause_or_finding_not_stated, src_missing_finding).",
+    ]
+    policy = source_compile["deterministic_ntsb_report_omission_contradiction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_ntsb_report_omission_contradiction_integrity_keeps_different_source_scope() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
+            "ntsb_report(report_123, final_report, final, v_2026_04_01, src_final_report).",
+        ]
+    }
+
+    report = _apply_ntsb_report_omission_contradiction_integrity(source_compile)
+
+    assert report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "domain_omission(occurrence_1, 'ntsb_report/5', role_missing, report_identifier_not_stated, src_missing_report_id).",
+        "ntsb_report(report_123, final_report, final, v_2026_04_01, src_final_report).",
     ]
 
 

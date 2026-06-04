@@ -67,6 +67,29 @@ them.
 ## Current Evidence
 
 ```text
+Domain omission accountability
+  live negative-control sweep, local Qwen MoE, N=3/support>=2:
+    NTSB report-id omission wrapper lens:
+      expected omission 1 / 1, forbidden ntsb_report 0 / 1,
+      unexpected same-signature wrapper rows 3, atom/lens gates clean
+    OSHA inspection-id omission wrapper lens:
+      expected omission 1 / 1, forbidden osha_inspection 0 / 1,
+      unexpected same-signature establishment rows 2, atom/lens gates clean
+    SEC signature omission lens:
+      expected omission 1 / 1, forbidden sec_signatory 0 / 1,
+      unexpected same-signature rows 0, atom/lens gates clean
+  guard changes:
+    added typed-only NTSB report-omission contradiction guard
+    refined SEC signature omission guard so all-not-stated dummy signatory rows
+      lose to the registered omission while real signatory rows still beat
+      contradictory omissions
+  artifact root:
+    C:\prethinker_tmp_archive\omission_accountability_live_20260604
+  read:
+    omission accountability is now live-tested across SEC, OSHA, and NTSB
+    negative controls; the guards read typed facts only and do not interpret
+    source prose or query text
+
 SEC Form 8-K skeleton pack
   historical pre-axis-repair cells:
     seed micro: 13 / 13

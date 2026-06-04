@@ -40,6 +40,31 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 | SEC Form 8-K | Skeleton-only: filing wrapper, registrant, identifiers, item headings, exhibits, signature block | One seed micro plus three unlike retained transfers, now under axis-clean repair | Historical pre-axis-repair cells were seed 13/13 and transfers 13/13, 12/12, 12/12. Repaired axis-clean breadth is seed 12/13, transfer_001 11/13, transfer_002 11/12, transfer_003 12/13 then 11/13; a pre-registered stability rerun and omission-accountability guard rescore landed at 12/13, but the latest fresh manifest refresh is 11/13 with 34/39 per-run exact. All repaired cells have 0 supported forbidden and clean atom/lens/value gates | Useful evidence that small closed skeleton packs transfer, but not a pristine methods anchor yet. Current boundary is exhibit treatment ambiguity, wrapper/telephone recall, duplicate file-number support, item-treatment recall, and ordinary MoE jitter, not prose leakage |
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, item, status, related activity | One seed micro plus one unlike retained transfer, plus two diagnostic transfer probes | Standing manifest: seed micro 21/21 support>=2 and first unlike transfer 15/15 support>=2; both have 0 supported forbidden and clean atom/lens governance. The previous repeated FTA total-penalty extra was source-only adjudicated into the seed oracle. Diagnostic transfer_002 is 18/53 with 0 forbidden; diagnostic transfer_003 is 2/21 with 0/10 supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a full promoted pack. Accident/injury and violation table rows transfer in bounded cells; long-table enumeration and mixed-document section attachment remain boundary rows |
 
+## Accountability Micro-Sweep
+
+Domain omissions are now live-tested as negative controls, not only listed in
+registry coverage. On 2026-06-04, three omission micro-fixtures were run on
+local Qwen MoE at `temperature=0`, `top_p=1.0`, `N=3`, `support>=2`, with
+focused lens scopes:
+
+| Fixture | Lens | Expected omission | Forbidden carrier | Unexpected same-signature rows | Gate read |
+| --- | --- | ---: | ---: | ---: | --- |
+| `ntsb_investigation_report_id_omission_v1` | `wrapper` | 1 / 1 | 0 / 1 `ntsb_report/5` | 3 | Atom-shape and lens-scope pass |
+| `osha_incident_inspection_id_omission_v1` | `wrapper` | 1 / 1 | 0 / 1 `osha_inspection/7` | 2 | Atom-shape and lens-scope pass |
+| `sec_form_8k_signature_omission_v1` | `signature` | 1 / 1 | 0 / 1 `sec_signatory/5` | 0 | Atom-shape and lens-scope pass |
+
+The sweep exposed two typed-consistency fixes: NTSB needed a report-omission
+contradiction guard, and SEC needed its signature-omission guard to distinguish
+real signatory rows from all-not-stated dummy signatory rows. Both guards are
+typed-only reducers: they do not read source prose, query text, or oracle
+answers.
+
+Retained artifact root:
+
+```text
+C:\prethinker_tmp_archive\omission_accountability_live_20260604
+```
+
 ## Case-Study Matrix
 
 This matrix is the current command surface for the research claim. It separates
