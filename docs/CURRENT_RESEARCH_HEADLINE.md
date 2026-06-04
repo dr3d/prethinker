@@ -68,6 +68,10 @@ NTSB investigation pack
   seed micro: 13 / 13
   first unlike transfer: 18 / 25 manifest; 19 / 25 deterministic reducer replay;
     0 forbidden
+  deterministic compile-fact QA over first unlike transfer:
+    53 / 75 per-run exact
+    18 / 25 support>=2
+    all 53 exact rows pass typed-plan replay and redaction replay
   claim: boundary corroboration; wrapper, chronology, vehicles, and conditions
     transfer more cleanly than casualty, safety-action, and findings substance
 ```

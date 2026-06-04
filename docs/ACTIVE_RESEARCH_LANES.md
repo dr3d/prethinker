@@ -168,6 +168,20 @@ ntsb_injury_count:    0 / 3
 ntsb_finding:         0 / 2
 ```
 
+Raw deterministic compile-fact QA over the same first unlike NTSB transfer:
+
+```text
+rows: 53 / 75 exact, 4 partial, 18 miss
+support>=2: 18 / 25
+redaction replay: 53 / 53 exact rows survive, 0 prose-dependent
+typed-plan replay: 53 / 53 exact rows replay through registered carriers
+```
+
+This is stricter than the `19 / 25` deterministic reducer replay because it
+measures raw emitted typed facts before the condition-value reducer. The
+difference is the weather atom variant (`dry_clear_nighttime` vs related
+compact weather atoms), not prose support.
+
 That is the current claim-bearing research floor for the first NTSB transfer
 fixture. It says the skeleton, chronology, vehicles, and conditions are alive,
 but casualty and safety-action recall are not yet stable under the fresh

@@ -178,7 +178,10 @@ Current high-signal evidence:
   rather than a row-grinding target.
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
   `18 / 25` in the manifest and `19 / 25` after deterministic reducer replay,
-  `0` forbidden, showing the same skeleton-vs-substance boundary.
+  `0` forbidden. Raw compile-fact QA over the transfer is `53 / 75` per-run
+  exact and `18 / 25` support>=2, with every exact row passing typed-plan and
+  redaction replay. This shows the same skeleton-vs-substance boundary while
+  separating emitted fact support from reducer replay.
 - Answer-judge governance now has null controls, redaction replay, and
   typed-plan replay so judge exact rate is not allowed to become the thesis
   metric by itself.
