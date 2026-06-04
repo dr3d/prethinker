@@ -42,7 +42,7 @@
       "id": "sec_form_8k_skeleton_transfer_003",
       "fixture_id": "sec_form_8k_skeleton_transfer_003",
       "description": "SEC Form 8-K/A skeleton transfer 003, current axis-clean item/exhibit/treatment repair rerun.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_value_axis_repair_20260604\\sec8k-t003-axis-clean-qwenmoe-r2",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_axis_stability_20260604\\sec8k-t003-axis-clean-qwenmoe-r4",
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 11,
