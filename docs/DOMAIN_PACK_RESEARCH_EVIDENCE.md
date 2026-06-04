@@ -597,6 +597,9 @@ FDA open blockers:
   transfer_002: expected `0`, forbidden `13`; retained stable emissions for
   violations 1, 2, and 3 are false positives, so this proposal is blocked for
   that fixture and should not be promoted from transfer_002;
+- `fda_response_assessment_item/6` is still a candidate, not a promoted
+  surface: it has no independent oracle review in the retained proposal-status
+  record, and the current validator reports `candidate_has_no_review_results`;
 - leave transfer_002 as boundary evidence unless a new FDA transfer fixture
   shows the same failure class and makes a general mechanism worth testing;
 - transfer_003 has now been remeasured as the second FDA boundary point:

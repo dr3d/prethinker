@@ -285,6 +285,10 @@ and 13 forbidden boundaries. The stable candidate emissions for violations 1,
 substance should abstain unless a compact layer survives independent review and
 fresh transfer gates.
 
+The separate `fda_response_assessment_item/6` proposal has not yet cleared that
+oracle-independence step. It remains a candidate with no independent review
+results, not a promoted response-assessment layer.
+
 ## NTSB Boundary Corroboration
 
 NTSB is a second unlike official-document family used to test whether the same

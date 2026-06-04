@@ -143,6 +143,9 @@ violations 1, 2, and 3 are false positives. Do not grind `transfer_002` upward
 row-by-row; use it to name the current abstention boundary. `transfer_003`
 now corroborates the same value/detail-flesh boundary under clean atom/lens
 governance, not the older archived integrity-fail story. The
+`fda_response_assessment_item/6` proposal remains an unreviewed candidate; the
+current proposal-status report warns `candidate_has_no_review_results`, so no
+assessment-item support should be cited as a promoted claim. The broader
 response-assessment lane remains a 16/17 composed diagnostic rather than a
 promoted fresh-compile claim. NTSB investigations are the second fixture-bank
 pack candidate. The R1 NTSB micro skeleton currently
