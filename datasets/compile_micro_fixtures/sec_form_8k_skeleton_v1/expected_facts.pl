@@ -1,4 +1,4 @@
-sec_filing(Filing, form_8_k, current_report, v_2025_10_01, v_2025_10_06, SrcFiling).
+sec_filing(Filing, form_8_k, current_report, v_2025_10_01, not_stated, SrcFiling).
 
 sec_registrant(Filing, hamilton_lane_incorporated, delaware, SrcRegistrant).
 

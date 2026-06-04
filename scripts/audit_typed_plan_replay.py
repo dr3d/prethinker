@@ -27,7 +27,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.audit_kb_atom_inventory import _latest_compile_json, _typed_facts  # noqa: E402
+from scripts.audit_kb_atom_inventory import (  # noqa: E402
+    SOURCE_RECORD_PREFIX as KB_SOURCE_RECORD_PREFIX,
+    _is_prose_like_fact,
+    _latest_compile_json,
+    _parse_fact,
+)
+from scripts.build_compile_fact_judged_qa import _compile_facts_with_domain_reducers  # noqa: E402
 from scripts.audit_redaction_replay import _iter_qa_files, _normalize, _reference_answer_parts  # noqa: E402
 from scripts.run_domain_bootstrap_qa import (  # noqa: E402
     load_runtime,
@@ -188,6 +194,7 @@ def build_report(
         "settings": {
             "compile_root": str(compile_root) if compile_root else "",
             "compile_json": str(compile_json) if compile_json else "",
+            "domain_reducers_applied": True,
         },
         "summary": summary,
         "by_fixture": {fixture: dict(counts) for fixture, counts in sorted(by_fixture.items())},
@@ -401,11 +408,7 @@ def _runtime_for_compile(compile_json: Path, *, runtime_cache: dict[Path, dict[s
     resolved = compile_json.resolve()
     if resolved in runtime_cache:
         return runtime_cache[resolved]
-    facts, rejected, _shape_issues = _typed_facts(
-        resolved,
-        include_source_record=False,
-        include_prose_like=False,
-    )
+    facts, rejected = _typed_facts_for_replay(resolved)
     runtime, errors = load_runtime(facts=[fact.clause for fact in facts], rules=[])
     payload = {
         "runtime": runtime,
@@ -415,6 +418,25 @@ def _runtime_for_compile(compile_json: Path, *, runtime_cache: dict[Path, dict[s
     }
     runtime_cache[resolved] = payload
     return payload
+
+
+def _typed_facts_for_replay(compile_json: Path) -> tuple[list[Any], Counter[str]]:
+    compile_facts, _reducer_reports = _compile_facts_with_domain_reducers(compile_json)
+    out: list[Any] = []
+    rejected: Counter[str] = Counter()
+    for clause in compile_facts:
+        fact = _parse_fact(str(clause))
+        if fact is None:
+            rejected["unparsed"] += 1
+            continue
+        if fact.predicate.startswith(KB_SOURCE_RECORD_PREFIX):
+            rejected["source_record"] += 1
+            continue
+        if _is_prose_like_fact(fact):
+            rejected["prose_like"] += 1
+            continue
+        out.append(fact)
+    return out, rejected
 
 
 def _query_uses_source_record(query: str) -> bool:

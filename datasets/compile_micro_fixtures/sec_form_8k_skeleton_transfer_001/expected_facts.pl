@@ -11,8 +11,8 @@ sec_registrant_identifier(Filing, servicenow_inc, exchange_name, exchange_new_yo
 sec_filing_item(Filing, item_5_02, officer_departure_appointment, substantive, SrcItem502).
 sec_filing_item(Filing, item_9_01, financial_statements_exhibits, exhibit, SrcItem901).
 
-sec_exhibit(Filing, exhibit_10_1, agreement, filed, SrcExhibit101).
-sec_exhibit(Filing, exhibit_10_2, other_exhibit, filed, SrcExhibit102).
+sec_exhibit(Filing, exhibit_10_1, agreement, not_stated, SrcExhibit101).
+sec_exhibit(Filing, exhibit_10_2, other_exhibit, not_stated, SrcExhibit102).
 sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, not_stated, SrcExhibit104).
 
 sec_signatory(Filing, russell_s_elmer, general_counsel, v_2025_12_23, SrcSignature).

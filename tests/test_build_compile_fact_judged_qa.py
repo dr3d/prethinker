@@ -71,6 +71,46 @@ def test_build_compile_fact_judged_qa_exact_partial_miss_and_forbidden(tmp_path:
     assert "all-variable facts are not answer-bearing" in rows["r004"]["reference_judge"]["rationale"]
 
 
+def test_build_compile_fact_judged_qa_applies_typed_domain_reducers(tmp_path: Path) -> None:
+    fixture_root = tmp_path / "fixtures"
+    fixture_dir = fixture_root / "fixture_sec"
+    fixture_dir.mkdir(parents=True)
+    (fixture_dir / "expected_facts.pl").write_text(
+        "sec_registrant_identifier(Filing, servicenow_inc, exchange_name, exchange_new_york_stock_exchange, SrcExchange).\n",
+        encoding="utf-8",
+    )
+    compile_json = tmp_path / "compile.json"
+    compile_json.write_text(
+        json.dumps(
+            {
+                "source_compile": {
+                    "facts": [
+                        "sec_registrant_identifier(filing_sec_8k_servicenow_20251223, servicenow_inc, exchange_name, exchange_nyse, direct)."
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_run_payload(
+        fixture_root=fixture_root,
+        fixture_id="fixture_sec",
+        run_id="run1",
+        compile_json=compile_json,
+        created_utc="2026-06-04T00:00:00Z",
+    )
+
+    assert payload["domain_reducers_applied"] is True
+    assert payload["domain_reducer_reports"]["sec_identifier_value_atom_reduction"]["reduction_count"] == 1
+    assert payload["verdict_summary"] == {"exact": 1}
+    assert payload["rows"][0]["answer"] == (
+        "sec_registrant_identifier("
+        "filing_sec_8k_servicenow_20251223, servicenow_inc, exchange_name, "
+        "exchange_new_york_stock_exchange, direct)."
+    )
+
+
 def test_build_compile_fact_judged_qa_writes_bundle(tmp_path: Path) -> None:
     fixture_root = tmp_path / "fixtures"
     fixture_dir = fixture_root / "fixture_a"

@@ -82,11 +82,15 @@ SEC Form 8-K skeleton pack
     R1: 12 / 13, 0 / 11 supported forbidden, clean axis/value/atom gates
     R2 after treatment-contract tightening and typed Item 9.01 guard:
       11 / 13, 0 / 10 supported forbidden, clean axis/value/atom gates
+  repaired breadth check over retained seed / transfer_001 / transfer_002:
+    seed: 12 / 13, 0 / 6 supported forbidden, clean atom/lens gates
+    transfer_001: 11 / 13, 0 / 8 supported forbidden, clean atom/lens gates
+    transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
   read: SEC remains useful evidence that small closed skeleton packs transfer,
     but the formal SEC methods-anchor claim is no longer the old 12/12 cell.
-    The current honest boundary is unstable `sec_filing_item_treatment/4`
-    recall plus ordinary MoE wrapper jitter; do not inflate it with prompt
-    polishing.
+    The current honest boundary is exhibit legal-treatment ambiguity, wrapper
+    filing/telephone recall, one duplicate commission-file value, and ordinary
+    MoE jitter; do not inflate it with prompt polishing.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -116,12 +120,11 @@ FDA warning-letter pack
 
 NTSB investigation pack
   seed micro: 13 / 13
-  first unlike transfer: 18 / 25 manifest
-  deterministic reducer replay: 19 / 25
+  first unlike transfer, current reducer-aligned manifest: 19 / 25
   deterministic compile-fact QA over first unlike transfer:
-    53 / 75 per-run exact
-    18 / 25 support>=2
-    all 53 exact rows pass typed-plan replay and redaction replay
+    57 / 75 per-run exact
+    19 / 25 support>=2
+    all 57 exact rows pass typed-plan replay and redaction replay
   forbidden support: 0 / 15
   read: corroborating boundary evidence; wrapper, chronology, vehicles, and
     conditions transfer more cleanly than casualty, safety-action attachment,
@@ -240,9 +243,9 @@ explain the current falsifiable result:
 - keep `docs/DOMAIN_ACCOUNTABILITY_STATUS.md` regenerated from
   `scripts/summarize_domain_accountability_status.py` so omission requirements,
   fixture coverage, and fixture-only omission patterns are visible;
-- treat SEC as a boundary-aware skeleton case study until the repaired
-  axis-clean schema reproduces beyond the current transfer_003
-  item-treatment-recall boundary;
+- treat SEC as a boundary-aware skeleton case study unless one more
+  pre-registered repaired-schema rerun materially tightens the current
+  seed/transfer boundary;
 - keep FDA as the richer case study with both positive transfer and boundary
   evidence;
 - keep NTSB as corroborating boundary evidence, not as a new grind target;

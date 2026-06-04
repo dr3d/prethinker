@@ -29,6 +29,7 @@ from scripts.validate_typed_micro_fixtures import (
     _load_fact_lines,
     _parse_fact,
 )
+from scripts.summarize_typed_micro_series import _apply_domain_reducers
 
 
 def parse_args() -> argparse.Namespace:
@@ -137,7 +138,7 @@ def build_run_payload(
     forbidden_path = fixture_dir / "forbidden_facts.pl"
     expected_facts = _load_fact_lines(expected_path)
     forbidden_facts = _load_fact_lines(forbidden_path) if forbidden_path.exists() else []
-    compile_facts = _facts_from_compile_json(compile_json)
+    compile_facts, domain_reducer_reports = _compile_facts_with_domain_reducers(compile_json)
     rows: list[dict[str, Any]] = []
     verdicts: Counter[str] = Counter()
     for index, expected_fact in enumerate(expected_facts, start=1):
@@ -167,10 +168,32 @@ def build_run_payload(
         "oracle_basis": str(expected_path),
         "forbidden_basis": str(forbidden_path) if forbidden_path.exists() else "",
         "generated_utc": created_utc,
+        "domain_reducers_applied": True,
+        "domain_reducer_reports": domain_reducer_reports,
         "verdict_summary": dict(sorted(verdicts.items())),
         "forbidden_emissions": forbidden_emissions,
         "rows": rows,
     }
+
+
+def _compile_facts_with_domain_reducers(path: Path) -> tuple[list[str], dict[str, Any]]:
+    compile_facts = _facts_from_compile_json(path)
+    reduced_compile: dict[str, Any] = {"facts": compile_facts, "rules": [], "queries": []}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        payload = {}
+    if isinstance(payload, dict):
+        mode = str(payload.get("mode", "")).strip()
+        if mode:
+            reduced_compile["mode"] = mode
+        if isinstance(payload.get("union_source_compile"), dict):
+            reduced_compile["union_source_compile"] = payload["union_source_compile"]
+        if isinstance(payload.get("active_profile_registry_lens"), dict):
+            reduced_compile["active_profile_registry_lens"] = payload["active_profile_registry_lens"]
+    reducer_reports = _apply_domain_reducers(reduced_compile)
+    reduced_facts = [str(fact).strip() for fact in reduced_compile.get("facts", []) if str(fact).strip()]
+    return reduced_facts, reducer_reports
 
 
 def write_bundle(*, bundle: dict[str, Any], out_dir: Path) -> None:

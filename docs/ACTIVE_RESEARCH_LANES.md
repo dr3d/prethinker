@@ -156,7 +156,8 @@ facts and clean atom-shape/signature governance. Focused lens runs showed a
 stronger manual diagnostic, and a deterministic lens union built from those
 historical focused runs reached 23/25. Those numbers are now treated only as
 diagnostic history: a fresh scripted same-condition lens-bundle harness
-reproduced at 18/25, then 19/25 after a typed-only condition-value reducer.
+reproduced at 18/25 before reducers, then 19/25 after a typed-only
+condition-value reducer. The current manifest is reducer-aligned.
 
 Current harnessed NTSB transfer status:
 
@@ -173,19 +174,19 @@ ntsb_injury_count:    0 / 3
 ntsb_finding:         0 / 2
 ```
 
-Raw deterministic compile-fact QA over the same first unlike NTSB transfer:
+Current reducer-aligned compile-fact QA over the same first unlike NTSB
+transfer:
 
 ```text
-rows: 53 / 75 exact, 4 partial, 18 miss
-support>=2: 18 / 25
-redaction replay: 53 / 53 exact rows survive, 0 prose-dependent
-typed-plan replay: 53 / 53 exact rows replay through registered carriers
+rows: 57 / 75 exact
+support>=2: 19 / 25
+redaction replay: 57 / 57 exact rows survive, 0 prose-dependent
+typed-plan replay: 57 / 57 exact rows replay through registered carriers
 ```
 
-This is stricter than the `19 / 25` deterministic reducer replay because it
-measures raw emitted typed facts before the condition-value reducer. The
-difference is the weather atom variant (`dry_clear_nighttime` vs related
-compact weather atoms), not prose support.
+The earlier raw/no-reducer view was `18 / 25` support>=2 and `53 / 75`
+per-run exact. The difference is the weather atom variant
+(`dry_clear_nighttime` vs related compact weather atoms), not prose support.
 
 That is the current claim-bearing research floor for the first NTSB transfer
 fixture. It says the skeleton, chronology, vehicles, and conditions are alive,
@@ -206,7 +207,11 @@ item/exhibit role semantics. The schema now splits item structure
 misattachments. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
 `11/13`, both with `0` supported forbidden and clean axis/value/atom gates. Do
 not use the older SEC cells as a pristine methods-anchor claim without this
-caveat.
+caveat. A repaired breadth check over the retained seed, transfer_001, and
+transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
+supported forbidden and clean atom/lens gates. The remaining boundary is
+exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
+duplicate commission-file value, and MoE jitter rather than prose leakage.
 
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,
@@ -241,8 +246,10 @@ research integrity gate: pass
 The important result is governance, not the final number. The SEC lane caught
 two real leak surfaces before trusting the transfer: prose/semantic payload in
 `source_or_scope`, and unstated CIK identifiers inferred from model prior
-knowledge. Current SEC status is therefore "one seed micro plus three unlike
-skeleton transfers passed under hard governance," not an SEC product claim.
+knowledge. Those historical pre-axis-repair cells are no longer the current SEC
+claim. The repaired breadth check is the current read: useful skeleton transfer
+evidence, but with boundary rows that keep SEC from being a pristine methods
+anchor.
 
 The second unlike retained SEC Form 8-K skeleton transfer completed under local
 Qwen N=3/support>=2:
@@ -266,7 +273,7 @@ else `not_stated`. This keeps item-body events and signature dates out of the
 wrapper carrier.
 
 The third unlike retained SEC Form 8-K skeleton transfer used a Blackstone
-Form 8-K/A amendment and also passed:
+Form 8-K/A amendment and historically passed before the value-axis repair:
 
 ```text
 fixture: sec_form_8k_skeleton_transfer_003
@@ -281,12 +288,11 @@ research integrity gate: pass
 
 That third run required only bounded recurring-palette expansion before
 measurement: `form_8_k_a` and `results_of_operations_financial_condition`. It
-does not prove event-substance extraction. It says the SEC skeleton domain pack
-now has one seed micro and three unlike skeleton transfers under hard
-governance.
+does not prove event-substance extraction, and after the later value-axis repair
+it is historical evidence rather than the current SEC score.
 
-A local deterministic compile-fact QA replay over the SEC seed plus all three
-transfers gives the complementary per-run view:
+A historical local deterministic compile-fact QA replay over the SEC seed plus
+all three transfers gives the complementary pre-axis-repair per-run view:
 
 ```text
 rows: 144 / 150 exact, 4 partial, 2 miss
@@ -299,12 +305,13 @@ redaction replay: 144 / 144 exact rows survive, 0 prose-dependent
 typed-plan replay: 144 / 144 exact rows replay through registered carriers
 ```
 
-The per-run misses/partials are not a contradiction of the SEC transfer claim;
-they are exactly why N>=3/support>=2 is the claim-bearing convention.
+The per-run misses/partials were not a contradiction of that historical SEC
+transfer claim; today, use the repaired breadth check above as the current SEC
+read.
 
-Next SEC work should either summarize the methodology evidence across FDA,
-NTSB, and SEC or deliberately test whether adding SEC event-substance carriers
-breaks the skeleton stability. Do not add event-substance carriers by default.
+Next SEC work should either pre-register one repaired-schema stability rerun or
+deliberately test whether adding SEC event-substance carriers breaks skeleton
+stability. Do not add event-substance carriers by default.
 
 OSHA accident/inspection is the fourth fixture-bank family under review. A
 closed skeleton/table registry now exists for inspection wrapper,
@@ -383,8 +390,9 @@ Before the next technical claim:
 
 1. Keep FDA as the primary case study and keep the per-layer boundary table
    current before reopening any row-level lane.
-2. Preserve SEC Form 8-K as a boundary-aware skeleton-pack case study unless
-   the repaired axis-clean schema reproduces beyond the current treatment row.
+2. Preserve SEC Form 8-K as a boundary-aware skeleton-pack case study unless a
+   pre-registered repaired-schema rerun materially tightens the current
+   seed/transfer boundary.
 3. Use NTSB as boundary evidence for what transfers, what abstains, and what
    becomes lower tier.
 4. Keep OSHA as fourth-family corroboration for skeleton/table transfer and

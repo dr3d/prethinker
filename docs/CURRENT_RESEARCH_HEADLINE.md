@@ -46,9 +46,13 @@ SEC Form 8-K skeleton pack
     R2 after treatment-contract tightening and typed guard:
       11 / 13, 0 / 10 supported forbidden
     axis/value/atom/lens gates clean in the repaired cells
+  repaired breadth check over retained seed / transfer_001 / transfer_002:
+    12 / 13; 11 / 13; 11 / 12
+    0 supported forbidden and clean atom/lens gates in each cell
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
-    methods anchor yet. The current boundary is unstable item-treatment recall
-    and MoE wrapper jitter, not prose leakage.
+    methods anchor yet. The current boundary is exhibit legal-treatment
+    ambiguity, wrapper/telephone recall, duplicate commission-file value, and
+    MoE jitter, not prose leakage.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -73,12 +77,12 @@ FDA warning-letter pack
 
 NTSB investigation pack
   seed micro: 13 / 13
-  first unlike transfer: 18 / 25 manifest; 19 / 25 deterministic reducer replay;
+  first unlike transfer: 19 / 25 in the current reducer-aligned manifest;
     0 forbidden
   deterministic compile-fact QA over first unlike transfer:
-    53 / 75 per-run exact
-    18 / 25 support>=2
-    all 53 exact rows pass typed-plan replay and redaction replay
+    57 / 75 per-run exact
+    19 / 25 support>=2
+    all 57 exact rows pass typed-plan replay and redaction replay
   claim: boundary corroboration; wrapper, chronology, vehicles, and conditions
     transfer more cleanly than casualty, safety-action, and findings substance
 
@@ -119,10 +123,10 @@ measuring, not as evidence of the current thesis.
 
 The next work should strengthen the research claim rather than lift one fixture:
 
-1. Re-run or replace the SEC methods anchor only after the axis-clean schema
-   reproduces beyond the current transfer_003 treatment-recall boundary, with
-   exact fixture, gate, model, and artifact references kept in
-   DOMAIN_PACK_RESEARCH_EVIDENCE.md.
+1. Treat SEC as a boundary-aware skeleton case study unless one more
+   pre-registered repaired-schema rerun materially tightens the current
+   seed/transfer boundary, with exact fixture, gate, model, and artifact
+   references kept in DOMAIN_PACK_RESEARCH_EVIDENCE.md.
 2. Keep the FDA v2 judged-QA result current and separated from messy-query
    claims; transfer_002 remains boundary evidence rather than a row-grinding
    target.

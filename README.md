@@ -77,8 +77,11 @@ SEC Form 8-K skeleton pack:
   current axis-clean schema:
     item structure, item legal treatment, and exhibit legal treatment are split
     transfer_003 repaired reruns: 12 / 13 then 11 / 13
+    repaired breadth check: seed 12 / 13; transfer_001 11 / 13;
+      transfer_002 11 / 12
     forbidden support: 0 in repaired cells
-  boundary: unstable item-treatment recall and ordinary MoE wrapper jitter;
+  boundary: exhibit legal-treatment ambiguity, wrapper/telephone recall,
+    duplicate commission-file value, and ordinary MoE jitter;
     SEC is useful skeleton evidence, not a pristine methods anchor
 
 FDA warning-letter pack:
@@ -93,7 +96,7 @@ FDA warning-letter pack:
 
 NTSB investigation pack:
   seed micro 13 / 13
-  first unlike transfer 18 / 25 manifest; 19 / 25 reducer replay
+  first unlike transfer 19 / 25 in the current reducer-aligned manifest
   boundary: casualty, safety-action, and findings substance
 ```
 
@@ -192,23 +195,20 @@ Current high-signal evidence:
 - SEC Form 8-K skeleton domain pack: historical pre-axis-repair retained cells
   were seed `13 / 13` and three transfers `13 / 13`, `12 / 12`, and `12 / 12`.
   A later value-axis audit split item structure, item legal treatment, and
-  exhibit legal treatment. The current manifest-backed compile-fact QA status
-  now reports SEC at `46 / 51` support>=2 and `135 / 153` per-run exact with
-  `0` prose-dependent exact rows and `0` unregistered typed plans. Repaired
-  transfer_003 reruns landed at `12 / 13` then `11 / 13`, both with `0`
-  supported forbidden; this is boundary-aware skeleton evidence, not the old
-  pristine anchor claim.
+  exhibit legal treatment. The current repaired breadth cells land at
+  `12 / 13`, `11 / 13`, `11 / 12`, and transfer_003 `12 / 13` then
+  `11 / 13`, all with `0` supported forbidden and clean governance. This is
+  boundary-aware skeleton evidence, not the old pristine anchor claim.
 - FDA warning-letter domain pack: deterministic judged-QA v2 across
   transfer_001 and transfer_002 is `137 / 159` exact; all `137` exact rows pass
   typed-plan replay and redaction replay. This is compile-fact transfer
   evidence, not messy-query competence; transfer_002 remains boundary evidence
   rather than a row-grinding target.
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
-  `18 / 25` in the manifest and `19 / 25` after deterministic reducer replay,
-  `0` forbidden. Raw compile-fact QA over the transfer is `53 / 75` per-run
-  exact and `18 / 25` support>=2, with every exact row passing typed-plan and
-  redaction replay. This shows the same skeleton-vs-substance boundary while
-  separating emitted fact support from reducer replay.
+  `19 / 25` in the current reducer-aligned manifest, `0` forbidden. The
+  manifest replays `57 / 75` per-run exact over the transfer, with every exact
+  row passing typed-plan and redaction replay. This shows the same
+  skeleton-vs-substance boundary under the current reducer-aligned gate.
 - OSHA accident/inspection domain pack: fourth-family skeleton probe from
   retained fixtures with `10` registered predicates and `4` lens-scoped
   compile surfaces. Local LM Studio N=3 seed replay is `18 / 20`

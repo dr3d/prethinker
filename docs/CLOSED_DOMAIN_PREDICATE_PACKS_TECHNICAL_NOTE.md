@@ -163,9 +163,9 @@ compiler proposes facts; deterministic gates decide what counts.
 
 | Family | Scope | Current result | What it supports |
 | --- | --- | --- | --- |
-| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, item treatment, exhibits, signature block | Historical pre-axis-repair cells: seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Repaired axis-clean transfer_003 reruns: `12/13` then `11/13`, both `0` supported forbidden with clean axis/value/atom gates | Useful skeleton-transfer and boundary evidence, not a pristine methods anchor. The repaired schema exposes unstable item-treatment recall and MoE wrapper jitter. |
+| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, item treatment, exhibits, signature block | Historical pre-axis-repair cells: seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Repaired axis-clean breadth: seed `12/13`, transfer_001 `11/13`, transfer_002 `11/12`, transfer_003 `12/13` then `11/13`; all repaired cells have `0` supported forbidden with clean governance | Useful skeleton-transfer and boundary evidence, not a pristine methods anchor. The repaired schema exposes exhibit treatment ambiguity, wrapper/telephone recall gaps, duplicate file-number instability, item-treatment recall, and MoE jitter. |
 | FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Fresh current-pack transfer_003: `19/26`, `0/10` supported forbidden, clean atom/lens/signature gates | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
-| NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `18/25` manifest and `19/25` deterministic reducer replay; raw compile-fact QA `53/75` per-run exact and `18/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. Raw fact QA separates emitted fact support from reducer replay. |
+| NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `19/25` in the current reducer-aligned manifest; compile-fact QA `57/75` per-run exact and `19/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, and conditions transfer more cleanly than casualty, safety-action attachment, and findings/probable-cause substance. The earlier raw/no-reducer view was `18/25` support>=2. |
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `18/20` support>=2 after a high-arity registry intake fix; first unlike transfer `12/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `3/10` supported forbidden after wildcard controls | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than wrapper/establishment, blank-value semantics, long-table enumeration, and mixed-section attachment. |
 
 ## SEC Methods Example
@@ -173,7 +173,8 @@ compiler proposes facts; deterministic gates decide what counts.
 SEC Form 8-K is a strong positive transfer cell because it is deliberately
 skeleton-only, but it is no longer described as the cleanest methods cell. The
 value-axis repair split item structure, item legal treatment, and exhibit legal
-treatment; repaired transfer_003 reruns exposed unstable treatment recall.
+treatment. Repaired reruns across the retained seed and transfers show clean
+governance but lower support than the historical pre-axis-repair claims.
 
 ```text
 profile: datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json
@@ -190,6 +191,7 @@ Claim-bearing artifacts:
 | Transfer 001 | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-transfer-r3-phone-reducer`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t001_r3` |
 | Transfer 002 | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t002-r3-date`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t002_r3` |
 | Transfer 003 | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t003_r1` |
+| Repaired seed / transfer_001 / transfer_002 breadth | `C:\prethinker_tmp_archive\sec_axis_breadth_20260604` |
 
 Important negative evidence: transfer_001 initially exposed an unstated-CIK
 model-prior leak. The row was rejected before the fixture became claim-bearing.
@@ -204,9 +206,13 @@ expected item/exhibit facts were themselves axis-mixed. The schema now separates
 Item 9.01 item-treatment misattachments. Under the repaired schema,
 transfer_003 reruns landed at `12/13` and `11/13` with `0` supported forbidden;
 the remaining boundary is unstable item-treatment recall plus ordinary MoE
-wrapper jitter, not prose leakage. SEC does not claim event-substance
-extraction and should not be treated as a pristine methods anchor until the
-axis-clean schema reproduces across the retained SEC cells.
+wrapper jitter, not prose leakage. A repaired breadth check over the retained
+seed, transfer_001, and transfer_002 cells then landed at `12/13`, `11/13`,
+and `11/12`, all with `0` supported forbidden and clean atom/lens gates. The
+remaining breadth boundaries are Exhibit 10.1 dual filed/incorporated treatment
+in the seed, transfer_001 filing-wrapper and telephone recall, and transfer_002
+duplicate commission-file value support. SEC does not claim event-substance
+extraction and should not be treated as a pristine methods anchor.
 
 ## FDA Case Study
 
@@ -285,8 +291,8 @@ artifact: C:\prethinker_tmp_archive\cb_lens_20260604\ntsb-transfer-surface-001-b
 Current transfer:
 
 ```text
-manifest: 18 / 25 expected, 0 / 15 supported forbidden
-R2 deterministic reducer replay: 19 / 25 expected, 0 / 15 supported forbidden
+current reducer-aligned manifest: 19 / 25 expected, 0 / 15 supported forbidden
+earlier raw/no-reducer diagnostic: 18 / 25 expected
 atom-shape / registered-signature / lens-scope blockers: 0
 ```
 

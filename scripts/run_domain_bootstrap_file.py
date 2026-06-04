@@ -10237,6 +10237,21 @@ def _canonical_sec_phone_identifier_atom(value: str) -> str:
     return canonical if canonical != text else ""
 
 
+SEC_EXCHANGE_IDENTIFIER_ATOM_REDUCTIONS = {
+    "exchange_ny_stock_exchange": "exchange_new_york_stock_exchange",
+    "exchange_nyse": "exchange_new_york_stock_exchange",
+    "exchange_the_new_york_stock_exchange": "exchange_new_york_stock_exchange",
+}
+
+
+def _canonical_sec_exchange_identifier_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    canonical = SEC_EXCHANGE_IDENTIFIER_ATOM_REDUCTIONS.get(text, "")
+    return canonical if canonical and canonical != text else ""
+
+
 def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
     """Canonicalize selected SEC identifier value atoms by typed identifier kind."""
 
@@ -10249,21 +10264,25 @@ def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -
         parsed = _parse_fact_clause(fact)
         if parsed is not None:
             predicate, args = parsed
-            if predicate == "sec_registrant_identifier" and len(args) == 5 and args[2] == "telephone":
+            identifier_kind = args[2] if predicate == "sec_registrant_identifier" and len(args) == 5 else ""
+            canonical = ""
+            if identifier_kind == "telephone":
                 canonical = _canonical_sec_phone_identifier_atom(args[3])
-                if canonical:
-                    original = args[3]
-                    args[3] = canonical
-                    candidate = f"{predicate}({', '.join(args)})."
-                    reductions.append(
-                        {
-                            "from": fact,
-                            "to": candidate,
-                            "identifier_kind": "telephone",
-                            "value": original,
-                            "canonical": canonical,
-                        }
-                    )
+            elif identifier_kind == "exchange_name":
+                canonical = _canonical_sec_exchange_identifier_atom(args[3])
+            if canonical:
+                original = args[3]
+                args[3] = canonical
+                candidate = f"{predicate}({', '.join(args)})."
+                reductions.append(
+                    {
+                        "from": fact,
+                        "to": candidate,
+                        "identifier_kind": identifier_kind,
+                        "value": original,
+                        "canonical": canonical,
+                    }
+                )
         if candidate not in seen:
             out.append(candidate)
             seen.add(candidate)
@@ -10277,9 +10296,10 @@ def _apply_sec_identifier_value_atom_reduction(source_compile: dict[str, Any]) -
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Canonicalizes telephone values already emitted in sec_registrant_identifier/5 "
-            "identifier_value slots to phone_NNN_NNN_NNNN atoms. It reads only typed carrier "
-            "arguments and creates no new identifier facts."
+            "Canonicalizes selected values already emitted in sec_registrant_identifier/5 "
+            "identifier_value slots. Telephone values normalize to phone_NNN_NNN_NNNN; "
+            "known SEC exchange-name aliases normalize to the registered exchange atom. "
+            "It reads only typed carrier arguments and creates no new identifier facts."
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}

@@ -5,8 +5,8 @@
     {
       "id": "sec_form_8k_skeleton_seed",
       "fixture_id": "sec_form_8k_skeleton_v1",
-      "description": "SEC Form 8-K skeleton seed micro, historical reducer bundle rescored against the current axis-clean oracle.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec-form-8k-skeleton-r3-local-qwen-contract-tightening-exhibit-number-reducer",
+      "description": "SEC Form 8-K skeleton seed micro, current repaired breadth bundle against the axis-clean oracle.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_axis_breadth_20260604\\sec-seed-axis-r1",
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 12,
@@ -17,11 +17,11 @@
     {
       "id": "sec_form_8k_skeleton_transfer_001",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "description": "SEC Form 8-K skeleton transfer 001, historical phone reducer bundle rescored against the current axis-clean oracle.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec8k-transfer-r3-phone-reducer",
+      "description": "SEC Form 8-K skeleton transfer 001, current repaired breadth bundle against the axis-clean oracle.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_axis_breadth_20260604\\sec-t001-axis-r1",
       "expect": {
         "support.reference_count": 13,
-        "support.exact_support_ge_2": 12,
+        "support.exact_support_ge_2": 11,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -29,8 +29,8 @@
     {
       "id": "sec_form_8k_skeleton_transfer_002",
       "fixture_id": "sec_form_8k_skeleton_transfer_002",
-      "description": "SEC Form 8-K skeleton transfer 002, historical date-boundary bundle rescored against the current axis-clean oracle.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\sec8k-t002-r3-date",
+      "description": "SEC Form 8-K skeleton transfer 002, current repaired breadth bundle against the axis-clean oracle.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_axis_breadth_20260604\\sec-t002-axis-r1",
       "expect": {
         "support.reference_count": 12,
         "support.exact_support_ge_2": 11,
@@ -57,7 +57,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\ntsb-transfer-surface-001-bundle-harness-r1",
       "expect": {
         "support.reference_count": 25,
-        "support.exact_support_ge_2": 18,
+        "support.exact_support_ge_2": 19,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

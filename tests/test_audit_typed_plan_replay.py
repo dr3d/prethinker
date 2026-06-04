@@ -262,6 +262,50 @@ def test_typed_plan_replay_uses_top_level_run_json_when_compile_root_absent(tmp_
     assert report["rows"][0]["compile_json"] == str(compile_path)
 
 
+def test_typed_plan_replay_applies_typed_domain_reducers(tmp_path):
+    compile_path = tmp_path / "compile.json"
+    compile_path.write_text(
+        json.dumps(
+            {
+                "source_compile": {
+                    "facts": [
+                        "sec_registrant_identifier(filing_sec_8k_servicenow_20251223, servicenow_inc, exchange_name, exchange_nyse, direct)."
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    qa_path = tmp_path / "qa.json"
+    query = (
+        "sec_registrant_identifier("
+        "Filing, servicenow_inc, exchange_name, exchange_new_york_stock_exchange, SrcExchange)."
+    )
+    qa_path.write_text(
+        json.dumps(
+            {
+                "run_json": str(compile_path),
+                "rows": [
+                    {
+                        "id": "row1",
+                        "fixture": "fixture_sec",
+                        "reference_answer": query,
+                        "reference_judge": {"verdict": "exact"},
+                        "queries": [query],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(qa_files=[qa_path])
+
+    assert report["settings"]["domain_reducers_applied"] is True
+    assert report["summary"]["typed_plan_replayed_exact"] == 1
+    assert report["summary"]["blocking_reasons"] == []
+
+
 def test_typed_plan_replay_replays_deterministic_typed_inventory_composition(tmp_path):
     compile_dir = tmp_path / "compile" / "fixture_a"
     compile_dir.mkdir(parents=True)
@@ -269,9 +313,9 @@ def test_typed_plan_replay_replays_deterministic_typed_inventory_composition(tmp
         json.dumps(
             {
                 "source_compile": {
-                    "facts": [
-                        "claim_range(set_a, 1, 2, contested_claims).",
-                        "claim_range(set_a, 4, 4, contested_claims).",
+                        "facts": [
+                            "claim_range(set_a, 1, 2, src_line_0001).",
+                            "claim_range(set_a, 4, 4, src_line_0001).",
                     ],
                     "rules": [],
                 }
@@ -290,7 +334,7 @@ def test_typed_plan_replay_replays_deterministic_typed_inventory_composition(tmp
                         "reference_answer": "1-2, 4",
                         "reference_judge": {"verdict": "exact"},
                         "queries": [
-                            "claim_range(SetId, Start, End, contested_claims).",
+                            "claim_range(SetId, Start, End, Src).",
                             "typed_list_range_inventory_composition(SetId, RenderedInventory).",
                         ],
                     }
