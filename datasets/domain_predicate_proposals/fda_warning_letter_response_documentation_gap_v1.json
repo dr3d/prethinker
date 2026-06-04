@@ -65,26 +65,29 @@
   },
   "positive_examples": [
     {
-      "fixture_id": "fda_warning_letter_domain_transfer_002",
-      "fact": "fda_response_documentation_gap(gap_v1, violation_1, cfr_21_211_113_b, protocol_or_record, src_a)."
-    },
-    {
-      "fixture_id": "fda_warning_letter_domain_transfer_002",
-      "fact": "fda_response_documentation_gap(gap_v2, violation_2, cfr_21_211_192, supporting_documentation, src_b)."
-    },
-    {
-      "fixture_id": "fda_warning_letter_domain_transfer_002",
-      "fact": "fda_response_documentation_gap(gap_v3, violation_3, cfr_21_211_42_c_10_v, validation_evidence, src_c)."
+      "fixture_id": "neutral_shape_example",
+      "fact": "fda_response_documentation_gap(Gap, ViolationId, CgmpCitation, protocol_or_record, Src)."
     }
   ],
   "forbidden_examples": [
     {
-      "fixture_id": "fda_warning_letter_domain_transfer_002",
-      "fact": "fda_response_documentation_gap(bad_mismatch, violation_2, cfr_21_211_113_b, supporting_documentation, src_bad)."
+      "fixture_id": "neutral_shape_example",
+      "fact": "fda_response_documentation_gap(Gap, wrong_violation_id, CgmpCitation, supporting_documentation, Src)."
     },
     {
+      "fixture_id": "neutral_shape_example",
+      "fact": "fda_response_documentation_gap(Gap, ViolationId, CgmpCitation, full_source_phrase, Src)."
+    }
+  ],
+  "review_results": [
+    {
+      "review_id": "fda_response_documentation_gap_oracle_review_20260603",
       "fixture_id": "fda_warning_letter_domain_transfer_002",
-      "fact": "fda_response_documentation_gap(bad_quote, violation_1, cfr_21_211_113_b, protocol_or_record, full_response_paragraph)."
+      "review_path": "datasets/candidate_oracle_reviews/fda_response_documentation_gap_oracle_review_20260603/manifest.json",
+      "result": "blocked_forbidden",
+      "expected_fact_count": 0,
+      "forbidden_fact_count": 13,
+      "summary": "Blind review found no source-defensible response-documentation-gap facts; retained candidate emissions for violations 1, 2, and 3 are false positives."
     }
   ],
   "unlike_transfer_plan": {

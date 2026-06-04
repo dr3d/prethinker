@@ -73,6 +73,48 @@ def test_proposal_evidence_blocks_supported_forbidden_facts(tmp_path: Path) -> N
     assert row["supported_forbidden_examples"]
 
 
+def test_candidate_review_forbidden_facts_block_prior_candidate_signal(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    proposal = _proposal(tmp_path / "proposal.json")
+    run1 = _compile(tmp_path / "run1" / "compile.json", ["demo_candidate(row_1, forbidden_value, src_a)."])
+    run2 = _compile(tmp_path / "run2" / "compile.json", ["demo_candidate(row_2, forbidden_value, src_b)."])
+    review_dir = tmp_path / "reviews" / "demo_review"
+    _write(
+        review_dir / "manifest.json",
+        json.dumps(
+            {
+                "review_id": "demo_review",
+                "fixture_id": "demo_fixture",
+                "predicate": "demo_candidate/3",
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_forbidden_inputs": False,
+            },
+            indent=2,
+        ),
+    )
+    _write(review_dir / "candidate_expected_facts.pl", "")
+    _write(review_dir / "candidate_forbidden_facts.pl", "demo_candidate(_, forbidden_value, _).\n")
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[proposal],
+        micro_root=micro_root,
+        compile_paths=[run1, run2],
+        support_threshold=2,
+        matcher="constant_slot",
+        candidate_review_paths=[review_dir / "manifest.json"],
+    )
+
+    row = report["proposals"][0]
+    assert row["state"] == "blocked_forbidden"
+    assert row["summary"]["forbidden_fact_count"] == 1
+    assert row["summary"]["supported_forbidden_fact_count"] == 1
+    assert row["candidate_reviews"][0]["reviewer_blind_to_model_outputs"] is True
+
+
 def test_proposal_evidence_reports_oracle_supported_when_expected_facts_match(tmp_path: Path) -> None:
     micro_root = tmp_path / "micro"
     fixture = micro_root / "demo_fixture"

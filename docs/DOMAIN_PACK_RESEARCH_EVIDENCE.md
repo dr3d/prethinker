@@ -202,8 +202,10 @@ FDA open blockers:
 - per-layer status is now consolidated in the FDA case-study table above; use
   that table rather than worksheet-era headline scores when describing the FDA
   result;
-- documentation-gap proposal evidence is waiting on blind oracle review before
-  any fixture oracle changes or promotion attempt;
+- documentation-gap proposal evidence has now had blind oracle review on
+  transfer_002: expected `0`, forbidden `13`; retained stable emissions for
+  violations 1, 2, and 3 are false positives, so this proposal is blocked for
+  that fixture and should not be promoted from transfer_002;
 - leave transfer_002 as boundary evidence unless a new FDA transfer fixture
   shows the same failure class and makes a general mechanism worth testing;
 - remeasure transfer_003 as a fresh current-pack bundle only if we deliberately

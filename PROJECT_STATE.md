@@ -83,6 +83,9 @@ FDA warning-letter pack
   read: primary richer case study; skeleton/citation/regulatory boilerplate
     transfer better than wrapper role semantics, context-dependent categories,
     response/detail value flesh, and other substance lanes
+  proposal review: `fda_response_documentation_gap/5` blind review on
+    transfer_002 found 0 expected / 13 forbidden; stable candidate emissions
+    for violations 1, 2, and 3 are false positives
 
 NTSB investigation pack
   seed micro: 13 / 13
@@ -188,7 +191,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-03:
 
 ```text
-2355 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
+2356 passed, 59 skipped, 9 strict xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

@@ -175,15 +175,16 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Warnings: `{summary['warning_count']}`",
         f"- Status: `{summary['status']}`",
         "",
-        "| Proposal | Signature | Status | Errors | Warnings |",
-        "| --- | --- | --- | --- | --- |",
+        "| Proposal | Signature | Status | Reviews | Errors | Warnings |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for row in report.get("proposals", []):
         lines.append(
-            "| `{}` | `{}` | `{}` | `{}` | `{}` |".format(
+            "| `{}` | `{}` | `{}` | `{}` | `{}` | `{}` |".format(
                 row.get("proposal_id") or row.get("path", ""),
                 row.get("candidate_signature", ""),
                 row.get("status", ""),
+                _review_summary(row.get("review_results")),
                 row.get("errors", []),
                 row.get("warnings", []),
             )
@@ -370,9 +371,24 @@ def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[
         "domain_profile": str(data.get("domain_profile") or "").strip(),
         "candidate_signature": str(data.get("candidate_signature") or "").strip(),
         "lens_owner": str(data.get("lens_owner") or "").strip(),
+        "review_results": data.get("review_results") if isinstance(data.get("review_results"), list) else [],
         "errors": errors,
         "warnings": warnings,
     }
+
+
+def _review_summary(value: Any) -> str:
+    if not isinstance(value, list) or not value:
+        return ""
+    parts: list[str] = []
+    for item in value[:3]:
+        if not isinstance(item, dict):
+            continue
+        fixture = str(item.get("fixture_id") or "").strip()
+        result = str(item.get("result") or "").strip()
+        if fixture or result:
+            parts.append(f"{fixture}:{result}".strip(":"))
+    return "; ".join(parts)
 
 
 def _signature_arity(signature: str) -> int:

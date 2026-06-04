@@ -9,7 +9,7 @@ claim-bearing gates.
 - Warnings: `0`
 - Status: `pass`
 
-| Proposal | Signature | Status | Errors | Warnings |
-| --- | --- | --- | --- | --- |
-| `fda_warning_letter_response_assessment_item_v1` | `fda_response_assessment_item/6` | `candidate` | `[]` | `[]` |
-| `fda_warning_letter_response_documentation_gap_v1` | `fda_response_documentation_gap/5` | `candidate` | `[]` | `[]` |
+| Proposal | Signature | Status | Reviews | Errors | Warnings |
+| --- | --- | --- | --- | --- | --- |
+| `fda_warning_letter_response_assessment_item_v1` | `fda_response_assessment_item/6` | `candidate` | `` | `[]` | `[]` |
+| `fda_warning_letter_response_documentation_gap_v1` | `fda_response_documentation_gap/5` | `candidate` | `fda_warning_letter_domain_transfer_002:blocked_forbidden` | `[]` | `[]` |
