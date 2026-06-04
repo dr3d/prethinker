@@ -45,6 +45,8 @@ SEC Form 8-K skeleton pack
     R1: 12 / 13, 0 / 11 supported forbidden
     R2 after treatment-contract tightening and typed guard:
       11 / 13, 0 / 10 supported forbidden
+    R3 pre-registered stability rerun:
+      12 / 13, 0 / 10 supported forbidden
     axis/value/atom/lens gates clean in the repaired cells
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     12 / 13; 11 / 13; 11 / 12
@@ -52,7 +54,7 @@ SEC Form 8-K skeleton pack
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
     methods anchor yet. The current boundary is exhibit legal-treatment
     ambiguity, wrapper/telephone recall, duplicate commission-file value, and
-    MoE jitter, not prose leakage.
+    MoE jitter plus bad omission-accountability noise, not prose leakage.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:

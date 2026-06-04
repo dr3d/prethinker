@@ -205,13 +205,17 @@ item/exhibit role semantics. The schema now splits item structure
 (`sec_filing_item_treatment/4`), and exhibit legal treatment
 (`sec_exhibit/5`), with a typed guard against Item 9.01 item-treatment
 misattachments. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
-`11/13`, both with `0` supported forbidden and clean axis/value/atom gates. Do
-not use the older SEC cells as a pristine methods-anchor claim without this
-caveat. A repaired breadth check over the retained seed, transfer_001, and
+`11/13`, both with `0` supported forbidden and clean axis/value/atom gates. A
+pre-registered stability rerun then landed at `12/13`, again with `0`
+supported forbidden and clean atom/signature/lens/value-axis gates. Treat this
+as a same-condition `11-12/13` band, not a fixed single score. Do not use the
+older SEC cells as a pristine methods-anchor claim without this caveat. A
+repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
 supported forbidden and clean atom/lens gates. The remaining boundary is
 exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
-duplicate commission-file value, and MoE jitter rather than prose leakage.
+duplicate commission-file value, bad omission-accountability noise, and MoE
+jitter rather than prose leakage.
 
 SEC Form 8-K is the third fixture-bank candidate under review. A closed
 skeleton-only registry now exists for filing wrapper, registrant, identifiers,
@@ -309,8 +313,9 @@ The per-run misses/partials were not a contradiction of that historical SEC
 transfer claim; today, use the repaired breadth check above as the current SEC
 read.
 
-Next SEC work should either pre-register one repaired-schema stability rerun or
-deliberately test whether adding SEC event-substance carriers breaks skeleton
+The pre-registered repaired-schema stability rerun has now been run. Next SEC
+work should only occur if a specific research question requires deliberately
+testing whether adding a narrow event-substance carrier breaks skeleton
 stability. Do not add event-substance carriers by default.
 
 OSHA accident/inspection is the fourth fixture-bank family under review. A

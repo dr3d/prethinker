@@ -82,6 +82,8 @@ SEC Form 8-K skeleton pack
     R1: 12 / 13, 0 / 11 supported forbidden, clean axis/value/atom gates
     R2 after treatment-contract tightening and typed Item 9.01 guard:
       11 / 13, 0 / 10 supported forbidden, clean axis/value/atom gates
+    R3 pre-registered stability rerun:
+      12 / 13, 0 / 10 supported forbidden, clean atom/signature/lens/value-axis gates
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     seed: 12 / 13, 0 / 6 supported forbidden, clean atom/lens gates
     transfer_001: 11 / 13, 0 / 8 supported forbidden, clean atom/lens gates
@@ -89,8 +91,9 @@ SEC Form 8-K skeleton pack
   read: SEC remains useful evidence that small closed skeleton packs transfer,
     but the formal SEC methods-anchor claim is no longer the old 12/12 cell.
     The current honest boundary is exhibit legal-treatment ambiguity, wrapper
-    filing/telephone recall, one duplicate commission-file value, and ordinary
-    MoE jitter; do not inflate it with prompt polishing.
+    filing/telephone recall, one duplicate commission-file value, bad
+    omission-accountability noise, and ordinary MoE jitter; do not inflate it
+    with prompt polishing or a favorable same-condition draw.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
