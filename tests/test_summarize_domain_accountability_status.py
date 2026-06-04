@@ -22,12 +22,13 @@ def test_domain_accountability_status_counts_fda_no_fei_requirement():
     assert fda["fixture_only_omission_patterns"] == []
 
 
-def test_domain_accountability_status_keeps_uncovered_negative_controls_visible():
+def test_domain_accountability_status_covers_sec_signature_negative_control():
     report = build_report()
     sec = next(row for row in report["domains"] if row["profile_id"] == "sec_form_8k_v1")
 
     assert sec["requirements"][0]["id"] == "missing_signature_block"
-    assert sec["requirements"][0]["fixture_support_count"] == 0
+    assert sec["requirements"][0]["fixture_support_count"] == 1
+    assert sec["requirements"][0]["fixtures"] == ["sec_form_8k_signature_omission_v1"]
 
 
 def test_domain_accountability_status_markdown_names_static_boundary():

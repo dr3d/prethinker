@@ -1,0 +1,16 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "sec_form_8k_signature_omission_v1",
+  "purpose": "Negative-control SEC Form 8-K skeleton micro-fixture for signature-block omission accountability. It pressures domain_omission/5 when a Form 8-K wrapper is present but no signature block is stated.",
+  "source": "source.md",
+  "domain_profile": "datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "domain_omission"
+  ],
+  "forbidden_classes": [
+    "invented_signature_block"
+  ],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

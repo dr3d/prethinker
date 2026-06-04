@@ -1,0 +1,16 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "osha_incident_inspection_id_omission_v1",
+  "purpose": "Negative-control OSHA incident micro-fixture for inspection-identifier omission accountability. It pressures domain_omission/5 when an OSHA enforcement excerpt is present but no inspection number or case identifier is stated.",
+  "source": "source.md",
+  "domain_profile": "datasets/domain_profiles/osha_incident_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "domain_omission"
+  ],
+  "forbidden_classes": [
+    "invented_inspection_identifier"
+  ],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

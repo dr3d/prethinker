@@ -10,18 +10,18 @@ This page shows which omission contracts exist and which typed fixture oracles e
 
 - Domains: `4`
 - Registry accountability requirements: `8`
-- Requirements covered by fixture omissions: `5`
-- Requirements not yet covered by fixture omissions: `3`
-- Fixture omission facts: `8`
+- Requirements covered by fixture omissions: `8`
+- Requirements not yet covered by fixture omissions: `0`
+- Fixture omission facts: `11`
 - Fixture-only omission patterns: `0`
 - Status: `pass`
 
 | Domain | Requirements | Covered | Fixture omissions | Fixture-only patterns |
 | --- | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 3 | 3 | 6 | 0 |
-| `ntsb_investigation_v1` | 2 | 1 | 1 | 0 |
-| `osha_incident_v1` | 2 | 1 | 1 | 0 |
-| `sec_form_8k_v1` | 1 | 0 | 0 | 0 |
+| `ntsb_investigation_v1` | 2 | 2 | 2 | 0 |
+| `osha_incident_v1` | 2 | 2 | 2 | 0 |
+| `sec_form_8k_v1` | 1 | 1 | 1 | 0 |
 
 ## fda_warning_letter_v1
 
@@ -51,7 +51,7 @@ All declared requirements have fixture coverage, and no fixture-only omission pa
 
 | ID | Carrier | Kind | Reason | Fixture support |
 | --- | --- | --- | --- | ---: |
-| `missing_report_identifier` | `ntsb_report/5` | `role_missing` | `report_identifier_not_stated` | 0 |
+| `missing_report_identifier` | `ntsb_report/5` | `role_missing` | `report_identifier_not_stated` | 1 |
 | `finding_not_stated` | `ntsb_finding/5` | `none_found` | `probable_cause_or_finding_not_stated` | 1 |
 
 ### Fixture Omission Patterns
@@ -59,11 +59,11 @@ All declared requirements have fixture coverage, and no fixture-only omission pa
 | Carrier | Kind | Reason | Count | Registry status | Fixtures |
 | --- | --- | --- | ---: | --- | --- |
 | `ntsb_finding/5` | `none_found` | `probable_cause_or_finding_not_stated` | 1 | `declared` | `ntsb_investigation_domain_v1` |
+| `ntsb_report/5` | `role_missing` | `report_identifier_not_stated` | 1 | `declared` | `ntsb_investigation_report_id_omission_v1` |
 
 ### Accountability Read
 
-Uncovered registry requirements:
-- `missing_report_identifier`: `ntsb_report/5` / `role_missing` / `report_identifier_not_stated`
+All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
 
 ## osha_incident_v1
 
@@ -71,7 +71,7 @@ Uncovered registry requirements:
 
 | ID | Carrier | Kind | Reason | Fixture support |
 | --- | --- | --- | --- | ---: |
-| `missing_inspection_identifier` | `osha_inspection/7` | `role_missing` | `inspection_identifier_not_stated` | 0 |
+| `missing_inspection_identifier` | `osha_inspection/7` | `role_missing` | `inspection_identifier_not_stated` | 1 |
 | `missing_accident_summary` | `osha_accident/7` | `none_found` | `accident_summary_not_stated` | 1 |
 
 ### Fixture Omission Patterns
@@ -79,11 +79,11 @@ Uncovered registry requirements:
 | Carrier | Kind | Reason | Count | Registry status | Fixtures |
 | --- | --- | --- | ---: | --- | --- |
 | `osha_accident/7` | `none_found` | `accident_summary_not_stated` | 1 | `declared` | `osha_incident_transfer_003` |
+| `osha_inspection/7` | `role_missing` | `inspection_identifier_not_stated` | 1 | `declared` | `osha_incident_inspection_id_omission_v1` |
 
 ### Accountability Read
 
-Uncovered registry requirements:
-- `missing_inspection_identifier`: `osha_inspection/7` / `role_missing` / `inspection_identifier_not_stated`
+All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
 
 ## sec_form_8k_v1
 
@@ -91,13 +91,14 @@ Uncovered registry requirements:
 
 | ID | Carrier | Kind | Reason | Fixture support |
 | --- | --- | --- | --- | ---: |
-| `missing_signature_block` | `sec_signatory/5` | `role_missing` | `signature_block_not_stated` | 0 |
+| `missing_signature_block` | `sec_signatory/5` | `role_missing` | `signature_block_not_stated` | 1 |
 
 ### Fixture Omission Patterns
 
-_No expected `domain_omission/5` facts in associated fixtures._
+| Carrier | Kind | Reason | Count | Registry status | Fixtures |
+| --- | --- | --- | ---: | --- | --- |
+| `sec_signatory/5` | `role_missing` | `signature_block_not_stated` | 1 | `declared` | `sec_form_8k_signature_omission_v1` |
 
 ### Accountability Read
 
-Uncovered registry requirements:
-- `missing_signature_block`: `sec_signatory/5` / `role_missing` / `signature_block_not_stated`
+All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
