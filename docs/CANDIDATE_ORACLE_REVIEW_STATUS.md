@@ -2,6 +2,7 @@
 
 This report validates retained candidate-review package structure only.
 It does not read source prose, inspect model outputs, or decide facts.
+It verifies review folder identity and repo-relative source-file references without opening those sources.
 
 - Reviews: `1`
 - Blocking errors: `0`

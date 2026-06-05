@@ -20,7 +20,7 @@ def _manifest(**overrides: object) -> str:
         "predicate": "demo_candidate/3",
         "reviewer_blind_to_model_outputs": True,
         "reviewer_read_forbidden_inputs": False,
-        "source_files": ["fixtures/demo_fixture/source.md"],
+        "source_files": ["datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md"],
         "created_at": "2026-06-05",
         **overrides,
     }
@@ -56,7 +56,7 @@ def test_import_candidate_oracle_review_supports_output_template_prefix(tmp_path
     package = _write_zip(
         tmp_path / "review.zip",
         {
-            "fixtures/demo_fixture/source.md": "not imported\n",
+            "datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md": "not imported\n",
             "output_template/manifest.json": _manifest(),
             "output_template/candidate_expected_facts.pl": "demo_candidate(Row, alpha, Src).\n",
             "output_template/candidate_forbidden_facts.pl": "demo_candidate(_, forbidden_value, _).\n",
@@ -68,7 +68,7 @@ def test_import_candidate_oracle_review_supports_output_template_prefix(tmp_path
 
     assert report["summary"]["status"] == "pass"
     assert report["review_id"] == "demo_review_20260605"
-    assert "fixtures/demo_fixture/source.md" in report["dropped_entries"]
+    assert "datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md" in report["dropped_entries"]
 
 
 def test_import_candidate_oracle_review_blocks_unfilled_template(tmp_path: Path) -> None:

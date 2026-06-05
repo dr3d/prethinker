@@ -87,6 +87,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "This report validates retained candidate-review package structure only.",
         "It does not read source prose, inspect model outputs, or decide facts.",
+        "It verifies review folder identity and repo-relative source-file references without opening those sources.",
         "",
         f"- Reviews: `{summary['review_count']}`",
         f"- Blocking errors: `{summary['blocking_errors']}`",
@@ -128,6 +129,8 @@ def _audit_review(path: Path) -> dict[str, Any]:
     signature = _parse_signature(predicate)
     if not review_id:
         errors.append("missing_review_id")
+    elif review_id != review_dir.name:
+        errors.append(f"review_id_folder_mismatch:{review_id}!={review_dir.name}")
     if not fixture_id:
         errors.append("missing_fixture_id")
     if signature is None:
@@ -136,8 +139,11 @@ def _audit_review(path: Path) -> dict[str, Any]:
         errors.append("reviewer_not_declared_blind_to_model_outputs")
     if manifest.get("reviewer_read_forbidden_inputs") is not False:
         errors.append("reviewer_forbidden_input_exposure_not_false")
-    if not _string_list(manifest.get("source_files")):
+    source_files = _string_list(manifest.get("source_files"))
+    if not source_files:
         errors.append("missing_source_files")
+    else:
+        errors.extend(_source_file_errors(source_files))
     placeholder_paths = _placeholder_paths(manifest)
     errors.extend(f"manifest_placeholder:{path}" for path in placeholder_paths)
 
@@ -267,6 +273,25 @@ def _string_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item).strip() for item in value if str(item).strip()]
+
+
+def _source_file_errors(source_files: list[str]) -> list[str]:
+    errors: list[str] = []
+    for value in source_files:
+        normalized = value.replace("\\", "/").strip()
+        path = Path(normalized)
+        if path.is_absolute():
+            errors.append(f"source_file_not_repo_relative:{normalized}")
+            continue
+        if ".." in path.parts:
+            errors.append(f"source_file_path_traversal:{normalized}")
+            continue
+        if not normalized.startswith("datasets/"):
+            errors.append(f"source_file_not_under_datasets:{normalized}")
+            continue
+        if not (REPO_ROOT / path).exists():
+            errors.append(f"source_file_missing:{normalized}")
+    return errors
 
 
 def _rel(path: Path) -> str:

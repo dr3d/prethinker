@@ -18,7 +18,7 @@ def _review_dir(root: Path, **overrides: object) -> Path:
         "predicate": "demo_candidate/3",
         "reviewer_blind_to_model_outputs": True,
         "reviewer_read_forbidden_inputs": False,
-        "source_files": ["fixtures/demo/source.md"],
+        "source_files": ["datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md"],
         **overrides,
     }
     _write(review / "manifest.json", json.dumps(payload, indent=2))
@@ -49,6 +49,33 @@ def test_candidate_oracle_review_audit_blocks_non_blind_review(tmp_path: Path) -
 
     assert report["summary"]["status"] == "fail"
     assert "reviewer_not_declared_blind_to_model_outputs" in report["reviews"][0]["errors"]
+
+
+def test_candidate_oracle_review_audit_blocks_review_id_folder_mismatch(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path, review_id="different_review_id")
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert "review_id_folder_mismatch:different_review_id!=demo_review" in report["reviews"][0]["errors"]
+
+
+def test_candidate_oracle_review_audit_blocks_missing_source_reference(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path, source_files=["datasets/compile_micro_fixtures/missing/source.md"])
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert "source_file_missing:datasets/compile_micro_fixtures/missing/source.md" in report["reviews"][0]["errors"]
+
+
+def test_candidate_oracle_review_audit_blocks_non_dataset_source_reference(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path, source_files=["README.md"])
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert "source_file_not_under_datasets:README.md" in report["reviews"][0]["errors"]
 
 
 def test_candidate_oracle_review_audit_blocks_forbidden_input_exposure(tmp_path: Path) -> None:
