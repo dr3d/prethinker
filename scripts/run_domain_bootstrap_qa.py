@@ -817,6 +817,7 @@ def main() -> int:
             [
                 "Atom-library query grounding is active. Plan only over predicates actually emitted in the compiled KB atom inventory.",
                 "The query planner may inspect typed predicate signatures, argument shapes, counts, and compact typed examples. It must not request source prose or invent predicates absent from the inventory.",
+                "If the question names a predicate signature that exists in compiled_predicate_inventory, include at least one full-arity query for that exact signature and leave requested or unspecified slots as uppercase variables.",
                 "If the KB atom library lacks an atom needed by the question, abstain or return a compile/query-surface gap rather than using source-record prose.",
             ]
         )

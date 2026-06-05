@@ -573,12 +573,12 @@ Cross-domain atom-library query packet:
 ```text
 packet: datasets/query_micro_fixtures/current_domain_atom_library_query_v1
 artifact:
-  C:\prethinker_tmp_archive\current_domain_atom_library_query_20260605\qwen_moe_temp0_r4
+  C:\prethinker_tmp_archive\current_domain_atom_library_query_20260605\qwen_moe_temp0_r5
 scope: retained single-run typed artifacts from FDA transfer_002,
   NTSB transfer_001, OSHA seed, and OSHA transfer_001
-product exact: 24/25
-typed-plan replay: 24/25, pass
-redacted rejudge thesis exact: 24/25, pass
+product exact: 25/25
+typed-plan replay: 25/25, pass
+redacted rejudge thesis exact: 25/25, pass
 compatibility/runtime/write rows: 0/0/0
 status: thesis-clean query-planner diagnostic across four non-SEC cells
 ```
@@ -590,12 +590,16 @@ run JSON. The first draft exposed that mistake: support>=2 oracles mixed with
 single-run artifacts conflated compile variance with query planning. The
 retained r4 packet corrects the contract and leaves one real residue:
 `fda_transfer_002_run1_query` q004, where the planner emitted no query for the
-available `fda_inspection_event/6` fact. A narrow syntax-policy repair also
-landed during this run: blocked constants that match a registered argument name
-after removing an `_id` suffix, such as `occurrence` for `occurrence_id`, are
-treated as slot-label placeholders and rewritten to fresh variables. That
-closed the NTSB timeline row without reading source prose, source records,
-question tokens, or answer keys.
+available `fda_inspection_event/6` fact. The retained r5 packet adds one
+LLM-side atom-library planning instruction: if the question names an emitted
+predicate signature, include a full-arity query for that exact signature and
+leave requested or unspecified slots as variables. Deterministic code still
+does not parse question text to select predicates. A narrow syntax-policy
+repair also landed during this run: blocked constants that match a registered
+argument name after removing an `_id` suffix, such as `occurrence` for
+`occurrence_id`, are treated as slot-label placeholders and rewritten to fresh
+variables. That closed the NTSB timeline row without reading source prose,
+source records, question tokens, or answer keys.
 
 Retained diagnostic artifact:
 

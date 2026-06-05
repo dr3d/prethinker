@@ -300,11 +300,13 @@ The next work should strengthen the research claim rather than lift one fixture:
    `datasets/query_micro_fixtures/current_domain_atom_library_query_v1` asks
    25 carrier-shaped questions over FDA transfer_002, NTSB transfer_001, OSHA
    seed, and OSHA transfer_001 single-run artifacts. Local Qwen MoE temp-0
-   r4 landed at `24/25` product exact and `24/25` thesis exact; typed-plan
+   r5 landed at `25/25` product exact and `25/25` thesis exact; typed-plan
    replay and redacted rejudge both passed with `0` prose-dependent exact rows.
-   The one residue is a query-surface gap where the planner emits no query for
-   an available `fda_inspection_event/6` row. This is query-planner evidence
-   over typed atoms, not permission to use prose or fallback rescue.
+   The r5 lift came from LLM-side planning guidance for questions that name an
+   emitted predicate signature plus a narrow `_id` slot-label syntax repair.
+   Deterministic code still does not parse question text to pick predicates.
+   This is query-planner evidence over typed atoms, not permission to use prose
+   or fallback rescue.
 7. Treat stale-number re-gating as a research finding: old clean cells are
    historical until they survive today's gates.
 
