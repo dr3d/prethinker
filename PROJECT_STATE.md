@@ -141,7 +141,9 @@ SEC Form 8-K skeleton pack
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     seed: 13 / 13, 0 / 7 supported forbidden after exhibit/item axis
       contract clarification, clean atom/lens gates
-    transfer_001: 11 / 13, 0 / 8 supported forbidden, clean atom/lens gates
+    transfer_001: 5 / 13, 0 / 8 supported forbidden, clean atom/lens gates
+      after the current-mainline full-bundle negative retest replaced the
+      older favorable breadth root
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
   fenced event-substance probe:
     `sec_material_event/6` is registered for experiments but not offered by the
@@ -170,10 +172,11 @@ SEC Form 8-K skeleton pack
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
     unexpected same-signature facts at support>=2 and any emitted forbidden
     facts. The current standing manifest is green: FDA transfer_002 is
-    21 / 29 support>=2 with 0 / 8 supported forbidden after explicit
-    adulteration-basis tightening. The earlier false 501(a)(2)(A)
-    insanitary-basis row is retained as an integrity lesson, not a current
-    claim blocker.
+    11 / 29 support>=2 with 0 / 8 supported forbidden in the fresh full-lens
+    current-pack retest. The prior 21 / 29 contract-only root is historical
+    context, not the current full-lens recall claim. The earlier false
+    501(a)(2)(A) insanitary-basis row is retained as an integrity lesson, not
+    a current claim blocker.
 
 FDA warning-letter pack
   older deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -189,10 +192,11 @@ FDA warning-letter pack
       review added two expected detail rows and one forbidden adulteration-basis
       sentinel
   standing transfer_002 current-pack status:
-    21 / 29 support>=2, 0 / 8 supported forbidden
-    read: clean but incomplete boundary cell after explicit
+    11 / 29 support>=2, 0 / 8 supported forbidden
+    read: clean but incomplete full-lens boundary cell. The prior 21 / 29
+      contract-only root remains historical context after explicit
       adulteration-basis contract tightening removed the false 501(a)(2)(A)
-      insanitary-basis row and lowered support from the previous red cell
+      insanitary-basis row; it is not the current full-lens recall claim
   transfer_003 fresh current-pack local rerun:
     19 / 26 support>=2, 0 / 10 supported forbidden
     atom-shape / registered-signature / lens-scope blockers: 0

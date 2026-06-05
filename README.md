@@ -83,7 +83,8 @@ SEC Form 8-K skeleton pack:
     transfer_003 repaired reruns now span 11-13 / 13 under the
       same local Qwen MoE lane
     standing breadth check: seed 13 / 13 after exhibit/item axis contract
-      rerun; transfer_001 11 / 13;
+      rerun; transfer_001 5 / 13 after the current-mainline full-bundle
+      negative retest;
       transfer_002 11 / 12
     forbidden support: 0 in repaired cells
   boundary: exhibit legal-treatment ambiguity, wrapper/telephone recall,
@@ -99,8 +100,8 @@ FDA warning-letter pack:
   all 137 exact rows passed typed-plan and redaction replay in that bundle,
     but v2 is now stale as a claim-bearing current status because the
     transfer_002 oracle changed
-  current standing transfer_002 cell: 21 / 29 support>=2 with
-    0 / 8 supported forbidden after explicit adulteration-basis tightening
+  current standing transfer_002 cell: 11 / 29 support>=2 with
+    0 / 8 supported forbidden in the fresh full-lens current-pack retest
   transfer_003 fresh current-pack boundary: 19 / 26 support>=2,
     0 / 10 forbidden, clean atom/lens gates
   boundary: wrapper role semantics, context-dependent category/substance,
@@ -219,9 +220,9 @@ Current high-signal evidence:
   were seed `13 / 13` and three transfers `13 / 13`, `12 / 12`, and `12 / 12`.
   A later value-axis audit split item structure, item legal treatment, and
   exhibit legal treatment. The current standing breadth cells land at
-  `13 / 13`, `11 / 13`, `11 / 12`, and transfer_003 now spans
-  `11-13 / 13` under the same local Qwen MoE lane, all with `0` supported
-  forbidden and clean governance. Dense compile substitutions on
+  seed `13 / 13`, transfer_001 `5 / 13`, transfer_002 `11 / 12`, and
+  transfer_003 now spans `11-13 / 13` under the same local Qwen MoE lane, all
+  with `0` supported forbidden and clean governance. Dense compile substitutions on
   transfer_003 landed lower on the same role-semantics rows, so this is
   boundary-aware skeleton evidence, not the old pristine or model-independent
   anchor claim.
@@ -230,9 +231,9 @@ Current high-signal evidence:
   passed typed-plan replay and redaction replay. A later source-only
   transfer_002 review changed the oracle, so v2 is retained as historical
   compile-fact evidence rather than current claim-bearing status. The current
-  standing transfer_002 cell is `21 / 29` support>=2 with `0 / 8` supported
-  forbidden after explicit adulteration-basis tightening; the remaining rows
-  are boundary/substance gaps, not forbidden-support leakage to paper over.
+  standing transfer_002 cell is `11 / 29` support>=2 with `0 / 8` supported
+  forbidden in the fresh full-lens current-pack retest; the remaining rows are
+  boundary/substance gaps, not forbidden-support leakage to paper over.
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
   `22 / 25` in the current scoped injury-count manifest, `0` forbidden. The
   manifest replays `60 / 75` per-run exact over the transfer, with every exact
