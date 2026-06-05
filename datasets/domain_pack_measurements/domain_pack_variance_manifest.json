@@ -64,6 +64,19 @@
           "path": "C:/prethinker_tmp_archive/osha_transfer001_variance_probe_20260605/osha-transfer-001-variance-r1"
         }
       ]
+    },
+    {
+      "id": "sec_t001_current_mainline_retest_negative",
+      "title": "SEC transfer_001 current-mainline full-bundle retest negative",
+      "fixture_id": "sec_form_8k_skeleton_transfer_001",
+      "claim_read": "Use as a negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score.",
+      "roots": [
+        {
+          "id": "current_mainline_r1",
+          "role": "fresh current-mainline Qwen MoE full-bundle rerun after SEC registrant guidance",
+          "path": "C:/prethinker_tmp_archive/sec_t001_current_pack_rerun_negative_20260605/sec-t001-current-pack-r1-20260605"
+        }
+      ]
     }
   ]
 }

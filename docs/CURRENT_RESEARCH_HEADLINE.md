@@ -97,7 +97,11 @@ SEC Form 8-K skeleton pack
     guidance probe recovered the wrapper, registrant, file number, EIN, ticker,
     and exchange rows at support>=2 (6/13 overall because the probe was wrapper
     lens only); telephone stayed 0/3. This remains focused mechanism evidence,
-    not a standing full-bundle support lift.
+    not a standing full-bundle support lift. A subsequent current-mainline
+    full-bundle transfer_001 rerun landed at 5/13 with 0 supported forbidden
+    and 15 unexpected same-signature facts: the wrapper date recovered, but
+    registrant/exhibit axes destabilized. Treat that as a negative retest, not
+    as a prompt-polish invitation.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
     status: pass

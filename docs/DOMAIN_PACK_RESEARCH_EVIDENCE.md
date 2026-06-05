@@ -41,6 +41,12 @@ diagnostic unless a fresh same-condition bundle reproduces it.
 | OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, item, status, related activity | One seed micro plus one unlike retained transfer, plus two diagnostic transfer probes | Standing manifest: seed micro 21/21 support>=2 and first unlike transfer 15/15 support>=2; both have 0 supported forbidden and clean atom/lens governance. The previous repeated FTA total-penalty extra was source-only adjudicated into the seed oracle and then independently accepted by the returned source-only review `osha_fta_total_penalty_blind_review_20260605`. Diagnostic transfer_002 is 18/53 with 0 forbidden; diagnostic transfer_003 is 2/21 with 0/10 supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a full promoted pack. Accident/injury and violation table rows transfer in bounded cells; long-table enumeration and mixed-document section attachment remain boundary rows |
 | State-AG settlement/AOD | Seed skeleton for state AG assurance/settlement instruments: wrapper, parties, authority citations, chronology, obligations, payment, contacts, signatures | One retained seed micro, three source-only unlike intakes, and two strict oracle-scored AOD transfer probes | Current fresh local Qwen MoE all-lens seed rerun is 17/27 support>=2, with 0/9 supported forbidden, 57 unexpected same-signature facts, clean registered-signature, atom-shape, lens-scope gates, and clean carrier value-domain audit. All 57 unexpected rows are support=1 only; none survive support>=2. Source-only intake on unlike Equinox AOD transfer candidate 002 is governance-clean and reconciles 7 support>=2 facts: 5 authority citations and 2 contact channels. Source-only intake on unlike Equifax AOD transfer candidate 003 is governance-clean and reconciles 24 support>=2 facts across wrapper, authority, contacts, effective-date event, parties, signatures, and obligations. Source-only intake on the broader Mercedes-Benz consent judgment t001 is governance-clean but reconciles only 4 authority-citation facts. Strict transfer-oracle probes then landed at Equinox t002 0/18 expected, 0/12 forbidden, and Equifax t003 0/29 expected, 0/12 forbidden; both had clean atom/lens/value-domain gates | Fifth-domain process/boundary evidence, not transfer support. The strict oracle probes show the pack sees settlement/AOD anatomy but does not reproduce expected compact atom choices. t002 has 14/18 stable same-predicate variants but no expected-subject matches; t003 has only 1/29 source-coordinate-only misses and 24/29 stable same-subject/same-predicate variants. Current gap is value/canonicalization/source-coordinate stability inside a closed language cage, not prose leakage |
 
+A 2026-06-05 SEC transfer_001 current-mainline full-bundle retest is retained as
+a negative measurement: 5/13 support>=2, 0 supported forbidden, clean atom/lens
+and value-domain gates, and 15 unexpected same-signature facts. It recovered the
+wrapper date but destabilized registrant/exhibit axes, so the older retained
+11/13 transfer_001 root should not be read as a stable current-pack score.
+
 ## Accountability Micro-Sweep
 
 Domain omissions are now live-tested as negative controls, not only listed in
@@ -153,6 +159,7 @@ historical unless they are re-gated here or in a newer note.
 | SEC | `sec_form_8k_skeleton_transfer_003` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t003_r1`; repaired stability rerun `C:\prethinker_tmp_archive\sec_stability_20260604\sec-t003-axis-stability-r1`; item-treatment seam root `C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604\sec8k-t003-item-treatment-filing-id-r2-20260604`; fresh refresh root `C:\prethinker_tmp_archive\sec_t003_refresh_20260605\sec8k-t003-axis-clean-refresh-r1-20260605`; same-day Qwen mainline rerun `C:\prethinker_tmp_archive\sec_t003_qwen_mainline_rerun_20260605\sec8k-t003-qwen-mainline-rerun-r1-20260605` | Historical pre-axis-repair unlike transfer evidence, 12/12; current repaired reruns show an 11-13/13 band. The same-day Qwen mainline rerun is another favorable 13/13 draw with 0/10 supported forbidden, 0 unexpected, clean atom/lens/value gates, and 13 value-mode reconciled facts |
 | SEC | repaired seed / transfer_001 / transfer_002 breadth | `C:\prethinker_tmp_archive\sec_axis_breadth_20260604` | Current repaired breadth evidence: 12/13, 11/13, 11/12; 0 supported forbidden; clean atom/lens gates |
 | SEC | current standing-manifest residue classification | `C:\prethinker_tmp_archive\sec_residue_classification_20260605\sec_current_manifest_inspect_20260605`; refreshed slot report `C:\prethinker_tmp_archive\compile_fact_drift_slot_visibility_20260605` | Diagnostic boundary classification only: transfer_001 wrapper zero-yield plus telephone substitution; transfer_002 event-date jitter, telephone substitution, and duplicate commission-file value-axis/oracle boundary; transfer_003 telephone substitution plus unstable item-treatment zero-yield. The refreshed status report separates typed drift slots: telephone substitutions drift on `identifier_kind` plus `identifier_value`, while the duplicate commission-file row drifts on `identifier_value` only. No support lift claimed |
+| SEC | transfer_001 current-mainline negative retest | `C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605\sec-t001-current-pack-r1-20260605` | Fresh current-mainline full-bundle retest after registrant guidance: 5/13 support>=2, 0 supported forbidden, clean atom/lens/value gates, and 15 unexpected same-signature facts. Treat as negative evidence that the older 11/13 transfer_001 root is not a stable current-pack score |
 | FDA | `fda_warning_letter_domain_transfer_001` | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` | Clean richer-domain transfer cell, 26/26 |
 | FDA | `fda_warning_letter_domain_transfer_002` | `C:\prethinker_tmp_archive\fda_adulteration_basis_contract_only_20260605\domain_lens_bundle\fda-t002-contract-only-full-r1-20260605` | Current standing cell after source-only focused review and explicit adulteration-basis contract tightening: 21/29 with 0/8 supported forbidden; the false 501(a)(2)(A) insanitary-basis row is removed, with support lower than the previous claim-blocked cell |
 | FDA | `fda_warning_letter_domain_transfer_003` | `C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1` | Clean boundary transfer cell, 19/26; 0/10 supported forbidden; all seven unsupported rows are value/detail flesh |
@@ -435,13 +442,20 @@ the probe intentionally offered only the wrapper lens). Telephone remained 0/3.
 No deterministic projection was promoted because the remaining typed atoms do
 not independently carry a safe telephone row or non-wrapper rows; using source
 prose or a signature date would cross the governance boundary. These are
-focused mechanism probes, not a standing full-bundle support lift. Retained
-artifacts:
+focused mechanism probes, not a standing full-bundle support lift.
+
+A follow-up current-mainline full-bundle transfer_001 rerun is retained as a
+negative retest: 5/13 support>=2, 0 supported forbidden, clean atom/lens and
+carrier value-domain gates, and 15 unexpected same-signature facts. The wrapper
+date recovered at support>=2, but registrant/exhibit axes destabilized. This is
+a boundary result and a warning against treating the older 11/13 retained root
+as a stable current-pack score. Retained artifacts:
 
 ```text
 C:\prethinker_tmp_archive\sec_wrapper_contract_probe_20260605
 C:\prethinker_tmp_archive\sec_identifier_contract_probe_20260605
 C:\prethinker_tmp_archive\sec_registrant_guidance_probe_20260605
+C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605
 ```
 
 The Gemma/Qwen run artifacts were generated before a local LM Studio metadata

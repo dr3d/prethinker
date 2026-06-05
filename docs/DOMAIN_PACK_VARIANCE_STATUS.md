@@ -6,8 +6,8 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `3`
-- Roots: `8`
+- Groups: `4`
+- Roots: `9`
 - Warnings: `5`
 
 Warnings:
@@ -24,6 +24,7 @@ Warnings:
 | `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 4 | `11-13/13` | 0 | `0-2` | `pass` |
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
+| `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
 
 ## SEC transfer_003 repaired-schema local Qwen MoE band
 
@@ -85,3 +86,20 @@ Roots:
 Roots:
 - `related_activity_blank_flag_r1`: `C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1`
 - `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\osha_transfer001_variance_probe_20260605\osha-transfer-001-variance-r1`
+
+## SEC transfer_001 current-mainline full-bundle retest negative
+
+- Group: `sec_t001_current_mainline_retest_negative`
+- Fixture: `sec_form_8k_skeleton_transfer_001`
+- Read: Use as a negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score.
+- Support band: `5/13`
+- Supported forbidden total: `0`
+- Unexpected band: `15`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `current_mainline_r1` | fresh current-mainline Qwen MoE full-bundle rerun after SEC registrant guidance | `5/13` | `18/39` | 0 | 15 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `7` value-mode facts |
+
+Roots:
+- `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605\sec-t001-current-pack-r1-20260605`
