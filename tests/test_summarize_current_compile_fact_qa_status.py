@@ -56,6 +56,8 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert "incorporated_by_reference" in md
     assert "`sec_form_8k_skeleton_seed`" in md
     assert "artifact atom pass/pass; value pass/pass" in md
+    assert "quant `Q4_K_M`" in md
+    assert "top_k `20`" in md
     assert "lens compiles `12`" in md
     assert "missing_bundle_manifest_recovered_from_compile_json" in md
     assert "Registered Variance Evidence" in md
@@ -540,9 +542,12 @@ def _source_cell(cell_id: str, *, warning: str = "") -> dict:
         },
         "effective_settings": {
             "backend": "lmstudio",
+            "provider_family": "local_lmstudio",
+            "transport_backend": "lmstudio",
             "model": "qwen/qwen3.6-35b-a3b",
             "temperature": 0.0,
             "top_p": 1.0,
+            "top_k_requested": 20,
             "num_ctx": 65536,
             "support_threshold": 2,
             "matcher": "constant_slot",

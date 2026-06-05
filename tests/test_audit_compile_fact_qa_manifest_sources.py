@@ -46,6 +46,10 @@ def test_audit_compile_fact_manifest_sources_accepts_manifested_bundle(tmp_path:
     assert report["cells"][0]["gate_summaries"]["lens_atom_audit_summary"]["status"] == "pass"
     assert report["cells"][0]["artifact_gate_summaries"]["lens_atom_inventory"]["status"] == "pass"
     assert report["cells"][0]["artifact_gate_summaries"]["lens_value_domains"]["status"] == "pass"
+    md = source_audit.report_md(report)
+    assert "| Cell | Runs | Lens Compiles | Manifest | Gates | Backend | Provider | Transport | Model | Quant |" in md
+    assert "`local_lmstudio`" in md
+    assert "`Q4_K_M`" in md
 
 
 def test_audit_compile_fact_manifest_sources_recovers_legacy_bundle_metadata(tmp_path: Path, monkeypatch) -> None:
@@ -87,6 +91,23 @@ def test_audit_compile_fact_manifest_sources_blocks_mixed_compile_settings(tmp_p
 
     assert report["summary"]["status"] == "fail"
     assert any("mixed_compile_setting:model" in reason for reason in report["summary"]["blocking_reasons"])
+
+
+def test_audit_compile_fact_manifest_sources_blocks_missing_local_quantization(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    _write_bundle_compile_json(bundle, "run1", quantization=None)
+    _write_bundle_compile_json(bundle, "run2", quantization=None)
+    _write_bundle_compile_json(bundle, "run3", quantization=None)
+    _write_score_report(bundle)
+    manifest = _write_manifest(tmp_path, bundle)
+
+    report = audit_manifest(manifest)
+
+    assert report["summary"]["status"] == "fail"
+    assert any(
+        "missing_local_lmstudio_quantization" in reason
+        for reason in report["summary"]["blocking_reasons"]
+    )
 
 
 def test_audit_compile_fact_manifest_sources_blocks_failed_bundle_atom_gate(tmp_path: Path) -> None:
@@ -301,15 +322,16 @@ def _write_bundle_compile_json(
     *,
     model: str = "qwen/qwen3.6-35b-a3b",
     lens_model: str | None = None,
+    quantization: str | None = "Q4_K_M",
     facts: list[str] | None = None,
 ) -> None:
     run_dir = bundle / "unions" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    payload = _compile_payload(model=model, facts=facts or [])
+    payload = _compile_payload(model=model, quantization=quantization, facts=facts or [])
     (run_dir / "compile.json").write_text(json.dumps(payload), encoding="utf-8")
     lens_dir = bundle / "lens_compiles" / run_id / "wrapper"
     lens_dir.mkdir(parents=True, exist_ok=True)
-    lens_payload = _compile_payload(model=lens_model or model, facts=facts or [])
+    lens_payload = _compile_payload(model=lens_model or model, quantization=quantization, facts=facts or [])
     (lens_dir / "compile.json").write_text(json.dumps(lens_payload), encoding="utf-8")
 
 
@@ -341,8 +363,8 @@ def _atom_gate_summary(**overrides: int) -> dict[str, int]:
     return payload
 
 
-def _compile_payload(*, model: str, facts: list[str] | None = None) -> dict:
-    return {
+def _compile_payload(*, model: str, quantization: str | None = "Q4_K_M", facts: list[str] | None = None) -> dict:
+    payload = {
         "backend": "lmstudio",
         "model": model,
         "model_serving_path": {
@@ -356,9 +378,12 @@ def _compile_payload(*, model: str, facts: list[str] | None = None) -> dict:
             },
             "execution": {"timeout_seconds": 420},
             "model": model,
-            "observed_runtime": {"api_v0_model": {"quantization": "Q4_K_M"}},
+            "observed_runtime": {"api_v0_model": {}},
             "provider_family": "local_lmstudio",
             "transport_backend": "lmstudio",
         },
         "source_compile": {"facts": facts or []},
     }
+    if quantization is not None:
+        payload["model_serving_path"]["observed_runtime"]["api_v0_model"]["quantization"] = quantization
+    return payload

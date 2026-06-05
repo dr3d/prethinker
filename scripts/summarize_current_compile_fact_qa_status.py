@@ -237,9 +237,12 @@ def _cell_row(
         "source_warning_count": len(source.get("warnings") or []),
         "source_warnings": list(source.get("warnings") or []),
         "backend": str(settings.get("backend") or ""),
+        "provider_family": str(settings.get("provider_family") or ""),
+        "transport_backend": str(settings.get("transport_backend") or ""),
         "model": str(settings.get("model") or ""),
         "temperature": settings.get("temperature", ""),
         "top_p": settings.get("top_p", ""),
+        "top_k_requested": settings.get("top_k_requested", ""),
         "num_ctx": settings.get("num_ctx", ""),
         "support_threshold": settings.get("support_threshold", ""),
         "matcher": str(settings.get("matcher") or ""),
@@ -932,8 +935,10 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"{cell['artifact_gate_status']}"
         )
         source = (
-            f"`{cell['backend']}` `{cell['model']}`; temp `{cell['temperature']}`; "
-            f"top_p `{cell['top_p']}`; ctx `{cell['num_ctx']}`; matcher `{cell['matcher']}`; "
+            f"`{cell['backend']}` `{cell['provider_family']}` `{cell['transport_backend']}` "
+            f"`{cell['model']}`; quant `{cell['quantization']}`; temp `{cell['temperature']}`; "
+            f"top_p `{cell['top_p']}`; top_k `{cell['top_k_requested']}`; "
+            f"ctx `{cell['num_ctx']}`; matcher `{cell['matcher']}`; "
             f"lens compiles `{cell['lens_compile_count']}`; manifest `{cell['bundle_manifest_status']}`"
         )
         variance = _cell_variance_summary(cell)

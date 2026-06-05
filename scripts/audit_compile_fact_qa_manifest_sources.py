@@ -150,6 +150,8 @@ def _audit_cell(cell: dict[str, Any], *, index: int) -> dict[str, Any]:
     for key in REQUIRED_SETTINGS:
         if _is_missing(settings.get(key)):
             blockers.append(f"{cell_id}:missing_required_setting:{key}")
+    if _uses_local_lmstudio(settings) and _is_missing(settings.get("quantization")):
+        blockers.append(f"{cell_id}:missing_local_lmstudio_quantization")
     if int(result.get("run_count") or 0) < MIN_RUN_COUNT:
         blockers.append(f"{cell_id}:run_count_lt_{MIN_RUN_COUNT}:{result.get('run_count')}")
 
@@ -659,6 +661,15 @@ def _summary_int(value: Any) -> int | None:
     return None
 
 
+def _uses_local_lmstudio(settings: dict[str, Any]) -> bool:
+    values = {
+        str(settings.get("backend") or "").casefold(),
+        str(settings.get("provider_family") or "").casefold(),
+        str(settings.get("transport_backend") or "").casefold(),
+    }
+    return "lmstudio" in values or "local_lmstudio" in values
+
+
 def report_md(report: dict[str, Any]) -> str:
     lines = [
         "# Compile-Fact QA Manifest Source Audit",
@@ -678,8 +689,8 @@ def report_md(report: dict[str, Any]) -> str:
         [
             "## Cells",
             "",
-            "| Cell | Runs | Lens Compiles | Manifest | Gates | Backend | Model | Temp | Top-p | Context | Support | Matcher | Warnings |",
-            "| --- | ---: | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
+            "| Cell | Runs | Lens Compiles | Manifest | Gates | Backend | Provider | Transport | Model | Quant | Temp | Top-p | Context | Support | Matcher | Warnings |",
+            "| --- | ---: | ---: | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
         ]
     )
     for cell in report["cells"]:
@@ -695,7 +706,10 @@ def report_md(report: dict[str, Any]) -> str:
             f"`{cell.get('bundle_manifest_status', '')}` | "
             f"`{gate_status}` | "
             f"`{settings.get('backend', '')}` | "
+            f"`{settings.get('provider_family', '')}` | "
+            f"`{settings.get('transport_backend', '')}` | "
             f"`{settings.get('model', '')}` | "
+            f"`{settings.get('quantization', '')}` | "
             f"{settings.get('temperature', '')} | "
             f"{settings.get('top_p', '')} | "
             f"{settings.get('num_ctx', '')} | "
