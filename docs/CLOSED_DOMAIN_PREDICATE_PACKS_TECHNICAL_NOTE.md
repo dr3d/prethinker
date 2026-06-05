@@ -240,8 +240,10 @@ forbidden, and `37/39` per-run exact with clean atom/lens/value-domain and
 value-axis gates plus one support=1 unexpected item-treatment row. A later
 same-day Qwen mainline rerun also landed at `13/13`, with `0/10` supported
 forbidden, `0` unexpected, clean atom/lens/value gates, and 13 value-mode
-reconciled facts. Treat the repaired transfer_003 picture as an `11-13/13`
-same-condition band, not a fixed score. A source-only typed reconciliation
+reconciled facts. A later fenced boundary rerun landed at `12/13`, `0/10`
+supported forbidden, `0` unexpected, and 12 value-mode reconciled facts. Treat
+the repaired transfer_003 picture as an `11-13/13` same-condition band, not a
+fixed score. A source-only typed reconciliation
 report over the earlier 11/13 root
 records 11 stable value-mode facts at support>=2, all support=3, with 0
 skipped/conflicts; item 2.02 treatment and telephone were below threshold in

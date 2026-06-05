@@ -268,9 +268,11 @@ landed at `13/13`, `0/10` supported forbidden, and `37/39` per-run exact with
 clean atom/lens/value-domain/value-axis gates and one support=1 unexpected
 item-treatment row. A same-day Qwen mainline rerun then landed at `13/13`,
 `0/10` supported forbidden, `0` unexpected, clean atom/lens/value gates, and 13
-value-mode reconciled facts at support>=2. Treat the current repaired-schema
-SEC picture as an `11-13/13` same-condition band, not a fixed single score. Do
-not use the favorable draws to claim item-treatment recall is solved. A
+value-mode reconciled facts at support>=2. A later fenced boundary rerun landed
+at `12/13`, `0/10` supported forbidden, `0` unexpected, and 12 value-mode
+reconciled facts. Treat the current repaired-schema SEC picture as an
+`11-13/13` same-condition band, not a fixed single score. Do not use the
+favorable draws to claim item-treatment recall is solved. A
 source-only typed reconciliation report over the earlier 11/13 transfer_003
 root shows 11 value-mode facts at support>=2, all with support=3, and 0
 skipped/conflicts. The reconciled facts cover filing wrapper, registrant, four

@@ -67,6 +67,10 @@ SEC Form 8-K skeleton pack
       13 / 13, 0 / 10 supported forbidden; 0 unexpected
       atom/lens/value-domain gates clean; 13 value-mode reconciled facts at
       support>=2
+    R8 fenced boundary rerun:
+      12 / 13, 0 / 10 supported forbidden; 0 unexpected
+      atom/lens/value-domain gates clean; 12 value-mode reconciled facts at
+      support>=2
     seed rerun after exhibit/item axis contract clarification:
       13 / 13, 0 / 7 supported forbidden; per-run exact 39 / 39
       the source-rejected Exhibit 10.1 `incorporated_by_reference`
@@ -97,7 +101,8 @@ SEC Form 8-K skeleton pack
     earlier current transfer_003 root shows 11 value-mode facts at support>=2,
     all support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone
     were absent from that stable support set. Later 2026-06-05 same-local-Qwen
-    reruns recovered 13/13 at support>=2, but these are favorable points inside
+    reruns recovered 13/13 at support>=2, while a later fenced boundary rerun
+    landed at 12/13 with the same clean governance. These are points inside
     the observed band, not a new fixed score. Focused transfer_001 wrapper
     probes moved `sec_filing/6` from 1/3 to 2/3 local-Qwen wrapper-lens support
     after contract consistency cleanup, but telephone stayed 0/3 and registrant

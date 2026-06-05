@@ -7,7 +7,7 @@ This report does not read source prose, QA questions, judge output, or oracle an
 
 - Status: `pass`
 - Groups: `9`
-- Roots: `15`
+- Roots: `16`
 - Warnings: `0`
 
 ## Groups
@@ -15,7 +15,7 @@ This report does not read source prose, QA questions, judge output, or oracle an
 | Group | Fixture | Roots | Support Band | Forbidden Total | Unexpected Band | Status |
 | --- | --- | ---: | --- | ---: | --- | --- |
 | `sec_seed_qwen_moe_same_condition` | `sec_form_8k_skeleton_v1` | 1 | `13/13` | 0 | `5` | `pass` |
-| `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 4 | `11-13/13` | 0 | `0-2` | `pass` |
+| `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 5 | `11-13/13` | 0 | `0-2` | `pass` |
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
 | `osha_seed_qwen_moe_same_condition` | `osha_incident_domain_v1` | 1 | `21/21` | 0 | `0` | `pass` |
@@ -57,12 +57,14 @@ Roots:
 | `item_treatment_filing_id_r2` | item-treatment filing-id seam check | `11/13` | `35/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `11` value-mode facts |
 | `axis_clean_refresh_r1` | same-local-Qwen refresh | `13/13` | `37/39` | 0 | 1 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `13` value-mode facts |
 | `qwen_mainline_rerun_r1` | same-day Qwen MoE mainline rerun | `13/13` | `36/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `13` value-mode facts |
+| `fenced_boundary_r8` | same-local-Qwen fenced boundary rerun; 12/13 support, 0 supported forbidden, 0 unexpected | `12/13` | `36/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `12` value-mode facts |
 
 Roots:
 - `stability_r1`: `C:\prethinker_tmp_archive\sec_stability_20260604\sec-t003-axis-stability-r1`
 - `item_treatment_filing_id_r2`: `C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604\sec8k-t003-item-treatment-filing-id-r2-20260604`
 - `axis_clean_refresh_r1`: `C:\prethinker_tmp_archive\sec_t003_refresh_20260605\sec8k-t003-axis-clean-refresh-r1-20260605`
 - `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\sec_t003_qwen_mainline_rerun_20260605\sec8k-t003-qwen-mainline-rerun-r1-20260605`
+- `fenced_boundary_r8`: `C:\prethinker_tmp_archive\sec_t003_r8_20260605\sec-t003-r8`
 
 ## SEC transfer_003 dense compile-substitution controls
 

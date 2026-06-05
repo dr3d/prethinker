@@ -39,6 +39,11 @@
           "id": "qwen_mainline_rerun_r1",
           "role": "same-day Qwen MoE mainline rerun",
           "path": "C:/prethinker_tmp_archive/sec_t003_qwen_mainline_rerun_20260605/sec8k-t003-qwen-mainline-rerun-r1-20260605"
+        },
+        {
+          "id": "fenced_boundary_r8",
+          "role": "same-local-Qwen fenced boundary rerun; 12/13 support, 0 supported forbidden, 0 unexpected",
+          "path": "C:/prethinker_tmp_archive/sec_t003_r8_20260605/sec-t003-r8"
         }
       ]
     },
