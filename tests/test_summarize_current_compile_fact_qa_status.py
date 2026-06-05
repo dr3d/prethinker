@@ -50,6 +50,7 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert report["cells"][0]["variance_groups"][0]["support_band"] == "`1-2/2`"
     assert "Support>=2: `3 / 4`" in md
     assert "Unexpected same-signature facts support>=2: `1`" in md
+    assert "Unexpected support>=2 counts are pinned in the standing manifest" in md
     assert "Forbidden fact emissions support>=1 / support>=2: `0 / 0`" in md
     assert "Unexpected Same-Signature Support>=2" in md
     assert "incorporated_by_reference" in md

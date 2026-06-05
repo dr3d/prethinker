@@ -141,6 +141,9 @@ def test_run_compile_fact_judged_qa_manifest_reports_expectation_mismatch() -> N
         "fixture_id": "fixture_a",
         "support_summary_by_fixture": {"fixture_a": {"exact_support_ge_2": 1}},
         "forbidden_emissions_summary_by_fixture": {"fixture_a": {"forbidden_emissions_ge_1": 0}},
+        "unexpected_same_signature_summary_by_fixture": {
+            "fixture_a": {"unexpected_same_signature_ge_2": 0}
+        },
         "redaction_summary": {"status": "pass", "blocking_reasons": [], "prose_dependent_exact": 0},
         "typed_plan_summary": {"status": "pass", "blocking_reasons": [], "unregistered_plan_exact_rows": 0},
         "expect": {"support.exact_support_ge_2": 2},
@@ -150,4 +153,25 @@ def test_run_compile_fact_judged_qa_manifest_reports_expectation_mismatch() -> N
 
     assert _blocking_reasons(result) == [
         "cell_a:expectation_mismatch:support.exact_support_ge_2:expected=2:actual=1"
+    ]
+
+
+def test_run_compile_fact_judged_qa_manifest_checks_unexpected_expectations() -> None:
+    result = {
+        "id": "cell_a",
+        "fixture_id": "fixture_a",
+        "support_summary_by_fixture": {"fixture_a": {"exact_support_ge_2": 1}},
+        "forbidden_emissions_summary_by_fixture": {"fixture_a": {"forbidden_emissions_ge_1": 0}},
+        "unexpected_same_signature_summary_by_fixture": {
+            "fixture_a": {"unexpected_same_signature_ge_2": 1}
+        },
+        "redaction_summary": {"status": "pass", "blocking_reasons": [], "prose_dependent_exact": 0},
+        "typed_plan_summary": {"status": "pass", "blocking_reasons": [], "unregistered_plan_exact_rows": 0},
+        "expect": {"unexpected.unexpected_same_signature_ge_2": 0},
+    }
+
+    from scripts.run_compile_fact_judged_qa_manifest import _blocking_reasons
+
+    assert _blocking_reasons(result) == [
+        "cell_a:expectation_mismatch:unexpected.unexpected_same_signature_ge_2:expected=0:actual=1"
     ]

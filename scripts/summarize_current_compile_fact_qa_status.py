@@ -838,6 +838,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Support>=2: `{summary['exact_support_ge_2']} / {summary['reference_count']}` expected typed facts",
         f"- Per-run exact: `{summary['per_run_exact']} / {summary['per_run_rows']}` deterministic fact rows",
         f"- Unexpected same-signature facts support>=2: `{summary['unexpected_same_signature_ge_2']}`",
+        "- Unexpected support>=2 counts are pinned in the standing manifest; count drift blocks the manifest run.",
         f"- Forbidden fact emissions support>=1 / support>=2: `{summary['forbidden_emissions_ge_1']} / {summary['forbidden_emissions_ge_2']}`",
         f"- Prose-dependent exact rows: `{summary['prose_dependent_exact']}`",
         f"- Unregistered exact typed plans: `{summary['unregistered_plan_exact_rows']}`",

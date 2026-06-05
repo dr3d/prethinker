@@ -11,6 +11,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Support>=2: `109 / 141` expected typed facts
 - Per-run exact: `309 / 423` deterministic fact rows
 - Unexpected same-signature facts support>=2: `4`
+- Unexpected support>=2 counts are pinned in the standing manifest; count drift blocks the manifest run.
 - Forbidden fact emissions support>=1 / support>=2: `0 / 0`
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`

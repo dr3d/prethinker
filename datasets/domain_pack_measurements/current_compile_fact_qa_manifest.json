@@ -10,6 +10,7 @@
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 13,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -22,6 +23,7 @@
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 5,
+        "unexpected.unexpected_same_signature_ge_2": 2,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -34,6 +36,7 @@
       "expect": {
         "support.reference_count": 12,
         "support.exact_support_ge_2": 11,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -46,6 +49,7 @@
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 11,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -58,6 +62,7 @@
       "expect": {
         "support.reference_count": 25,
         "support.exact_support_ge_2": 22,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -70,6 +75,7 @@
       "expect": {
         "support.reference_count": 29,
         "support.exact_support_ge_2": 11,
+        "unexpected.unexpected_same_signature_ge_2": 2,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -82,6 +88,7 @@
       "expect": {
         "support.reference_count": 21,
         "support.exact_support_ge_2": 21,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -94,6 +101,7 @@
       "expect": {
         "support.reference_count": 15,
         "support.exact_support_ge_2": 15,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

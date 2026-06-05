@@ -228,11 +228,16 @@ def _blocking_reasons(result: dict[str, Any]) -> list[str]:
             f"{cell_id}:forbidden_emissions_ge_1:"
             f"{forbidden.get('forbidden_emissions_ge_1')}"
         )
+    unexpected = result.get("unexpected_same_signature_summary_by_fixture", {}).get(
+        fixture_id,
+        {},
+    )
     for key, expected in dict(result.get("expect") or {}).items():
         actual = _expect_actual(
             key=key,
             support=support,
             forbidden=forbidden,
+            unexpected=unexpected,
             redaction=result["redaction_summary"],
             typed_plan=result["typed_plan_summary"],
         )
@@ -254,6 +259,7 @@ def _expect_actual(
     key: str,
     support: dict[str, Any],
     forbidden: dict[str, Any],
+    unexpected: dict[str, Any],
     redaction: dict[str, Any],
     typed_plan: dict[str, Any],
 ) -> Any:
@@ -261,6 +267,8 @@ def _expect_actual(
         return support.get(key.split(".", 1)[1])
     if key.startswith("forbidden."):
         return forbidden.get(key.split(".", 1)[1])
+    if key.startswith("unexpected."):
+        return unexpected.get(key.split(".", 1)[1])
     if key.startswith("redaction."):
         return redaction.get(key.split(".", 1)[1])
     if key.startswith("typed_plan."):
