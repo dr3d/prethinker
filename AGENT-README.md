@@ -74,7 +74,7 @@ not use them as day-one guidance unless the user names a specific artifact.
 - FDA warning letters are the first case study; SEC Form 8-K skeletons, NTSB
   investigations, and OSHA accident/inspection records are
   methodology-transfer/boundary probes. OSHA now has a measured local N=3
-  seed/transfer skeleton probe (`18/20`, `12/15`, both `0` supported
+  seed/transfer skeleton probe (`21/21`, `15/15`, both `0` supported
   forbidden), but it is fourth-family corroboration rather than a broad OSHA
   product claim. Do not grind rows toward a nicer score. Characterize failure
   classes and abstention boundaries.
@@ -86,16 +86,14 @@ worksheets or old commit narratives. If a stale public surface, fixture-shaped
 vocabulary leak, or active prompt/config drift appears, clean it up or record
 the current lesson in a compact active doc.
 
-The active FDA documentation-gap proposal lane is waiting on blind oracle
-review before any fixture oracle changes. The handoff is local-only:
+There are no pending external work orders in the current queue. FDA
+documentation-gap review is complete and rejected for transfer_002; FDA
+response-assessment item review is complete across transfer_001/002/003 but
+remains candidate evidence, not a promoted surface. If a new source-only work
+order is created, keep it packetized and blind to model outputs.
 
-```text
-C:\prethinker\tmp\fda_response_documentation_gap_oracle_review_work_order_20260603.md
-```
-
-Do not inspect candidate compile outputs while authoring that oracle. ACH
-remains overlay-only: it may propose and score evidence matrices, but it must
-not mutate KB facts, QA verdicts, or compile artifacts.
+ACH remains overlay-only: it may propose and score evidence matrices, but it
+must not mutate KB facts, QA verdicts, or compile artifacts.
 
 Do not set cadence timers unless the user explicitly asks. The user prefers
 continuous autonomous progress within the current session and will interrupt

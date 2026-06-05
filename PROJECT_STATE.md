@@ -139,7 +139,8 @@ SEC Form 8-K skeleton pack
         excluding telephone, two filing items, two exhibits, and signatory
         item 2.02 treatment and telephone remain below support threshold
   repaired breadth check over retained seed / transfer_001 / transfer_002:
-    seed: 12 / 13, 0 / 6 supported forbidden, clean atom/lens gates
+    seed: 13 / 13, 0 / 7 supported forbidden after exhibit/item axis
+      contract clarification, clean atom/lens gates
     transfer_001: 11 / 13, 0 / 8 supported forbidden, clean atom/lens gates
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
   fenced event-substance probe:
@@ -168,11 +169,11 @@ SEC Form 8-K skeleton pack
   current compile-fact QA precision detail:
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
     unexpected same-signature facts at support>=2 and any emitted forbidden
-    facts. The current standing status is deliberately red: FDA transfer_002
-    emits a source-rejected `fda_adulteration_basis/5` 501(a)(2)(A)
-    insanitary-basis row at support=2. This row was found by a source-only
-    focused review and is a claim-blocking precision failure, not an
-    unexpected-fact candidate.
+    facts. The current standing manifest is green: FDA transfer_002 is
+    21 / 29 support>=2 with 0 / 8 supported forbidden after explicit
+    adulteration-basis tightening. The earlier false 501(a)(2)(A)
+    insanitary-basis row is retained as an integrity lesson, not a current
+    claim blocker.
 
 FDA warning-letter pack
   older deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -188,12 +189,10 @@ FDA warning-letter pack
       review added two expected detail rows and one forbidden adulteration-basis
       sentinel
   standing transfer_002 current-pack status:
-    22 / 29 support>=2, 1 / 8 forbidden emitted at support=2
-    emitted forbidden row:
-      fda_adulteration_basis(_, adulteration_insanitary_conditions,
-      fdca_501_a_2_a, _, _).
-    read: live precision blocker; no safe typed-only deterministic drop rule is
-      currently justified without making a source-specific patch
+    21 / 29 support>=2, 0 / 8 supported forbidden
+    read: clean but incomplete boundary cell after explicit
+      adulteration-basis contract tightening removed the false 501(a)(2)(A)
+      insanitary-basis row and lowered support from the previous red cell
   transfer_003 fresh current-pack local rerun:
     19 / 26 support>=2, 0 / 10 supported forbidden
     atom-shape / registered-signature / lens-scope blockers: 0
@@ -627,13 +626,13 @@ Common local checks:
 ```powershell
 $env:PYTHONPATH='.'
 pytest -q
-python scripts\run_current_research_governance.py --out-root tmp\current_research_governance --exit-zero
+python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\build_compile_fact_judged_qa.py --help
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
 python scripts\audit_reference_judge_null_control_reports.py --out-json tmp\reference_judge_null_control_reports.json --out-md tmp\reference_judge_null_control_reports.md
-python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --exit-zero
+python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md
 python scripts\audit_research_artifact_paths.py
 python scripts\audit_historical_score_claims.py
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
@@ -644,9 +643,9 @@ python scripts\audit_pending_external_work_orders.py --include-tmp-zips --out-js
 python scripts\audit_source_oracle_reviews.py --out-json tmp\source_oracle_reviews.json --out-md docs\SOURCE_ORACLE_REVIEW_STATUS.md --expect-md docs\SOURCE_ORACLE_REVIEW_STATUS.md
 ```
 
-The governance command currently reports a claim-blocking FDA transfer_002
-precision failure. Use `--exit-zero` for report regeneration and remove it only
-when checking whether that blocker has cleared.
+The governance command should pass without `--exit-zero` before current public
+docs are treated as synchronized. Generated roots under `tmp\` should be
+archived or removed after review.
 
 Before a public/docs cleanup commit, also run stale-claim greps over
 `README.md`, `PROJECT_STATE.md`, `docs/*.md`, and `docs/index.html`.
