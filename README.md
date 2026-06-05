@@ -93,10 +93,13 @@ SEC Form 8-K skeleton pack:
     or model-independent methods anchor
 
 FDA warning-letter pack:
-  deterministic judged-QA v2: 137 / 159 exact
-  all 137 exact rows pass typed-plan and redaction replay
-  transfer_001: 78 / 78 exact across N=3
-  transfer_002: 59 / 81 exact across N=3
+  older deterministic judged-QA v2, before later transfer_002 source-only
+    oracle review: 137 / 159 exact
+  all 137 exact rows passed typed-plan and redaction replay in that bundle,
+    but v2 is now stale as a claim-bearing current status because the
+    transfer_002 oracle changed
+  current standing transfer_002 cell: 22 / 29 support>=2 with one
+    source-rejected forbidden emission at support=2
   transfer_003 fresh current-pack boundary: 19 / 26 support>=2,
     0 / 10 forbidden, clean atom/lens gates
   boundary: wrapper role semantics, context-dependent category/substance,
@@ -173,9 +176,14 @@ Focused local verification for the current domain-pack and governance work:
 
 ```powershell
 python -m pytest -q
-python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
+python scripts\run_current_research_governance.py --out-root tmp\current_research_governance --exit-zero
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 ```
+
+`run_current_research_governance.py` currently reports a claim-blocking failure:
+FDA transfer_002 emits one source-rejected forbidden fact at support=2. Use
+`--exit-zero` when regenerating reports; remove it only when checking whether
+the blocker has been cleared.
 
 Deterministic compile-fact QA bundles can be regenerated in-repo from
 `expected_facts.pl` and compile JSON typed facts:
@@ -183,7 +191,7 @@ Deterministic compile-fact QA bundles can be regenerated in-repo from
 ```powershell
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
-python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md
+python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --exit-zero
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json --expect-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
@@ -217,11 +225,14 @@ Current high-signal evidence:
   transfer_003 landed lower on the same role-semantics rows, so this is
   boundary-aware skeleton evidence, not the old pristine or model-independent
   anchor claim.
-- FDA warning-letter domain pack: deterministic judged-QA v2 across
-  transfer_001 and transfer_002 is `137 / 159` exact; all `137` exact rows pass
-  typed-plan replay and redaction replay. This is compile-fact transfer
-  evidence, not messy-query competence; transfer_002 remains boundary evidence
-  rather than a row-grinding target.
+- FDA warning-letter domain pack: the older deterministic judged-QA v2 across
+  transfer_001 and transfer_002 was `137 / 159` exact, and all `137` exact rows
+  passed typed-plan replay and redaction replay. A later source-only
+  transfer_002 review changed the oracle, so v2 is retained as historical
+  compile-fact evidence rather than current claim-bearing status. The current
+  standing transfer_002 cell is `22 / 29` support>=2 with one source-rejected
+  forbidden emission at support=2; this is a live precision blocker, not a row
+  to paper over.
 - NTSB investigation domain pack: seed micro `13 / 13`; first unlike transfer
   `22 / 25` in the current scoped injury-count manifest, `0` forbidden. The
   manifest replays `60 / 75` per-run exact over the transfer, with every exact

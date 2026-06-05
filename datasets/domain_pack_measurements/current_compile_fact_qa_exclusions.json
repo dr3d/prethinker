@@ -147,6 +147,24 @@
       "evidence_roots": [
         "datasets\\compile_micro_fixtures\\state_ag_settlement_aod_v1"
       ]
+    },
+    {
+      "fixture_id": "state_ag_settlement_aod_transfer_002",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "source_only_transfer_oracle_not_standing_manifest_cell",
+      "note": "State-AG settlement/AOD transfer 002 is a retained source-only expected/forbidden micro-fixture. It validates oracle shape and negative controls but has not been run as a standing same-condition compile-fact manifest cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\state_ag_settlement_aod_transfer_002"
+      ]
+    },
+    {
+      "fixture_id": "state_ag_settlement_aod_transfer_003",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "source_only_transfer_oracle_not_standing_manifest_cell",
+      "note": "State-AG settlement/AOD transfer 003 is a retained source-only expected/forbidden micro-fixture. It validates oracle shape and negative controls but has not been run as a standing same-condition compile-fact manifest cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\state_ag_settlement_aod_transfer_003"
+      ]
     }
   ]
 }

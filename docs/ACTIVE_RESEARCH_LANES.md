@@ -116,12 +116,18 @@ fda_transfer_judged_qa_v2 deterministic compile-fact QA:
   typed-plan replay: 137 / 137 exact rows replay through registered carriers
   redaction replay: 137 / 137 exact rows survive with 0 prose-dependent rows
   scope: oracle-shaped Prolog fact QA, not messy human query planning
+  current status: stale as claim-bearing transfer_002 status after later
+    source-only review changed the oracle; retain as historical/pre-review
+    compile-fact evidence only
 
 transfer_002 fresh current-pack lens-scoped bundle:
   artifact root:
     C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
-  20 / 27 expected, 0 / 7 supported forbidden
+  22 / 29 expected, 1 / 8 forbidden emitted at support=2
   atom-shape / registered-signature / lens-scope blockers: 0
+  current blocker:
+    fda_adulteration_basis(_, adulteration_insanitary_conditions,
+    fdca_501_a_2_a, _, _).
   boundary residue:
     wrapper role semantics
     context-dependent violation-3 category/substance
@@ -145,21 +151,23 @@ messy human QA. The package is now reproducible locally with
 `scripts/build_compile_fact_judged_qa.py`, which compares `expected_facts.pl`
 against compile JSON typed facts and prints support>=2 summaries by fixture.
 The `transfer_001` replay is the clean FDA transfer cell.
-`transfer_002` and `transfer_003` are clean boundary cells: current gates hold,
-but the richer rows do not all transfer. A blind candidate review of
-`fda_response_documentation_gap/5` on `transfer_002` found 0 expected facts and
-13 forbidden boundaries, so retained stable documentation-gap emissions for
-violations 1, 2, and 3 are false positives. Do not grind `transfer_002` upward
-row-by-row; use it to name the current abstention boundary. `transfer_003`
+`transfer_003` is a clean boundary cell: current gates hold, but the richer
+rows do not all transfer. `transfer_002` is no longer clean after the
+source-only focused review added two expected detail rows and one forbidden
+adulteration-basis sentinel; the current standing cell is 22/29 with one
+supported forbidden 501(a)(2)(A) insanitary-basis emission. A blind candidate
+review of `fda_response_documentation_gap/5` on `transfer_002` found 0
+expected facts and 13 forbidden boundaries, so retained stable
+documentation-gap emissions for violations 1, 2, and 3 are false positives.
+Do not grind `transfer_002` upward row-by-row; use it to name the current
+abstention and precision boundary. `transfer_003`
 now corroborates the same value/detail-flesh boundary under clean atom/lens
 governance, not the older archived integrity-fail story. The
-`fda_response_assessment_item/6` proposal remains an unreviewed candidate; the
-current proposal-status report warns `candidate_has_no_review_results` and now
-links the pending source-only review packet at
-`tmp\fda_response_assessment_item_blind_review_work_order_20260604.zip`, so no
-assessment-item support should be cited as a promoted claim. The broader
-response-assessment lane remains a 16/17 composed diagnostic rather than a
-promoted fresh-compile claim.
+`fda_response_assessment_item/6` proposal now has retained source-only
+candidate-review results for `transfer_001`, `transfer_002`, and
+`transfer_003`, but it remains a candidate rather than a promoted carrier. The
+broader response-assessment lane remains a 16/17 composed diagnostic rather
+than a promoted fresh-compile claim.
 
 NTSB investigations are the second fixture-bank pack candidate. The R1 NTSB
 micro skeleton currently

@@ -1,0 +1,10 @@
+{
+  "fixture_id": "fda_warning_letter_domain_transfer_002",
+  "predicate": "fda_violation_detail/5",
+  "review_id": "fda_t002_oos_assay_detail_focused_review_20260605",
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_forbidden_inputs": false,
+  "source_files": [
+    "datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md"
+  ]
+}

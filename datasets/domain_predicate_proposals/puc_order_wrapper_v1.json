@@ -100,15 +100,12 @@
     "support_threshold": 2,
     "heldout_policy": "unlike PUC orders or resolutions not used to shape the wrapper carrier or value domains"
   },
-  "pending_external_work_orders": [
+  "pending_external_work_orders": [],
+  "source_oracle_review_results": [
     {
-      "kind": "source_only_expected_forbidden_oracle",
-      "path": "tmp/puc_order_wrapper_oracle_work_order_20260604.zip",
-      "fixtures": [
-        "puc_order_ugly_002",
-        "puc_order_ugly_003"
-      ],
-      "purpose": "Independent source-only review decides expected and forbidden wrapper facts before this draft can become a candidate."
+      "review_id": "puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604",
+      "review_path": "datasets/source_oracle_reviews/puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604/manifest.json",
+      "result": "source_oracle_complete"
     }
   ],
   "promotion_gates": [

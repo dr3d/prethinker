@@ -261,6 +261,49 @@ def test_pending_external_work_order_audit_warns_candidate_fact_is_not_full_blin
     assert "candidate_fact_focus_review_not_full_blind:candidate_fact.pl" in report["work_orders"][0]["warnings"]
 
 
+def test_pending_external_work_order_audit_allows_variable_only_fact_template(
+    tmp_path: Path,
+) -> None:
+    _write_zip_map(
+        tmp_path / "standalone.zip",
+        {
+            "README.md": "review instructions\n",
+            "expected_facts_TEMPLATE.pl": "% puc_order(OrderId, AgencyId, DocketId, OrderKind, IssuedDate, DecisionStatus, SourceOrScope).\n",
+            "forbidden_facts_TEMPLATE.pl": "% puc_order(BadOrderId, AgencyId, DocketId, full_source_sentence_blob, IssuedDate, DecisionStatus, SourceOrScope).\n",
+            "manifest.json": "{}\n",
+            "source.md": "source placeholder\n",
+        },
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "pass"
+    assert report["work_orders"][0]["errors"] == []
+
+
+def test_pending_external_work_order_audit_blocks_literal_fact_examples_in_templates(
+    tmp_path: Path,
+) -> None:
+    _write_zip_map(
+        tmp_path / "standalone.zip",
+        {
+            "README.md": "review instructions\n",
+            "expected_facts_TEMPLATE.pl": "% state_ag_instrument(aod_24_099, assurance_of_discontinuance, new_york_attorney_general, equinox_group_llc, aod_24_099, v_2025_05_19, caption).\n",
+            "forbidden_facts_TEMPLATE.pl": "% no examples\n",
+            "manifest.json": "{}\n",
+            "source.md": "source placeholder\n",
+        },
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "fail"
+    assert any(
+        error.startswith("template_contains_literal_fact_example:expected_facts_TEMPLATE.pl:line_1:")
+        for error in report["work_orders"][0]["errors"]
+    )
+
+
 def test_pending_external_work_order_audit_expect_md_marks_stale_report(
     tmp_path: Path,
     monkeypatch,
@@ -337,3 +380,9 @@ def _write_zip(path: Path, entries: list[str]) -> None:
     with zipfile.ZipFile(path, "w") as archive:
         for entry in entries:
             archive.writestr(entry, "placeholder\n")
+
+
+def _write_zip_map(path: Path, entries: dict[str, str]) -> None:
+    with zipfile.ZipFile(path, "w") as archive:
+        for entry, text in entries.items():
+            archive.writestr(entry, text)

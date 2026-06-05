@@ -1,0 +1,32 @@
+{
+  "blocked_reason": "",
+  "notes": "Independent source-only review. The draft proposal's two positive examples were independently confirmed source-correct and retained on the merits (SourceOrScope normalized to src_caption). No stop condition triggered: both sources support a clean puc_order/7 row, the closed OrderKind and DecisionStatus domains cover both instruments (resolution/approves_settlement; order_memorializing_decision/memorializes_decision), and no prose-shaped atom is needed for the wrapper. Forbidden rows test prose-shaped OrderKind/DecisionStatus, inferred/conflated legal status (denies_request on 002; approves_settlement on 003), conflated identifiers (M-4846 authority and swapped id on 002; DW#340357 doc-control on 003), conflated dates (conference 10/12 on 002; prior April-25 order on 003), wrong closed kind (final_order on 003), and ordering-paragraph/vote/service-list prose forced into wrapper slots.",
+  "outputs": {
+    "puc_order_ugly_002": {
+      "expected_fact_count": 1,
+      "forbidden_fact_count": 8,
+      "source_files": [
+        "datasets/real_world_transfer/fresh_ugly_public_20260528_01/puc_order_ugly_002/source.md"
+      ],
+      "source_only_basis": "CPUC Resolution ALJ-445 (caption + summary + order). OrderId=cpuc_alj_445 (Resolution ALJ-445); AgencyId=cpuc (Public Utilities Commission of the State of California); DocketId=h_22_07_010 (Request for Hearing H.22-07-010); OrderKind=resolution (titled RESOLUTION ALJ-445); IssuedDate=v_2023_10_16 (Date of Issuance 10/16/2023); DecisionStatus=approves_settlement (grants Joint Motion for Approval of Settlement Agreement, Order para 1). One clean current order."
+    },
+    "puc_order_ugly_003": {
+      "expected_fact_count": 1,
+      "forbidden_fact_count": 7,
+      "source_files": [
+        "datasets/real_world_transfer/fresh_ugly_public_20260529_01/puc_order_ugly_003/source.md"
+      ],
+      "source_only_basis": "Utah PSC Order Memorializing Decision, Docket 24-035-04. OrderId=utah_psc_24_035_04_omd; AgencyId=utah_psc (Public Service Commission of Utah); DocketId=docket_24_035_04 (DOCKET NO. 24-035-04); OrderKind=order_memorializing_decision (titled ORDER MEMORIALIZING DECISION); IssuedDate=v_2025_06_24 (ISSUED June 24, 2025); DecisionStatus=memorializes_decision ('this order memorializes the PSC's approval of the Settlement'). One clean current order; approves_settlement was rejected as a conflation since the approval occurred at the prior hearing and this order only memorializes it."
+    }
+  },
+  "predicate": "puc_order/7",
+  "proposal_file": "datasets/domain_predicate_proposals/puc_order_wrapper_v1.json",
+  "proposal_id": "puc_order_wrapper_v1",
+  "review_id": "puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604",
+  "reviewer": "external_source_only_agent",
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_model_outputs": false,
+  "schema": "prethinker.source_oracle_review.v1",
+  "source_only_review": true,
+  "status": "complete"
+}

@@ -1,0 +1,17 @@
+{
+  "bundle_review_id": "fda_response_assessment_item_oracle_review_20260604",
+  "created_at": "2026-06-04",
+  "fixture_id": "fda_warning_letter_domain_transfer_002",
+  "numbered_item_map": "allowed_inputs/numbered_item_maps/fda_warning_letter_domain_transfer_002.pl",
+  "predicate": "fda_response_assessment_item/6",
+  "review_id": "fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_002",
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_forbidden_inputs": false,
+  "schema_files": [
+    "allowed_inputs/schema/fda_response_assessment_item_neutral_contract.json",
+    "allowed_inputs/schema/ontology_registry.json"
+  ],
+  "source_files": [
+    "datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md"
+  ]
+}

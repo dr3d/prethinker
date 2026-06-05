@@ -79,6 +79,40 @@ def test_typed_micro_fixture_compile_comparison_reports_forbidden_range_expansio
     assert "compile_emitted_forbidden_facts" in row["errors"]
 
 
+def test_typed_micro_fixture_reads_nested_files_manifest_keys(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "returned_shape"
+    fixture_dir.mkdir()
+    (fixture_dir / "source.md").write_text("Source text is not inspected by this validator.\n", encoding="utf-8")
+    (fixture_dir / "expected_facts.pl").write_text(
+        "list_member(count_set_1, 2, count, src_line_0001).\n",
+        encoding="utf-8",
+    )
+    (fixture_dir / "forbidden_facts.pl").write_text(
+        "list_member(count_set_1, 5, count, src_line_0001).\n",
+        encoding="utf-8",
+    )
+    (fixture_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "fixture_id": "returned_shape",
+                "files": {
+                    "source": "source.md",
+                    "expected_facts": "expected_facts.pl",
+                    "forbidden_facts": "forbidden_facts.pl",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(root=tmp_path)
+
+    row = report["rows"][0]
+    assert row["expected_fact_count"] == 1
+    assert row["forbidden_fact_count"] == 1
+    assert row["errors"] == []
+
+
 def test_typed_micro_fixture_accepts_declared_alternative_groups(tmp_path: Path) -> None:
     compile_json = tmp_path / "compile.json"
     compile_json.write_text(

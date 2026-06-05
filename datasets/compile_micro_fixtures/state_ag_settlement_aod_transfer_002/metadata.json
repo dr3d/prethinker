@@ -1,0 +1,25 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260528_01",
+  "fixture_id": "state_ag_settlement_ugly_002",
+  "source_family": "state_ag",
+  "source_title": "NY Attorney General Assurance of Discontinuance, In re Equinox Group, LLC, Equinox Holdings, Inc., Equinox Media, LLC, and SoulCycle LLC (Assurance No. 24-099)",
+  "source_url": "https://ag.ny.gov/sites/default/files/settlements-agreements/equinox-group-llc-assurance-of-discontinuance-2025.pdf",
+  "source_date": "2025-05-19",
+  "collected_at": "2026-05-28",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "source_coordinates",
+    "tables",
+    "cross_section"
+  ],
+  "compile_micro_fixture_id": "state_ag_settlement_aod_transfer_002",
+  "domain_profile": "state_ag_settlement_v1",
+  "oracle_authored_blind_to_model_outputs": true
+}

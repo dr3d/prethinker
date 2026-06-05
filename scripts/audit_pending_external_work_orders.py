@@ -51,6 +51,10 @@ RUN_ARTIFACT_PATH_PARTS = {
     "source_oracle_reviews",
     "candidate_oracle_reviews",
 }
+TEMPLATE_LITERAL_ALLOWLIST = {
+    "full_source_sentence_blob",
+}
+FACT_LIKE_RE = re.compile(r"^\s*%?\s*(?:[\w -]+:\s*)?([a-z][a-z0-9_]*)\(([^)]*)\)\.?\s*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -147,9 +151,9 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Pending External Work Order Audit",
         "",
-        f"This report validates {scope} and entry-name leak policy only.",
-        "It blocks pending packets that include filled oracle files, judged-QA manifests, model outputs, or compile/run artifacts.",
-        "It does not read source prose or decide expected/forbidden facts.",
+        f"This report validates {scope} plus entry-name and template-content leak policy only.",
+        "It blocks pending packets that include filled oracle files, judged-QA manifests, model outputs, compile/run artifacts, or literal fact examples inside oracle templates.",
+        "It may read packet-control/template files, but it does not read source prose or decide expected/forbidden facts.",
         "",
         f"- Proposals scanned: `{summary['proposal_count']}`",
         f"- Pending work orders: `{summary['work_order_count']}`",
@@ -203,7 +207,13 @@ def _audit_work_order(
         errors.append(f"not_zip:{path_text}")
     else:
         with zipfile.ZipFile(resolved) as archive:
-            raw_entries = [name for name in archive.namelist() if name.strip()]
+            archive_entries = [info for info in archive.infolist() if info.filename.strip()]
+            raw_entries = [info.filename for info in archive_entries]
+            _validate_template_content_no_answer_examples(
+                archive=archive,
+                archive_entries=archive_entries,
+                errors=errors,
+            )
         errors.extend(_zip_entry_name_errors(raw_entries))
         entries = sorted(_normalize_entry(name) for name in raw_entries)
         _validate_no_answer_leakage(entries=entries, errors=errors, warnings=warnings)
@@ -238,7 +248,13 @@ def _audit_standalone_zip(*, zip_path: Path) -> dict[str, Any]:
         errors.append(f"not_zip:{zip_path}")
     else:
         with zipfile.ZipFile(zip_path) as archive:
-            raw_entries = [name for name in archive.namelist() if name.strip()]
+            archive_entries = [info for info in archive.infolist() if info.filename.strip()]
+            raw_entries = [info.filename for info in archive_entries]
+            _validate_template_content_no_answer_examples(
+                archive=archive,
+                archive_entries=archive_entries,
+                errors=errors,
+            )
         errors.extend(_zip_entry_name_errors(raw_entries))
         entries = sorted(_normalize_entry(name) for name in raw_entries)
         _validate_no_answer_leakage(entries=entries, errors=errors, warnings=warnings)
@@ -358,6 +374,53 @@ def _validate_no_answer_leakage(
             errors.append(f"model_or_compile_output_not_allowed:{normalized}")
         if name == "candidate_fact.pl":
             warnings.append(f"candidate_fact_focus_review_not_full_blind:{normalized}")
+
+
+def _validate_template_content_no_answer_examples(
+    *,
+    archive: zipfile.ZipFile,
+    archive_entries: list[zipfile.ZipInfo],
+    errors: list[str],
+) -> None:
+    for archive_entry in archive_entries:
+        entry = _normalize_entry(archive_entry.filename)
+        if not _is_fact_template_file(entry):
+            continue
+        try:
+            text = archive.read(archive_entry).decode("utf-8")
+        except zipfile.BadZipFile as exc:
+            errors.append(f"template_unreadable_zip_header:{entry}:{exc}")
+            continue
+        except UnicodeDecodeError:
+            errors.append(f"template_not_utf8:{entry}")
+            continue
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            literal_atoms = _template_line_literal_atoms(line)
+            if not literal_atoms:
+                continue
+            atoms = ",".join(literal_atoms[:3])
+            errors.append(f"template_contains_literal_fact_example:{entry}:line_{line_number}:{atoms}")
+
+
+def _template_line_literal_atoms(line: str) -> list[str]:
+    match = FACT_LIKE_RE.match(line)
+    if not match:
+        return []
+    args = [arg.strip() for arg in match.group(2).split(",")]
+    literal_atoms: list[str] = []
+    for arg in args:
+        if not arg or arg == "_" or arg[0].isupper():
+            continue
+        if arg in TEMPLATE_LITERAL_ALLOWLIST:
+            continue
+        if re.match(r"^[a-z][a-z0-9_]*$", arg):
+            literal_atoms.append(arg)
+    return literal_atoms
+
+
+def _is_fact_template_file(entry: str) -> bool:
+    name = Path(entry).name.lower()
+    return bool(re.match(r"(candidate_)?(expected|forbidden)_facts(_template)?\.pl$", name))
 
 
 def _is_output_template(entry: str) -> bool:

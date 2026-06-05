@@ -100,16 +100,25 @@
     "support_threshold": 2,
     "heldout_policy": "unlike FDA warning letters not used to shape the response-assessment carrier or value domains"
   },
-  "pending_external_work_orders": [
+  "pending_external_work_orders": [],
+  "review_results": [
     {
-      "kind": "source_only_candidate_oracle_review",
-      "path": "tmp/fda_response_assessment_item_blind_review_work_order_20260604.zip",
-      "fixtures": [
-        "fda_warning_letter_domain_transfer_001",
-        "fda_warning_letter_domain_transfer_002",
-        "fda_warning_letter_domain_transfer_003"
-      ],
-      "purpose": "Independent source-only review before deciding whether the candidate response-assessment carrier should promote or abstain."
+      "review_id": "fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_001",
+      "fixture_id": "fda_warning_letter_domain_transfer_001",
+      "review_path": "datasets/candidate_oracle_reviews/fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_001/manifest.json",
+      "result": "source_only_candidate_review_complete"
+    },
+    {
+      "review_id": "fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_002",
+      "fixture_id": "fda_warning_letter_domain_transfer_002",
+      "review_path": "datasets/candidate_oracle_reviews/fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_002/manifest.json",
+      "result": "source_only_candidate_review_complete"
+    },
+    {
+      "review_id": "fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_003",
+      "fixture_id": "fda_warning_letter_domain_transfer_003",
+      "review_path": "datasets/candidate_oracle_reviews/fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_003/manifest.json",
+      "result": "source_only_candidate_review_complete"
     }
   ],
   "promotion_gates": [

@@ -26,7 +26,7 @@ def test_build_compile_fact_judged_qa_exact_partial_miss_and_forbidden(tmp_path:
         encoding="utf-8",
     )
     (fixture_dir / "forbidden_facts.pl").write_text(
-        "fda_warning_letter(Letter, cber, apothecary_pharma_llc, v_2025_12_01, SrcLetter).\n",
+        "fda_warning_letter(_, cber, apothecary_pharma_llc, v_2025_12_01, _).\n",
         encoding="utf-8",
     )
     compile_json = tmp_path / "compile.json"
@@ -56,7 +56,7 @@ def test_build_compile_fact_judged_qa_exact_partial_miss_and_forbidden(tmp_path:
     assert payload["verdict_summary"] == {"exact": 1, "miss": 3}
     assert payload["forbidden_emissions"] == [
         {
-            "forbidden_fact": "fda_warning_letter(Letter, cber, apothecary_pharma_llc, v_2025_12_01, SrcLetter).",
+            "forbidden_fact": "fda_warning_letter(_, cber, apothecary_pharma_llc, v_2025_12_01, _).",
             "compiled_fact": "fda_warning_letter(wl_999999, cber, apothecary_pharma_llc, v_2025_12_01, source_url).",
         }
     ]
@@ -159,6 +159,11 @@ def test_build_compile_fact_judged_qa_writes_bundle(tmp_path: Path) -> None:
         "runs_seen": 1,
         "unexpected_same_signature_ge_1": 0,
         "unexpected_same_signature_ge_2": 0,
+    }
+    assert manifest["forbidden_emissions_summary_by_fixture"]["fixture_a"] == {
+        "runs_seen": 1,
+        "forbidden_emissions_ge_1": 0,
+        "forbidden_emissions_ge_2": 0,
     }
     assert manifest["support_summary_by_fixture"]["fixture_a"] == {
         "exact_support_ge_1": 1,

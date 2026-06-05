@@ -149,6 +149,14 @@ def run_cell(
             "unexpected_same_signature_emissions_by_file",
             {},
         ),
+        "forbidden_emissions_summary_by_fixture": bundle.get(
+            "forbidden_emissions_summary_by_fixture",
+            {},
+        ),
+        "forbidden_emissions_by_file": bundle.get(
+            "forbidden_emissions_by_file",
+            {},
+        ),
         "redaction_summary": redaction.get("summary", {}),
         "typed_plan_summary": typed_plan.get("summary", {}),
         "expect": cell.get("expect", {}),
@@ -214,10 +222,17 @@ def _blocking_reasons(result: dict[str, Any]) -> list[str]:
     if support is None:
         out.append(f"{cell_id}:missing_support_summary:{fixture_id}")
         support = {}
+    forbidden = result.get("forbidden_emissions_summary_by_fixture", {}).get(fixture_id, {})
+    if int(forbidden.get("forbidden_emissions_ge_1") or 0):
+        out.append(
+            f"{cell_id}:forbidden_emissions_ge_1:"
+            f"{forbidden.get('forbidden_emissions_ge_1')}"
+        )
     for key, expected in dict(result.get("expect") or {}).items():
         actual = _expect_actual(
             key=key,
             support=support,
+            forbidden=forbidden,
             redaction=result["redaction_summary"],
             typed_plan=result["typed_plan_summary"],
         )
@@ -238,11 +253,14 @@ def _expect_actual(
     *,
     key: str,
     support: dict[str, Any],
+    forbidden: dict[str, Any],
     redaction: dict[str, Any],
     typed_plan: dict[str, Any],
 ) -> Any:
     if key.startswith("support."):
         return support.get(key.split(".", 1)[1])
+    if key.startswith("forbidden."):
+        return forbidden.get(key.split(".", 1)[1])
     if key.startswith("redaction."):
         return redaction.get(key.split(".", 1)[1])
     if key.startswith("typed_plan."):
@@ -274,11 +292,12 @@ def _summary_md(summary: dict[str, Any]) -> str:
         lines.append("")
     lines.append("## Cells")
     lines.append("")
-    lines.append("| Cell | Support>=2 | Per-run exact | Redaction | Typed plan |")
-    lines.append("| --- | ---: | ---: | --- | --- |")
+    lines.append("| Cell | Support>=2 | Forbidden | Per-run exact | Redaction | Typed plan |")
+    lines.append("| --- | ---: | ---: | ---: | --- | --- |")
     for cell in summary["cells"]:
         fixture_id = cell["fixture_id"]
         support = cell["support_summary_by_fixture"].get(fixture_id, {})
+        forbidden = cell.get("forbidden_emissions_summary_by_fixture", {}).get(fixture_id, {})
         support_text = f"{support.get('exact_support_ge_2', 0)} / {support.get('reference_count', 0)}"
         redaction = cell["redaction_summary"]
         typed_plan = cell["typed_plan_summary"]
@@ -286,6 +305,7 @@ def _summary_md(summary: dict[str, Any]) -> str:
             "| "
             f"`{cell['id']}` | "
             f"{support_text} | "
+            f"{forbidden.get('forbidden_emissions_ge_1', 0)} / {forbidden.get('forbidden_emissions_ge_2', 0)} | "
             f"{redaction.get('product_exact', 0)} / {redaction.get('row_count', 0)} | "
             f"{redaction.get('status', '')}; prose-dependent {redaction.get('prose_dependent_exact', 0)} | "
             f"{typed_plan.get('status', '')}; registered {typed_plan.get('registered_typed_plan_replayed_exact', 0)} |"

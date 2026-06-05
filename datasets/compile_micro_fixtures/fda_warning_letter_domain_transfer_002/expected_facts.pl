@@ -38,8 +38,10 @@ fda_violation_detail(Viol1, procedure_scope, sop_0870_3_0, violation_scope, SrcD
 fda_violation_detail(Viol1, response_status, inadequate, ResponseRole1, SrcDetail2).
 fda_violation_detail(Viol2, record_review_subject, environmental_monitoring_excursion, violation_scope, SrcDetail3).
 fda_violation_detail(Viol2, response_status, inadequate, ResponseRole2, SrcDetail4).
+fda_violation_detail(violation_2, record_review_subject, out_of_specification_assay, violation_scope, direct).
 fda_violation_detail(Viol3, procedure_scope, decontamination_effectiveness_validation, violation_scope, SrcDetail5).
 fda_violation_detail(Viol4, process_area, iso_7, violation_scope, SrcDetail6).
+fda_violation_detail(violation_4, observation_subject, peeling_paint_ceiling, violation_scope, direct).
 
 % --- adulteration basis ---
 fda_adulteration_basis(Letter, adulteration_cgmp, fdca_501_a_2_b, drug_products, SrcBasis).

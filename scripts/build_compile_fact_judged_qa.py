@@ -124,6 +124,7 @@ def build_bundle(
         "support_summary_by_fixture": _support_summary_by_fixture(files),
         "verdict_summary_by_file": verdict_summary_by_file,
         "forbidden_emissions_by_file": forbidden_emissions_by_file,
+        "forbidden_emissions_summary_by_fixture": _forbidden_emissions_summary_by_fixture(files),
         "unexpected_same_signature_summary_by_fixture": _unexpected_same_signature_summary_by_fixture(files),
         "unexpected_same_signature_emissions_by_file": unexpected_emissions_by_file,
         "files": files,
@@ -462,6 +463,8 @@ def _bindings(expected: dict[str, Any], candidate: dict[str, Any]) -> dict[str, 
         expected_text = str(expected_arg).strip()
         actual_text = str(actual_arg).strip()
         if _is_expected_variable(expected_text):
+            if expected_text == "_":
+                continue
             bound = out.get(expected_text)
             if bound is not None and bound != actual_text:
                 return None
@@ -619,6 +622,29 @@ def _unexpected_same_signature_summary_by_fixture(files: list[dict[str, Any]]) -
             "runs_seen": len(runs_by_fixture[fixture_id]),
             "unexpected_same_signature_ge_2": sum(1 for count in counter.values() if count >= 2),
             "unexpected_same_signature_ge_1": sum(1 for count in counter.values() if count >= 1),
+        }
+    return out
+
+
+def _forbidden_emissions_summary_by_fixture(files: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    by_fixture: dict[str, Counter[str]] = defaultdict(Counter)
+    runs_by_fixture: dict[str, set[str]] = defaultdict(set)
+    for item in files:
+        payload = item["payload"]
+        fixture_id = str(payload["fixture"])
+        run_id = str(payload["run_id"])
+        runs_by_fixture[fixture_id].add(run_id)
+        for row in payload.get("forbidden_emissions", []):
+            forbidden_fact = str(row.get("forbidden_fact") or "").strip()
+            if forbidden_fact:
+                by_fixture[fixture_id][forbidden_fact] += 1
+    out: dict[str, dict[str, int]] = {}
+    for fixture_id in sorted(runs_by_fixture):
+        counter = by_fixture.get(fixture_id, Counter())
+        out[fixture_id] = {
+            "runs_seen": len(runs_by_fixture[fixture_id]),
+            "forbidden_emissions_ge_1": sum(1 for count in counter.values() if count >= 1),
+            "forbidden_emissions_ge_2": sum(1 for count in counter.values() if count >= 2),
         }
     return out
 

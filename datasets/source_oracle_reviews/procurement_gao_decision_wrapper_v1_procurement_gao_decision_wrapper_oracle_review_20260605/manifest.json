@@ -1,0 +1,32 @@
+{
+  "blocked_reason": "",
+  "notes": "Independent source-only review. The proposal's positive examples are neutral variable shapes (not fixture facts), so all slot values were decided from the sources. No stop condition triggered: both sources support a clean gao_bid_protest_decision/7 row, the closed ForumId and DecisionStatus domains cover both decisions (gao/sustained; gao/denied), and no prose-shaped atom is needed for the wrapper. Hardest call: 003 overall status is denied despite one ground dismissed as untimely; anchored to GAO's explicit bottom-line ('The protest is denied'). Forbidden rows test inferred/conflated disposition, prior-decision conflation (docket and status), conflated/cited B-numbers, wrong dates (solicitation-issue and prior-decision dates), and OCI/CPAR/recommendation/finding prose forced into wrapper slots.",
+  "outputs": {
+    "procurement_contract_ugly_002": {
+      "expected_fact_count": 1,
+      "forbidden_fact_count": 8,
+      "source_files": [
+        "datasets/real_world_transfer/fresh_ugly_public_20260528_01/procurement_contract_ugly_002/source.md"
+      ],
+      "source_only_basis": "GAO decision, Matter of: Castro & Company, LLC, B-423689, dated November 13, 2025. ForumId=gao (Office of the Comptroller General); DocketId=b_423689 (File: B-423689); ProcurementId=rfq_9531bp25q0010 (RFQ No. 9531BP25Q0010; GAO elects RFQ per fn1); DecisionDate=v_2025_11_13; DecisionStatus=sustained ('We sustain the protest'; 'The protest is sustained'; all three digest grounds sustained). One clean current decision."
+    },
+    "procurement_contract_ugly_003": {
+      "expected_fact_count": 1,
+      "forbidden_fact_count": 8,
+      "source_files": [
+        "datasets/real_world_transfer/fresh_ugly_public_20260529_01/procurement_contract_ugly_003/source.md"
+      ],
+      "source_only_basis": "GAO decision, Matter of: Enviremedial Services, Inc., B-423552.3, dated March 24, 2026. ForumId=gao (Office of the General Counsel); DocketId=b_423552_3 (File: B-423552.3, distinct from prior B-423552 and B-423552.2); ProcurementId=rfp_w912hp25r1000 (RFP No. W912HP25R1000); DecisionDate=v_2026_03_24; DecisionStatus=denied ('We deny the protest'; 'The protest is denied'). One ground was dismissed as untimely, but GAO's stated overall disposition is denied; dismissed/denied_in_part/sustained_in_part are forbidden conflations (sustained_in_part was the PRIOR B-423552/.2 outcome). One clean current decision."
+    }
+  },
+  "predicate": "gao_bid_protest_decision/7",
+  "proposal_file": "datasets/domain_predicate_proposals/procurement_gao_decision_wrapper_v1.json",
+  "proposal_id": "procurement_gao_decision_wrapper_v1",
+  "review_id": "procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605",
+  "reviewer": "external_source_only_agent",
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_model_outputs": false,
+  "schema": "prethinker.source_oracle_review.v1",
+  "source_only_review": true,
+  "status": "complete"
+}

@@ -68,8 +68,8 @@
       "description": "FDA warning-letter transfer 002 current-pack boundary bundle.",
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\cb_lens_20260604\\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon",
       "expect": {
-        "support.reference_count": 27,
-        "support.exact_support_ge_2": 20,
+        "support.reference_count": 29,
+        "support.exact_support_ge_2": 22,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

@@ -109,6 +109,8 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
             "unexpected_same_signature_ge_2": sum(
                 int(cell["unexpected_same_signature_ge_2"]) for cell in cells
             ),
+            "forbidden_emissions_ge_1": sum(int(cell["forbidden_emissions_ge_1"]) for cell in cells),
+            "forbidden_emissions_ge_2": sum(int(cell["forbidden_emissions_ge_2"]) for cell in cells),
             "prose_dependent_exact": sum(int(cell["prose_dependent_exact"]) for cell in cells),
             "unregistered_plan_exact_rows": sum(
                 int(cell["unregistered_plan_exact_rows"]) for cell in cells
@@ -130,6 +132,10 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
     unexpected_support = _unexpected_same_signature_support(
         cell.get("unexpected_same_signature_emissions_by_file") or {}
     )
+    forbidden = dict((cell.get("forbidden_emissions_summary_by_fixture") or {}).get(fixture_id) or {})
+    forbidden_support = _forbidden_emission_support(
+        cell.get("forbidden_emissions_by_file") or {}
+    )
     redaction = dict(cell.get("redaction_summary") or {})
     typed_plan = dict(cell.get("typed_plan_summary") or {})
     per_run_counts = _per_run_counts(cell.get("verdict_summary_by_file") or {})
@@ -149,6 +155,9 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
         "unexpected_same_signature_ge_2": int(unexpected.get("unexpected_same_signature_ge_2") or 0),
         "unexpected_same_signature_ge_1": int(unexpected.get("unexpected_same_signature_ge_1") or 0),
         "unexpected_same_signature_support_ge_2": unexpected_support,
+        "forbidden_emissions_ge_1": int(forbidden.get("forbidden_emissions_ge_1") or 0),
+        "forbidden_emissions_ge_2": int(forbidden.get("forbidden_emissions_ge_2") or 0),
+        "forbidden_emissions_support_ge_1": forbidden_support,
         "redaction_status": str(redaction.get("status") or ""),
         "prose_dependent_exact": int(redaction.get("prose_dependent_exact") or 0),
         "typed_plan_status": str(typed_plan.get("status") or ""),
@@ -210,6 +219,38 @@ def _unexpected_same_signature_support(value: Any) -> list[dict[str, Any]]:
     return rows
 
 
+def _forbidden_emission_support(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, dict):
+        return []
+    counts: dict[str, int] = {}
+    compiled: dict[str, set[str]] = {}
+    for emissions in value.values():
+        if not isinstance(emissions, list):
+            continue
+        run_facts: dict[str, set[str]] = {}
+        for item in emissions:
+            if not isinstance(item, dict):
+                continue
+            forbidden_fact = str(item.get("forbidden_fact") or "").strip()
+            compiled_fact = str(item.get("compiled_fact") or "").strip()
+            if not forbidden_fact:
+                continue
+            run_facts.setdefault(forbidden_fact, set())
+            if compiled_fact:
+                run_facts[forbidden_fact].add(compiled_fact)
+        for forbidden_fact, compiled_facts in run_facts.items():
+            counts[forbidden_fact] = counts.get(forbidden_fact, 0) + 1
+            compiled.setdefault(forbidden_fact, set()).update(compiled_facts)
+    return [
+        {
+            "forbidden_fact": forbidden_fact,
+            "support": support,
+            "compiled_facts": sorted(compiled.get(forbidden_fact, set())),
+        }
+        for forbidden_fact, support in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+
 def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
     families: dict[str, dict[str, Any]] = {}
     for cell in cells:
@@ -224,6 +265,8 @@ def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "per_run_rows": 0,
                 "per_run_exact": 0,
                 "unexpected_same_signature_ge_2": 0,
+                "forbidden_emissions_ge_1": 0,
+                "forbidden_emissions_ge_2": 0,
                 "prose_dependent_exact": 0,
                 "unregistered_plan_exact_rows": 0,
             },
@@ -234,6 +277,8 @@ def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
         row["per_run_rows"] += int(cell["per_run_rows"])
         row["per_run_exact"] += int(cell["per_run_exact"])
         row["unexpected_same_signature_ge_2"] += int(cell["unexpected_same_signature_ge_2"])
+        row["forbidden_emissions_ge_1"] += int(cell["forbidden_emissions_ge_1"])
+        row["forbidden_emissions_ge_2"] += int(cell["forbidden_emissions_ge_2"])
         row["prose_dependent_exact"] += int(cell["prose_dependent_exact"])
         row["unregistered_plan_exact_rows"] += int(cell["unregistered_plan_exact_rows"])
     return [families[key] for key in sorted(families)]
@@ -262,6 +307,8 @@ def _blocking_reasons(
             blockers.append(
                 f"{cell_id}:unregistered_plan_exact_rows:{cell['unregistered_plan_exact_rows']}"
             )
+        if cell["forbidden_emissions_ge_1"]:
+            blockers.append(f"{cell_id}:forbidden_emissions_ge_1:{cell['forbidden_emissions_ge_1']}")
     return blockers
 
 
@@ -305,6 +352,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Support>=2: `{summary['exact_support_ge_2']} / {summary['reference_count']}` expected typed facts",
         f"- Per-run exact: `{summary['per_run_exact']} / {summary['per_run_rows']}` deterministic fact rows",
         f"- Unexpected same-signature facts support>=2: `{summary['unexpected_same_signature_ge_2']}`",
+        f"- Forbidden fact emissions support>=1 / support>=2: `{summary['forbidden_emissions_ge_1']} / {summary['forbidden_emissions_ge_2']}`",
         f"- Prose-dependent exact rows: `{summary['prose_dependent_exact']}`",
         f"- Unregistered exact typed plans: `{summary['unregistered_plan_exact_rows']}`",
         f"- Source/provenance warnings: `{summary['source_warning_count']}`",
@@ -318,13 +366,13 @@ def render_markdown(report: dict[str, Any]) -> str:
         [
             "## By Family",
             "",
-            "| Family | Cells | Support>=2 | Per-run exact | Unexpected>=2 | Prose-dependent | Unregistered plans |",
-            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Family | Cells | Support>=2 | Per-run exact | Unexpected>=2 | Forbidden | Prose-dependent | Unregistered plans |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for family in report["families"]:
         lines.append(
-            "| `{}` | {} | {} / {} | {} / {} | {} | {} | {} |".format(
+            "| `{}` | {} | {} / {} | {} / {} | {} | {} / {} | {} | {} |".format(
                 family["family"],
                 family["cell_count"],
                 family["exact_support_ge_2"],
@@ -332,6 +380,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 family["per_run_exact"],
                 family["per_run_rows"],
                 family["unexpected_same_signature_ge_2"],
+                family["forbidden_emissions_ge_1"],
+                family["forbidden_emissions_ge_2"],
                 family["prose_dependent_exact"],
                 family["unregistered_plan_exact_rows"],
             )
@@ -341,8 +391,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
             "## Cells",
             "",
-            "| Cell | Fixture | Support>=2 | Per-run exact | Unexpected>=2 | Replay gates | Source metadata |",
-            "| --- | --- | ---: | ---: | ---: | --- | --- |",
+            "| Cell | Fixture | Support>=2 | Per-run exact | Unexpected>=2 | Forbidden | Replay gates | Source metadata |",
+            "| --- | --- | ---: | ---: | ---: | ---: | --- | --- |",
         ]
     )
     for cell in report["cells"]:
@@ -357,7 +407,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"lens compiles `{cell['lens_compile_count']}`; manifest `{cell['bundle_manifest_status']}`"
         )
         lines.append(
-            "| `{}` | `{}` | {} / {} | {} / {} | {} | {} | {} |".format(
+            "| `{}` | `{}` | {} / {} | {} / {} | {} | {} | {} | {} |".format(
                 cell["id"],
                 cell["fixture_id"],
                 cell["exact_support_ge_2"],
@@ -365,10 +415,42 @@ def render_markdown(report: dict[str, Any]) -> str:
                 cell["per_run_exact"],
                 cell["per_run_rows"],
                 cell["unexpected_same_signature_ge_2"],
+                f"{cell['forbidden_emissions_ge_1']} / {cell['forbidden_emissions_ge_2']}",
                 replay,
                 source,
             )
         )
+    forbidden_rows = [
+        (cell, row)
+        for cell in report["cells"]
+        for row in cell.get("forbidden_emissions_support_ge_1", [])
+    ]
+    if forbidden_rows:
+        lines.extend(
+            [
+                "",
+                "## Forbidden Fact Emissions",
+                "",
+                "These rows are source-rejected facts that the compiler still emitted.",
+                "Any occurrence blocks claim-bearing status for the cell.",
+                "",
+                "| Cell | Fixture | Support | Forbidden Fact | Compiled Fact(s) |",
+                "| --- | --- | ---: | --- | --- |",
+            ]
+        )
+        for cell, row in forbidden_rows:
+            forbidden_fact = str(row.get("forbidden_fact") or "").replace("|", "\\|")
+            compiled_facts = "; ".join(str(item) for item in row.get("compiled_facts") or [])
+            compiled_facts = compiled_facts.replace("|", "\\|")
+            lines.append(
+                "| `{}` | `{}` | {} | `{}` | `{}` |".format(
+                    cell["id"],
+                    cell["fixture_id"],
+                    row.get("support", 0),
+                    forbidden_fact,
+                    compiled_facts,
+                )
+            )
     unexpected_rows = [
         (cell, row)
         for cell in report["cells"]

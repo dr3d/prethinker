@@ -84,35 +84,37 @@ SEC Form 8-K skeleton pack
     recovered 13/13 at support>=2, but that is a favorable point inside the
     observed band, not a new fixed score.
   latest governance artifact:
-    C:\prethinker_tmp_archive\pending_external_work_order_gate_20260605\current_research_governance
-    17 research-governance checks passed, including sign-clean,
+    C:\prethinker_tmp_archive\current_research_governance_final_20260605
+    15 of 17 research-governance checks pass, including sign-clean,
+    artifact-path freshness, historical-score disclaimers,
     `sec_value_axis_integrity`, `compile_fact_qa_exclusions`,
-    fixture-bank inventory freshness, pending external work-order audit over
-    the 8 active proposal and standalone `tmp` zip packets with 0 blocking
-    errors and 1 warning: the OSHA FTA total-penalty packet is a focused
-    candidate review, not a fully blind oracle packet. The audit now also
-    blocks queued packets that contain filled oracle files, judged-QA
-    manifests, model outputs, or compile/run artifacts. Manifest-source audit,
-    redaction replay, typed-plan replay, and checked-in status freshness also
-    pass. The standing manifest
-    now prints
-    same-signature unexpected support (`4` rows at support>=2 across all
-    standing cells) as a precision diagnostic, and
-    `CURRENT_COMPILE_FACT_QA_STATUS.md` now lists the exact repeated
-    unexpected facts rather than only the count. A typed SEC identifier-value
-    normalization pass raised only per-run exact support in transfer_002
-    (commission-file/EIN punctuation loss), not support>=2. The current
-    standing compile-fact QA status is 123/139 expected facts at support>=2
-    and 343/417 deterministic per-run exact rows, with 0 prose-dependent exact
-    rows and 0 unregistered exact typed plans.
+    retained candidate/source oracle reviews, fixture-bank inventory freshness,
+    and pending external work-order packet hygiene. The pending packet audit is
+    green over 4 standalone `tmp` work-order zips with 0 blocking errors and 1
+    focused-review warning. Manifest-source audit, redaction replay, and
+    typed-plan replay still pass at the artifact level. The two red checks are
+    `compile_fact_qa_manifest` and `current_compile_fact_qa_status`, both
+    because FDA transfer_002 now propagates supported forbidden emissions:
+    125/141 expected facts at support>=2 and 347/423 deterministic per-run
+    exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
+    plans, and one source-rejected FDA transfer_002 forbidden fact emitted at
+    support=2.
 
 FDA warning-letter pack
-  deterministic judged-QA v2 across transfer_001 and transfer_002:
+  older deterministic judged-QA v2 across transfer_001 and transfer_002:
     137 / 159 exact = 86.16%
     all 137 exact rows pass typed-plan replay and redaction replay
     transfer_001: 78 / 78 exact across N=3
     transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
     support>=2: transfer_001 26 / 26; transfer_002 20 / 27
+    status: historical/pre-review compile-fact evidence, not the current
+      transfer_002 claim-bearing status
+  current standing transfer_002 current-pack cell:
+    22 / 29 support>=2, 1 / 8 forbidden emitted at support=2
+    forbidden row: fda_adulteration_basis(_, adulteration_insanitary_conditions,
+      fdca_501_a_2_a, _, _).
+    status: claim-blocking precision failure; do not call transfer_002 a clean
+      boundary cell until a general, typed-only fix removes the false basis
   transfer_003 fresh current-pack local rerun:
     19 / 26 support>=2, 0 / 10 forbidden
     atom-shape / registered-signature / lens-scope blockers: 0
@@ -217,9 +219,10 @@ The next work should strengthen the research claim rather than lift one fixture:
    pre-registered repaired-schema rerun materially tightens the current
    seed/transfer boundary, with exact fixture, gate, model, and artifact
    references kept in DOMAIN_PACK_RESEARCH_EVIDENCE.md.
-2. Keep the FDA v2 judged-QA result current and separated from messy-query
-   claims; transfer_002 remains boundary evidence rather than a row-grinding
-   target.
+2. Keep FDA transfer_002 red in the current manifest until the false
+   501(a)(2)(A) adulteration-basis emission is removed by a general typed
+   mechanism. The older v2 judged-QA bundle remains historical/pre-review
+   evidence and must stay separated from messy-query claims.
 3. Keep NTSB as corroborating boundary evidence, with the current scoped
    injury-count manifest separated from older reducer-aligned diagnostics.
 4. Keep OSHA as fourth-family corroborating evidence inside the standing

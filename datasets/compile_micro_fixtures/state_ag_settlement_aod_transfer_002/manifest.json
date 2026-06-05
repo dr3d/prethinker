@@ -1,0 +1,35 @@
+{
+  "compile_micro_fixture_id": "state_ag_settlement_aod_transfer_002",
+  "domain_profile": "state_ag_settlement_v1",
+  "source_fixture": "state_ag_settlement_ugly_002",
+  "instrument": "NY OAG Assurance of Discontinuance, In re Equinox Group, LLC / SoulCycle (Assurance No. 24-099)",
+  "oracle_authored_blind_to_model_outputs": true,
+  "files": {
+    "source": "source.md",
+    "metadata": "metadata.json",
+    "expected_facts": "expected_facts.pl",
+    "forbidden_facts": "forbidden_facts.pl",
+    "notes": "oracle_authoring_notes.md"
+  },
+  "expected_fact_count": 18,
+  "forbidden_fact_count": 12,
+  "expected_predicate_counts": {
+    "state_ag_instrument": 1,
+    "state_ag_party": 5,
+    "state_ag_authority_citation": 5,
+    "state_ag_event": 3,
+    "state_ag_contact_channel": 4
+  },
+  "empty_lanes": {
+    "state_ag_obligation": "relief provisions not in the Findings extract",
+    "state_ag_monetary_payment": "monetary provisions not in the Findings extract",
+    "state_ag_signature": "signature block not in the Findings extract"
+  },
+  "registry": "ontology_registry.json (state_ag_settlement_v1)",
+  "validation": {
+    "all_predicates_registered": true,
+    "all_arities_correct": true,
+    "forbidden_disjoint_from_expected": true,
+    "prolog_parse": "pass"
+  }
+}

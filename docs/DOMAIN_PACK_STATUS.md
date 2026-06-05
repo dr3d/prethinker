@@ -8,20 +8,20 @@ This report does not read source prose, QA questions, or judge outputs.
 - Domains: `5`
 - Predicates: `60` (`55` domain-specific plus shared carriers)
 - Lenses: `29`
-- Associated fixtures: `24`
+- Associated fixtures: `26`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `520`
-- Forbidden facts in associated fixtures: `183`
+- Expected facts in associated fixtures: `569`
+- Forbidden facts in associated fixtures: `208`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
 
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 291 | 79 |
+| `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 31 |
-| `state_ag_settlement_v1` | 9 | 8 | 5 | 1 | 27 | 9 |
+| `state_ag_settlement_v1` | 9 | 8 | 5 | 3 | 74 | 33 |
 
 ## fda_warning_letter_v1
 
@@ -51,7 +51,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Fixture | Association | Expected | Forbidden | Expected signatures |
 | --- | --- | ---: | ---: | --- |
 | `fda_warning_letter_domain_transfer_001` | `fixture_id_prefix` | 26 | 9 | `fda_adulteration_basis/5`:2, `fda_conclusion_scope/4`:2, `fda_consultant_recommendation/4`:1, `fda_correspondence_party/5`:2, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_response_requirement/6`:1, `fda_violation/5`:6, `fda_violation_citation/4`:6, `fda_violation_detail/5`:2, `fda_warning_letter/5`:1 |
-| `fda_warning_letter_domain_transfer_002` | `fixture_id_prefix` | 27 | 7 | `domain_omission/5`:1, `fda_adulteration_basis/5`:1, `fda_conclusion_scope/4`:2, `fda_correspondence_party/5`:4, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_response_requirement/6`:1, `fda_violation/5`:4, `fda_violation_citation/4`:4, `fda_violation_detail/5`:6, `fda_warning_letter/5`:1 |
+| `fda_warning_letter_domain_transfer_002` | `fixture_id_prefix` | 29 | 8 | `domain_omission/5`:1, `fda_adulteration_basis/5`:1, `fda_conclusion_scope/4`:2, `fda_correspondence_party/5`:4, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_response_requirement/6`:1, `fda_violation/5`:4, `fda_violation_citation/4`:4, `fda_violation_detail/5`:8, `fda_warning_letter/5`:1 |
 | `fda_warning_letter_domain_transfer_003` | `fixture_id_prefix` | 26 | 10 | `domain_omission/5`:1, `fda_adulteration_basis/5`:1, `fda_conclusion_scope/4`:2, `fda_consultant_recommendation/4`:1, `fda_correspondence_party/5`:3, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_response_requirement/6`:1, `fda_violation/5`:2, `fda_violation_citation/4`:4, `fda_violation_detail/5`:7, `fda_warning_letter/5`:1 |
 | `fda_warning_letter_domain_v1` | `fixture_id_prefix` | 22 | 6 | `domain_omission/5`:1, `fda_adulteration_basis/5`:1, `fda_conclusion_scope/4`:2, `fda_consultant_recommendation/4`:1, `fda_correspondence_party/5`:1, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_prior_warning_letter/5`:1, `fda_regulatory_meeting/4`:1, `fda_response_requirement/6`:1, `fda_violation/5`:2, `fda_violation_citation/4`:3, `fda_violation_detail/5`:4, `fda_warning_letter/5`:1 |
 | `fda_warning_letter_em_detail_micro_v1` | `fixture_id_prefix` | 14 | 7 | `fda_adulteration_basis/5`:1, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_violation/5`:2, `fda_violation_citation/4`:2, `fda_violation_detail/5`:5, `fda_warning_letter/5`:1 |
@@ -164,6 +164,8 @@ This report does not read source prose, QA questions, or judge outputs.
 
 | Fixture | Association | Expected | Forbidden | Expected signatures |
 | --- | --- | ---: | ---: | --- |
+| `state_ag_settlement_aod_transfer_002` | `fixture_id_prefix` | 18 | 12 | `state_ag_authority_citation/4`:5, `state_ag_contact_channel/7`:4, `state_ag_event/6`:3, `state_ag_instrument/7`:1, `state_ag_party/5`:5 |
+| `state_ag_settlement_aod_transfer_003` | `fixture_id_prefix` | 29 | 12 | `state_ag_authority_citation/4`:7, `state_ag_contact_channel/7`:3, `state_ag_event/6`:4, `state_ag_instrument/7`:1, `state_ag_monetary_payment/7`:1, `state_ag_obligation/7`:5, `state_ag_party/5`:4, `state_ag_signature/6`:4 |
 | `state_ag_settlement_aod_v1` | `manifest_domain_profile` | 27 | 9 | `state_ag_authority_citation/4`:4, `state_ag_contact_channel/7`:3, `state_ag_event/6`:4, `state_ag_instrument/7`:1, `state_ag_monetary_payment/7`:1, `state_ag_obligation/7`:6, `state_ag_party/5`:4, `state_ag_signature/6`:4 |
 
 ## Unassigned Typed Micro-Fixtures

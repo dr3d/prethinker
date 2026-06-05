@@ -97,15 +97,12 @@
     "support_threshold": 2,
     "heldout_policy": "unlike GAO bid-protest decisions not used to shape the wrapper carrier or value domains"
   },
-  "pending_external_work_orders": [
+  "pending_external_work_orders": [],
+  "source_oracle_review_results": [
     {
-      "kind": "source_only_expected_forbidden_oracle",
-      "path": "tmp/procurement_gao_decision_wrapper_oracle_work_order_20260605.zip",
-      "fixtures": [
-        "procurement_contract_ugly_002",
-        "procurement_contract_ugly_003"
-      ],
-      "purpose": "Independent source-only review decides expected and forbidden wrapper facts before this draft can become a candidate."
+      "review_id": "procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605",
+      "review_path": "datasets/source_oracle_reviews/procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605/manifest.json",
+      "result": "source_oracle_complete"
     }
   ],
   "promotion_gates": [

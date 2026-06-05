@@ -22,6 +22,8 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert report["summary"]["per_run_rows"] == 12
     assert report["summary"]["per_run_exact"] == 8
     assert report["summary"]["unexpected_same_signature_ge_2"] == 1
+    assert report["summary"]["forbidden_emissions_ge_1"] == 0
+    assert report["summary"]["forbidden_emissions_ge_2"] == 0
     assert report["cells"][0]["unexpected_same_signature_support_ge_2"] == [
         {
             "fact": "sec_exhibit(sec_8k_material_event_001, exhibit_10_1, agreement, incorporated_by_reference, exhibit_table_row_10_1).",
@@ -31,6 +33,7 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert report["summary"]["source_warning_count"] == 1
     assert "Support>=2: `3 / 4`" in md
     assert "Unexpected same-signature facts support>=2: `1`" in md
+    assert "Forbidden fact emissions support>=1 / support>=2: `0 / 0`" in md
     assert "Unexpected Same-Signature Support>=2" in md
     assert "incorporated_by_reference" in md
     assert "`sec_form_8k_skeleton_seed`" in md
@@ -57,6 +60,21 @@ def test_summarize_current_compile_fact_qa_status_blocks_prose_dependent_rows(tm
 
     assert report["summary"]["status"] == "fail"
     assert any("prose_dependent_exact" in reason for reason in report["summary"]["blocking_reasons"])
+
+
+def test_summarize_current_compile_fact_qa_status_blocks_forbidden_emissions(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path, forbidden_emissions_ge_1=1, forbidden_emissions_ge_2=1)
+    source_audit = _write_source_audit(tmp_path)
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    md = render_markdown(report)
+
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["forbidden_emissions_ge_1"] == 1
+    assert report["summary"]["forbidden_emissions_ge_2"] == 1
+    assert any("forbidden_emissions_ge_1" in reason for reason in report["summary"]["blocking_reasons"])
+    assert "Forbidden Fact Emissions" in md
+    assert "fdca_501_a_2_a" in md
 
 
 def test_compile_fact_status_markdown_freshness_check_passes_matching_doc(tmp_path: Path) -> None:
@@ -90,7 +108,13 @@ def test_compile_fact_status_markdown_freshness_check_blocks_stale_doc(tmp_path:
     assert any("expected_markdown_stale" in reason for reason in report["summary"]["blocking_reasons"])
 
 
-def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Path:
+def _write_manifest_run(
+    tmp_path: Path,
+    *,
+    prose_dependent_exact: int = 0,
+    forbidden_emissions_ge_1: int = 0,
+    forbidden_emissions_ge_2: int = 0,
+) -> Path:
     path = tmp_path / "manifest_run.json"
     path.write_text(
         json.dumps(
@@ -109,6 +133,8 @@ def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Pa
                         },
                         prose_dependent_exact=prose_dependent_exact,
                         unexpected_same_signature_ge_2=1,
+                        forbidden_emissions_ge_1=forbidden_emissions_ge_1,
+                        forbidden_emissions_ge_2=forbidden_emissions_ge_2,
                     ),
                     _cell(
                         cell_id="osha_incident_transfer_001",
@@ -122,6 +148,8 @@ def _write_manifest_run(tmp_path: Path, *, prose_dependent_exact: int = 0) -> Pa
                         },
                         prose_dependent_exact=0,
                         unexpected_same_signature_ge_2=0,
+                        forbidden_emissions_ge_1=0,
+                        forbidden_emissions_ge_2=0,
                     ),
                 ],
             }
@@ -160,6 +188,8 @@ def _cell(
     verdict_summary: dict,
     prose_dependent_exact: int,
     unexpected_same_signature_ge_2: int,
+    forbidden_emissions_ge_1: int,
+    forbidden_emissions_ge_2: int,
 ) -> dict:
     row_count = sum(sum(counts.values()) for counts in verdict_summary.values())
     exact = sum(int(counts.get("exact") or 0) for counts in verdict_summary.values())
@@ -183,6 +213,17 @@ def _cell(
         },
         "unexpected_same_signature_emissions_by_file": _unexpected_emissions(
             unexpected_same_signature_ge_2
+        ),
+        "forbidden_emissions_summary_by_fixture": {
+            fixture_id: {
+                "runs_seen": 3,
+                "forbidden_emissions_ge_1": forbidden_emissions_ge_1,
+                "forbidden_emissions_ge_2": forbidden_emissions_ge_2,
+            }
+        },
+        "forbidden_emissions_by_file": _forbidden_emissions(
+            forbidden_emissions_ge_1,
+            forbidden_emissions_ge_2,
         ),
         "redaction_summary": {
             "status": "pass",
@@ -208,6 +249,24 @@ def _unexpected_emissions(unexpected_same_signature_ge_2: int) -> dict:
         "run2.json": [fact],
         "run3.json": [fact],
     }
+
+
+def _forbidden_emissions(forbidden_emissions_ge_1: int, forbidden_emissions_ge_2: int) -> dict:
+    if not forbidden_emissions_ge_1:
+        return {}
+    row = {
+        "forbidden_fact": (
+            "fda_adulteration_basis(Letter, adulteration_insanitary_conditions, "
+            "fdca_501_a_2_a, Scope, Src)."
+        ),
+        "compiled_fact": (
+            "fda_adulteration_basis(wl_320_25_68, adulteration_insanitary_conditions, "
+            "fdca_501_a_2_a, drug_products, direct)."
+        ),
+    }
+    if forbidden_emissions_ge_2:
+        return {"run1.json": [row], "run2.json": [row]}
+    return {"run1.json": [row]}
 
 
 def _source_cell(cell_id: str, *, warning: str = "") -> dict:

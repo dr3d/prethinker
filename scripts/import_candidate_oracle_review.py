@@ -94,24 +94,38 @@ def import_review_zip(
         if not manifest_choices:
             errors.append("no_candidate_review_manifest")
             return _report(zip_path=zip_path, dest_root=dest_root, errors=errors, warnings=warnings, dry_run=dry_run, entries=entries)
-        if len(manifest_choices) > 1:
+        if len(manifest_choices) > 1 and not _is_same_review_fixture_bundle(manifest_choices):
             errors.append("multiple_candidate_review_manifests")
             return _report(zip_path=zip_path, dest_root=dest_root, errors=errors, warnings=warnings, dry_run=dry_run, entries=entries)
 
-        choice = manifest_choices[0]
-        manifest = choice["manifest"]
-        selected_review_id = str(manifest.get("review_id") or "").strip()
-        if not selected_review_id:
-            errors.append("selected_manifest_missing_review_id")
-            return _report(zip_path=zip_path, dest_root=dest_root, errors=errors, warnings=warnings, dry_run=dry_run, entries=entries)
-        dest_dir = dest_root / selected_review_id
-        if dest_dir.exists() and not overwrite:
-            errors.append(f"destination_exists:{selected_review_id}")
+        choices = manifest_choices
+        imported_reviews: list[dict[str, Any]] = []
+        dest_dirs: list[Path] = []
+        for choice in choices:
+            selected_review_id = _selected_review_id(choice, bundle=len(choices) > 1)
+            if not selected_review_id:
+                errors.append("selected_manifest_missing_review_id")
+                continue
+            dest_dir = dest_root / selected_review_id
+            if dest_dir.exists() and not overwrite:
+                errors.append(f"destination_exists:{selected_review_id}")
+            dest_dirs.append(dest_dir)
+            imported_reviews.append(
+                {
+                    "review_id": selected_review_id,
+                    "fixture_id": str(choice["manifest"].get("fixture_id") or ""),
+                    "dest_dir": _rel(dest_dir),
+                    "copied_files": [],
+                }
+            )
+        if errors:
+            first = imported_reviews[0] if imported_reviews else {}
             return _report(
                 zip_path=zip_path,
                 dest_root=dest_root,
-                review_id=selected_review_id,
-                dest_dir=dest_dir,
+                review_id=str(first.get("review_id") or ""),
+                dest_dir=dest_dirs[0] if dest_dirs else None,
+                imported_reviews=imported_reviews,
                 errors=errors,
                 warnings=warnings,
                 dry_run=dry_run,
@@ -119,22 +133,34 @@ def import_review_zip(
             )
 
         with tempfile.TemporaryDirectory(prefix="prethinker_candidate_review_") as tmp:
-            stage_dir = Path(tmp) / selected_review_id
-            stage_dir.mkdir(parents=True, exist_ok=True)
-            copied, dropped = _stage_review_files(archive, entries, choice["prefix"], stage_dir)
-            if dropped:
-                warnings.append(f"dropped_non_review_entries:{len(dropped)}")
-            audit = audit_reviews([stage_dir / "manifest.json"])
+            manifest_paths: list[Path] = []
+            dropped_all: list[str] = []
+            copied_all: list[str] = []
+            for index, choice in enumerate(choices):
+                selected_review_id = imported_reviews[index]["review_id"]
+                stage_dir = Path(tmp) / selected_review_id
+                stage_dir.mkdir(parents=True, exist_ok=True)
+                manifest = _normalized_manifest(choice["manifest"], selected_review_id=selected_review_id)
+                copied, dropped = _stage_review_files(archive, entries, choice["prefix"], stage_dir, manifest=manifest)
+                imported_reviews[index]["copied_files"] = copied
+                copied_all.extend(f"{selected_review_id}/{item}" for item in copied)
+                dropped_all.extend(dropped)
+                manifest_paths.append(stage_dir / "manifest.json")
+            if dropped_all:
+                warnings.append(f"dropped_non_review_entries:{len(set(dropped_all))}")
+            audit = audit_reviews(manifest_paths)
             warnings.extend(f"audit:{warning}" for warning in _audit_warnings(audit))
             if audit["summary"]["status"] != "pass":
                 errors.extend(f"audit:{error}" for row in audit["reviews"] for error in row["errors"])
+                first = imported_reviews[0]
                 return _report(
                     zip_path=zip_path,
                     dest_root=dest_root,
-                    review_id=selected_review_id,
-                    dest_dir=dest_dir,
-                    copied=copied,
-                    dropped=dropped,
+                    review_id=first["review_id"],
+                    dest_dir=dest_dirs[0],
+                    copied=copied_all,
+                    dropped=sorted(set(dropped_all)),
+                    imported_reviews=imported_reviews,
                     audit=audit,
                     dry_run=dry_run,
                     errors=errors,
@@ -142,17 +168,21 @@ def import_review_zip(
                     entries=entries,
                 )
             if not dry_run:
-                if dest_dir.exists():
-                    shutil.rmtree(dest_dir)
                 dest_root.mkdir(parents=True, exist_ok=True)
-                shutil.copytree(stage_dir, dest_dir)
+                for index, item in enumerate(imported_reviews):
+                    dest_dir = dest_root / item["review_id"]
+                    if dest_dir.exists():
+                        shutil.rmtree(dest_dir)
+                    shutil.copytree(Path(tmp) / item["review_id"], dest_dir)
+            first = imported_reviews[0]
             return _report(
                 zip_path=zip_path,
                 dest_root=dest_root,
-                review_id=selected_review_id,
-                dest_dir=dest_dir,
-                copied=copied,
-                dropped=dropped,
+                review_id=first["review_id"],
+                dest_dir=dest_dirs[0],
+                copied=copied_all,
+                dropped=sorted(set(dropped_all)),
+                imported_reviews=imported_reviews,
                 audit=audit,
                 dry_run=dry_run,
                 errors=errors,
@@ -178,11 +208,56 @@ def _candidate_manifests(archive: zipfile.ZipFile, entries: list[dict[str, str]]
     return choices
 
 
+def _is_same_review_fixture_bundle(choices: list[dict[str, Any]]) -> bool:
+    if len(choices) < 2:
+        return False
+    review_ids = {str(choice["manifest"].get("review_id") or "").strip() for choice in choices}
+    fixture_ids = [str(choice["manifest"].get("fixture_id") or "").strip() for choice in choices]
+    return len(review_ids) == 1 and bool(next(iter(review_ids))) and all(fixture_ids) and len(set(fixture_ids)) == len(fixture_ids)
+
+
+def _selected_review_id(choice: dict[str, Any], *, bundle: bool) -> str:
+    manifest = choice["manifest"]
+    review_id = str(manifest.get("review_id") or "").strip()
+    if not bundle:
+        return review_id
+    fixture_id = str(manifest.get("fixture_id") or "").strip()
+    if not review_id or not fixture_id:
+        return ""
+    return f"{review_id}_{fixture_id}"
+
+
+def _normalized_manifest(manifest: dict[str, Any], *, selected_review_id: str) -> dict[str, Any]:
+    normalized = dict(manifest)
+    original_review_id = str(manifest.get("review_id") or "").strip()
+    if original_review_id and original_review_id != selected_review_id:
+        normalized["bundle_review_id"] = original_review_id
+    normalized["review_id"] = selected_review_id
+    fixture_id = str(normalized.get("fixture_id") or "").strip()
+    normalized["source_files"] = [
+        _normalized_source_file(str(item), fixture_id=fixture_id)
+        for item in normalized.get("source_files", [])
+        if str(item).strip()
+    ]
+    return normalized
+
+
+def _normalized_source_file(value: str, *, fixture_id: str) -> str:
+    normalized = value.replace("\\", "/").strip()
+    if fixture_id and normalized == f"fixtures/{fixture_id}/source.md":
+        candidate = f"datasets/compile_micro_fixtures/{fixture_id}/source.md"
+        if (REPO_ROOT / candidate).exists():
+            return candidate
+    return normalized
+
+
 def _stage_review_files(
     archive: zipfile.ZipFile,
     entries: list[dict[str, str]],
     prefix: str,
     stage_dir: Path,
+    *,
+    manifest: dict[str, Any] | None = None,
 ) -> tuple[list[str], list[str]]:
     copied: list[str] = []
     dropped: list[str] = []
@@ -191,7 +266,10 @@ def _stage_review_files(
         for entry in entries
         if _prefix(entry["name"]) == prefix and Path(entry["name"]).name in REVIEW_FILE_NAMES
     }
-    _copy_entry(archive, selected["manifest.json"], stage_dir / "manifest.json")
+    if manifest is None:
+        _copy_entry(archive, selected["manifest.json"], stage_dir / "manifest.json")
+    else:
+        (stage_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     copied.append("manifest.json")
     expected = selected.get("candidate_expected_facts.pl") or selected.get("expected_facts.pl")
     forbidden = selected.get("candidate_forbidden_facts.pl") or selected.get("forbidden_facts.pl")
@@ -245,6 +323,7 @@ def _report(
     audit: dict[str, Any] | None = None,
     dry_run: bool = False,
     entries: list[dict[str, str]] | None = None,
+    imported_reviews: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     return {
         "schema": "prethinker.candidate_oracle_review_import.v1",
@@ -260,6 +339,7 @@ def _report(
         "dest_dir": _rel(dest_dir) if dest_dir else "",
         "copied_files": copied or [],
         "dropped_entries": dropped or [],
+        "imported_reviews": imported_reviews or [],
         "zip_entry_count": len(entries or []),
         "audit_summary": (audit or {}).get("summary", {}),
         "errors": errors,

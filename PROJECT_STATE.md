@@ -167,13 +167,15 @@ SEC Form 8-K skeleton pack
       favorable same-condition point inside the observed SEC band.
   current compile-fact QA precision detail:
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
-    unexpected same-signature facts at support>=2. The current rows are
-    diagnostics only: SEC seed dual Exhibit 10.1 treatment and FDA
-    transfer_002 boundary/detail extras. They are not expected facts unless an
-    independent source-only oracle adds them.
+    unexpected same-signature facts at support>=2 and any emitted forbidden
+    facts. The current standing status is deliberately red: FDA transfer_002
+    emits a source-rejected `fda_adulteration_basis/5` 501(a)(2)(A)
+    insanitary-basis row at support=2. This row was found by a source-only
+    focused review and is a claim-blocking precision failure, not an
+    unexpected-fact candidate.
 
 FDA warning-letter pack
-  deterministic judged-QA v2 across transfer_001 and transfer_002:
+  older deterministic judged-QA v2 across transfer_001 and transfer_002:
     137 / 159 exact = 86.16%
     all 137 exact rows pass typed-plan replay and redaction replay
     transfer_001: 78 / 78 exact across N=3
@@ -181,6 +183,17 @@ FDA warning-letter pack
     support>=2 view:
       transfer_001: 26 / 26
       transfer_002: 20 / 27
+    status: retained as historical/pre-review compile-fact evidence; not the
+      current claim-bearing transfer_002 status after the source-only focused
+      review added two expected detail rows and one forbidden adulteration-basis
+      sentinel
+  standing transfer_002 current-pack status:
+    22 / 29 support>=2, 1 / 8 forbidden emitted at support=2
+    emitted forbidden row:
+      fda_adulteration_basis(_, adulteration_insanitary_conditions,
+      fdca_501_a_2_a, _, _).
+    read: live precision blocker; no safe typed-only deterministic drop rule is
+      currently justified without making a source-specific patch
   transfer_003 fresh current-pack local rerun:
     19 / 26 support>=2, 0 / 10 supported forbidden
     atom-shape / registered-signature / lens-scope blockers: 0
@@ -192,11 +205,11 @@ FDA warning-letter pack
   proposal review: `fda_response_documentation_gap/5` blind review on
     transfer_002 found 0 expected / 13 forbidden; stable candidate emissions
     for violations 1, 2, and 3 are false positives
-  pending candidate review: `fda_response_assessment_item/6` remains
-    unreviewed and is now explicitly queued in the proposal table via
-    `tmp\fda_response_assessment_item_blind_review_work_order_20260604.zip`;
-    do not cite assessment-item support as a promoted claim until that
-    source-only review returns and the proposal status changes.
+  candidate review: `fda_response_assessment_item/6` now has retained
+    source-only candidate-review results for transfer_001, transfer_002, and
+    transfer_003 under `datasets\candidate_oracle_reviews`; do not cite
+    assessment-item support as a promoted claim until the carrier is promoted
+    through a fresh same-condition compile measurement.
   scope note: v2 is oracle-shaped compile-fact QA, not evidence that messy
     human query planning is solved
   reproducibility note: `scripts/build_compile_fact_judged_qa.py` now
@@ -345,13 +358,13 @@ Fixture-bank / next-domain inventory
     read: the two PUC sources agree on wrapper/docket/order/procedure anatomy
       but drift in candidate predicate names, so PUC should proceed through
       closed carrier/oracle review rather than open profile induction.
-    external oracle packet:
-      tmp\puc_order_wrapper_oracle_work_order_20260604.zip
+    retained source oracle:
+      datasets\source_oracle_reviews\puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604
     proposal-status traceability:
-      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this pending
-      source-only oracle work order directly in the proposal table.
-    next step: wait for source-only expected/forbidden wrapper facts before
-      creating or scoring a PUC closed registry.
+      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this retained
+      source-only oracle review directly in the proposal table.
+    next step: if pursued, register the carrier and run same-condition compile
+      measurement; do not request another oracle packet for the wrapper.
   Procurement / GAO bid-protest pre-registry proposal:
     datasets\domain_predicate_proposals\procurement_gao_decision_wrapper_v1.json
     status: draft
@@ -364,13 +377,13 @@ Fixture-bank / next-domain inventory
       protest-ground/finding surfaces and the second flagged timeliness
       slot-loss, so only the wrapper carrier is drafted; merits/finding lanes
       stay out of scope.
-    external oracle packet:
-      tmp\procurement_gao_decision_wrapper_oracle_work_order_20260605.zip
+    retained source oracle:
+      datasets\source_oracle_reviews\procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605
     proposal-status traceability:
-      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this pending
-      source-only oracle work order directly in the proposal table.
-    next step: wait for source-only expected/forbidden wrapper facts before
-      creating or scoring a procurement closed registry.
+      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this retained
+      source-only oracle review directly in the proposal table.
+    next step: if pursued, register the carrier and run same-condition compile
+      measurement; do not request another oracle packet for the wrapper.
   FTC public-order pre-registry negative:
     artifact root:
       C:\prethinker_tmp_archive\ftc_domain_bootstrap_20260605
@@ -391,10 +404,11 @@ Fixture-bank / next-domain inventory
       complaint anatomy, and the open bootstrap drifts into substance/detail
       predicates rather than a compact shared skeleton.
   active external work-order packet audit:
-    C:\prethinker_tmp_archive\pending_external_work_order_gate_20260605
+    docs\PENDING_EXTERNAL_WORK_ORDERS.md
     status: pass
-    coverage: 8 active proposal and standalone tmp work-order zip packets
-      (3 proposal-declared, 5 standalone)
+    coverage: 4 standalone tmp work-order zip packets after accepted/returned
+      packets were retained and archived
+      (0 proposal-declared, 4 standalone)
     blocking errors: 0
     warnings: 1
     warning meaning:
@@ -402,12 +416,13 @@ Fixture-bank / next-domain inventory
       blind oracle packet.
     answer-leak policy:
       queued pending packets fail if they include filled oracle files,
-      judged-QA manifests, model outputs, or compile/run artifacts.
+      judged-QA manifests, model outputs, compile/run artifacts, or literal
+      fact examples inside oracle templates.
   retained candidate-oracle review audit:
     docs\CANDIDATE_ORACLE_REVIEW_STATUS.md
-    current retained reviews: 1
+    current retained reviews: 7
     blocking errors: 0
-    warnings: 0
+    warnings: 17
     scope: validates blind/source-only metadata and candidate
       expected/forbidden fact-file shape only, review folder identity, and
       repo-relative source-file references; it does not read source prose or
@@ -418,6 +433,12 @@ Fixture-bank / next-domain inventory
       facts / README / adjudication notes, drops source and work-order payloads,
       audits the staged review, and refuses overwrites unless explicitly
       requested.
+  retained source-oracle review audit:
+    docs\SOURCE_ORACLE_REVIEW_STATUS.md
+    current retained reviews: 2, covering 4 source-only expected/forbidden
+      outputs for draft PUC and procurement wrapper proposals
+    blocking errors: 0
+    warnings: 5
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,
@@ -587,12 +608,14 @@ The pending external work-order audit now also blocks answer-leak entries in
 queued review packets: filled oracle files, judged-QA manifests, model outputs,
 and compile/run artifacts are not allowed in pending source-only packets.
 Template files and focused candidate-review targets are allowed, with focused
-candidate packets labeled as not fully blind.
+candidate packets labeled as not fully blind. Template files are also scanned
+for literal fact examples so target-specific answers cannot hide in comments
+under a safe filename.
 
 Current full-suite result on 2026-06-05:
 
 ```text
-2532 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2538 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
@@ -604,13 +627,13 @@ Common local checks:
 ```powershell
 $env:PYTHONPATH='.'
 pytest -q
-python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
+python scripts\run_current_research_governance.py --out-root tmp\current_research_governance --exit-zero
 python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
 python scripts\build_compile_fact_judged_qa.py --help
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
 python scripts\audit_reference_judge_null_control_reports.py --out-json tmp\reference_judge_null_control_reports.json --out-md tmp\reference_judge_null_control_reports.md
-python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md
+python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --exit-zero
 python scripts\audit_research_artifact_paths.py
 python scripts\audit_historical_score_claims.py
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
@@ -620,6 +643,10 @@ python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDI
 python scripts\audit_pending_external_work_orders.py --include-tmp-zips --out-json tmp\pending_external_work_orders.json --out-md docs\PENDING_EXTERNAL_WORK_ORDERS.md --expect-md docs\PENDING_EXTERNAL_WORK_ORDERS.md
 python scripts\audit_source_oracle_reviews.py --out-json tmp\source_oracle_reviews.json --out-md docs\SOURCE_ORACLE_REVIEW_STATUS.md --expect-md docs\SOURCE_ORACLE_REVIEW_STATUS.md
 ```
+
+The governance command currently reports a claim-blocking FDA transfer_002
+precision failure. Use `--exit-zero` for report regeneration and remove it only
+when checking whether that blocker has cleared.
 
 Before a public/docs cleanup commit, also run stale-claim greps over
 `README.md`, `PROJECT_STATE.md`, `docs/*.md`, and `docs/index.html`.

@@ -21,3 +21,6 @@ fda_prior_warning_letter(_, rechon_life_science_ab, _, _, _).
 
 % Inferred regulatory meeting asserted as held; source states future eligibility only.
 fda_regulatory_meeting(_, _, post_warning_letter_meeting_held, _).
+
+% Source states FDCA 501(a)(2)(B) CGMP adulteration only, not 501(a)(2)(A) insanitary adulteration.
+fda_adulteration_basis(_, adulteration_insanitary_conditions, fdca_501_a_2_a, _, _).

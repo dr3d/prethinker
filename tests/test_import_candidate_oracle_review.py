@@ -71,6 +71,46 @@ def test_import_candidate_oracle_review_supports_output_template_prefix(tmp_path
     assert "datasets/compile_micro_fixtures/fda_warning_letter_domain_transfer_002/source.md" in report["dropped_entries"]
 
 
+def test_import_candidate_oracle_review_supports_same_review_id_fixture_bundle(tmp_path: Path) -> None:
+    bundle_id = "demo_bundle_review_20260605"
+    fixture_a = "fda_warning_letter_domain_transfer_001"
+    fixture_b = "fda_warning_letter_domain_transfer_002"
+    package = _write_zip(
+        tmp_path / "review_bundle.zip",
+        {
+            f"candidate_oracle_reviews/{bundle_id}/{fixture_a}/manifest.json": _manifest(
+                review_id=bundle_id,
+                fixture_id=fixture_a,
+                source_files=[f"fixtures/{fixture_a}/source.md"],
+            ),
+            f"candidate_oracle_reviews/{bundle_id}/{fixture_a}/candidate_expected_facts.pl": "demo_candidate(Row, alpha, Src).\n",
+            f"candidate_oracle_reviews/{bundle_id}/{fixture_a}/candidate_forbidden_facts.pl": "demo_candidate(_, forbidden_value, _).\n",
+            f"candidate_oracle_reviews/{bundle_id}/{fixture_b}/manifest.json": _manifest(
+                review_id=bundle_id,
+                fixture_id=fixture_b,
+                source_files=[f"fixtures/{fixture_b}/source.md"],
+            ),
+            f"candidate_oracle_reviews/{bundle_id}/{fixture_b}/candidate_expected_facts.pl": "demo_candidate(Row, beta, Src).\n",
+            f"candidate_oracle_reviews/{bundle_id}/{fixture_b}/candidate_forbidden_facts.pl": "demo_candidate(_, forbidden_value, _).\n",
+            f"candidate_oracle_reviews/{bundle_id}/summary.md": "# Bundle summary\n",
+        },
+    )
+    dest = tmp_path / "reviews"
+
+    report = import_review_zip(zip_path=package, dest_root=dest)
+
+    assert report["summary"]["status"] == "pass"
+    assert len(report["imported_reviews"]) == 2
+    review_a = dest / f"{bundle_id}_{fixture_a}"
+    review_b = dest / f"{bundle_id}_{fixture_b}"
+    assert review_a.exists()
+    assert review_b.exists()
+    manifest = json.loads((review_a / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["review_id"] == f"{bundle_id}_{fixture_a}"
+    assert manifest["bundle_review_id"] == bundle_id
+    assert manifest["source_files"] == [f"datasets/compile_micro_fixtures/{fixture_a}/source.md"]
+
+
 def test_import_candidate_oracle_review_blocks_unfilled_template(tmp_path: Path) -> None:
     package = _write_zip(
         tmp_path / "template.zip",

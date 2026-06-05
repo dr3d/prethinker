@@ -66,13 +66,15 @@ def build_report(*, root: Path = DEFAULT_ROOT, compile_map: dict[str, Path] | No
         fixture_dir = manifest_path.parent
         manifest = _load_json(manifest_path)
         fixture_id = str(manifest.get("fixture_id") or fixture_dir.name).strip()
-        source_path = fixture_dir / str(manifest.get("source") or "source.md")
-        expected_path = fixture_dir / str(manifest.get("expected_facts") or "expected_facts.pl")
-        alternatives_path = fixture_dir / str(manifest.get("expected_alternatives") or "")
-        forbidden_path = fixture_dir / str(manifest.get("forbidden_facts") or "")
+        source_path = fixture_dir / _manifest_file(manifest, "source", default="source.md")
+        expected_path = fixture_dir / _manifest_file(manifest, "expected_facts", default="expected_facts.pl")
+        alternatives_file = _manifest_file(manifest, "expected_alternatives", default="")
+        forbidden_file = _manifest_file(manifest, "forbidden_facts", default="")
+        alternatives_path = fixture_dir / alternatives_file
+        forbidden_path = fixture_dir / forbidden_file
         expected_facts = _load_fact_lines(expected_path)
-        expected_alternatives = _load_alternative_groups(alternatives_path) if str(manifest.get("expected_alternatives") or "").strip() else []
-        forbidden_facts = _load_fact_lines(forbidden_path) if str(manifest.get("forbidden_facts") or "").strip() else []
+        expected_alternatives = _load_alternative_groups(alternatives_path) if alternatives_file.strip() else []
+        forbidden_facts = _load_fact_lines(forbidden_path) if forbidden_file.strip() else []
         errors: list[str] = []
         if not source_path.exists():
             errors.append("missing_source")
@@ -168,6 +170,16 @@ def build_report(*, root: Path = DEFAULT_ROOT, compile_map: dict[str, Path] | No
         },
         "rows": rows,
     }
+
+
+def _manifest_file(manifest: dict[str, Any], key: str, *, default: str) -> str:
+    value = manifest.get(key)
+    if str(value or "").strip():
+        return str(value).strip()
+    files = manifest.get("files")
+    if isinstance(files, dict) and str(files.get(key) or "").strip():
+        return str(files[key]).strip()
+    return default
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -476,6 +488,8 @@ def _unify_fact_pattern(
         expected_text = str(expected_arg).strip()
         actual_text = str(actual_arg).strip()
         if _is_expected_variable(expected_text):
+            if expected_text == "_":
+                continue
             bound = out.get(expected_text)
             if bound is not None and bound != actual_text:
                 return None
