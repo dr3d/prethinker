@@ -31,6 +31,28 @@ DISCLAIMER_PATTERN = re.compile(
 )
 STALE_STATUS_PATTERNS = [
     (
+        "fda_transfer_002_stale_21_29_current_metric",
+        re.compile(
+            r"("
+            r"current\s+standing\s+transfer_002\s+cell\s*:\s*21\s*/\s*29|"
+            r"standing\s+transfer_002\s+current-pack\s+status\s*:\s*21\s*/\s*29|"
+            r"FDA\s+transfer_002\s+is\s+21\s*/\s*29\s+support>=2|"
+            r"FDA\s+Case\s+Study.*?<strong>\s*21\s*/\s*29\s*;\s*19\s*/\s*26\s*</strong>"
+            r")",
+            re.IGNORECASE | re.DOTALL,
+        ),
+    ),
+    (
+        "sec_transfer_001_stale_11_13_current_metric",
+        re.compile(
+            r"("
+            r"standing\s+breadth\s+check:.*?transfer_001\s+11\s*/\s*13|"
+            r"current\s+standing\s+breadth\s+cells\s+land\s+at.*?transfer_001\s+`?11\s*/\s*13`?"
+            r")",
+            re.IGNORECASE | re.DOTALL,
+        ),
+    ),
+    (
         "fda_transfer_002_red_cell",
         re.compile(
             r"("
@@ -148,7 +170,7 @@ def _default_docs(root: Path) -> list[Path]:
         elif path.is_dir():
             docs.extend(
                 path.relative_to(root)
-                for path in sorted(path.glob("*.md"))
+                for path in sorted([*path.glob("*.md"), *path.glob("*.html")])
                 if not _skip_doc(path)
             )
     return docs
@@ -168,7 +190,7 @@ def _tracked_default_docs(root: Path) -> list[Path]:
     docs = [
         Path(line.strip())
         for line in result.stdout.splitlines()
-        if line.strip().lower().endswith(".md")
+        if line.strip().lower().endswith((".md", ".html"))
     ]
     return [path for path in docs if not _skip_doc(path)]
 

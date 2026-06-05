@@ -62,6 +62,47 @@ def test_audit_historical_score_claims_blocks_stale_current_status(tmp_path: Pat
     }
 
 
+def test_audit_historical_score_claims_blocks_stale_fda_current_metric(tmp_path: Path) -> None:
+    doc = tmp_path / "index.html"
+    doc.write_text(
+        "<article><span>FDA Case Study</span><strong>21 / 29; 19 / 26</strong></article>\n",
+        encoding="utf-8",
+    )
+
+    report = audit_docs(root=tmp_path, docs=[Path("index.html")])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["stale_status_occurrence_count"] == 1
+    assert report["stale_status_occurrences"][0]["pattern"] == "fda_transfer_002_stale_21_29_current_metric"
+
+
+def test_audit_historical_score_claims_allows_historical_fda_21_29_context(tmp_path: Path) -> None:
+    doc = tmp_path / "doc.md"
+    doc.write_text(
+        "The prior 21 / 29 contract-only root is historical context, not the current full-lens recall claim.\n",
+        encoding="utf-8",
+    )
+
+    report = audit_docs(root=tmp_path, docs=[Path("doc.md")])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["stale_status_occurrence_count"] == 0
+
+
+def test_audit_historical_score_claims_blocks_stale_sec_current_metric(tmp_path: Path) -> None:
+    doc = tmp_path / "doc.md"
+    doc.write_text(
+        "standing breadth check: seed 13 / 13; transfer_001 11 / 13; transfer_002 11 / 12\n",
+        encoding="utf-8",
+    )
+
+    report = audit_docs(root=tmp_path, docs=[Path("doc.md")])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["stale_status_occurrence_count"] == 1
+    assert report["stale_status_occurrences"][0]["pattern"] == "sec_transfer_001_stale_11_13_current_metric"
+
+
 def test_audit_historical_score_claims_fails_missing_docs(tmp_path: Path) -> None:
     report = audit_docs(root=tmp_path, docs=[Path("missing.md")])
 
@@ -78,11 +119,12 @@ def test_default_docs_scan_tracked_docs_not_untracked_drafts(tmp_path: Path) -> 
     (tmp_path / "docs").mkdir()
     (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
     (tmp_path / "docs" / "tracked.md").write_text("not current 90%+\n", encoding="utf-8")
+    (tmp_path / "docs" / "index.html").write_text("<strong>11 / 29</strong>\n", encoding="utf-8")
     (tmp_path / "docs" / "draft.md").write_text("90%+\n", encoding="utf-8")
 
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(
-        ["git", "add", "README.md", "docs/tracked.md"],
+        ["git", "add", "README.md", "docs/tracked.md", "docs/index.html"],
         cwd=tmp_path,
         check=True,
         capture_output=True,
@@ -92,4 +134,5 @@ def test_default_docs_scan_tracked_docs_not_untracked_drafts(tmp_path: Path) -> 
 
     assert Path("README.md") in docs
     assert Path("docs/tracked.md") in docs
+    assert Path("docs/index.html") in docs
     assert Path("docs/draft.md") not in docs
