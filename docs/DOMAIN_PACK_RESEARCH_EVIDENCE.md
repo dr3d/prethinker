@@ -1045,6 +1045,15 @@ The next technical work should serve one of four purposes:
    likewise not a domain-pack claim. The active next step is the source-only
    external oracle packet at
    `tmp\procurement_gao_decision_wrapper_oracle_work_order_20260605.zip`.
+   A source-only FTC public-order pre-registry probe was also run over two
+   retained ACH-stress fixtures and archived under
+   `C:\prethinker_tmp_archive\ftc_domain_bootstrap_20260605`. It is a negative:
+   the two bootstraps had predicate-overlap Jaccard `2/26 = 0.077`, the second
+   source skipped 8 compile rows, and the atom-shape audit failed with 15
+   blockers from numeric-leading identifiers and prose-shaped definition atoms.
+   Do not externalize or promote an FTC public-order pack from that pair; it
+   shows that the retained FTC decision/order and data-security complaint are
+   not yet a compact shared domain family.
 
 Avoid row-grinding. The technical result gets stronger through reproducible
 transfer, clear abstention boundaries, and honest failure classes.

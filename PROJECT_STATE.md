@@ -353,6 +353,25 @@ Fixture-bank / next-domain inventory
       source-only oracle work order directly in the proposal table.
     next step: wait for source-only expected/forbidden wrapper facts before
       creating or scoring a procurement closed registry.
+  FTC public-order pre-registry negative:
+    artifact root:
+      C:\prethinker_tmp_archive\ftc_domain_bootstrap_20260605
+    basis:
+      two retained ACH-stress public-order fixtures, one FTC decision/order and
+      one FTC administrative complaint, both source-only profile bootstraps
+      under local Qwen MoE
+    result:
+      t001: 13 candidate predicates, 37 admitted facts, 0 skipped
+      t002: 17 candidate predicates, 53 admitted facts, 8 skipped
+      predicate-overlap Jaccard: 2 / 26 = 0.077
+      atom-shape audit: fail, 15 blockers (numeric-leading file id and
+        prose-shaped definition atoms)
+    read:
+      do not package this pair as a closed FTC public-order domain yet. It is a
+      useful negative showing that same agency/order-ish surface labels are not
+      enough; the retained pair mixes remedy-order anatomy and data-security
+      complaint anatomy, and the open bootstrap drifts into substance/detail
+      predicates rather than a compact shared skeleton.
   active external work-order packet audit:
     C:\prethinker_tmp_archive\pending_external_work_order_status_20260605
     status: pass
