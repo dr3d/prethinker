@@ -258,8 +258,8 @@ def _validate_proposal(
     path: Path,
     *,
     profile_root: Path,
-    retained_reviews: list[dict[str, str]],
-    retained_source_oracles: list[dict[str, str]],
+    retained_reviews: list[dict[str, Any]],
+    retained_source_oracles: list[dict[str, Any]],
 ) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -405,7 +405,22 @@ def _validate_proposal(
     elif status in {"draft", "candidate"} and carrier_contract(signature) is None:
         warnings.append("candidate_signature_not_yet_registered")
 
-    return _row(path=path, data=data, errors=errors, warnings=warnings)
+    return _row(
+        path=path,
+        data=data,
+        errors=errors,
+        warnings=warnings,
+        review_results=_review_results_with_counts(
+            review_results,
+            retained_reviews=retained_reviews,
+            source_oracle=False,
+        ),
+        source_oracle_review_results=_review_results_with_counts(
+            source_oracle_review_results,
+            retained_reviews=retained_source_oracles,
+            source_oracle=True,
+        ),
+    )
 
 
 def _validate_examples(value: Any, signature: str, kind: str, errors: list[str]) -> None:
@@ -475,7 +490,7 @@ def _validate_review_links(
     proposal_id: str,
     candidate_signature: str,
     review_results: list[Any],
-    retained_reviews: list[dict[str, str]],
+    retained_reviews: list[dict[str, Any]],
     errors: list[str],
 ) -> None:
     linked_review_ids: set[str] = set()
@@ -525,7 +540,7 @@ def _validate_source_oracle_links(
     proposal_id: str,
     candidate_signature: str,
     review_results: list[Any],
-    retained_reviews: list[dict[str, str]],
+    retained_reviews: list[dict[str, Any]],
     errors: list[str],
 ) -> None:
     linked_review_ids: set[str] = set()
@@ -575,7 +590,15 @@ def _validate_source_oracle_links(
             errors.append(f"retained_source_oracle_review_missing_from_proposal:{review['review_id']}")
 
 
-def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[str]) -> dict[str, Any]:
+def _row(
+    *,
+    path: Path,
+    data: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+    review_results: list[dict[str, Any]] | None = None,
+    source_oracle_review_results: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     return {
         "path": str(path),
         "proposal_id": str(data.get("proposal_id") or "").strip(),
@@ -588,9 +611,17 @@ def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[
             if isinstance(data.get("pending_external_work_orders"), list)
             else []
         ),
-        "review_results": data.get("review_results") if isinstance(data.get("review_results"), list) else [],
+        "review_results": (
+            review_results
+            if review_results is not None
+            else data.get("review_results")
+            if isinstance(data.get("review_results"), list)
+            else []
+        ),
         "source_oracle_review_results": (
-            data.get("source_oracle_review_results")
+            source_oracle_review_results
+            if source_oracle_review_results is not None
+            else data.get("source_oracle_review_results")
             if isinstance(data.get("source_oracle_review_results"), list)
             else []
         ),
@@ -620,8 +651,9 @@ def _review_summary(value: Any) -> str:
             continue
         fixture = str(item.get("fixture_id") or "").strip()
         result = str(item.get("result") or "").strip()
+        counts = _review_count_summary(item)
         if fixture or result:
-            parts.append(f"{fixture}:{result}".strip(":"))
+            parts.append(f"{fixture}:{result}{counts}".strip(":"))
     return "; ".join(parts)
 
 
@@ -634,9 +666,18 @@ def _source_oracle_summary(value: Any) -> str:
             continue
         review_id = str(item.get("review_id") or "").strip()
         result = str(item.get("result") or "").strip()
+        counts = _review_count_summary(item)
         if review_id or result:
-            parts.append(f"{review_id}:{result}".strip(":"))
+            parts.append(f"{review_id}:{result}{counts}".strip(":"))
     return "; ".join(parts)
+
+
+def _review_count_summary(item: dict[str, Any]) -> str:
+    expected = item.get("expected_fact_count")
+    forbidden = item.get("forbidden_fact_count")
+    if expected is None and forbidden is None:
+        return ""
+    return f" (expected {_int_value(expected)}, forbidden {_int_value(forbidden)})"
 
 
 def _work_order_summary(value: Any) -> str:
@@ -655,11 +696,11 @@ def _work_order_summary(value: Any) -> str:
     return "; ".join(parts)
 
 
-def _retained_candidate_reviews(root: Path) -> list[dict[str, str]]:
+def _retained_candidate_reviews(root: Path) -> list[dict[str, Any]]:
     root_path = root.resolve()
     if not root_path.exists():
         return []
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     for manifest_path in sorted(root_path.rglob("manifest.json")):
         manifest = _load_json(manifest_path)
         if not manifest:
@@ -671,16 +712,22 @@ def _retained_candidate_reviews(root: Path) -> list[dict[str, str]]:
                 "proposal_id": str(manifest.get("proposal_id") or "").strip(),
                 "fixture_id": str(manifest.get("fixture_id") or "").strip(),
                 "predicate": str(manifest.get("predicate") or "").strip(),
+                "expected_fact_count": _count_fact_lines(
+                    manifest_path.parent / "candidate_expected_facts.pl"
+                ),
+                "forbidden_fact_count": _count_fact_lines(
+                    manifest_path.parent / "candidate_forbidden_facts.pl"
+                ),
             }
         )
     return rows
 
 
-def _retained_source_oracle_reviews(root: Path) -> list[dict[str, str]]:
+def _retained_source_oracle_reviews(root: Path) -> list[dict[str, Any]]:
     root_path = root.resolve()
     if not root_path.exists():
         return []
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     for manifest_path in sorted(root_path.rglob("manifest.json")):
         manifest = _load_json(manifest_path)
         if not manifest:
@@ -692,9 +739,84 @@ def _retained_source_oracle_reviews(root: Path) -> list[dict[str, str]]:
                 "proposal_id": str(manifest.get("proposal_id") or "").strip(),
                 "predicate": str(manifest.get("predicate") or "").strip(),
                 "status": str(manifest.get("status") or "").strip(),
+                "expected_fact_count": _source_oracle_count(manifest, "expected_fact_count"),
+                "forbidden_fact_count": _source_oracle_count(manifest, "forbidden_fact_count"),
             }
         )
     return rows
+
+
+def _review_results_with_counts(
+    value: list[Any],
+    *,
+    retained_reviews: list[dict[str, Any]],
+    source_oracle: bool,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            rows.append(item)
+            continue
+        row = dict(item)
+        counts = _counts_for_review_result(row, retained_reviews=retained_reviews, source_oracle=source_oracle)
+        if counts:
+            row.setdefault("expected_fact_count", counts["expected_fact_count"])
+            row.setdefault("forbidden_fact_count", counts["forbidden_fact_count"])
+        rows.append(row)
+    return rows
+
+
+def _counts_for_review_result(
+    item: dict[str, Any],
+    *,
+    retained_reviews: list[dict[str, Any]],
+    source_oracle: bool,
+) -> dict[str, int]:
+    review_path = str(item.get("review_path") or "").strip()
+    if review_path:
+        manifest_path = _resolve_path(review_path)
+        manifest = _load_json(manifest_path)
+        if manifest:
+            if source_oracle:
+                return {
+                    "expected_fact_count": _source_oracle_count(manifest, "expected_fact_count"),
+                    "forbidden_fact_count": _source_oracle_count(manifest, "forbidden_fact_count"),
+                }
+            return {
+                "expected_fact_count": _count_fact_lines(
+                    manifest_path.parent / "candidate_expected_facts.pl"
+                ),
+                "forbidden_fact_count": _count_fact_lines(
+                    manifest_path.parent / "candidate_forbidden_facts.pl"
+                ),
+            }
+    review_id = str(item.get("review_id") or "").strip()
+    for review in retained_reviews:
+        if review.get("review_id") == review_id:
+            return {
+                "expected_fact_count": _int_value(review.get("expected_fact_count")),
+                "forbidden_fact_count": _int_value(review.get("forbidden_fact_count")),
+            }
+    return {}
+
+
+def _source_oracle_count(manifest: dict[str, Any], key: str) -> int:
+    outputs = manifest.get("outputs")
+    if not isinstance(outputs, dict):
+        return _int_value(manifest.get(key))
+    return sum(
+        _int_value(output.get(key))
+        for output in outputs.values()
+        if isinstance(output, dict)
+    )
+
+
+def _count_fact_lines(path: Path) -> int:
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return 0
+    return sum(1 for raw in lines if raw.strip() and not raw.strip().startswith("%"))
 
 
 def _signature_arity(signature: str) -> int:

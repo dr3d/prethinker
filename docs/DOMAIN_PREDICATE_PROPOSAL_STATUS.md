@@ -11,7 +11,7 @@ claim-bearing gates.
 
 | Proposal | Signature | Status | Pending Work | Candidate Reviews | Source Oracles | Errors | Warnings |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `fda_warning_letter_response_assessment_item_v1` | `fda_response_assessment_item/6` | `candidate` | `` | `fda_warning_letter_domain_transfer_001:source_only_candidate_review_complete; fda_warning_letter_domain_transfer_002:source_only_candidate_review_complete; fda_warning_letter_domain_transfer_003:source_only_candidate_review_complete` | `` | `[]` | `[]` |
-| `fda_warning_letter_response_documentation_gap_v1` | `fda_response_documentation_gap/5` | `rejected` | `` | `fda_warning_letter_domain_transfer_002:blocked_forbidden` | `` | `[]` | `[]` |
-| `procurement_gao_decision_wrapper_v1` | `gao_bid_protest_decision/7` | `draft` | `` | `` | `procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605:source_oracle_complete` | `[]` | `[]` |
-| `puc_order_wrapper_v1` | `puc_order/7` | `draft` | `` | `` | `puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604:source_oracle_complete` | `[]` | `[]` |
+| `fda_warning_letter_response_assessment_item_v1` | `fda_response_assessment_item/6` | `candidate` | `` | `fda_warning_letter_domain_transfer_001:source_only_candidate_review_complete (expected 0, forbidden 9); fda_warning_letter_domain_transfer_002:source_only_candidate_review_complete (expected 3, forbidden 8); fda_warning_letter_domain_transfer_003:source_only_candidate_review_complete (expected 1, forbidden 8)` | `` | `[]` | `[]` |
+| `fda_warning_letter_response_documentation_gap_v1` | `fda_response_documentation_gap/5` | `rejected` | `` | `fda_warning_letter_domain_transfer_002:blocked_forbidden (expected 0, forbidden 13)` | `` | `[]` | `[]` |
+| `procurement_gao_decision_wrapper_v1` | `gao_bid_protest_decision/7` | `draft` | `` | `` | `procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605:source_oracle_complete (expected 2, forbidden 16)` | `[]` | `[]` |
+| `puc_order_wrapper_v1` | `puc_order/7` | `draft` | `` | `` | `puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604:source_oracle_complete (expected 2, forbidden 15)` | `[]` | `[]` |

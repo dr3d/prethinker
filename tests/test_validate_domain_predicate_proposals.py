@@ -206,11 +206,24 @@ def test_linked_retained_review_passes_when_metadata_matches(tmp_path: Path) -> 
             "predicate": payload["candidate_signature"],
         },
     )
+    (review_path.parent / "candidate_expected_facts.pl").write_text(
+        "fda_new_compact_lane(subject, example_kind, example_value, stated, src_a).\n",
+        encoding="utf-8",
+    )
+    (review_path.parent / "candidate_forbidden_facts.pl").write_text(
+        "fda_new_compact_lane(subject, example_kind, forbidden_value, stated, src_b).\n"
+        "fda_new_compact_lane(subject, example_kind, prose_blob, stated, src_c).\n",
+        encoding="utf-8",
+    )
 
     report = build_report([proposal], candidate_review_root=tmp_path / "reviews")
+    rendered = render_markdown(report)
 
     assert report["summary"]["status"] == "pass"
     assert report["proposals"][0]["errors"] == []
+    assert report["proposals"][0]["review_results"][0]["expected_fact_count"] == 1
+    assert report["proposals"][0]["review_results"][0]["forbidden_fact_count"] == 2
+    assert "oracle_supported (expected 1, forbidden 2)" in rendered
 
 
 def test_retained_source_oracle_review_for_proposal_must_be_linked(tmp_path: Path) -> None:
@@ -282,13 +295,27 @@ def test_linked_source_oracle_review_passes_when_metadata_matches(tmp_path: Path
             "proposal_id": payload["proposal_id"],
             "predicate": payload["candidate_signature"],
             "status": "complete",
+            "outputs": {
+                "demo_fixture_001": {
+                    "expected_fact_count": 2,
+                    "forbidden_fact_count": 3,
+                },
+                "demo_fixture_002": {
+                    "expected_fact_count": 1,
+                    "forbidden_fact_count": 4,
+                },
+            },
         },
     )
 
     report = build_report([proposal], source_oracle_review_root=tmp_path / "source_reviews")
+    rendered = render_markdown(report)
 
     assert report["summary"]["status"] == "pass"
     assert report["proposals"][0]["errors"] == []
+    assert report["proposals"][0]["source_oracle_review_results"][0]["expected_fact_count"] == 3
+    assert report["proposals"][0]["source_oracle_review_results"][0]["forbidden_fact_count"] == 7
+    assert "source_oracle_complete (expected 3, forbidden 7)" in rendered
 
 
 def test_blocked_source_oracle_review_requires_rejected_status(tmp_path: Path) -> None:
