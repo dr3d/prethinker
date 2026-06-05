@@ -12,11 +12,13 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     manifest_run = _write_manifest_run(tmp_path)
     source_audit = _write_source_audit(tmp_path)
     variance_status = _write_variance_status(tmp_path)
+    exclusion_audit = _write_exclusion_audit(tmp_path)
 
     report = build_report(
         manifest_run_path=manifest_run,
         source_audit_path=source_audit,
         variance_status_path=variance_status,
+        exclusion_audit_path=exclusion_audit,
     )
     md = render_markdown(report)
 
@@ -37,6 +39,14 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     ]
     assert report["summary"]["source_warning_count"] == 1
     assert report["summary"]["variance_group_count"] == 1
+    assert report["summary"]["exclusion_audit_status"] == "pass"
+    assert report["summary"]["excluded_fixture_count"] == 2
+    assert report["summary"]["missing_exclusion_count"] == 0
+    assert report["summary"]["exclusion_reason_counts"] == {
+        "diagnostic_boundary_probe": 1,
+        "seed_or_component_micro_fixture": 1,
+    }
+    assert report["excluded_fixtures"][0]["fixture_id"] == "osha_incident_transfer_002"
     assert report["cells"][0]["variance_groups"][0]["support_band"] == "`1-2/2`"
     assert "Support>=2: `3 / 4`" in md
     assert "Unexpected same-signature facts support>=2: `1`" in md
@@ -50,6 +60,11 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert "Registered Variance Evidence" in md
     assert "`sec_seed_variance`" in md
     assert "Do not promote favorable draw." in md
+    assert "Excluded associated fixtures: `2` (audit `pass`; missing `0`)" in md
+    assert "Excluded Associated Fixtures" in md
+    assert "`diagnostic_boundary_probe`" in md
+    assert "`osha_incident_transfer_002`" in md
+    assert "retained as a boundary cell" in md
 
 
 def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_facts(
@@ -193,6 +208,29 @@ def test_summarize_current_compile_fact_qa_status_blocks_failed_source_audit(tmp
 
     assert report["summary"]["status"] == "fail"
     assert "source_audit_status_not_pass" in report["summary"]["blocking_reasons"]
+
+
+def test_summarize_current_compile_fact_qa_status_blocks_failed_exclusion_audit(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+    exclusion_audit = _write_exclusion_audit(
+        tmp_path,
+        status="fail",
+        blocking_reasons=["osha_incident_transfer_002:missing_evidence_root"],
+    )
+
+    report = build_report(
+        manifest_run_path=manifest_run,
+        source_audit_path=source_audit,
+        exclusion_audit_path=exclusion_audit,
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert "exclusion_audit_status_not_pass" in report["summary"]["blocking_reasons"]
+    assert (
+        "exclusion_audit:osha_incident_transfer_002:missing_evidence_root"
+        in report["summary"]["blocking_reasons"]
+    )
 
 
 def test_summarize_current_compile_fact_qa_status_blocks_prose_dependent_rows(tmp_path: Path) -> None:
@@ -345,6 +383,48 @@ def _write_variance_status(tmp_path: Path) -> Path:
                         "status": "pass",
                     }
                 ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_exclusion_audit(
+    tmp_path: Path,
+    *,
+    status: str = "pass",
+    blocking_reasons: list[str] | None = None,
+) -> Path:
+    path = tmp_path / "exclusion_audit.json"
+    exclusions = [
+        {
+            "fixture_id": "osha_incident_transfer_002",
+            "reason_code": "diagnostic_boundary_probe",
+            "status": "long_table_boundary_not_promoted",
+            "note": "OSHA long-table probe retained as a boundary cell.",
+        },
+        {
+            "fixture_id": "fda_warning_letter_domain_v1",
+            "reason_code": "seed_or_component_micro_fixture",
+            "status": "fixture_bank_seed",
+            "note": "Seed micro retained for domain-pack construction only.",
+        },
+    ]
+    path.write_text(
+        json.dumps(
+            {
+                "summary": {
+                    "status": status,
+                    "excluded_fixture_count": len(exclusions),
+                    "missing_exclusion_count": 0,
+                    "reason_counts": {
+                        "diagnostic_boundary_probe": 1,
+                        "seed_or_component_micro_fixture": 1,
+                    },
+                    "blocking_reasons": blocking_reasons or [],
+                },
+                "excluded_fixtures": exclusions,
             }
         ),
         encoding="utf-8",

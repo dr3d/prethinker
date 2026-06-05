@@ -1,7 +1,7 @@
 # Current Compile-Fact QA Status
 
 Generated from the current compile-fact QA manifest run, manifest source/settings audit,
-and registered variance status when available.
+registered variance status when available, and the compile-fact exclusion audit when available.
 This page does not read source prose, call an LLM, or judge messy human questions.
 
 ## Summary
@@ -19,6 +19,51 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Unsupported expected facts support<2: `16`
 - Unsupported split support 0 / support 1: `10 / 6`
 - Unsupported repair postures: `primary_constant_boundary` x6, `compile_stability_boundary` x3, `source_choice_boundary` x3, `value_choice_variance_boundary` x3, `compile_recall_boundary` x1
+- Excluded associated fixtures: `22` (audit `pass`; missing `0`)
+
+## Excluded Associated Fixtures
+
+These domain-associated fixtures are deliberately not scored in the standing manifest.
+The exclusion audit validates each row has an allowed reason and retained evidence root;
+this table makes the non-claim-bearing cells visible without promoting them.
+
+### By Reason
+
+| Reason | Count |
+| --- | ---: |
+| `accountability_control_micro_fixture` | 3 |
+| `component_lane_fixture` | 3 |
+| `diagnostic_boundary_probe` | 9 |
+| `diagnostic_lane_not_promoted` | 3 |
+| `external_judged_qa_package` | 1 |
+| `seed_or_component_micro_fixture` | 3 |
+
+### Rows
+
+| Fixture | Reason | Status | Note |
+| --- | --- | --- | --- |
+| `ntsb_investigation_report_id_omission_v1` | `accountability_control_micro_fixture` | `omission_control` | Omission-control micro-fixture validates accountability behavior and is not a transfer measurement cell. |
+| `osha_incident_inspection_id_omission_v1` | `accountability_control_micro_fixture` | `omission_control` | Omission-control micro-fixture validates OSHA inspection-id accountability and is not a transfer measurement cell. |
+| `sec_form_8k_signature_omission_v1` | `accountability_control_micro_fixture` | `omission_control` | SEC signature omission-control micro-fixture validates accountability behavior and is not a transfer measurement cell. |
+| `fda_warning_letter_em_detail_micro_v1` | `component_lane_fixture` | `component_pressure_fixture` | Environmental-monitoring detail pressure fixture retained for schema/lane pressure, not a standing transfer measurement. |
+| `fda_warning_letter_insanitary_001` | `component_lane_fixture` | `component_pressure_fixture` | Insanitary-condition lane pressure fixture retained as component evidence outside the standing current manifest. |
+| `fda_warning_letter_insanitary_002` | `component_lane_fixture` | `component_pressure_fixture` | Second insanitary-condition lane pressure fixture retained as component evidence outside the standing current manifest. |
+| `fda_warning_letter_domain_transfer_003` | `diagnostic_boundary_probe` | `documented_boundary_cell_not_standing_manifest_cell` | Current-pack boundary cell documented as 19/26 support>=2 with unsupported value/detail flesh; retained as boundary evidence, not a manifest cell. |
+| `osha_incident_transfer_002` | `diagnostic_boundary_probe` | `long_table_boundary_not_promoted` | Diagnostic OSHA long-table probe: 18/53 support>=2 with 0/8 forbidden; documents long citation/status inventory boundary. |
+| `osha_incident_transfer_003` | `diagnostic_boundary_probe` | `mixed_section_boundary_not_promoted` | Diagnostic OSHA mixed-section probe: 2/21 support>=2 with 0/10 forbidden after accident-omission guard; documents section-attachment boundary. |
+| `procurement_contract_ugly_002` | `diagnostic_boundary_probe` | `registered_draft_wrapper_probe_not_promoted` | GAO bid-protest wrapper draft-pack probe: 0/1 support>=2 with 0/8 supported forbidden. Retained as process/boundary evidence for compact-id and source-coordinate instability, not a standing manifest cell. |
+| `procurement_contract_ugly_003` | `diagnostic_boundary_probe` | `registered_draft_wrapper_probe_not_promoted` | GAO bid-protest wrapper draft-pack probe: 0/1 support>=2 with 0/8 supported forbidden. Retained as process/boundary evidence for compact-id, procurement-id, and source-coordinate instability, not a standing manifest cell. |
+| `puc_order_ugly_002` | `diagnostic_boundary_probe` | `registered_draft_wrapper_probe_not_promoted` | PUC wrapper draft-pack probe: 0/1 support>=2 with 0/8 supported forbidden. Retained as process/boundary evidence for compact-id and source-coordinate instability, not a standing manifest cell. |
+| `puc_order_ugly_003` | `diagnostic_boundary_probe` | `registered_draft_wrapper_probe_not_promoted` | PUC wrapper draft-pack probe: 0/1 support>=2 with 0/7 supported forbidden. Retained as process/boundary evidence for zero-yield delivery under the reviewed compact carrier, not a standing manifest cell. |
+| `state_ag_settlement_aod_transfer_002` | `diagnostic_boundary_probe` | `source_only_transfer_oracle_not_standing_manifest_cell` | State-AG settlement/AOD transfer 002 is a retained source-only expected/forbidden micro-fixture. It validates oracle shape and negative controls but has not been run as a standing same-condition compile-fact manifest cell. |
+| `state_ag_settlement_aod_transfer_003` | `diagnostic_boundary_probe` | `source_only_transfer_oracle_not_standing_manifest_cell` | State-AG settlement/AOD transfer 003 is a retained source-only expected/forbidden micro-fixture. It validates oracle shape and negative controls but has not been run as a standing same-condition compile-fact manifest cell. |
+| `fda_warning_letter_observation_transfer_001` | `diagnostic_lane_not_promoted` | `response_observation_diagnostic` | Observation-transfer response lanes are diagnostic/candidate evidence and are not promoted into the standing compile-fact QA manifest. |
+| `fda_warning_letter_observation_transfer_002` | `diagnostic_lane_not_promoted` | `response_observation_diagnostic` | Observation-transfer response lanes are diagnostic/candidate evidence and are not promoted into the standing compile-fact QA manifest. |
+| `fda_warning_letter_observation_transfer_003` | `diagnostic_lane_not_promoted` | `response_observation_diagnostic` | Observation-transfer response lanes are diagnostic/candidate evidence and are not promoted into the standing compile-fact QA manifest. |
+| `fda_warning_letter_domain_transfer_001` | `external_judged_qa_package` | `measured_outside_standing_compile_fact_manifest` | Covered by the retained FDA transfer judged-QA v2 package and older gate artifact, not by the current domain-lens bundle manifest. |
+| `fda_warning_letter_domain_v1` | `seed_or_component_micro_fixture` | `fixture_bank_seed` | Seed micro used to build the FDA domain pack; current transfer evidence is represented by retained transfer cells instead. |
+| `ntsb_investigation_domain_v1` | `seed_or_component_micro_fixture` | `fixture_bank_seed` | NTSB seed micro validates the initial pack; current transfer boundary evidence is represented by the unlike transfer cell. |
+| `state_ag_settlement_aod_v1` | `seed_or_component_micro_fixture` | `fixture_bank_seed` | State-AG settlement/AOD seed micro starts a fifth closed-domain pack candidate; it is schema and pressure evidence only until same-condition compiles and unlike transfer fixtures are measured. |
 
 ## By Family
 

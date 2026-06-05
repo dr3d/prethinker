@@ -42,6 +42,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional domain-pack variance status JSON to attach registered variance bands to matching cells.",
     )
+    parser.add_argument(
+        "--exclusion-audit",
+        type=Path,
+        default=None,
+        help="Optional compile-fact QA exclusion audit JSON for associated fixtures not in the standing manifest.",
+    )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument(
@@ -60,6 +66,7 @@ def main() -> int:
         manifest_run_path=args.manifest_run,
         source_audit_path=args.source_audit,
         variance_status_path=args.variance_status,
+        exclusion_audit_path=args.exclusion_audit,
     )
     rendered_md = render_markdown(report)
     if args.expect_md:
@@ -86,11 +93,15 @@ def build_report(
     manifest_run_path: Path,
     source_audit_path: Path,
     variance_status_path: Path | None = None,
+    exclusion_audit_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest_run = _load_json(manifest_run_path)
     source_audit = _load_json(source_audit_path)
     variance_status = _load_json(variance_status_path) if variance_status_path else {}
+    exclusion_audit = _load_json(exclusion_audit_path) if exclusion_audit_path else {}
     variance_by_fixture = _variance_groups_by_fixture(variance_status)
+    excluded_fixtures = _excluded_fixture_rows(exclusion_audit)
+    exclusion_summary = _exclusion_summary(exclusion_audit, excluded_fixtures)
     source_by_id = {
         str(cell.get("id") or ""): cell
         for cell in source_audit.get("cells", [])
@@ -112,6 +123,7 @@ def build_report(
     blockers = _blocking_reasons(
         manifest_run=manifest_run,
         source_audit=source_audit,
+        exclusion_audit=exclusion_audit,
         cells=cells,
     )
     return {
@@ -120,6 +132,7 @@ def build_report(
         "manifest_run_path": str(manifest_run_path),
         "source_audit_path": str(source_audit_path),
         "variance_status_path": str(variance_status_path or ""),
+        "exclusion_audit_path": str(exclusion_audit_path or ""),
         "summary": {
             "status": "pass" if not blockers else "fail",
             "blocking_reasons": blockers,
@@ -156,9 +169,14 @@ def build_report(
                 if int(row.get("exact_support") or 0) == 1
             ),
             "unsupported_repair_postures": unsupported_repair_postures,
+            "exclusion_audit_status": exclusion_summary["status"],
+            "excluded_fixture_count": exclusion_summary["excluded_fixture_count"],
+            "missing_exclusion_count": exclusion_summary["missing_exclusion_count"],
+            "exclusion_reason_counts": exclusion_summary["reason_counts"],
         },
         "families": families,
         "unsupported_by_carrier": unsupported_by_carrier,
+        "excluded_fixtures": excluded_fixtures,
         "cells": cells,
     }
 
@@ -254,6 +272,55 @@ def _variance_groups_by_fixture(report: dict[str, Any]) -> dict[str, list[dict[s
         }
         out.setdefault(fixture_id, []).append(row)
     return out
+
+
+def _excluded_fixture_rows(report: dict[str, Any]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for row in report.get("excluded_fixtures") or []:
+        if not isinstance(row, dict):
+            continue
+        rows.append(
+            {
+                "fixture_id": str(row.get("fixture_id") or "").strip(),
+                "reason_code": str(row.get("reason_code") or "").strip(),
+                "status": str(row.get("status") or "").strip(),
+                "note": str(row.get("note") or "").strip(),
+            }
+        )
+    return sorted(rows, key=lambda row: (row["reason_code"], row["fixture_id"]))
+
+
+def _exclusion_summary(
+    report: dict[str, Any],
+    excluded_fixtures: list[dict[str, str]],
+) -> dict[str, Any]:
+    if not report:
+        return {
+            "status": "not_available",
+            "excluded_fixture_count": 0,
+            "missing_exclusion_count": 0,
+            "reason_counts": {},
+        }
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    reason_counts = summary.get("reason_counts")
+    if not isinstance(reason_counts, dict):
+        reason_counts = _exclusion_reason_counts(excluded_fixtures)
+    return {
+        "status": str(summary.get("status") or "unknown"),
+        "excluded_fixture_count": int(
+            summary.get("excluded_fixture_count") or len(excluded_fixtures)
+        ),
+        "missing_exclusion_count": int(summary.get("missing_exclusion_count") or 0),
+        "reason_counts": dict(sorted((str(key), int(value or 0)) for key, value in reason_counts.items())),
+    }
+
+
+def _exclusion_reason_counts(excluded_fixtures: list[dict[str, str]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in excluded_fixtures:
+        reason = row.get("reason_code") or "unknown"
+        counts[reason] = counts.get(reason, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _per_run_counts(verdict_summary_by_file: dict[str, Any]) -> dict[str, int]:
@@ -701,6 +768,7 @@ def _blocking_reasons(
     *,
     manifest_run: dict[str, Any],
     source_audit: dict[str, Any],
+    exclusion_audit: dict[str, Any],
     cells: list[dict[str, Any]],
 ) -> list[str]:
     blockers: list[str] = []
@@ -708,6 +776,10 @@ def _blocking_reasons(
         blockers.append("manifest_run_status_not_pass")
     if (source_audit.get("summary") or {}).get("status") != "pass":
         blockers.append("source_audit_status_not_pass")
+    if exclusion_audit and (exclusion_audit.get("summary") or {}).get("status") != "pass":
+        blockers.append("exclusion_audit_status_not_pass")
+        for reason in (exclusion_audit.get("summary") or {}).get("blocking_reasons") or []:
+            blockers.append(f"exclusion_audit:{reason}")
     for cell in cells:
         cell_id = cell["id"]
         if cell["redaction_status"] != "pass":
@@ -756,7 +828,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "# Current Compile-Fact QA Status",
         "",
         "Generated from the current compile-fact QA manifest run, manifest source/settings audit,",
-        "and registered variance status when available.",
+        "registered variance status when available, and the compile-fact exclusion audit when available.",
         "This page does not read source prose, call an LLM, or judge messy human questions.",
         "",
         "## Summary",
@@ -774,11 +846,50 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Unsupported expected facts support<2: `{summary['unsupported_expected_fact_count']}`",
         f"- Unsupported split support 0 / support 1: `{summary['unsupported_support_0_count']} / {summary['unsupported_support_1_count']}`",
         f"- Unsupported repair postures: {_repair_postures_markdown(summary.get('unsupported_repair_postures') or {})}",
+        f"- Excluded associated fixtures: `{summary['excluded_fixture_count']}` (audit `{summary['exclusion_audit_status']}`; missing `{summary['missing_exclusion_count']}`)",
         "",
     ]
     if summary["blocking_reasons"]:
         lines.extend(["## Blocking Reasons", ""])
         lines.extend(f"- `{reason}`" for reason in summary["blocking_reasons"])
+        lines.append("")
+    excluded_fixtures = report.get("excluded_fixtures") or []
+    if excluded_fixtures:
+        lines.extend(
+            [
+                "## Excluded Associated Fixtures",
+                "",
+                "These domain-associated fixtures are deliberately not scored in the standing manifest.",
+                "The exclusion audit validates each row has an allowed reason and retained evidence root;",
+                "this table makes the non-claim-bearing cells visible without promoting them.",
+                "",
+                "### By Reason",
+                "",
+                "| Reason | Count |",
+                "| --- | ---: |",
+            ]
+        )
+        for reason, count in sorted((summary.get("exclusion_reason_counts") or {}).items()):
+            lines.append(f"| `{reason}` | {int(count)} |")
+        lines.extend(
+            [
+                "",
+                "### Rows",
+                "",
+                "| Fixture | Reason | Status | Note |",
+                "| --- | --- | --- | --- |",
+            ]
+        )
+        for row in excluded_fixtures:
+            note = str(row.get("note") or "").replace("|", "\\|")
+            lines.append(
+                "| `{}` | `{}` | `{}` | {} |".format(
+                    row.get("fixture_id") or "",
+                    row.get("reason_code") or "",
+                    row.get("status") or "",
+                    note,
+                )
+            )
         lines.append("")
     lines.extend(
         [

@@ -39,6 +39,9 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
     source_review_command = next(command for command in commands if command["id"] == "source_oracle_reviews")
     assert "--expect-md" in source_review_command["command"]
     assert "docs/SOURCE_ORACLE_REVIEW_STATUS.md" in source_review_command["command"]
+    status_command = next(command for command in commands if command["id"] == "current_compile_fact_qa_status")
+    assert "--exclusion-audit" in status_command["command"]
+    assert any("compile_fact_qa_exclusions.json" in item for item in status_command["command"])
 
 
 def test_governance_commands_can_include_pytest(tmp_path: Path) -> None:
