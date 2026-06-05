@@ -176,7 +176,6 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             "command": [
                 python,
                 "scripts/audit_pending_external_work_orders.py",
-                "--include-tmp-zips",
                 "--out-json",
                 str(report_root / "pending_external_work_orders.json"),
                 "--out-md",
