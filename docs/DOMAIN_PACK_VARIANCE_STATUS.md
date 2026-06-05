@@ -6,8 +6,8 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `8`
-- Roots: `14`
+- Groups: `9`
+- Roots: `15`
 - Warnings: `6`
 
 Warnings:
@@ -22,6 +22,7 @@ Warnings:
 
 | Group | Fixture | Roots | Support Band | Forbidden Total | Unexpected Band | Status |
 | --- | --- | ---: | --- | ---: | --- | --- |
+| `sec_seed_qwen_moe_same_condition` | `sec_form_8k_skeleton_v1` | 1 | `13/13` | 0 | `5` | `pass` |
 | `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 4 | `11-13/13` | 0 | `0-2` | `pass` |
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
@@ -30,6 +31,23 @@ Warnings:
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
 | `sec_t002_current_mainline_retest` | `sec_form_8k_skeleton_transfer_002` | 1 | `11/12` | 0 | `2` | `pass` |
 | `ntsb_transfer001_qwen_moe_same_condition` | `ntsb_investigation_transfer_surface_001` | 2 | `22/25` | 0 | `16` | `pass` |
+
+## SEC seed local Qwen MoE same-condition retest
+
+- Group: `sec_seed_qwen_moe_same_condition`
+- Fixture: `sec_form_8k_skeleton_v1`
+- Read: Use as the current standing SEC seed cell: the fresh current-mainline retest preserves 13/13 support with clean governance, while singleton item-treatment rows remain precision noise rather than promoted support.
+- Support band: `13/13`
+- Supported forbidden total: `0`
+- Unexpected band: `5`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `current_mainline_r1` | same-local-Qwen SEC seed current-pack variance rerun | `13/13` | `39/39` | 0 | 5 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `15` value-mode facts |
+
+Roots:
+- `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_seed_current_pack_rerun_20260605\sec-seed-current-pack-r1-20260605`
 
 ## SEC transfer_003 repaired-schema local Qwen MoE band
 

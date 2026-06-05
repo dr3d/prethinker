@@ -5,8 +5,8 @@
     {
       "id": "sec_form_8k_skeleton_seed",
       "fixture_id": "sec_form_8k_skeleton_v1",
-      "description": "SEC Form 8-K skeleton seed micro, rerun after exhibit/item treatment axis contract clarification.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_seed_value_axis_contract_repair_r2_20260605\\sec-seed-axis-contract-r2",
+      "description": "SEC Form 8-K skeleton seed micro current-mainline retest; support remains 13/13 while singleton item-treatment precision noise is visible.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_seed_current_pack_rerun_20260605\\sec-seed-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 13,
         "support.exact_support_ge_2": 13,

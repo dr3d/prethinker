@@ -312,8 +312,8 @@ The latest guard and manifest artifacts are
 `C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`; the
 fresh SEC transfer_003 refresh is archived at
 `C:\prethinker_tmp_archive\sec_t003_refresh_20260605`; the fresh SEC seed
-contract rerun is archived at
-`C:\prethinker_tmp_archive\sec_seed_value_axis_contract_repair_r2_20260605`;
+current-mainline retest is archived at
+`C:\prethinker_tmp_archive\sec_seed_current_pack_rerun_20260605`;
 the drift-slot status refresh is archived at
 `C:\prethinker_tmp_archive\compile_fact_drift_slot_visibility_20260605`.
 This is governance cleanup, colder provenance refresh, precision visibility,

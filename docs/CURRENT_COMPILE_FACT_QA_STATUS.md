@@ -15,7 +15,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
-- Registered variance groups on current cells: `8`
+- Registered variance groups on current cells: `9`
 - Unsupported expected facts support<2: `32`
 - Unsupported split support 0 / support 1: `21 / 11`
 - Unsupported repair postures: `compile_recall_boundary` x16, `primary_constant_boundary` x7, `compile_stability_boundary` x3, `source_choice_boundary` x3, `value_choice_variance_boundary` x3
@@ -78,7 +78,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 
 | Cell | Fixture | Support>=2 | Per-run exact | Unexpected>=2 | Forbidden | Replay gates | Source metadata |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | 13 / 13 | 39 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
+| `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | 13 / 13 | 39 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_seed_qwen_moe_same_condition` `13/13` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 5 / 13 | 18 / 39 | 2 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t001_current_mainline_retest_negative` `5/13` |
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | 11 / 12 | 31 / 36 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t002_current_mainline_retest` `11/12` |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 35 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t003_qwen_moe_repaired_schema` `11-13/13`, `sec_t003_dense_compile_substitution_controls` `10/12` |
@@ -94,6 +94,7 @@ They are attached to current cells so a favorable retained root is not promoted 
 
 | Cell | Fixture | Group | Roots | Support Band | Forbidden Total | Unexpected Band | Read |
 | --- | --- | --- | ---: | --- | ---: | --- | --- |
+| `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | `sec_seed_qwen_moe_same_condition` | 1 | `13/13` | 0 | `5` | Use as the current standing SEC seed cell: the fresh current-mainline retest preserves 13/13 support with clean governance, while singleton item-treatment rows remain precision noise rather than promoted support. |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_t001_current_mainline_retest_negative` | 1 | `5/13` | 0 | `15` | Use as a negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. |
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | `sec_t002_current_mainline_retest` | 1 | `11/12` | 0 | `2` | Use as the current standing transfer_002 cell: the fresh current-mainline Qwen MoE retest preserves 11/12 support with clean governance, while duplicate commission-file value support remains the live boundary. |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_qwen_moe_repaired_schema` | 4 | `11-13/13` | 0 | `0-2` | Use as an 11-13/13 same-condition band. Do not promote a favorable 13/13 draw as a fixed score. |
@@ -184,7 +185,7 @@ adds them to the fixture.
 
 | Cell | Note |
 | --- | --- |
-| `sec_form_8k_skeleton_seed` | SEC Form 8-K skeleton seed micro, rerun after exhibit/item treatment axis contract clarification. |
+| `sec_form_8k_skeleton_seed` | SEC Form 8-K skeleton seed micro current-mainline retest; support remains 13/13 while singleton item-treatment precision noise is visible. |
 | `sec_form_8k_skeleton_transfer_001` | SEC Form 8-K skeleton transfer 001 current-mainline negative retest; wrapper date recovered but registrant/exhibit axes destabilized. |
 | `sec_form_8k_skeleton_transfer_002` | SEC Form 8-K skeleton transfer 002 current-mainline retest; support count remains 11/12 with the duplicate commission-file value boundary visible. |
 | `sec_form_8k_skeleton_transfer_003` | SEC Form 8-K/A skeleton transfer 003, current axis-clean item/exhibit/treatment repair rerun. |

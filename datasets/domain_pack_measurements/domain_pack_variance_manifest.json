@@ -2,6 +2,19 @@
   "schema_version": "prethinker.domain_pack_variance_manifest.v1",
   "groups": [
     {
+      "id": "sec_seed_qwen_moe_same_condition",
+      "title": "SEC seed local Qwen MoE same-condition retest",
+      "fixture_id": "sec_form_8k_skeleton_v1",
+      "claim_read": "Use as the current standing SEC seed cell: the fresh current-mainline retest preserves 13/13 support with clean governance, while singleton item-treatment rows remain precision noise rather than promoted support.",
+      "roots": [
+        {
+          "id": "current_mainline_r1",
+          "role": "same-local-Qwen SEC seed current-pack variance rerun",
+          "path": "C:/prethinker_tmp_archive/sec_seed_current_pack_rerun_20260605/sec-seed-current-pack-r1-20260605"
+        }
+      ]
+    },
+    {
       "id": "sec_t003_qwen_moe_repaired_schema",
       "title": "SEC transfer_003 repaired-schema local Qwen MoE band",
       "fixture_id": "sec_form_8k_skeleton_transfer_003",

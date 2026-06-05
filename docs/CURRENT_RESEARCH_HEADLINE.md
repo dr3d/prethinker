@@ -71,6 +71,9 @@ SEC Form 8-K skeleton pack
       13 / 13, 0 / 7 supported forbidden; per-run exact 39 / 39
       the source-rejected Exhibit 10.1 `incorporated_by_reference`
       exhibit-role row no longer appears
+    later current-mainline seed retest:
+      13 / 13, 0 / 7 supported forbidden; five singleton unexpected
+      `sec_filing_item_treatment/4` rows, all support=1 only
     axis/value-domain/atom/lens gates clean in the repaired cells
   standing manifest over retained seed / transfer_001 / transfer_002:
     13 / 13; 5 / 13; 11 / 12
