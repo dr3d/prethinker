@@ -24,6 +24,27 @@ def test_utterance_regex_audit_classifies_semantic_trigger(tmp_path: Path) -> No
     assert report["rows"][0]["category"] == "semantic_trigger"
 
 
+def test_utterance_regex_audit_ignores_file_path_for_allowed_hints(tmp_path: Path) -> None:
+    path = tmp_path / "identifier_scratch" / "sample.py"
+    path.parent.mkdir()
+    path.write_text(
+        textwrap.dedent(
+            """
+            import re
+
+            def route(utterance):
+                return re.search(r"\\b(?:heading|section)\\b", utterance)
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report((path,))
+
+    assert report["summary"]["regex_hit_count"] == 1
+    assert report["rows"][0]["category"] == "semantic_trigger"
+
+
 def test_utterance_regex_audit_treats_compiled_regex_subject_separately(tmp_path: Path) -> None:
     path = tmp_path / "sample.py"
     path.write_text(

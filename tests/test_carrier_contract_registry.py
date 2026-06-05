@@ -441,6 +441,7 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert registrant["args"] == ["filing_id", "registrant_id", "jurisdiction", "source_or_scope"]
     registrant_text = " ".join(registrant["contract"] + registrant["forbidden_uses"])
     assert "sec_registrant_identifier/5" in registrant_text
+    assert "telephone values" in registrant_text
     assert "full_cover_table" in registrant_text
 
     assert identifier is not None

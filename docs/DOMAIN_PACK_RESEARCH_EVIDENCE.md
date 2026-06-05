@@ -419,15 +419,22 @@ C:\prethinker_tmp_archive\compile_fact_drift_slot_visibility_20260605
 A focused 2026-06-05 wrapper-emission contract probe clarified that a source
 cover page stating Form 8-K / Current Report should emit exactly one
 `sec_filing/6` wrapper row even when no separate filing/submission date is
-stated. The probe did not close the transfer_001 row: the wrapper appeared in
-only one of three local-Qwen wrapper-lens compiles, with zero supported
-forbidden facts. No deterministic projection was promoted because the remaining
-typed atoms do not independently carry a safe cover-page report-date wrapper;
-using source prose or a signature date would cross the governance boundary.
-Retained artifact:
+stated. The first wrapper-only probe did not close the transfer_001 row: the
+wrapper appeared in only one of three local-Qwen compiles, with zero supported
+forbidden facts. A follow-up central contract consistency cleanup added
+telephone to the `sec_registrant/4` instruction that points cover-page
+identifiers into `sec_registrant_identifier/5`. That second wrapper-only probe
+recovered `sec_filing/6` at 2/3 support, but telephone stayed 0/3 and registrant
+atoms split across `servicenow_inc`, `service_now_inc`, and `svc_now_inc`.
+No deterministic projection was promoted because the remaining typed atoms do
+not independently carry a safe cover-page report-date wrapper; using source
+prose or a signature date would cross the governance boundary. These are
+focused mechanism probes, not a standing full-bundle support lift. Retained
+artifacts:
 
 ```text
 C:\prethinker_tmp_archive\sec_wrapper_contract_probe_20260605
+C:\prethinker_tmp_archive\sec_identifier_contract_probe_20260605
 ```
 
 The Gemma/Qwen run artifacts were generated before a local LM Studio metadata

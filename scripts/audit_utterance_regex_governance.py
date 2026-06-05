@@ -273,7 +273,7 @@ def _classify(
     call_name: str,
     file: str,
 ) -> tuple[str, str]:
-    joined = " ".join([pattern, subject, function, call_name, file]).casefold()
+    joined = " ".join([pattern, subject, function, call_name]).casefold()
     if FORBIDDEN_PATTERN_HINT_RE.search(pattern):
         return "forbidden_or_needs_review", "pattern contains fixture/batch/probe vocabulary"
     source_alias_functions = {

@@ -808,7 +808,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "contract": [
             "SEC registrant relation: link a filing to the source-stated registrant and jurisdiction of incorporation or organization.",
             "registrant_id is a compact normalized entity atom from the registrant name; jurisdiction is a compact state or not_stated.",
-            "Use sec_registrant_identifier/5 for CIK, commission file number, IRS EIN, ticker, and exchange values.",
+            "Use sec_registrant_identifier/5 for CIK, commission file number, IRS EIN, ticker, exchange, and telephone values.",
             "Do not pack the whole cover-page table or address block into registrant_id or jurisdiction.",
         ],
         "value_domains": {},
