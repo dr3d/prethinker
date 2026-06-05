@@ -41,6 +41,13 @@ def parse_args() -> argparse.Namespace:
         help="Root containing independent candidate oracle reviews. Reviews do not mutate fixture oracles.",
     )
     parser.add_argument("--candidate-review", action="append", default=[], type=Path)
+    parser.add_argument(
+        "--source-oracle-review-root",
+        type=Path,
+        default=ROOT / "datasets" / "source_oracle_reviews",
+        help="Root containing source-only expected/forbidden oracle reviews for draft packs.",
+    )
+    parser.add_argument("--source-oracle-review", action="append", default=[], type=Path)
     parser.add_argument("--support-threshold", type=int, default=2)
     parser.add_argument("--matcher", choices=("unification", "constant_slot"), default="constant_slot")
     parser.add_argument("--apply-domain-reducers", action="store_true")
@@ -64,6 +71,10 @@ def main() -> int:
         apply_domain_reducers=args.apply_domain_reducers,
         compile_root=args.compile_root,
         candidate_review_paths=_candidate_review_paths(root=args.candidate_review_root, explicit=args.candidate_review),
+        source_oracle_review_paths=_review_paths(
+            root=args.source_oracle_review_root,
+            explicit=args.source_oracle_review,
+        ),
     )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -89,6 +100,7 @@ def build_report(
     apply_domain_reducers: bool = False,
     compile_root: Path | None = None,
     candidate_review_paths: list[Path] | None = None,
+    source_oracle_review_paths: list[Path] | None = None,
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     errors: list[str] = []
@@ -124,6 +136,13 @@ def build_report(
                 candidate_review_paths=candidate_review_paths or [],
                 matcher=matcher,
             )
+            _apply_source_oracle_reviews_to_series_report(
+                series_report,
+                proposal_id=proposal_id,
+                signature=signature,
+                source_oracle_review_paths=source_oracle_review_paths or [],
+                matcher=matcher,
+            )
         state = _candidate_state(series_report) if series_report else "unmeasured"
         row = {
             "proposal_id": proposal_id,
@@ -134,6 +153,7 @@ def build_report(
             "errors": row_errors,
             "summary": series_report.get("summary", {}) if series_report else {},
             "candidate_reviews": series_report.get("candidate_reviews", []) if series_report else [],
+            "source_oracle_reviews": series_report.get("source_oracle_reviews", []) if series_report else [],
             "supported_unexpected_examples": _supported_unexpected_examples(series_report),
             "supported_forbidden_examples": _supported_forbidden_examples(series_report),
         }
@@ -148,6 +168,7 @@ def build_report(
         "matcher": matcher,
         "domain_reducers_applied": bool(apply_domain_reducers),
         "candidate_review_count": len(candidate_review_paths or []),
+        "source_oracle_review_count": len(source_oracle_review_paths or []),
         "summary": {
             "proposal_count": len(rows),
             "blocking_errors": len(errors),
@@ -175,6 +196,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Matcher: `{report.get('matcher', '')}`",
         f"- Domain reducers applied: `{report.get('domain_reducers_applied', False)}`",
         f"- Candidate review files: `{report.get('candidate_review_count', 0)}`",
+        f"- Source oracle review files: `{report.get('source_oracle_review_count', 0)}`",
         f"- Proposals: `{summary.get('proposal_count', 0)}`",
         f"- Blocking errors: `{summary.get('blocking_errors', 0)}`",
         f"- Status: `{summary.get('status', '')}`",
@@ -325,6 +347,85 @@ def _apply_candidate_reviews_to_series_report(
     summary["supported_forbidden_fact_count"] = len(supported_forbidden)
 
 
+def _apply_source_oracle_reviews_to_series_report(
+    series_report: dict[str, Any],
+    *,
+    proposal_id: str,
+    signature: str,
+    source_oracle_review_paths: list[Path],
+    matcher: str,
+) -> None:
+    reviews = [
+        review
+        for path in source_oracle_review_paths
+        for review in [_load_source_oracle_review(path, fixture_id=str(series_report.get("fixture_id") or ""))]
+        if review
+        and review.get("proposal_id") == proposal_id
+        and review.get("candidate_signature") == signature
+    ]
+    if not reviews:
+        return
+    compile_facts_by_run = _compile_facts_by_run(series_report)
+    forbidden_rows = list(series_report.get("forbidden_rows") or [])
+    expected_rows = list(series_report.get("rows") or [])
+    expected_facts = {str(row.get("expected_fact") or "") for row in expected_rows}
+    forbidden_facts = {str(row.get("forbidden_fact") or "") for row in forbidden_rows}
+    for review in reviews:
+        for fact in review.get("expected_facts", []):
+            if fact in expected_facts:
+                continue
+            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
+            expected_rows.append(
+                {
+                    "expected_fact": fact,
+                    "support_count": len(run_ids),
+                    "support_runs": run_ids,
+                    "meets_threshold": len(run_ids) >= int(series_report.get("support_threshold") or 2),
+                    "same_predicate_variants": [],
+                    "source_oracle_review_id": review.get("review_id", ""),
+                }
+            )
+            expected_facts.add(fact)
+        for fact in review.get("forbidden_facts", []):
+            if fact in forbidden_facts:
+                continue
+            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
+            forbidden_rows.append(
+                {
+                    "forbidden_fact": fact,
+                    "support_count": len(run_ids),
+                    "support_runs": run_ids,
+                    "supported": bool(run_ids),
+                    "source_oracle_review_id": review.get("review_id", ""),
+                }
+            )
+            forbidden_facts.add(fact)
+    supported_rows = [
+        row for row in expected_rows if int(row.get("support_count") or 0) >= int(series_report.get("support_threshold") or 2)
+    ]
+    supported_forbidden = [row for row in forbidden_rows if row.get("supported")]
+    series_report["rows"] = expected_rows
+    series_report["forbidden_rows"] = forbidden_rows
+    series_report["source_oracle_reviews"] = [
+        {
+            "review_id": review.get("review_id", ""),
+            "path": _rel(review.get("path")) if isinstance(review.get("path"), Path) else "",
+            "expected_fact_count": len(review.get("expected_facts", [])),
+            "forbidden_fact_count": len(review.get("forbidden_facts", [])),
+            "source_only_review": review.get("source_only_review"),
+            "reviewer_blind_to_model_outputs": review.get("reviewer_blind_to_model_outputs"),
+            "reviewer_read_model_outputs": review.get("reviewer_read_model_outputs"),
+        }
+        for review in reviews
+    ]
+    summary = series_report.setdefault("summary", {})
+    summary["expected_fact_count"] = len(expected_rows)
+    summary["supported_fact_count"] = len(supported_rows)
+    summary["unsupported_fact_count"] = len(expected_rows) - len(supported_rows)
+    summary["forbidden_fact_count"] = len(forbidden_rows)
+    summary["supported_forbidden_fact_count"] = len(supported_forbidden)
+
+
 def _compile_facts_by_run(series_report: dict[str, Any]) -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
     for run in series_report.get("runs", []):
@@ -380,6 +481,10 @@ def _proposal_paths(*, root: Path, explicit: list[Path]) -> list[Path]:
 
 
 def _candidate_review_paths(*, root: Path, explicit: list[Path]) -> list[Path]:
+    return _review_paths(root=root, explicit=explicit)
+
+
+def _review_paths(*, root: Path, explicit: list[Path]) -> list[Path]:
     paths = [path.resolve() for path in explicit]
     if root.exists():
         paths.extend(sorted(path.resolve() for path in root.rglob("manifest.json")))
@@ -411,6 +516,40 @@ def _load_candidate_review(path: Path) -> dict[str, Any]:
         "reviewer_blind_to_model_outputs": manifest.get("reviewer_blind_to_model_outputs"),
         "reviewer_read_forbidden_inputs": manifest.get("reviewer_read_forbidden_inputs"),
         "context_caveat": str(manifest.get("reviewer_context_caveat") or "").strip(),
+    }
+
+
+def _load_source_oracle_review(path: Path, *, fixture_id: str) -> dict[str, Any]:
+    manifest_path = path
+    if path.is_dir():
+        manifest_path = path / "manifest.json"
+    manifest = _load_json(manifest_path)
+    if not manifest or str(manifest.get("status") or "").strip() != "complete":
+        return {}
+    if manifest.get("source_only_review") is not True:
+        return {}
+    if manifest.get("reviewer_blind_to_model_outputs") is not True:
+        return {}
+    if manifest.get("reviewer_read_model_outputs") is not False:
+        return {}
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    if fixture_id not in outputs:
+        return {}
+    review_dir = manifest_path.parent
+    fixture_dir = review_dir / fixture_id
+    expected_path = fixture_dir / "expected_facts.pl"
+    forbidden_path = fixture_dir / "forbidden_facts.pl"
+    return {
+        "path": manifest_path,
+        "review_id": str(manifest.get("review_id") or review_dir.name).strip(),
+        "proposal_id": str(manifest.get("proposal_id") or "").strip(),
+        "fixture_id": fixture_id,
+        "candidate_signature": str(manifest.get("predicate") or "").strip(),
+        "expected_facts": _review_fact_lines(expected_path),
+        "forbidden_facts": _review_fact_lines(forbidden_path),
+        "source_only_review": manifest.get("source_only_review"),
+        "reviewer_blind_to_model_outputs": manifest.get("reviewer_blind_to_model_outputs"),
+        "reviewer_read_model_outputs": manifest.get("reviewer_read_model_outputs"),
     }
 
 

@@ -135,6 +135,141 @@ def test_candidate_review_forbidden_facts_block_prior_candidate_signal(tmp_path:
     assert row["candidate_reviews"][0]["reviewer_blind_to_model_outputs"] is True
 
 
+def test_source_oracle_review_expected_facts_become_oracle_support(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    proposal = _proposal(tmp_path / "proposal.json")
+    run1 = _compile(tmp_path / "run1" / "compile.json", ["demo_candidate(row_1, alpha, src_a)."])
+    run2 = _compile(tmp_path / "run2" / "compile.json", ["demo_candidate(row_2, alpha, src_b)."])
+    review_dir = tmp_path / "source_reviews" / "demo_source_review"
+    _write(
+        review_dir / "manifest.json",
+        json.dumps(
+            {
+                "review_id": "demo_source_review",
+                "proposal_id": "demo_candidate_v1",
+                "predicate": "demo_candidate/3",
+                "status": "complete",
+                "source_only_review": True,
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_model_outputs": False,
+                "outputs": {"demo_fixture": {"expected_fact_count": 1, "forbidden_fact_count": 0}},
+            },
+            indent=2,
+        ),
+    )
+    _write(review_dir / "demo_fixture" / "expected_facts.pl", "demo_candidate(Item, alpha, Src).\n")
+    _write(review_dir / "demo_fixture" / "forbidden_facts.pl", "")
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[proposal],
+        micro_root=micro_root,
+        compile_paths=[run1, run2],
+        support_threshold=2,
+        matcher="constant_slot",
+        source_oracle_review_paths=[review_dir / "manifest.json"],
+    )
+
+    row = report["proposals"][0]
+    assert row["state"] == "oracle_supported"
+    assert row["summary"]["expected_fact_count"] == 1
+    assert row["summary"]["supported_fact_count"] == 1
+    assert row["source_oracle_reviews"][0]["source_only_review"] is True
+    rendered = render_markdown(report)
+    assert "Source oracle review files: `1`" in rendered
+
+
+def test_source_oracle_review_forbidden_facts_block_prior_candidate_signal(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    proposal = _proposal(tmp_path / "proposal.json")
+    run1 = _compile(tmp_path / "run1" / "compile.json", ["demo_candidate(row_1, forbidden_value, src_a)."])
+    run2 = _compile(tmp_path / "run2" / "compile.json", ["demo_candidate(row_2, forbidden_value, src_b)."])
+    review_dir = tmp_path / "source_reviews" / "demo_source_review"
+    _write(
+        review_dir / "manifest.json",
+        json.dumps(
+            {
+                "review_id": "demo_source_review",
+                "proposal_id": "demo_candidate_v1",
+                "predicate": "demo_candidate/3",
+                "status": "complete",
+                "source_only_review": True,
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_model_outputs": False,
+                "outputs": {"demo_fixture": {"expected_fact_count": 0, "forbidden_fact_count": 1}},
+            },
+            indent=2,
+        ),
+    )
+    _write(review_dir / "demo_fixture" / "expected_facts.pl", "")
+    _write(review_dir / "demo_fixture" / "forbidden_facts.pl", "demo_candidate(_, forbidden_value, _).\n")
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[proposal],
+        micro_root=micro_root,
+        compile_paths=[run1, run2],
+        support_threshold=2,
+        matcher="constant_slot",
+        source_oracle_review_paths=[review_dir / "manifest.json"],
+    )
+
+    row = report["proposals"][0]
+    assert row["state"] == "blocked_forbidden"
+    assert row["summary"]["forbidden_fact_count"] == 1
+    assert row["summary"]["supported_forbidden_fact_count"] == 1
+    assert row["supported_forbidden_examples"][0]["source_oracle_review_id"] == "demo_source_review"
+
+
+def test_source_oracle_review_with_different_proposal_is_ignored(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    proposal = _proposal(tmp_path / "proposal.json")
+    run1 = _compile(tmp_path / "run1" / "compile.json", ["demo_candidate(row_1, alpha, src_a)."])
+    run2 = _compile(tmp_path / "run2" / "compile.json", ["demo_candidate(row_1, alpha, src_a)."])
+    review_dir = tmp_path / "source_reviews" / "demo_source_review"
+    _write(
+        review_dir / "manifest.json",
+        json.dumps(
+            {
+                "review_id": "demo_source_review",
+                "proposal_id": "different_proposal_v1",
+                "predicate": "demo_candidate/3",
+                "status": "complete",
+                "source_only_review": True,
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_model_outputs": False,
+                "outputs": {"demo_fixture": {"expected_fact_count": 1, "forbidden_fact_count": 0}},
+            },
+            indent=2,
+        ),
+    )
+    _write(review_dir / "demo_fixture" / "expected_facts.pl", "demo_candidate(Item, alpha, Src).\n")
+    _write(review_dir / "demo_fixture" / "forbidden_facts.pl", "")
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[proposal],
+        micro_root=micro_root,
+        compile_paths=[run1, run2],
+        support_threshold=2,
+        matcher="constant_slot",
+        source_oracle_review_paths=[review_dir / "manifest.json"],
+    )
+
+    row = report["proposals"][0]
+    assert row["state"] == "candidate_signal_no_oracle"
+    assert row["source_oracle_reviews"] == []
+
+
 def test_proposal_evidence_reports_oracle_supported_when_expected_facts_match(tmp_path: Path) -> None:
     micro_root = tmp_path / "micro"
     fixture = micro_root / "demo_fixture"

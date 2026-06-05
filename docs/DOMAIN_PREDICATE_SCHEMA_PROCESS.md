@@ -232,6 +232,11 @@ means repeated typed facts exist in retained compiles, but the fixture oracle
 did not predeclare them; those rows require independent review before any
 claim-bearing promotion.
 
+When a source-only expected/forbidden oracle review has been imported, the same
+evidence report can consume it from `datasets/source_oracle_reviews`. Matching
+review facts become proposal evidence for the current fixture only; they do not
+mutate the original fixture oracle.
+
 5. Define allowed value domains.
 
 For enum-like slots, declare compact allowed values before running broad
