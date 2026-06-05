@@ -11,6 +11,13 @@ Forbidden facts are negative sentinels; off-domain or prose-shaped sentinel valu
 - Warnings: `14`
 - Status: `pass`
 
+## Warning Classes
+
+| Warning class | Count |
+| --- | ---: |
+| `forbidden_atom_shape` | 4 |
+| `forbidden_value_domain` | 10 |
+
 | Review | Fixture | Predicate | Expected | Forbidden | Blind | Read Forbidden Inputs | Errors | Warnings |
 | --- | --- | --- | ---: | ---: | --- | --- | --- | --- |
 | `fda_response_assessment_item_oracle_review_20260604_fda_warning_letter_domain_transfer_001` | `fda_warning_letter_domain_transfer_001` | `fda_response_assessment_item/6` | 0 | 9 | `True` | `False` | `[]` | `['candidate_forbidden_facts.pl:line_15:forbidden_value_domain:cgmps_citation:value_not_allowed:cfr_21_211_22_d', 'candidate_forbidden_facts.pl:line_16:forbidden_value_domain:cgmps_citation:value_not_allowed:cfr_21_211_28_a', 'candidate_forbidden_facts.pl:line_17:forbidden_value_domain:cgmps_citation:value_not_allowed:cfr_21_211_42_c_10_vi', 'candidate_forbidden_facts.pl:line_18:forbidden_value_domain:cgmps_citation:value_not_allowed:cfr_21_211_188', 'candidate_forbidden_facts.pl:line_21:forbidden_atom_shape:quoted_atom_contains_whitespace:arg6']` |

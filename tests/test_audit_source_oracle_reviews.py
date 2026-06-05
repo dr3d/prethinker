@@ -165,6 +165,8 @@ def test_source_oracle_review_audit_warns_on_forbidden_sentinel_bad_values(tmp_p
         "forbidden_facts.pl:line_1:forbidden_value_domain:gap_kind:" in warning
         for warning in output_warnings
     )
+    assert report["summary"]["warning_kind_counts"]["forbidden_atom_shape"] == 1
+    assert report["summary"]["warning_kind_counts"]["forbidden_value_domain"] == 1
 
 
 def test_source_oracle_review_audit_blocks_count_mismatch(tmp_path: Path) -> None:

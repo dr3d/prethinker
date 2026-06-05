@@ -11,6 +11,13 @@ Forbidden facts are negative sentinels; off-domain or prose-shaped sentinel valu
 - Warnings: `12`
 - Status: `pass`
 
+## Warning Classes
+
+| Warning class | Count |
+| --- | ---: |
+| `forbidden_atom_shape` | 5 |
+| `forbidden_value_domain` | 7 |
+
 | Review | Proposal | Predicate | Status | Fixture | Expected | Forbidden | Errors | Warnings |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
 | `procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605` | `procurement_gao_decision_wrapper_v1` | `gao_bid_protest_decision/7` | `complete` | `procurement_contract_ugly_002` | 1 | 8 | `[]` | `['forbidden_facts.pl:line_9:forbidden_value_domain:decision_status:value_not_allowed:agency_failed_to_document_consideration_of_an_apparent_oci', 'forbidden_facts.pl:line_12:forbidden_atom_shape:registered_carrier_prose_shaped_value:arg4']` |

@@ -14,6 +14,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -89,6 +90,7 @@ def build_report(review_paths: list[Path]) -> dict[str, Any]:
             "output_count": output_count,
             "blocking_errors": len(errors),
             "warnings": len(warnings),
+            "warning_kind_counts": _warning_kind_counts(warnings),
             "status": "pass" if not errors else "fail",
         },
         "reviews": rows,
@@ -111,9 +113,19 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Warnings: `{summary['warnings']}`",
         f"- Status: `{summary['status']}`",
         "",
-        "| Review | Proposal | Predicate | Status | Fixture | Expected | Forbidden | Errors | Warnings |",
-        "| --- | --- | --- | --- | --- | ---: | ---: | --- | --- |",
     ]
+    warning_kinds = summary.get("warning_kind_counts") or {}
+    if warning_kinds:
+        lines.extend(["## Warning Classes", "", "| Warning class | Count |", "| --- | ---: |"])
+        for kind, count in warning_kinds.items():
+            lines.append(f"| `{kind}` | {count} |")
+        lines.append("")
+    lines.extend(
+        [
+            "| Review | Proposal | Predicate | Status | Fixture | Expected | Forbidden | Errors | Warnings |",
+            "| --- | --- | --- | --- | --- | ---: | ---: | --- | --- |",
+        ]
+    )
     for row in report["reviews"]:
         if not row["outputs"]:
             lines.append(
@@ -464,6 +476,17 @@ def _rel(path: Path) -> str:
         return str(path.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
     except ValueError:
         return str(path)
+
+
+def _warning_kind_counts(warnings: list[str]) -> dict[str, int]:
+    return dict(sorted(Counter(_warning_kind(warning) for warning in warnings).items()))
+
+
+def _warning_kind(warning: str) -> str:
+    for token in str(warning).split(":"):
+        if token.endswith("_value_domain") or token.endswith("_atom_shape"):
+            return token
+    return str(warning).split(":", 1)[0] or "unknown"
 
 
 if __name__ == "__main__":
