@@ -240,6 +240,7 @@ def _validate_registry(path: Path) -> dict[str, Any]:
 
     lenses = data.get("lenses", [])
     lens_rows: list[dict[str, Any]] = []
+    offered_signatures: set[str] = set()
     if lenses:
         if not isinstance(lenses, list):
             errors.append("lenses_not_list")
@@ -273,10 +274,13 @@ def _validate_registry(path: Path) -> dict[str, Any]:
                     lens_errors.append("duplicate_allowed_signature")
                 if "domain_omission/5" in predicate_signatures and "domain_omission/5" not in allowed:
                     lens_warnings.append("domain_omission_not_allowed")
+                if len(lenses) > 1 and set(allowed) == predicate_signatures:
+                    lens_warnings.append("lens_offers_entire_domain")
                 if not str(item.get("purpose") or "").strip():
                     lens_warnings.append("missing_purpose")
                 errors.extend(f"lens:{lens_id}:{error}" for error in lens_errors)
                 warnings.extend(f"lens:{lens_id}:{warning}" for warning in lens_warnings)
+                offered_signatures.update(allowed)
                 lens_rows.append(
                     {
                         "id": lens_id,
@@ -285,6 +289,8 @@ def _validate_registry(path: Path) -> dict[str, Any]:
                         "warnings": lens_warnings,
                     }
                 )
+            for signature in sorted(predicate_signatures - offered_signatures):
+                errors.append(f"predicate_not_offered_by_any_lens:{signature}")
 
     return {
         "registry": str(path),

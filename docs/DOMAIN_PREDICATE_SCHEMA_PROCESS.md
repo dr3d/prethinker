@@ -122,6 +122,9 @@ argument order aligned with the carrier contracts, and does not silently drift
 into a local one-off predicate language. It also validates lens allowlists:
 every `lenses[].allowed_signatures[]` entry must already exist in the domain
 registry, so a lens cannot acquire predicates that the domain did not offer.
+The validator also blocks predicates that appear in the domain registry but are
+not offered by any lens, and warns if a multi-lens registry hands an entire
+domain vocabulary to one lens.
 
 Use a lens-scoped registry in the compile runner with:
 

@@ -195,3 +195,117 @@ def test_domain_predicate_schema_validator_blocks_lens_outside_registry(tmp_path
         "lens:wrapper:allowed_signature_not_in_domain_registry:fda_violation/5"
         in report["registries"][0]["errors"]
     )
+
+
+def test_domain_predicate_schema_validator_blocks_predicate_not_offered_by_any_lens(tmp_path):
+    path = tmp_path / "ontology_registry.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "candidate_profile_registry_v1",
+                "fixture": "bad_orphan_predicate_v1",
+                "lenses": [
+                    {
+                        "id": "wrapper",
+                        "purpose": "Wrapper lens.",
+                        "allowed_signatures": ["fda_warning_letter/5"],
+                    }
+                ],
+                "predicates": [
+                    {
+                        "signature": "fda_warning_letter/5",
+                        "args": [
+                            "letter_id",
+                            "issuing_office",
+                            "recipient_entity",
+                            "issue_date",
+                            "source_or_scope",
+                        ],
+                        "category": "fda_document_wrapper",
+                        "notes": "Registered wrapper.",
+                    },
+                    {
+                        "signature": "fda_violation/5",
+                        "args": [
+                            "violation_id",
+                            "letter_id",
+                            "violation_number",
+                            "violation_category",
+                            "source_or_scope",
+                        ],
+                        "category": "fda_cgmp_violation",
+                        "notes": "Registered violation carrier not offered to any lens.",
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report([path])
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "predicate_not_offered_by_any_lens:fda_violation/5"
+        in report["registries"][0]["errors"]
+    )
+
+
+def test_domain_predicate_schema_validator_warns_when_lens_offers_entire_domain(tmp_path):
+    signatures = ["fda_warning_letter/5", "fda_violation/5"]
+    predicates = [
+        {
+            "signature": "fda_warning_letter/5",
+            "args": [
+                "letter_id",
+                "issuing_office",
+                "recipient_entity",
+                "issue_date",
+                "source_or_scope",
+            ],
+            "category": "fda_document_wrapper",
+            "notes": "Registered wrapper.",
+        },
+        {
+            "signature": "fda_violation/5",
+            "args": [
+                "violation_id",
+                "letter_id",
+                "violation_number",
+                "violation_category",
+                "source_or_scope",
+            ],
+            "category": "fda_cgmp_violation",
+            "notes": "Registered violation carrier.",
+        },
+    ]
+    path = tmp_path / "ontology_registry.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "candidate_profile_registry_v1",
+                "fixture": "broad_lens_v1",
+                "lenses": [
+                    {
+                        "id": "wrapper",
+                        "purpose": "Broad wrapper lens.",
+                        "allowed_signatures": signatures,
+                    },
+                    {
+                        "id": "violations",
+                        "purpose": "Broad violation lens.",
+                        "allowed_signatures": signatures,
+                    },
+                ],
+                "predicates": predicates,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report([path])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["warning_count"] == 2
+    assert "lens:wrapper:lens_offers_entire_domain" in report["registries"][0]["warnings"]
+    assert "lens:violations:lens_offers_entire_domain" in report["registries"][0]["warnings"]
