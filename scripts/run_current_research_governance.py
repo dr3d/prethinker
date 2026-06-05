@@ -172,6 +172,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "candidate_oracle_reviews",
+            "command": [
+                python,
+                "scripts/audit_candidate_oracle_reviews.py",
+                "--out-json",
+                str(report_root / "candidate_oracle_reviews.json"),
+                "--out-md",
+                str(report_root / "candidate_oracle_reviews.md"),
+                "--expect-md",
+                "docs/CANDIDATE_ORACLE_REVIEW_STATUS.md",
+            ],
+        },
+        {
             "id": "sec_value_axis_integrity",
             "command": [
                 python,

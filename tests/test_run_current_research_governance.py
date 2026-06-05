@@ -16,6 +16,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "fixture_bank_domain_inventory",
         "domain_predicate_proposal_status",
         "pending_external_work_orders",
+        "candidate_oracle_reviews",
         "sec_value_axis_integrity",
         "compile_fact_qa_exclusions",
         "compile_fact_qa_manifest_sources",
@@ -26,6 +27,9 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
     pending_command = next(command for command in commands if command["id"] == "pending_external_work_orders")
     assert "--expect-md" in pending_command["command"]
     assert "docs/PENDING_EXTERNAL_WORK_ORDERS.md" in pending_command["command"]
+    review_command = next(command for command in commands if command["id"] == "candidate_oracle_reviews")
+    assert "--expect-md" in review_command["command"]
+    assert "docs/CANDIDATE_ORACLE_REVIEW_STATUS.md" in review_command["command"]
 
 
 def test_governance_commands_can_include_pytest(tmp_path: Path) -> None:

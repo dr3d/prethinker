@@ -378,6 +378,14 @@ Fixture-bank / next-domain inventory
     coverage: 8 active proposal and standalone tmp work-order zip packets
     blocking errors: 0
     warnings: 0
+  retained candidate-oracle review audit:
+    docs\CANDIDATE_ORACLE_REVIEW_STATUS.md
+    current retained reviews: 1
+    blocking errors: 0
+    warnings: 0
+    scope: validates blind/source-only metadata and candidate
+      expected/forbidden fact-file shape only; it does not read source prose or
+      decide whether the review facts are true.
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,
