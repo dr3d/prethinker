@@ -207,6 +207,7 @@ def import_review_zip(
             if dropped:
                 warnings.append(f"dropped_non_review_entries:{len(dropped)}")
             audit = audit_reviews([stage_dir / "manifest.json"])
+            warnings.extend(f"audit:{warning}" for warning in _audit_warnings(audit))
             if audit["summary"]["status"] != "pass":
                 errors.extend(
                     f"audit:{error}"
@@ -378,6 +379,15 @@ def _manifest_independence_errors(manifest: dict[str, Any]) -> list[str]:
     if manifest.get("source_only_review") is False:
         errors.append("returned_manifest_declares_not_source_only")
     return errors
+
+
+def _audit_warnings(audit: dict[str, Any]) -> list[str]:
+    warnings: list[str] = []
+    for row in audit.get("reviews", []):
+        warnings.extend(str(warning) for warning in row.get("warnings", []))
+        for output in row.get("outputs", []):
+            warnings.extend(str(warning) for warning in output.get("warnings", []))
+    return warnings
 
 
 def _source_file_map(fixture_ids: list[str]) -> tuple[dict[str, str], list[str]]:

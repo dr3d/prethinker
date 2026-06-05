@@ -125,6 +125,7 @@ def import_review_zip(
             if dropped:
                 warnings.append(f"dropped_non_review_entries:{len(dropped)}")
             audit = audit_reviews([stage_dir / "manifest.json"])
+            warnings.extend(f"audit:{warning}" for warning in _audit_warnings(audit))
             if audit["summary"]["status"] != "pass":
                 errors.extend(f"audit:{error}" for row in audit["reviews"] for error in row["errors"])
                 return _report(
@@ -209,6 +210,10 @@ def _stage_review_files(
         if entry["name"] not in allowed_sources:
             dropped.append(entry["name"])
     return copied, dropped
+
+
+def _audit_warnings(audit: dict[str, Any]) -> list[str]:
+    return [warning for row in audit.get("reviews", []) for warning in row.get("warnings", [])]
 
 
 def _copy_entry(archive: zipfile.ZipFile, name: str, dest: Path) -> None:

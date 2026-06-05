@@ -154,6 +154,29 @@ def test_import_source_oracle_review_blocks_wrong_fact_shape(tmp_path: Path) -> 
     assert "audit:expected_facts.pl:line_1:predicate_mismatch:wrong_oracle" in report["errors"]
 
 
+def test_import_source_oracle_review_surfaces_audit_warnings(tmp_path: Path) -> None:
+    package = _write_zip(
+        tmp_path / "review.zip",
+        {
+            "manifest.json": _manifest(),
+            f"{FIXTURE_ID}/expected_facts.pl": "demo_oracle(Row, alpha, Src).\n",
+            f"{FIXTURE_ID}/forbidden_facts.pl": "demo_oracle(_, 'bad prose sentinel', _).\n",
+        },
+    )
+    proposal = _proposal(tmp_path / "proposal.json")
+
+    report = import_review_zip(
+        zip_path=package,
+        proposal_path=proposal,
+        dest_root=tmp_path / "reviews",
+        review_id="demo_source_oracle_review_20260605",
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["warnings"] >= 1
+    assert any("audit:forbidden_facts.pl:line_1:forbidden_atom_shape:" in warning for warning in report["warnings"])
+
+
 def test_import_source_oracle_review_blocks_missing_source_fixture(tmp_path: Path) -> None:
     package = _write_zip(
         tmp_path / "review.zip",

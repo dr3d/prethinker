@@ -88,6 +88,28 @@ def test_import_candidate_oracle_review_blocks_unfilled_template(tmp_path: Path)
     assert "audit:review_has_no_expected_or_forbidden_facts" in report["errors"]
 
 
+def test_import_candidate_oracle_review_surfaces_audit_warnings(tmp_path: Path) -> None:
+    package = _write_zip(
+        tmp_path / "review.zip",
+        {
+            "manifest.json": _manifest(predicate="fda_response_documentation_gap/5"),
+            "candidate_expected_facts.pl": (
+                "fda_response_documentation_gap("
+                "Gap, violation_1, cfr_21_211_113_b, supporting_documentation, Src).\n"
+            ),
+            "candidate_forbidden_facts.pl": (
+                "fda_response_documentation_gap(_, _, _, 'Your response is inadequate.', _).\n"
+            ),
+        },
+    )
+
+    report = import_review_zip(zip_path=package, dest_root=tmp_path / "reviews")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["warnings"] >= 1
+    assert any("audit:candidate_forbidden_facts.pl:line_1:forbidden_atom_shape:" in warning for warning in report["warnings"])
+
+
 def test_import_candidate_oracle_review_refuses_overwrite_without_flag(tmp_path: Path) -> None:
     package = _write_zip(
         tmp_path / "review.zip",
