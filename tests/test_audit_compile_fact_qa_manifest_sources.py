@@ -5,7 +5,8 @@ import scripts.audit_compile_fact_qa_manifest_sources as source_audit
 from scripts.audit_compile_fact_qa_manifest_sources import audit_manifest
 
 
-def test_audit_compile_fact_manifest_sources_accepts_manifested_bundle(tmp_path: Path) -> None:
+def test_audit_compile_fact_manifest_sources_accepts_manifested_bundle(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(source_audit, "REPO_ROOT", tmp_path / "repo")
     bundle = tmp_path / "bundle"
     _write_bundle_compile_json(bundle, "run1")
     _write_bundle_compile_json(bundle, "run2")
@@ -47,7 +48,8 @@ def test_audit_compile_fact_manifest_sources_accepts_manifested_bundle(tmp_path:
     assert report["cells"][0]["artifact_gate_summaries"]["lens_value_domains"]["status"] == "pass"
 
 
-def test_audit_compile_fact_manifest_sources_recovers_legacy_bundle_metadata(tmp_path: Path) -> None:
+def test_audit_compile_fact_manifest_sources_recovers_legacy_bundle_metadata(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(source_audit, "REPO_ROOT", tmp_path / "repo")
     bundle = tmp_path / "legacy_bundle"
     _write_flat_bundle_compile_json(bundle, "run1")
     _write_flat_bundle_compile_json(bundle, "run2")

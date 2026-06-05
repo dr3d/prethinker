@@ -5,7 +5,8 @@ import scripts.audit_reference_judge_null_control_reports as null_reports
 from scripts.audit_reference_judge_null_control_reports import audit_manifest
 
 
-def test_audit_reference_judge_null_control_reports_accepts_pass(tmp_path: Path) -> None:
+def test_audit_reference_judge_null_control_reports_accepts_pass(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(null_reports, "REPO_ROOT", tmp_path / "repo")
     report = tmp_path / "report.json"
     _write_report(report)
     manifest = _write_manifest(tmp_path, report)
@@ -17,7 +18,8 @@ def test_audit_reference_judge_null_control_reports_accepts_pass(tmp_path: Path)
     assert result["reports"][0]["exact_null_verdicts"] == 0
 
 
-def test_audit_reference_judge_null_control_reports_blocks_exact_null(tmp_path: Path) -> None:
+def test_audit_reference_judge_null_control_reports_blocks_exact_null(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(null_reports, "REPO_ROOT", tmp_path / "repo")
     report = tmp_path / "report.json"
     _write_report(report, exact_null_verdicts=1, status="blocked")
     manifest = _write_manifest(tmp_path, report)

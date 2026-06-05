@@ -12,6 +12,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "historical_score_claims",
         "domain_predicate_schema",
         "domain_pack_status",
+        "domain_pack_variance_status",
         "domain_accountability_status",
         "fixture_bank_domain_inventory",
         "domain_predicate_proposal_status",

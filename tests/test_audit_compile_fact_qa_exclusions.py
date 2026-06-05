@@ -5,7 +5,8 @@ import scripts.audit_compile_fact_qa_exclusions as exclusions
 from scripts.audit_compile_fact_qa_exclusions import audit_manifests
 
 
-def test_compile_fact_exclusion_audit_accepts_complete_ledger(tmp_path: Path) -> None:
+def test_compile_fact_exclusion_audit_accepts_complete_ledger(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(exclusions, "REPO_ROOT", tmp_path / "repo")
     measured = _write_measurement_manifest(tmp_path, ["fixture_a"])
     evidence = tmp_path / "evidence"
     evidence.mkdir()
