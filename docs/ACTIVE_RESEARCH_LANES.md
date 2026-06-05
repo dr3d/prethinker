@@ -269,7 +269,7 @@ The latest guard and manifest artifacts are
 `C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`; the
 fresh SEC refresh is archived at
 `C:\prethinker_tmp_archive\sec_t003_refresh_20260605`; the latest full
-governance run passed 16 checks and prints repeated unexpected same-signature
+governance run passed 17 checks and prints repeated unexpected same-signature
 rows as a standing precision diagnostic. This is governance cleanup, colder
 provenance refresh, precision visibility, and band measurement, not a fixed
 support lift.

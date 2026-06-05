@@ -32,6 +32,7 @@ The current front-door documents are:
 - `docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md`
 - `docs/PENDING_EXTERNAL_WORK_ORDERS.md`
 - `docs/CANDIDATE_ORACLE_REVIEW_STATUS.md`
+- `docs/SOURCE_ORACLE_REVIEW_STATUS.md`
 - `docs/ACTIVE_RESEARCH_LANES.md`
 - `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
 - `docs/PUBLIC_DOCS_GUIDE.md`
@@ -571,7 +572,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-05:
 
 ```text
-2487 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2509 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
@@ -597,6 +598,7 @@ python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_AC
 python scripts\summarize_fixture_bank_domains.py --out-md docs\FIXTURE_BANK_DOMAIN_INVENTORY.md --out-json tmp\fixture_bank_domain_inventory.json --expect-md docs\FIXTURE_BANK_DOMAIN_INVENTORY.md
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
 python scripts\audit_pending_external_work_orders.py --include-tmp-zips --out-json tmp\pending_external_work_orders.json --out-md docs\PENDING_EXTERNAL_WORK_ORDERS.md --expect-md docs\PENDING_EXTERNAL_WORK_ORDERS.md
+python scripts\audit_source_oracle_reviews.py --out-json tmp\source_oracle_reviews.json --out-md docs\SOURCE_ORACLE_REVIEW_STATUS.md --expect-md docs\SOURCE_ORACLE_REVIEW_STATUS.md
 ```
 
 Before a public/docs cleanup commit, also run stale-claim greps over
