@@ -26,6 +26,32 @@ from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E40
 DEFAULT_PROPOSAL_ROOT = REPO_ROOT / "datasets" / "domain_predicate_proposals"
 DEFAULT_TMP_ROOT = REPO_ROOT / "tmp"
 
+ANSWER_FACT_BASENAMES = {
+    "expected_facts.pl",
+    "forbidden_facts.pl",
+    "candidate_expected_facts.pl",
+    "candidate_forbidden_facts.pl",
+}
+RUN_ARTIFACT_BASENAMES = {
+    "current_judged_qa_manifest.json",
+    "judged_qa_manifest.json",
+    "qa_manifest.json",
+    "score_manifest.json",
+}
+RUN_ARTIFACT_PATH_PARTS = {
+    "compile_artifacts",
+    "compile_outputs",
+    "current_judged_qa",
+    "judged_qa",
+    "model_outputs",
+    "oracle_reviews",
+    "prior_runs",
+    "run_artifacts",
+    "scored_runs",
+    "source_oracle_reviews",
+    "candidate_oracle_reviews",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -121,7 +147,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Pending External Work Order Audit",
         "",
-        f"This report validates {scope} only.",
+        f"This report validates {scope} and entry-name leak policy only.",
+        "It blocks pending packets that include filled oracle files, judged-QA manifests, model outputs, or compile/run artifacts.",
         "It does not read source prose or decide expected/forbidden facts.",
         "",
         f"- Proposals scanned: `{summary['proposal_count']}`",
@@ -179,6 +206,7 @@ def _audit_work_order(
             raw_entries = [name for name in archive.namelist() if name.strip()]
         errors.extend(_zip_entry_name_errors(raw_entries))
         entries = sorted(_normalize_entry(name) for name in raw_entries)
+        _validate_no_answer_leakage(entries=entries, errors=errors, warnings=warnings)
         _validate_entries(
             entries=entries,
             proposal_id=proposal_id,
@@ -213,6 +241,7 @@ def _audit_standalone_zip(*, zip_path: Path) -> dict[str, Any]:
             raw_entries = [name for name in archive.namelist() if name.strip()]
         errors.extend(_zip_entry_name_errors(raw_entries))
         entries = sorted(_normalize_entry(name) for name in raw_entries)
+        _validate_no_answer_leakage(entries=entries, errors=errors, warnings=warnings)
         _validate_standalone_entries(entries=entries, errors=errors, warnings=warnings)
     return {
         "proposal_path": "",
@@ -299,12 +328,42 @@ def _validate_standalone_entries(
 
 def _is_expected_template(entry: str) -> bool:
     name = Path(entry).name.lower()
-    return bool(re.match(r"(candidate_)?expected_facts(_template)?\.pl$", name))
+    return bool(re.match(r"(candidate_)?expected_facts(_template)?\.pl$", name)) and _is_output_template(entry)
 
 
 def _is_forbidden_template(entry: str) -> bool:
     name = Path(entry).name.lower()
-    return bool(re.match(r"(candidate_)?forbidden_facts(_template)?\.pl$", name))
+    return bool(re.match(r"(candidate_)?forbidden_facts(_template)?\.pl$", name)) and _is_output_template(entry)
+
+
+def _validate_no_answer_leakage(
+    *,
+    entries: list[str],
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    for entry in entries:
+        normalized = _normalize_entry(entry)
+        lower_entry = normalized.lower()
+        name = Path(normalized).name.lower()
+        path_parts = {part.lower() for part in PurePosixPath(lower_entry).parts}
+        if name in ANSWER_FACT_BASENAMES and not _is_output_template(normalized):
+            errors.append(f"answer_oracle_file_not_template:{normalized}")
+        if name in RUN_ARTIFACT_BASENAMES:
+            errors.append(f"run_artifact_file_not_allowed:{normalized}")
+        leaking_parts = sorted(path_parts & RUN_ARTIFACT_PATH_PARTS)
+        for part in leaking_parts:
+            errors.append(f"run_artifact_path_not_allowed:{part}:{normalized}")
+        if name in {"model_output.json", "llm_output.json", "compile.json", "compile_output.json"}:
+            errors.append(f"model_or_compile_output_not_allowed:{normalized}")
+        if name == "candidate_fact.pl":
+            warnings.append(f"candidate_fact_focus_review_not_full_blind:{normalized}")
+
+
+def _is_output_template(entry: str) -> bool:
+    normalized = _normalize_entry(entry).lower()
+    name = Path(normalized).name.lower()
+    return name.endswith("_template.pl") or normalized.startswith("output_template/")
 
 
 def _proposal_paths(*, root: Path, explicit: list[Path]) -> list[Path]:

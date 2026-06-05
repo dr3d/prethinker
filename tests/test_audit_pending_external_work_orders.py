@@ -95,10 +95,10 @@ def test_pending_external_work_order_audit_can_inventory_standalone_tmp_zips(tmp
         tmp_path / "standalone.zip",
         [
             "README.md",
-            "expected_facts.pl",
-            "forbidden_facts.pl",
+            "expected_facts_TEMPLATE.pl",
+            "forbidden_facts_TEMPLATE.pl",
             "source.md",
-            "current_judged_qa_manifest.json",
+            "manifest.json",
         ],
     )
 
@@ -123,8 +123,8 @@ def test_pending_external_work_order_audit_accepts_candidate_review_packet_shape
         tmp_path / "candidate_review.zip",
         [
             "README.md",
-            "candidate_expected_facts.pl",
-            "candidate_forbidden_facts.pl",
+            "output_template/candidate_expected_facts.pl",
+            "output_template/candidate_forbidden_facts.pl",
             "output_template/manifest.json",
             "example_wrapper_v1.json",
             "fixtures/fda_transfer_001/manifest.json",
@@ -149,8 +149,8 @@ def test_pending_external_work_order_audit_blocks_candidate_review_packet_missin
         tmp_path / "candidate_review.zip",
         [
             "README.md",
-            "candidate_expected_facts.pl",
-            "candidate_forbidden_facts.pl",
+            "output_template/candidate_expected_facts.pl",
+            "output_template/candidate_forbidden_facts.pl",
             "example_wrapper_v1.json",
             "fixtures/fda_transfer_001/source.md",
         ],
@@ -167,8 +167,8 @@ def test_pending_external_work_order_audit_blocks_absolute_standalone_entries(tm
         tmp_path / "standalone.zip",
         [
             "README.md",
-            "expected_facts.pl",
-            "forbidden_facts.pl",
+            "expected_facts_TEMPLATE.pl",
+            "forbidden_facts_TEMPLATE.pl",
             "source.md",
             "manifest.json",
             "/absolute.txt",
@@ -186,8 +186,8 @@ def test_pending_external_work_order_audit_accepts_manifest_as_standalone_metada
         tmp_path / "standalone.zip",
         [
             "README.md",
-            "expected_facts.pl",
-            "forbidden_facts.pl",
+            "expected_facts_TEMPLATE.pl",
+            "forbidden_facts_TEMPLATE.pl",
             "manifest.json",
             "source.md",
         ],
@@ -197,6 +197,68 @@ def test_pending_external_work_order_audit_accepts_manifest_as_standalone_metada
 
     assert report["summary"]["status"] == "pass"
     assert report["work_orders"][0]["warnings"] == []
+
+
+def test_pending_external_work_order_audit_blocks_answer_oracle_files_in_pending_packets(
+    tmp_path: Path,
+) -> None:
+    _write_zip(
+        tmp_path / "standalone.zip",
+        [
+            "README.md",
+            "expected_facts.pl",
+            "forbidden_facts.pl",
+            "source.md",
+            "manifest.json",
+        ],
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "fail"
+    errors = report["work_orders"][0]["errors"]
+    assert "answer_oracle_file_not_template:expected_facts.pl" in errors
+    assert "answer_oracle_file_not_template:forbidden_facts.pl" in errors
+
+
+def test_pending_external_work_order_audit_blocks_judged_qa_manifests(tmp_path: Path) -> None:
+    _write_zip(
+        tmp_path / "standalone.zip",
+        [
+            "README.md",
+            "expected_facts_TEMPLATE.pl",
+            "forbidden_facts_TEMPLATE.pl",
+            "source.md",
+            "manifest.json",
+            "current_judged_qa_manifest.json",
+        ],
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "fail"
+    assert "run_artifact_file_not_allowed:current_judged_qa_manifest.json" in report["work_orders"][0]["errors"]
+
+
+def test_pending_external_work_order_audit_warns_candidate_fact_is_not_full_blind(
+    tmp_path: Path,
+) -> None:
+    _write_zip(
+        tmp_path / "standalone.zip",
+        [
+            "README.md",
+            "expected_facts_TEMPLATE.pl",
+            "forbidden_facts_TEMPLATE.pl",
+            "source.md",
+            "manifest.json",
+            "candidate_fact.pl",
+        ],
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "pass"
+    assert "candidate_fact_focus_review_not_full_blind:candidate_fact.pl" in report["work_orders"][0]["warnings"]
 
 
 def test_pending_external_work_order_audit_expect_md_marks_stale_report(

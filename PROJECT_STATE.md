@@ -577,10 +577,16 @@ lens or union artifacts contain nonzero atom-shape, unregistered-fact,
 lens-scope, or closed-slot value-domain blockers, or if hidden lens compiles
 mix incompatible inference settings behind clean union metadata.
 
+The pending external work-order audit now also blocks answer-leak entries in
+queued review packets: filled oracle files, judged-QA manifests, model outputs,
+and compile/run artifacts are not allowed in pending source-only packets.
+Template files and focused candidate-review targets are allowed, with focused
+candidate packets labeled as not fully blind.
+
 Current full-suite result on 2026-06-05:
 
 ```text
-2529 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2532 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
