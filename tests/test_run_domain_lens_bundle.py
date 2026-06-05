@@ -12,6 +12,7 @@ from scripts.run_domain_lens_bundle import (
     _build_reconcile_command,
     _build_score_command,
     _build_value_domain_audit_command,
+    _lens_scope_manifest,
     _load_registry_lenses,
     _load_summary,
     _parse_lens_domain_hints,
@@ -25,8 +26,16 @@ def test_load_registry_lenses_and_select_requested(tmp_path: Path) -> None:
         json.dumps(
             {
                 "lenses": [
-                    {"id": "wrapper", "purpose": "Wrapper facts."},
-                    {"id": "timeline", "purpose": "Timeline facts."},
+                    {
+                        "id": "wrapper",
+                        "purpose": "Wrapper facts.",
+                        "allowed_signatures": ["doc/3", "domain_omission/5"],
+                    },
+                    {
+                        "id": "timeline",
+                        "purpose": "Timeline facts.",
+                        "allowed_signatures": ["event/4"],
+                    },
                 ]
             }
         ),
@@ -36,7 +45,10 @@ def test_load_registry_lenses_and_select_requested(tmp_path: Path) -> None:
     lenses = _load_registry_lenses(registry)
 
     assert [lens.lens_id for lens in lenses] == ["wrapper", "timeline"]
-    assert _selected_lenses(lenses, ["timeline"]) == [LensSpec("timeline", "Timeline facts.")]
+    assert lenses[0].allowed_signatures == ("doc/3", "domain_omission/5")
+    assert _selected_lenses(lenses, ["timeline"]) == [
+        LensSpec("timeline", "Timeline facts.", ("event/4",))
+    ]
     with pytest.raises(ValueError, match="unknown lens"):
         _selected_lenses(lenses, ["missing"])
 
@@ -48,6 +60,24 @@ def test_parse_lens_domain_hints_requires_lens_prefix() -> None:
 
     with pytest.raises(ValueError, match="lens_id=hint"):
         _parse_lens_domain_hints(["Use wrapper only."])
+
+
+def test_lens_scope_manifest_lists_offered_signatures() -> None:
+    assert _lens_scope_manifest(
+        [
+            LensSpec(
+                "wrapper",
+                "Wrapper facts.",
+                ("doc/3", "domain_omission/5"),
+            )
+        ]
+    ) == [
+        {
+            "id": "wrapper",
+            "purpose": "Wrapper facts.",
+            "offered_signatures": ["doc/3", "domain_omission/5"],
+        }
+    ]
 
 
 def test_build_lens_compile_command_restricts_registry_lens() -> None:

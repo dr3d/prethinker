@@ -499,6 +499,10 @@ The important boundary is source meaning versus durable truth:
 - Query and compile must meet on the same governed atoms.
 - Predicate sets are offered as a function of lens, not as one global bag
   available to every compile pass.
+- Lens-bundle manifests now expose `lens_scopes[].offered_signatures`; the
+  `profile_registry_lens_plan` setting only describes optional compile-plan
+  pass behavior and does not mean the source compile received a global
+  predicate bag.
 
 ## Current Research Pressure
 

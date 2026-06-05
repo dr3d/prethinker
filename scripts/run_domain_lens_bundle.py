@@ -37,6 +37,7 @@ DEFAULT_OUT_ROOT = REPO_ROOT / "tmp" / "domain_lens_bundle"
 class LensSpec:
     lens_id: str
     purpose: str
+    allowed_signatures: tuple[str, ...] = ()
 
 
 def parse_args() -> argparse.Namespace:
@@ -288,6 +289,7 @@ def main() -> int:
         "out_root": str(out_root),
         "repeat": repeat,
         "lenses": [lens.lens_id for lens in selected_lenses],
+        "lens_scopes": _lens_scope_manifest(selected_lenses),
         "settings": {
             "backend": str(args.backend),
             "model": str(args.model),
@@ -363,10 +365,34 @@ def _load_registry_lenses(path: Path) -> list[LensSpec]:
         lens_id = str(item.get("id", "")).strip()
         if not lens_id:
             continue
-        lenses.append(LensSpec(lens_id=lens_id, purpose=str(item.get("purpose", "")).strip()))
+        allowed_signatures = tuple(
+            sorted(
+                str(signature).strip()
+                for signature in item.get("allowed_signatures", [])
+                if isinstance(item.get("allowed_signatures"), list) and str(signature).strip()
+            )
+        )
+        lenses.append(
+            LensSpec(
+                lens_id=lens_id,
+                purpose=str(item.get("purpose", "")).strip(),
+                allowed_signatures=allowed_signatures,
+            )
+        )
     if not lenses:
         raise ValueError(f"registry has no named lenses: {path}")
     return lenses
+
+
+def _lens_scope_manifest(lenses: list[LensSpec]) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": lens.lens_id,
+            "purpose": lens.purpose,
+            "offered_signatures": list(lens.allowed_signatures),
+        }
+        for lens in lenses
+    ]
 
 
 def _selected_lenses(registry_lenses: list[LensSpec], requested_ids: list[str]) -> list[LensSpec]:
