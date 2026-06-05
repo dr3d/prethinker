@@ -175,6 +175,8 @@ def _root_row(*, root_spec: dict[str, Any], fixture_id: str) -> dict[str, Any]:
     if not isinstance(value_domain, dict):
         value_domain = _load_optional_summary(root / "reports" / "union_carrier_value_domains.json")
     typed_reconcile = manifest.get("typed_reconcile_summary")
+    if not isinstance(typed_reconcile, dict):
+        typed_reconcile = _load_optional_summary(root / "reports" / "typed_reconcile_support_ge2_value.json")
     series = _load_optional_json(root / "reports" / "typed_micro_series_summary.json")
     per_run_exact, per_run_rows = _per_run_counts(series=series, score=score)
 
@@ -412,7 +414,22 @@ def _load_optional_summary(path: Path) -> dict[str, Any] | None:
     if not isinstance(report, dict):
         return None
     summary = report.get("summary")
-    return summary if isinstance(summary, dict) else None
+    if isinstance(summary, dict):
+        return summary
+    source_compile = report.get("source_compile")
+    if not isinstance(source_compile, dict):
+        return None
+    reconciliation = source_compile.get("governed_reconciliation")
+    if not isinstance(reconciliation, dict):
+        return None
+    result = dict(reconciliation)
+    if "reconciled_fact_count" not in result:
+        facts = source_compile.get("facts")
+        result["reconciled_fact_count"] = int(
+            source_compile.get("unique_fact_count")
+            or (len(facts) if isinstance(facts, list) else 0)
+        )
+    return result
 
 
 def _load_optional_json(path: Path) -> dict[str, Any] | None:

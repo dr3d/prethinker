@@ -53,9 +53,9 @@ Roots:
 
 | Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| `stability_r1` | pre-registered stability rerun before later omission guard | `12/13` | `36/39` | 0 | 2 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
-| `item_treatment_filing_id_r2` | item-treatment filing-id seam check | `11/13` | `35/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
-| `axis_clean_refresh_r1` | same-local-Qwen refresh | `13/13` | `37/39` | 0 | 1 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `stability_r1` | pre-registered stability rerun before later omission guard | `12/13` | `36/39` | 0 | 2 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `13` value-mode facts |
+| `item_treatment_filing_id_r2` | item-treatment filing-id seam check | `11/13` | `35/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `11` value-mode facts |
+| `axis_clean_refresh_r1` | same-local-Qwen refresh | `13/13` | `37/39` | 0 | 1 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `13` value-mode facts |
 | `qwen_mainline_rerun_r1` | same-day Qwen MoE mainline rerun | `13/13` | `36/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `13` value-mode facts |
 
 Roots:
@@ -76,8 +76,8 @@ Roots:
 
 | Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| `gemma4_q4_r1` | Gemma 4 12B Q4_K_M compile substitution | `10/12` | `29/36` | 0 | 6 | atom `0`; lens `0`; value `pass` | `lmstudio` `google/gemma-4-12b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
-| `qwen27b_q4_r1` | Qwen 3.6 27B Q4_K_M dense same-family compile substitution | `10/12` | `30/36` | 0 | 3 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-27b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `gemma4_q4_r1` | Gemma 4 12B Q4_K_M compile substitution | `10/12` | `29/36` | 0 | 6 | atom `0`; lens `0`; value `pass` | `lmstudio` `google/gemma-4-12b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `12` value-mode facts |
+| `qwen27b_q4_r1` | Qwen 3.6 27B Q4_K_M dense same-family compile substitution | `10/12` | `30/36` | 0 | 3 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-27b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `13` value-mode facts |
 
 Roots:
 - `gemma4_q4_r1`: `C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\compile_substitution_sec\sec8k-t003-gemma4-q4-temp0-r1`
@@ -95,7 +95,7 @@ Roots:
 
 | Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| `related_activity_blank_flag_r1` | standing transfer_001 current-pack root after blank related-activity flag contract | `15/15` | `36/45` | 0 | 3 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `related_activity_blank_flag_r1` | standing transfer_001 current-pack root after blank related-activity flag contract | `15/15` | `36/45` | 0 | 3 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `11` value-mode facts |
 | `qwen_mainline_rerun_r1` | same-local-Qwen transfer_001 variance rerun | `15/15` | `36/45` | 0 | 3 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `11` value-mode facts |
 
 Roots:
@@ -182,7 +182,7 @@ Roots:
 
 | Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| `scoped_injury_count_r1` | standing transfer_001 current scoped injury-count root | `22/25` | `60/75` | 0 | 16 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `scoped_injury_count_r1` | standing transfer_001 current scoped injury-count root | `22/25` | `60/75` | 0 | 16 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `6` value-mode facts |
 | `qwen_mainline_rerun_r1` | same-local-Qwen transfer_001 variance rerun | `22/25` | `60/75` | 0 | 16 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `6` value-mode facts |
 
 Roots:

@@ -53,6 +53,7 @@ def test_domain_pack_variance_status_uses_archived_value_domain_report(tmp_path:
         expected=13,
         value_report_status="pass",
         value_report_violations=0,
+        typed_report_count=12,
     )
     manifest = _write_variance_manifest(tmp_path, [root])
 
@@ -64,7 +65,9 @@ def test_domain_pack_variance_status_uses_archived_value_domain_report(tmp_path:
     root_row = report["groups"][0]["roots"][0]
     assert root_row["value_domain_status"] == "pass"
     assert root_row["value_domain_violation_count"] == 0
+    assert root_row["typed_reconcile_fact_count"] == 12
     assert "value `pass`" in md
+    assert "`12` value-mode facts" in md
     assert "value_domain_report_not_recorded" not in md
 
 
@@ -133,6 +136,7 @@ def _write_bundle_root(
     value_violations: int | None = None,
     value_report_status: str | None = None,
     value_report_violations: int | None = None,
+    typed_report_count: int | None = None,
     reconcile_count: int | None = None,
 ) -> Path:
     (root / "reports").mkdir(parents=True)
@@ -189,6 +193,27 @@ def _write_bundle_root(
         manifest["typed_reconcile_summary"] = {
             "reconciled_fact_count": reconcile_count,
         }
+    if typed_report_count is not None:
+        (root / "reports" / "typed_reconcile_support_ge2_value.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "governed_typed_micro_reconciliation_v1",
+                    "fixture_id": "sec_form_8k_skeleton_transfer_003",
+                    "source_compile": {
+                        "mode": "governed_typed_micro_reconciliation",
+                        "facts": [f"test_fact_{index}." for index in range(typed_report_count)],
+                        "unique_fact_count": typed_report_count,
+                        "governed_reconciliation": {
+                            "schema_version": "governed_typed_micro_reconciliation_v1",
+                            "fixture_id": "sec_form_8k_skeleton_transfer_003",
+                            "support_mode": "value",
+                        },
+                    },
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
     (root / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     if per_run_exact is not None:
         series = {
