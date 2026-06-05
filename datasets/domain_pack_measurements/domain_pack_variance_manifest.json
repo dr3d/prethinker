@@ -92,6 +92,19 @@
       ]
     },
     {
+      "id": "sec_t002_current_mainline_retest",
+      "title": "SEC transfer_002 current-mainline full-bundle retest",
+      "fixture_id": "sec_form_8k_skeleton_transfer_002",
+      "claim_read": "Use as the current standing transfer_002 cell: the fresh current-mainline Qwen MoE retest preserves 11/12 support with clean governance, while duplicate commission-file value support remains the live boundary.",
+      "roots": [
+        {
+          "id": "current_mainline_r1",
+          "role": "fresh current-mainline Qwen MoE full-bundle rerun after SEC standing-cell demotions",
+          "path": "C:/prethinker_tmp_archive/sec_t002_current_pack_rerun_20260605/sec-t002-current-pack-r1-20260605"
+        }
+      ]
+    },
+    {
       "id": "ntsb_transfer001_qwen_moe_same_condition",
       "title": "NTSB transfer_001 local Qwen MoE same-condition band",
       "fixture_id": "ntsb_investigation_transfer_surface_001",

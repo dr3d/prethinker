@@ -29,8 +29,8 @@
     {
       "id": "sec_form_8k_skeleton_transfer_002",
       "fixture_id": "sec_form_8k_skeleton_transfer_002",
-      "description": "SEC Form 8-K skeleton transfer 002, current repaired breadth bundle against the axis-clean oracle.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_axis_breadth_20260604\\sec-t002-axis-r1",
+      "description": "SEC Form 8-K skeleton transfer 002 current-mainline retest; support count remains 11/12 with the duplicate commission-file value boundary visible.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t002_current_pack_rerun_20260605\\sec-t002-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 12,
         "support.exact_support_ge_2": 11,

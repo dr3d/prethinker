@@ -282,7 +282,10 @@ transfer_002 cells previously landed at `13/13`, `11/13`, and `11/12`, but the
 standing manifest now demotes transfer_001 to the current-mainline negative
 retest at `5/13`, `0/8` supported forbidden, and clean atom/lens/value gates.
 The older transfer_001 `11/13` root is historical mechanism evidence, not the
-current standing cell. The seed lift came from a fresh
+current standing cell. Transfer_002 was rerun under the current full-bundle
+mainline on 2026-06-05 and preserved `11/12`, `0/6` supported forbidden, and
+clean atom/lens/value gates, so its standing root is now the retest rather than
+the older breadth root. The seed lift came from a fresh
 2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
 axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
 source-rejected `incorporated_by_reference` exhibit-role row is absent. The

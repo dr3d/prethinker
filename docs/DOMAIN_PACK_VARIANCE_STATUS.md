@@ -6,8 +6,8 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `6`
-- Roots: `12`
+- Groups: `7`
+- Roots: `13`
 - Warnings: `6`
 
 Warnings:
@@ -27,6 +27,7 @@ Warnings:
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
 | `fda_transfer002_qwen_moe_same_condition_negative` | `fda_warning_letter_domain_transfer_002` | 1 | `11/29` | 0 | `33` | `pass` |
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
+| `sec_t002_current_mainline_retest` | `sec_form_8k_skeleton_transfer_002` | 1 | `11/12` | 0 | `2` | `pass` |
 | `ntsb_transfer001_qwen_moe_same_condition` | `ntsb_investigation_transfer_surface_001` | 2 | `22/25` | 0 | `16` | `pass` |
 
 ## SEC transfer_003 repaired-schema local Qwen MoE band
@@ -123,6 +124,23 @@ Roots:
 
 Roots:
 - `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605\sec-t001-current-pack-r1-20260605`
+
+## SEC transfer_002 current-mainline full-bundle retest
+
+- Group: `sec_t002_current_mainline_retest`
+- Fixture: `sec_form_8k_skeleton_transfer_002`
+- Read: Use as the current standing transfer_002 cell: the fresh current-mainline Qwen MoE retest preserves 11/12 support with clean governance, while duplicate commission-file value support remains the live boundary.
+- Support band: `11/12`
+- Supported forbidden total: `0`
+- Unexpected band: `2`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `current_mainline_r1` | fresh current-mainline Qwen MoE full-bundle rerun after SEC standing-cell demotions | `11/12` | `31/36` | 0 | 2 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `11` value-mode facts |
+
+Roots:
+- `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_t002_current_pack_rerun_20260605\sec-t002-current-pack-r1-20260605`
 
 ## NTSB transfer_001 local Qwen MoE same-condition band
 
