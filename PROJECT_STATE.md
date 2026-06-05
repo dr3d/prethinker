@@ -618,7 +618,7 @@ under a safe filename.
 Current full-suite result on 2026-06-05:
 
 ```text
-2538 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2569 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
