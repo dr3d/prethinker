@@ -452,17 +452,46 @@ per-draw band, Gemma Q8 is promising but still gated by one redacted-rejudge
 normalized-display partial, and Gemma Q4_K_M is clean on this tiny retained
 query anchor.
 
-The active next question is planner performance inside the atom library on a
-larger and unlike query set, not permission to restore fallback rescue. The
-optional `--atom-library-query-validation-retry` lane remains LLM-proposes /
-deterministic-code-validates: one second planner call can see the atom-slot
-validation failure, but Python still cannot rewrite a blocked query.
+The larger SEC atom-library query packet is now retained under
+`datasets/query_micro_fixtures/sec_form_8k_atom_library_query_v1`. It asks 25
+questions across the SEC seed plus three unlike SEC transfer run-1 typed
+artifacts. This is a query-planner viability packet, not a compile-recall score:
+the questions ask about typed facts present in the selected run artifacts.
+
+First local Qwen MoE temp-0/top_p-1.0 pass:
+
+```text
+packet: datasets/query_micro_fixtures/sec_form_8k_atom_library_query_v1
+artifact: C:\prethinker_tmp_archive\sec_atom_library_query_20260605\qwen_moe_temp0_r1
+product exact: 20/25
+typed-plan full replay: 19/25
+redacted-rejudge thesis exact: 19/25
+clean intersection exact: 18/25
+compatibility/runtime/write rows: 0/0/0
+status: blocked, not claim-bearing
+```
+
+The blocker is cleanly query-side. Five product-miss rows were blocked by the
+compiled atom inventory because the planner emitted role-label nouns as
+constants instead of variables: `reportkind`, `exhibitnumber`, `exhibitkind`,
+`exhibitrole`, and `itemtreatment`. One product-exact row replayed only
+partially because the planner added an unnecessary dead `sec_filing_item_treatment/4`
+query next to a successful `sec_filing_item/5` query. One product-exact row
+survived typed-plan replay but failed redacted rejudge as a normalized-display
+partial for `entity_servicenow_inc` versus `ServiceNow Inc.`. These are useful
+planner/rendering failures, not permission to restore fallback rescue.
+
+The optional `--atom-library-query-validation-retry` lane remains
+LLM-proposes / deterministic-code-validates: one second planner call can see
+the atom-slot validation failure, but Python still cannot rewrite a blocked
+query.
 
 Retained diagnostic artifact:
 
 ```text
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_smoke_20260604
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_variable_fix_smoke_20260604_r2
+C:\prethinker_tmp_archive\sec_atom_library_query_20260605\qwen_moe_temp0_r1
 ```
 
 Retained governance artifact:

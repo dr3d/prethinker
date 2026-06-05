@@ -1,0 +1,50 @@
+{
+  "schema": "prethinker.query_micro_fixture_manifest.v1",
+  "fixture_id": "sec_form_8k_atom_library_query_v1",
+  "created": "2026-06-05",
+  "purpose": "Measure sign-clean atom-library query planning across the SEC seed and three unlike SEC transfer artifacts.",
+  "claim_boundary": [
+    "This is a query-planner viability measurement over selected retained typed run artifacts.",
+    "It is not a compile-recall score.",
+    "It is not a permission path for source prose, source-record fallback, or Python query-language parsing."
+  ],
+  "required_runner_flags": [
+    "--sign-clean-strict",
+    "--judge-reference-answers",
+    "--atom-library-query-grounding"
+  ],
+  "optional_runner_flags": [
+    "--atom-library-query-validation-retry",
+    "--classify-failure-surfaces"
+  ],
+  "cells": [
+    {
+      "id": "sec_seed_run1_query",
+      "fixture_id": "sec_form_8k_skeleton_v1",
+      "qa_file": "datasets/query_micro_fixtures/sec_form_8k_atom_library_query_v1/sec_seed_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/sec_seed_value_axis_contract_repair_r2_20260605/sec-seed-axis-contract-r2/unions/run1/domain_bootstrap_file_20260605T095125451578Z_sec-seed-axis-contract-r2-run1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 7
+    },
+    {
+      "id": "sec_transfer_001_run1_query",
+      "fixture_id": "sec_form_8k_skeleton_transfer_001",
+      "qa_file": "datasets/query_micro_fixtures/sec_form_8k_atom_library_query_v1/sec_transfer_001_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/sec_axis_breadth_20260604/sec-t001-axis-r1/unions/run1/domain_bootstrap_file_20260604T172324523995Z_sec-t001-axis-r1-run1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 5
+    },
+    {
+      "id": "sec_transfer_002_run1_query_current",
+      "fixture_id": "sec_form_8k_skeleton_transfer_002",
+      "qa_file": "datasets/query_micro_fixtures/sec_form_8k_atom_library_query_v1/sec_transfer_002_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/sec_axis_breadth_20260604/sec-t002-axis-r1/unions/run1/domain_bootstrap_file_20260604T172802373266Z_sec-t002-axis-r1-run1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 6
+    },
+    {
+      "id": "sec_transfer_003_run1_query",
+      "fixture_id": "sec_form_8k_skeleton_transfer_003",
+      "qa_file": "datasets/query_micro_fixtures/sec_form_8k_atom_library_query_v1/sec_transfer_003_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/sec_item_treatment_filing_id_20260604/sec8k-t003-item-treatment-filing-id-r2-20260604/unions/run1/domain_bootstrap_file_20260605T002533856509Z_sec8k-t003-item-treatment-filing-id-r2-20260604-_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 7
+    }
+  ]
+}
