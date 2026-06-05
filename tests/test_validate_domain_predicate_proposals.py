@@ -213,6 +213,84 @@ def test_linked_retained_review_passes_when_metadata_matches(tmp_path: Path) -> 
     assert report["proposals"][0]["errors"] == []
 
 
+def test_retained_source_oracle_review_for_proposal_must_be_linked(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    proposal = _write(tmp_path / "proposal.json", payload)
+    review_root = tmp_path / "source_reviews"
+    _write(
+        review_root / "demo_source_review" / "manifest.json",
+        {
+            "review_id": "demo_source_review",
+            "proposal_id": payload["proposal_id"],
+            "predicate": payload["candidate_signature"],
+            "status": "complete",
+        },
+    )
+
+    report = build_report([proposal], source_oracle_review_root=review_root)
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "retained_source_oracle_review_missing_from_proposal:demo_source_review"
+        in report["proposals"][0]["errors"]
+    )
+
+
+def test_linked_source_oracle_review_path_must_match_proposal_and_signature(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    review_path = tmp_path / "source_reviews" / "demo_source_review" / "manifest.json"
+    payload["source_oracle_review_results"] = [
+        {
+            "review_id": "demo_source_review",
+            "review_path": str(review_path),
+            "result": "source_oracle_complete",
+        }
+    ]
+    proposal = _write(tmp_path / "proposal.json", payload)
+    _write(
+        review_path,
+        {
+            "review_id": "demo_source_review",
+            "proposal_id": "different_proposal",
+            "predicate": "other_candidate/3",
+            "status": "complete",
+        },
+    )
+
+    report = build_report([proposal], source_oracle_review_root=tmp_path / "source_reviews")
+
+    errors = report["proposals"][0]["errors"]
+    assert "source_oracle_review_result_1:proposal_id_mismatch" in errors
+    assert "source_oracle_review_result_1:predicate_mismatch" in errors
+
+
+def test_linked_source_oracle_review_passes_when_metadata_matches(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    review_path = tmp_path / "source_reviews" / "demo_source_review" / "manifest.json"
+    payload["source_oracle_review_results"] = [
+        {
+            "review_id": "demo_source_review",
+            "review_path": str(review_path),
+            "result": "source_oracle_complete",
+        }
+    ]
+    proposal = _write(tmp_path / "proposal.json", payload)
+    _write(
+        review_path,
+        {
+            "review_id": "demo_source_review",
+            "proposal_id": payload["proposal_id"],
+            "predicate": payload["candidate_signature"],
+            "status": "complete",
+        },
+    )
+
+    report = build_report([proposal], source_oracle_review_root=tmp_path / "source_reviews")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["proposals"][0]["errors"] == []
+
+
 def test_domain_predicate_proposal_status_report_disclaims_promotion(tmp_path: Path) -> None:
     path = _write(tmp_path / "proposal.json", _valid_payload())
     report = build_report([path])
@@ -239,4 +317,5 @@ def test_domain_predicate_proposal_status_report_shows_pending_work_order(tmp_pa
     rendered = render_markdown(report)
 
     assert "Pending Work" in rendered
+    assert "Source Oracles" in rendered
     assert "source_only_expected_forbidden_oracle:tmp/example_domain_work_order.zip" in rendered

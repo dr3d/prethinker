@@ -28,6 +28,7 @@ from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E40
 DEFAULT_ROOT = REPO_ROOT / "datasets" / "domain_predicate_proposals"
 DEFAULT_PROFILE_ROOT = REPO_ROOT / "datasets" / "domain_profiles"
 DEFAULT_CANDIDATE_REVIEW_ROOT = REPO_ROOT / "datasets" / "candidate_oracle_reviews"
+DEFAULT_SOURCE_ORACLE_REVIEW_ROOT = REPO_ROOT / "datasets" / "source_oracle_reviews"
 
 SIGNATURE_RE = re.compile(r"^[a-z][a-z0-9_]*/[1-9][0-9]*$")
 ARG_RE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -130,6 +131,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--profile-root", type=Path, default=DEFAULT_PROFILE_ROOT)
     parser.add_argument("--candidate-review-root", type=Path, default=DEFAULT_CANDIDATE_REVIEW_ROOT)
+    parser.add_argument("--source-oracle-review-root", type=Path, default=DEFAULT_SOURCE_ORACLE_REVIEW_ROOT)
     parser.add_argument("--proposal", action="append", default=[], type=Path)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
@@ -150,7 +152,12 @@ def main() -> int:
         print(json.dumps(TEMPLATE, indent=2, sort_keys=True))
         return 0
     paths = _proposal_paths(root=args.root, explicit=args.proposal)
-    report = build_report(paths, profile_root=args.profile_root, candidate_review_root=args.candidate_review_root)
+    report = build_report(
+        paths,
+        profile_root=args.profile_root,
+        candidate_review_root=args.candidate_review_root,
+        source_oracle_review_root=args.source_oracle_review_root,
+    )
     rendered_md = render_markdown(report)
     if args.expect_md:
         apply_markdown_freshness_check(
@@ -175,9 +182,19 @@ def build_report(
     *,
     profile_root: Path = DEFAULT_PROFILE_ROOT,
     candidate_review_root: Path = DEFAULT_CANDIDATE_REVIEW_ROOT,
+    source_oracle_review_root: Path = DEFAULT_SOURCE_ORACLE_REVIEW_ROOT,
 ) -> dict[str, Any]:
     retained_reviews = _retained_candidate_reviews(candidate_review_root)
-    rows = [_validate_proposal(path, profile_root=profile_root, retained_reviews=retained_reviews) for path in paths]
+    retained_source_oracles = _retained_source_oracle_reviews(source_oracle_review_root)
+    rows = [
+        _validate_proposal(
+            path,
+            profile_root=profile_root,
+            retained_reviews=retained_reviews,
+            retained_source_oracles=retained_source_oracles,
+        )
+        for path in paths
+    ]
     blocking_errors = sum(len(row["errors"]) for row in rows)
     warning_count = sum(len(row["warnings"]) for row in rows)
     return {
@@ -207,17 +224,18 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Warnings: `{summary['warning_count']}`",
         f"- Status: `{summary['status']}`",
         "",
-        "| Proposal | Signature | Status | Pending Work | Reviews | Errors | Warnings |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Proposal | Signature | Status | Pending Work | Candidate Reviews | Source Oracles | Errors | Warnings |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in report.get("proposals", []):
         lines.append(
-            "| `{}` | `{}` | `{}` | `{}` | `{}` | `{}` | `{}` |".format(
+            "| `{}` | `{}` | `{}` | `{}` | `{}` | `{}` | `{}` | `{}` |".format(
                 row.get("proposal_id") or row.get("path", ""),
                 row.get("candidate_signature", ""),
                 row.get("status", ""),
                 _work_order_summary(row.get("pending_external_work_orders")),
                 _review_summary(row.get("review_results")),
+                _source_oracle_summary(row.get("source_oracle_review_results")),
                 row.get("errors", []),
                 row.get("warnings", []),
             )
@@ -236,7 +254,13 @@ def _proposal_paths(*, root: Path, explicit: list[Path]) -> list[Path]:
     return list(unique.values())
 
 
-def _validate_proposal(path: Path, *, profile_root: Path, retained_reviews: list[dict[str, str]]) -> dict[str, Any]:
+def _validate_proposal(
+    path: Path,
+    *,
+    profile_root: Path,
+    retained_reviews: list[dict[str, str]],
+    retained_source_oracles: list[dict[str, str]],
+) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
     data = _load_json(path)
@@ -249,6 +273,11 @@ def _validate_proposal(path: Path, *, profile_root: Path, retained_reviews: list
     if status not in VALID_STATUSES:
         errors.append("invalid_status")
     review_results = data.get("review_results") if isinstance(data.get("review_results"), list) else []
+    source_oracle_review_results = (
+        data.get("source_oracle_review_results")
+        if isinstance(data.get("source_oracle_review_results"), list)
+        else []
+    )
     if _has_blocked_review(review_results) and status != "rejected":
         errors.append("blocked_review_requires_rejected_status")
     if status == "candidate" and not review_results:
@@ -269,6 +298,13 @@ def _validate_proposal(path: Path, *, profile_root: Path, retained_reviews: list
         candidate_signature=signature,
         review_results=review_results,
         retained_reviews=retained_reviews,
+        errors=errors,
+    )
+    _validate_source_oracle_links(
+        proposal_id=str(data.get("proposal_id") or "").strip(),
+        candidate_signature=signature,
+        review_results=source_oracle_review_results,
+        retained_reviews=retained_source_oracles,
         errors=errors,
     )
 
@@ -482,6 +518,57 @@ def _validate_review_links(
             errors.append(f"retained_review_missing_from_proposal:{review['review_id']}")
 
 
+def _validate_source_oracle_links(
+    *,
+    proposal_id: str,
+    candidate_signature: str,
+    review_results: list[Any],
+    retained_reviews: list[dict[str, str]],
+    errors: list[str],
+) -> None:
+    linked_review_ids: set[str] = set()
+    linked_paths: set[str] = set()
+    for index, item in enumerate(review_results):
+        if not isinstance(item, dict):
+            errors.append(f"source_oracle_review_result_{index + 1}:not_object")
+            continue
+        review_id = str(item.get("review_id") or "").strip()
+        review_path = str(item.get("review_path") or "").strip()
+        if review_id:
+            linked_review_ids.add(review_id)
+        if review_path:
+            resolved = _resolve_path(review_path)
+            linked_paths.add(_rel(resolved))
+            manifest = _load_json(resolved)
+            if not manifest:
+                errors.append(f"source_oracle_review_result_{index + 1}:missing_or_invalid_review_path")
+                continue
+            manifest_review_id = str(manifest.get("review_id") or "").strip()
+            manifest_proposal_id = str(manifest.get("proposal_id") or "").strip()
+            manifest_predicate = str(manifest.get("predicate") or "").strip()
+            if review_id and manifest_review_id and review_id != manifest_review_id:
+                errors.append(f"source_oracle_review_result_{index + 1}:review_id_mismatch")
+            if proposal_id and manifest_proposal_id and proposal_id != manifest_proposal_id:
+                errors.append(f"source_oracle_review_result_{index + 1}:proposal_id_mismatch")
+            if candidate_signature and manifest_predicate and candidate_signature != manifest_predicate:
+                errors.append(f"source_oracle_review_result_{index + 1}:predicate_mismatch")
+        elif review_id:
+            retained = [review for review in retained_reviews if review["review_id"] == review_id]
+            if retained:
+                if retained[0].get("proposal_id") != proposal_id:
+                    errors.append(f"source_oracle_review_result_{index + 1}:proposal_id_mismatch")
+                if retained[0].get("predicate") != candidate_signature:
+                    errors.append(f"source_oracle_review_result_{index + 1}:predicate_mismatch")
+
+    for review in retained_reviews:
+        if review.get("predicate") != candidate_signature:
+            continue
+        if review.get("proposal_id") != proposal_id:
+            continue
+        if review["review_id"] not in linked_review_ids and review["path"] not in linked_paths:
+            errors.append(f"retained_source_oracle_review_missing_from_proposal:{review['review_id']}")
+
+
 def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[str]) -> dict[str, Any]:
     return {
         "path": str(path),
@@ -496,6 +583,11 @@ def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[
             else []
         ),
         "review_results": data.get("review_results") if isinstance(data.get("review_results"), list) else [],
+        "source_oracle_review_results": (
+            data.get("source_oracle_review_results")
+            if isinstance(data.get("source_oracle_review_results"), list)
+            else []
+        ),
         "errors": errors,
         "warnings": warnings,
     }
@@ -524,6 +616,20 @@ def _review_summary(value: Any) -> str:
         result = str(item.get("result") or "").strip()
         if fixture or result:
             parts.append(f"{fixture}:{result}".strip(":"))
+    return "; ".join(parts)
+
+
+def _source_oracle_summary(value: Any) -> str:
+    if not isinstance(value, list) or not value:
+        return ""
+    parts: list[str] = []
+    for item in value[:3]:
+        if not isinstance(item, dict):
+            continue
+        review_id = str(item.get("review_id") or "").strip()
+        result = str(item.get("result") or "").strip()
+        if review_id or result:
+            parts.append(f"{review_id}:{result}".strip(":"))
     return "; ".join(parts)
 
 
@@ -559,6 +665,27 @@ def _retained_candidate_reviews(root: Path) -> list[dict[str, str]]:
                 "proposal_id": str(manifest.get("proposal_id") or "").strip(),
                 "fixture_id": str(manifest.get("fixture_id") or "").strip(),
                 "predicate": str(manifest.get("predicate") or "").strip(),
+            }
+        )
+    return rows
+
+
+def _retained_source_oracle_reviews(root: Path) -> list[dict[str, str]]:
+    root_path = root.resolve()
+    if not root_path.exists():
+        return []
+    rows: list[dict[str, str]] = []
+    for manifest_path in sorted(root_path.rglob("manifest.json")):
+        manifest = _load_json(manifest_path)
+        if not manifest:
+            continue
+        rows.append(
+            {
+                "path": _rel(manifest_path),
+                "review_id": str(manifest.get("review_id") or manifest_path.parent.name).strip(),
+                "proposal_id": str(manifest.get("proposal_id") or "").strip(),
+                "predicate": str(manifest.get("predicate") or "").strip(),
+                "status": str(manifest.get("status") or "").strip(),
             }
         )
     return rows
