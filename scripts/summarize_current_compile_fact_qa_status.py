@@ -91,6 +91,7 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
         if isinstance(cell, dict)
     ]
     families = _family_rows(cells)
+    unsupported_by_carrier = _unsupported_by_carrier_rows(cells)
     blockers = _blocking_reasons(
         manifest_run=manifest_run,
         source_audit=source_audit,
@@ -125,6 +126,7 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
             ),
         },
         "families": families,
+        "unsupported_by_carrier": unsupported_by_carrier,
         "cells": cells,
     }
 
@@ -348,6 +350,54 @@ def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [families[key] for key in sorted(families)]
 
 
+def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    groups: dict[tuple[str, str], dict[str, Any]] = {}
+    for cell in cells:
+        family = str(cell.get("family") or "other")
+        for row in cell.get("unsupported_expected_facts") or []:
+            carrier = str(row.get("carrier") or "unknown")
+            key = (family, carrier)
+            group = groups.setdefault(
+                key,
+                {
+                    "family": family,
+                    "carrier": carrier,
+                    "unsupported_count": 0,
+                    "support_0_count": 0,
+                    "support_1_count": 0,
+                    "cells": set(),
+                },
+            )
+            support = int(row.get("exact_support") or 0)
+            group["unsupported_count"] += 1
+            if support <= 0:
+                group["support_0_count"] += 1
+            elif support == 1:
+                group["support_1_count"] += 1
+            group["cells"].add(str(cell.get("id") or ""))
+    rows: list[dict[str, Any]] = []
+    for group in groups.values():
+        rows.append(
+            {
+                "family": group["family"],
+                "carrier": group["carrier"],
+                "unsupported_count": group["unsupported_count"],
+                "support_0_count": group["support_0_count"],
+                "support_1_count": group["support_1_count"],
+                "cell_count": len(group["cells"]),
+                "cells": sorted(group["cells"]),
+            }
+        )
+    return sorted(
+        rows,
+        key=lambda row: (
+            str(row["family"]),
+            -int(row["unsupported_count"]),
+            str(row["carrier"]),
+        ),
+    )
+
+
 def _blocking_reasons(
     *,
     manifest_run: dict[str, Any],
@@ -499,6 +549,35 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "These rows are the current coverage boundary: expected typed facts",
                 "with exact support below the claim threshold of 2. They are",
                 "diagnostic planning data, not permission to repair rows one by one.",
+                "",
+            ]
+        )
+        carrier_rows = report.get("unsupported_by_carrier") or []
+        if carrier_rows:
+            lines.extend(
+                [
+                    "### By Carrier",
+                    "",
+                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Cells |",
+                    "| --- | --- | ---: | ---: | ---: | --- |",
+                ]
+            )
+            for row in carrier_rows:
+                cells = ", ".join(f"`{cell}`" for cell in row.get("cells") or [])
+                lines.append(
+                    "| `{}` | `{}` | {} | {} | {} | {} |".format(
+                        row.get("family") or "",
+                        row.get("carrier") or "",
+                        row.get("unsupported_count", 0),
+                        row.get("support_0_count", 0),
+                        row.get("support_1_count", 0),
+                        cells,
+                    )
+                )
+        lines.extend(
+            [
+                "",
+                "### Rows",
                 "",
                 "| Cell | Fixture | Carrier | Support | Verdicts | Expected Fact | Non-Exact Emissions |",
                 "| --- | --- | --- | ---: | --- | --- | --- |",

@@ -71,12 +71,24 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
     md = render_markdown(report)
 
     assert report["summary"]["unsupported_expected_fact_count"] == 1
+    assert report["unsupported_by_carrier"] == [
+        {
+            "family": "osha_incident",
+            "carrier": "osha_penalty_amount/4",
+            "unsupported_count": 1,
+            "support_0_count": 0,
+            "support_1_count": 1,
+            "cell_count": 1,
+            "cells": ["osha_incident_transfer_001"],
+        }
+    ]
     unsupported = report["cells"][1]["unsupported_expected_facts"]
     assert unsupported[0]["reference_answer"] == (
         "osha_penalty_amount(inspection_1, total, usd_1000, Src)."
     )
     assert unsupported[0]["exact_support"] == 1
     assert "Unsupported Expected Facts" in md
+    assert "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | `osha_incident_transfer_001` |" in md
     assert "osha_penalty_amount" in md
 
 

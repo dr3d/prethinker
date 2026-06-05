@@ -44,6 +44,21 @@ These rows are the current coverage boundary: expected typed facts
 with exact support below the claim threshold of 2. They are
 diagnostic planning data, not permission to repair rows one by one.
 
+### By Carrier
+
+| Family | Carrier | Unsupported | Support 0 | Support 1 | Cells |
+| --- | --- | ---: | ---: | ---: | --- |
+| `fda_warning_letter` | `fda_violation_detail/5` | 5 | 5 | 0 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_correspondence_party/5` | 2 | 2 | 0 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_violation/5` | 1 | 1 | 0 | `fda_warning_letter_transfer_002_current_pack` |
+| `ntsb_investigation` | `ntsb_finding/5` | 2 | 0 | 2 | `ntsb_transfer_surface_001` |
+| `ntsb_investigation` | `ntsb_timeline_event/6` | 1 | 0 | 1 | `ntsb_transfer_surface_001` |
+| `sec_form_8k` | `sec_registrant_identifier/5` | 3 | 1 | 2 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_002`, `sec_form_8k_skeleton_transfer_003` |
+| `sec_form_8k` | `sec_filing/6` | 1 | 1 | 0 | `sec_form_8k_skeleton_transfer_001` |
+| `sec_form_8k` | `sec_filing_item_treatment/4` | 1 | 0 | 1 | `sec_form_8k_skeleton_transfer_003` |
+
+### Rows
+
 | Cell | Fixture | Carrier | Support | Verdicts | Expected Fact | Non-Exact Emissions |
 | --- | --- | --- | ---: | --- | --- | --- |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_filing/6` | 0 | run1: miss, run2: miss, run3: miss | `sec_filing(Filing, form_8_k, current_report, v_2025_12_23, not_stated, SrcFiling).` | `` |
