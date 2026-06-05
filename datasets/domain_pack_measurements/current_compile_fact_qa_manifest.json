@@ -9,6 +9,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_seed_current_pack_rerun_20260605\\sec-seed-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 13,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 13,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
@@ -22,6 +23,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_current_pack_rerun_negative_20260605\\sec-t001-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 13,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 5,
         "unexpected.unexpected_same_signature_ge_2": 2,
         "redaction.prose_dependent_exact": 0,
@@ -35,6 +37,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t002_current_pack_rerun_20260605\\sec-t002-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 12,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 11,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
@@ -48,6 +51,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_item_treatment_filing_id_20260604\\sec8k-t003-item-treatment-filing-id-r2-20260604",
       "expect": {
         "support.reference_count": 13,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 11,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
@@ -61,6 +65,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\ntsb_casualty_partition_contract_20260604\\ntsb-transfer-casualty-partition-r1",
       "expect": {
         "support.reference_count": 25,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 22,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
@@ -74,6 +79,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\fda_t002_variance_probe_20260605\\fda-t002-variance-r1-20260605",
       "expect": {
         "support.reference_count": 29,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 11,
         "unexpected.unexpected_same_signature_ge_2": 2,
         "redaction.prose_dependent_exact": 0,
@@ -87,6 +93,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_seed_current_pack_rerun_20260605\\osha-seed-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 21,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 21,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
@@ -100,6 +107,7 @@
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\osha_related_activity_flag_contract_20260604\\osha-transfer-001-related-activity-blank-flag-r1",
       "expect": {
         "support.reference_count": 15,
+        "support.runs_seen": 3,
         "support.exact_support_ge_2": 15,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,

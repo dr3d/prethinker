@@ -39,6 +39,7 @@ def test_run_compile_fact_judged_qa_manifest_end_to_end(tmp_path: Path) -> None:
                 "domain_lens_bundle": str(bundle_root),
                 "expect": {
                     "support.reference_count": 1,
+                    "support.runs_seen": 2,
                     "support.exact_support_ge_2": 1,
                     "redaction.prose_dependent_exact": 0,
                     "typed_plan.unregistered_plan_exact_rows": 0,
