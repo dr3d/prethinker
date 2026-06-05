@@ -282,106 +282,12 @@ clean atom/lens gates, while the emitted event rows varied across runs and had
 no support>=2 row. This is negative evidence for promoting an SEC event carrier
 from the seed alone; keep the skeleton profile frozen.
 
-SEC Form 8-K is the third fixture-bank candidate under review. A closed
-skeleton-only registry now exists for filing wrapper, registrant, identifiers,
-item headings, exhibits, and signature block. It is a methodology probe for the
-research claim above, not a product pack. The first skeleton micro is
-governance-clean:
-
-```text
-fixture: sec_form_8k_skeleton_v1
-local-Qwen lens bundle: N=3, support>=2
-post-source-scope-guard support: 9 / 13
-after skeleton contract tightening: 12 / 13
-after typed exhibit-number normalization: 13 / 13
-supported forbidden facts: 0 / 6
-atom-shape/signature blockers: 0
-```
-
-The first unlike retained SEC Form 8-K skeleton transfer has also run:
-
-```text
-fixture: sec_form_8k_skeleton_transfer_001
-artifact root: C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-transfer-r3-phone-reducer
-gate: C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t001_r3
-local-Qwen lens bundle: N=3, support>=2
-initial transfer: 5 / 13, 0 / 7 forbidden
-fresh R3 after CIK containment: 12 / 13, 0 / 8 forbidden
-R3 replay with typed phone-value reducer: 13 / 13, 0 / 8 forbidden, 0 unexpected
-atom-shape/signature/lens-scope blockers: 0
-research integrity gate: pass
-```
-
-The important result is governance, not the final number. The SEC lane caught
-two real leak surfaces before trusting the transfer: prose/semantic payload in
-`source_or_scope`, and unstated CIK identifiers inferred from model prior
-knowledge. Those historical pre-axis-repair cells are no longer the current SEC
-claim. The repaired breadth check is the current read: useful skeleton transfer
-evidence, but with boundary rows that keep SEC from being a pristine methods
-anchor.
-
-The second unlike retained SEC Form 8-K skeleton transfer completed under local
-Qwen N=3/support>=2:
-
-```text
-fixture: sec_form_8k_skeleton_transfer_002
-artifact root: C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t002-r3-date
-supported expected facts: 12 / 12
-supported forbidden facts: 0 / 6
-unexpected same-signature facts: 1
-registered fact/signature rate: 100%
-atom-shape/signature/lens-scope blockers: 0
-```
-
-The one unexpected row is a single-run signatory-name normalization variant and
-is not being repaired until it blocks transfer. The useful intervention was a
-contract boundary on `sec_filing/6`: wrapper event date must come from the
-cover-page Date of Report / Date of Earliest Event Reported field, while
-`filing_date` requires an explicitly labeled filed/submitted/accession date or
-else `not_stated`. This keeps item-body events and signature dates out of the
-wrapper carrier.
-
-The third unlike retained SEC Form 8-K skeleton transfer used a Blackstone
-Form 8-K/A amendment and historically passed before the value-axis repair:
-
-```text
-fixture: sec_form_8k_skeleton_transfer_003
-artifact root: C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1
-supported expected facts: 12 / 12
-supported forbidden facts: 0 / 10
-unexpected same-signature facts: 1
-registered fact/signature rate: 100%
-atom-shape/signature/lens-scope blockers: 0
-research integrity gate: pass
-```
-
-That third run required only bounded recurring-palette expansion before
-measurement: `form_8_k_a` and `results_of_operations_financial_condition`. It
-does not prove event-substance extraction, and after the later value-axis repair
-it is historical evidence rather than the current SEC score.
-
-A historical local deterministic compile-fact QA replay over the SEC seed plus
-all three transfers gives the complementary pre-axis-repair per-run view:
-
-```text
-rows: 144 / 150 exact, 4 partial, 2 miss
-support>=2 by fixture:
-  seed: 13 / 13
-  transfer_001: 13 / 13
-  transfer_002: 12 / 12
-  transfer_003: 12 / 12
-redaction replay: 144 / 144 exact rows survive, 0 prose-dependent
-typed-plan replay: 144 / 144 exact rows replay through registered carriers
-```
-
-The per-run misses/partials were not a contradiction of that historical SEC
-transfer claim; today, use the repaired breadth check above as the current SEC
-read.
-
-The pre-registered repaired-schema stability rerun has now been run. Next SEC
-work should only occur if a specific research question requires deliberately
-testing whether adding a narrow event-substance carrier breaks skeleton
-stability. Do not add event-substance carriers by default.
+Detailed pre-axis SEC seed and transfer run history lives in
+`docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`. This active-lanes page keeps only the
+current repaired-schema band and boundary above. Next SEC work should occur
+only if a specific research question requires deliberately testing whether a
+narrow event-substance carrier breaks skeleton stability. Do not add
+event-substance carriers by default.
 
 OSHA accident/inspection is the fourth fixture-bank family under review. A
 closed skeleton/table registry now exists for inspection wrapper,
