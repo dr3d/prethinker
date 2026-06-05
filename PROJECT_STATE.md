@@ -386,6 +386,12 @@ Fixture-bank / next-domain inventory
     scope: validates blind/source-only metadata and candidate
       expected/forbidden fact-file shape only; it does not read source prose or
       decide whether the review facts are true.
+    importer:
+      scripts\import_candidate_oracle_review.py stages returned review zips,
+      copies only manifest / candidate expected facts / candidate forbidden
+      facts / README / adjudication notes, drops source and work-order payloads,
+      audits the staged review, and refuses overwrites unless explicitly
+      requested.
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,

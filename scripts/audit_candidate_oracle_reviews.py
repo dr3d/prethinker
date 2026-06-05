@@ -27,6 +27,7 @@ from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E40
 DEFAULT_REVIEW_ROOT = REPO_ROOT / "datasets" / "candidate_oracle_reviews"
 SIGNATURE_RE = re.compile(r"^([a-z][a-z0-9_]*)/([1-9][0-9]*)$")
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
+PLACEHOLDER_RE = re.compile(r"(?:REPLACE_WITH|TODO|TBD)", re.IGNORECASE)
 
 
 def parse_args() -> argparse.Namespace:
@@ -137,6 +138,8 @@ def _audit_review(path: Path) -> dict[str, Any]:
         errors.append("reviewer_forbidden_input_exposure_not_false")
     if not _string_list(manifest.get("source_files")):
         errors.append("missing_source_files")
+    placeholder_paths = _placeholder_paths(manifest)
+    errors.extend(f"manifest_placeholder:{path}" for path in placeholder_paths)
 
     expected_path = review_dir / "candidate_expected_facts.pl"
     forbidden_path = review_dir / "candidate_forbidden_facts.pl"
@@ -151,6 +154,8 @@ def _audit_review(path: Path) -> dict[str, Any]:
     forbidden_facts, forbidden_errors = _fact_lines(forbidden_path, signature=signature)
     errors.extend(f"candidate_expected_facts.pl:{error}" for error in expected_errors)
     errors.extend(f"candidate_forbidden_facts.pl:{error}" for error in forbidden_errors)
+    if not expected_facts and not forbidden_facts:
+        errors.append("review_has_no_expected_or_forbidden_facts")
 
     return {
         "path": _rel(manifest_path),
@@ -269,6 +274,20 @@ def _rel(path: Path) -> str:
         return str(path.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
     except ValueError:
         return str(path)
+
+
+def _placeholder_paths(value: Any, prefix: str = "") -> list[str]:
+    hits: list[str] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            child = f"{prefix}.{key}" if prefix else str(key)
+            hits.extend(_placeholder_paths(item, child))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            hits.extend(_placeholder_paths(item, f"{prefix}[{index}]"))
+    elif isinstance(value, str) and PLACEHOLDER_RE.search(value):
+        hits.append(prefix or "<root>")
+    return hits
 
 
 if __name__ == "__main__":

@@ -80,6 +80,26 @@ def test_candidate_oracle_review_audit_blocks_fact_arity_mismatch(tmp_path: Path
     assert "candidate_expected_facts.pl:line_1:arity_mismatch:2" in report["reviews"][0]["errors"]
 
 
+def test_candidate_oracle_review_audit_blocks_unfilled_template_placeholder(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path, fixture_id="REPLACE_WITH_FIXTURE_ID")
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert "manifest_placeholder:fixture_id" in report["reviews"][0]["errors"]
+
+
+def test_candidate_oracle_review_audit_blocks_empty_review(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path)
+    _write(review / "candidate_expected_facts.pl", "% RESULT: NO EXPECTED FACTS.\n")
+    _write(review / "candidate_forbidden_facts.pl", "% RESULT: NO FORBIDDEN FACTS.\n")
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert "review_has_no_expected_or_forbidden_facts" in report["reviews"][0]["errors"]
+
+
 def test_candidate_oracle_review_audit_expect_md_marks_stale_report(
     tmp_path: Path,
     monkeypatch,
