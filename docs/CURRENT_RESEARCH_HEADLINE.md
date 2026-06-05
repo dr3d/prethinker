@@ -23,7 +23,7 @@ Current domain-pack claims require:
 - registered signatures only;
 - atom-shape pass;
 - lens-scope pass;
-- carrier value-domain pass when available;
+- carrier value-domain pass where applicable;
 - no source-record prose matching, query-text routing, fixture vocabulary, or
   prose-shaped atoms in the winning path.
 

@@ -23,7 +23,7 @@ gate named for that result:
 - registered signatures only;
 - atom-shape pass;
 - lens-scope pass;
-- carrier value-domain pass when available;
+- carrier value-domain pass where applicable;
 - sign-clean audit pass for current code;
 - no source-record prose matching, query-text routing, or fixture vocabulary in
   the winning path.
