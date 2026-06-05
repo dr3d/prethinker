@@ -107,6 +107,69 @@ def test_candidate_oracle_review_audit_blocks_fact_arity_mismatch(tmp_path: Path
     assert "candidate_expected_facts.pl:line_1:arity_mismatch:2" in report["reviews"][0]["errors"]
 
 
+def test_candidate_oracle_review_audit_blocks_expected_prose_shaped_atom(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path)
+    _write(
+        review / "candidate_expected_facts.pl",
+        (
+            "demo_candidate(Row, "
+            "'this is a source sentence that should never become a trusted typed atom value', Src).\n"
+        ),
+    )
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert any(
+        "candidate_expected_facts.pl:line_1:expected_atom_shape:" in error
+        for error in report["reviews"][0]["errors"]
+    )
+
+
+def test_candidate_oracle_review_audit_blocks_expected_value_domain_violation(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path, predicate="fda_response_documentation_gap/5")
+    _write(
+        review / "candidate_expected_facts.pl",
+        "fda_response_documentation_gap(Gap, violation_1, cfr_21_211_113_b, investigation_failure, Src).\n",
+    )
+    _write(
+        review / "candidate_forbidden_facts.pl",
+        "fda_response_documentation_gap(_, _, _, _, _).\n",
+    )
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "candidate_expected_facts.pl:line_1:expected_value_domain:gap_kind:value_not_allowed:investigation_failure"
+        in report["reviews"][0]["errors"]
+    )
+
+
+def test_candidate_oracle_review_audit_warns_on_forbidden_sentinel_bad_values(tmp_path: Path) -> None:
+    review = _review_dir(tmp_path, predicate="fda_response_documentation_gap/5")
+    _write(
+        review / "candidate_expected_facts.pl",
+        "fda_response_documentation_gap(Gap, violation_1, cfr_21_211_113_b, supporting_documentation, Src).\n",
+    )
+    _write(
+        review / "candidate_forbidden_facts.pl",
+        "fda_response_documentation_gap(_, _, _, 'Your response is inadequate.', _).\n",
+    )
+
+    report = build_report([review / "manifest.json"])
+
+    assert report["summary"]["status"] == "pass"
+    assert any(
+        "candidate_forbidden_facts.pl:line_1:forbidden_atom_shape:" in warning
+        for warning in report["reviews"][0]["warnings"]
+    )
+    assert any(
+        "candidate_forbidden_facts.pl:line_1:forbidden_value_domain:gap_kind:" in warning
+        for warning in report["reviews"][0]["warnings"]
+    )
+
+
 def test_candidate_oracle_review_audit_blocks_unfilled_template_placeholder(tmp_path: Path) -> None:
     review = _review_dir(tmp_path, fixture_id="REPLACE_WITH_FIXTURE_ID")
 

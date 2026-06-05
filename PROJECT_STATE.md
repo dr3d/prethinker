@@ -572,7 +572,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-05:
 
 ```text
-2515 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2521 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the

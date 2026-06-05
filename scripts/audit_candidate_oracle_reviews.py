@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E402
+from scripts.oracle_fact_governance import audit_oracle_fact_clause  # noqa: E402
 
 DEFAULT_REVIEW_ROOT = REPO_ROOT / "datasets" / "candidate_oracle_reviews"
 SIGNATURE_RE = re.compile(r"^([a-z][a-z0-9_]*)/([1-9][0-9]*)$")
@@ -88,6 +89,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         "This report validates retained candidate-review package structure only.",
         "It does not read source prose, inspect model outputs, or decide facts.",
         "It verifies review folder identity and repo-relative source-file references without opening those sources.",
+        "Expected facts are hard-gated for compact atom shape and registered carrier value domains.",
+        "Forbidden facts are negative sentinels; off-domain or prose-shaped sentinel values are warnings, not support.",
         "",
         f"- Reviews: `{summary['review_count']}`",
         f"- Blocking errors: `{summary['blocking_errors']}`",
@@ -156,10 +159,20 @@ def _audit_review(path: Path) -> dict[str, Any]:
     if not (review_dir / "README.md").exists():
         warnings.append("missing_README.md")
 
-    expected_facts, expected_errors = _fact_lines(expected_path, signature=signature)
-    forbidden_facts, forbidden_errors = _fact_lines(forbidden_path, signature=signature)
+    expected_facts, expected_errors, expected_warnings = _fact_lines(
+        expected_path,
+        signature=signature,
+        role="expected",
+    )
+    forbidden_facts, forbidden_errors, forbidden_warnings = _fact_lines(
+        forbidden_path,
+        signature=signature,
+        role="forbidden",
+    )
     errors.extend(f"candidate_expected_facts.pl:{error}" for error in expected_errors)
     errors.extend(f"candidate_forbidden_facts.pl:{error}" for error in forbidden_errors)
+    warnings.extend(f"candidate_expected_facts.pl:{warning}" for warning in expected_warnings)
+    warnings.extend(f"candidate_forbidden_facts.pl:{warning}" for warning in forbidden_warnings)
     if not expected_facts and not forbidden_facts:
         errors.append("review_has_no_expected_or_forbidden_facts")
 
@@ -177,11 +190,12 @@ def _audit_review(path: Path) -> dict[str, Any]:
     }
 
 
-def _fact_lines(path: Path, *, signature: tuple[str, int] | None) -> tuple[list[str], list[str]]:
+def _fact_lines(path: Path, *, signature: tuple[str, int] | None, role: str) -> tuple[list[str], list[str], list[str]]:
     if not path.exists():
-        return [], []
+        return [], [], []
     facts: list[str] = []
     errors: list[str] = []
+    warnings: list[str] = []
     for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         text = raw.strip()
         if not text or text.startswith("%"):
@@ -200,8 +214,17 @@ def _fact_lines(path: Path, *, signature: tuple[str, int] | None) -> tuple[list[
                 errors.append(f"line_{line_no}:predicate_mismatch:{name}")
             if len(args) != sig_arity:
                 errors.append(f"line_{line_no}:arity_mismatch:{len(args)}")
+        fact_errors, fact_warnings = audit_oracle_fact_clause(
+            predicate=name,
+            args=args,
+            clause=text,
+            line_no=line_no,
+            role=role,
+        )
+        errors.extend(fact_errors)
+        warnings.extend(fact_warnings)
         facts.append(text)
-    return facts, errors
+    return facts, errors, warnings
 
 
 def _parse_fact(text: str) -> tuple[str, list[str]] | None:

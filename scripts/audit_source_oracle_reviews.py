@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E402
+from scripts.oracle_fact_governance import audit_oracle_fact_clause  # noqa: E402
 
 
 DEFAULT_REVIEW_ROOT = REPO_ROOT / "datasets" / "source_oracle_reviews"
@@ -101,6 +102,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "This report validates retained source-only expected/forbidden oracle packages.",
         "It does not read source prose, inspect model outputs, or decide facts.",
+        "Expected facts are hard-gated for compact atom shape and registered carrier value domains.",
+        "Forbidden facts are negative sentinels; off-domain or prose-shaped sentinel values are warnings, not support.",
         "",
         f"- Reviews: `{summary['review_count']}`",
         f"- Outputs: `{summary['output_count']}`",
@@ -244,10 +247,20 @@ def _audit_outputs(
         else:
             errors.extend(_source_file_errors(source_files))
         errors.extend(f"manifest_placeholder:{item}" for item in _placeholder_paths(fixture_manifest))
-        expected_facts, expected_errors = _fact_lines(expected_path, signature=signature)
-        forbidden_facts, forbidden_errors = _fact_lines(forbidden_path, signature=signature)
+        expected_facts, expected_errors, expected_warnings = _fact_lines(
+            expected_path,
+            signature=signature,
+            role="expected",
+        )
+        forbidden_facts, forbidden_errors, forbidden_warnings = _fact_lines(
+            forbidden_path,
+            signature=signature,
+            role="forbidden",
+        )
         errors.extend(f"expected_facts.pl:{error}" for error in expected_errors)
         errors.extend(f"forbidden_facts.pl:{error}" for error in forbidden_errors)
+        warnings.extend(f"expected_facts.pl:{warning}" for warning in expected_warnings)
+        warnings.extend(f"forbidden_facts.pl:{warning}" for warning in forbidden_warnings)
         expected_count = len(expected_facts)
         forbidden_count = len(forbidden_facts)
         manifest_expected = _optional_int(fixture_manifest.get("expected_fact_count"))
@@ -269,11 +282,12 @@ def _audit_outputs(
     return rows
 
 
-def _fact_lines(path: Path, *, signature: tuple[str, int] | None) -> tuple[list[str], list[str]]:
+def _fact_lines(path: Path, *, signature: tuple[str, int] | None, role: str) -> tuple[list[str], list[str], list[str]]:
     if not path.exists():
-        return [], []
+        return [], [], []
     facts: list[str] = []
     errors: list[str] = []
+    warnings: list[str] = []
     for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         text = raw.strip()
         if not text or text.startswith("%"):
@@ -292,8 +306,17 @@ def _fact_lines(path: Path, *, signature: tuple[str, int] | None) -> tuple[list[
                 errors.append(f"line_{line_no}:predicate_mismatch:{name}")
             if len(args) != sig_arity:
                 errors.append(f"line_{line_no}:arity_mismatch:{len(args)}")
+        fact_errors, fact_warnings = audit_oracle_fact_clause(
+            predicate=name,
+            args=args,
+            clause=text,
+            line_no=line_no,
+            role=role,
+        )
+        errors.extend(fact_errors)
+        warnings.extend(fact_warnings)
         facts.append(text)
-    return facts, errors
+    return facts, errors, warnings
 
 
 def _parse_fact(text: str) -> tuple[str, list[str]] | None:

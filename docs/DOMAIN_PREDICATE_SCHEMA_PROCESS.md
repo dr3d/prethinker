@@ -373,6 +373,14 @@ review. Once retained, the proposal validator requires the proposal to link the
 source-oracle review under `source_oracle_review_results`; otherwise the
 proposal and retained oracle evidence have drifted apart.
 
+The oracle-review audits treat expected and forbidden facts asymmetrically.
+Expected facts are claim-bearing: they can add proposal evidence, so they are
+hard-gated for compact atom shape and registered carrier value domains before
+they can be consumed. Forbidden facts are negative sentinels: they may name
+off-domain or prose-shaped bad outputs so the compiler can be caught emitting
+them, but those values are reported as warnings and never count as positive
+support.
+
 10. Require omission/accountability.
 
 When a carrier is common for the domain but absent or uncertain in the source,
