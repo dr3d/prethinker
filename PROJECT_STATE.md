@@ -248,9 +248,9 @@ OSHA accident/inspection pack
     employee injury, violation counts, penalties, item, and status rows transfer
     better than long-table enumeration and mixed-source section attachment. The
     prior repeated FTA total-penalty extra was adjudicated as source-backed and
-    is now in the seed oracle; an independent source-only review packet is
-    queued at `tmp\osha_fta_total_penalty_blind_review_work_order_20260605.zip`,
-    so treat that uplift as project-adjudicated until review returns. The
+    is now in the seed oracle; the retained blind candidate review
+    `datasets/candidate_oracle_reviews/osha_fta_total_penalty_blind_review_20260605`
+    independently accepts the row. The
     transfer_003 guard is cleanup only: support
     stays 2 / 21 while the current news-release accident/injury rows are
     blocked from contaminating the prior inspection detail.
