@@ -111,6 +111,71 @@ def test_import_candidate_oracle_review_supports_same_review_id_fixture_bundle(t
     assert manifest["source_files"] == [f"datasets/compile_micro_fixtures/{fixture_a}/source.md"]
 
 
+def test_import_candidate_oracle_review_splits_manifestless_standalone_packet_by_predicate(tmp_path: Path) -> None:
+    package = _write_zip(
+        tmp_path / "standalone_review.zip",
+        {
+            "REVIEW_TEMPLATE.md": "# Review\n\nFixture: `sec_form_8k_skeleton_transfer_001`\n",
+            "expected_facts_template.pl": (
+                "sec_exhibit(Filing, exhibit_10_1, agreement, filed, SrcExhibit101).\n"
+                "sec_registrant(Filing, servicenow_inc, delaware, SrcRegistrant).\n"
+            ),
+            "forbidden_facts_template.pl": (
+                "sec_registrant(Filing, svc_now_inc, delaware, SrcRegistrant).\n"
+            ),
+            "source.md": "dropped source copy\n",
+            "ontology_registry.json": "{}\n",
+        },
+    )
+    dest = tmp_path / "reviews"
+
+    report = import_review_zip(
+        zip_path=package,
+        dest_root=dest,
+        review_id="sec_t001_source_review_20260605",
+        fixture_id="sec_form_8k_skeleton_transfer_001",
+    )
+
+    assert report["summary"]["status"] == "pass"
+    review_ids = {item["review_id"] for item in report["imported_reviews"]}
+    assert review_ids == {
+        "sec_t001_source_review_20260605_sec_exhibit_5",
+        "sec_t001_source_review_20260605_sec_registrant_4",
+    }
+    exhibit_manifest = json.loads(
+        (dest / "sec_t001_source_review_20260605_sec_exhibit_5" / "manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert exhibit_manifest["predicate"] == "sec_exhibit/5"
+    assert exhibit_manifest["source_files"] == [
+        "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_001/source.md"
+    ]
+    assert not (dest / "sec_t001_source_review_20260605_sec_exhibit_5" / "source.md").exists()
+
+
+def test_import_candidate_oracle_review_blocks_manifestless_packet_without_explicit_fixture(tmp_path: Path) -> None:
+    package = _write_zip(
+        tmp_path / "standalone_review.zip",
+        {
+            "REVIEW_TEMPLATE.md": "# Review\n",
+            "expected_facts_template.pl": (
+                "sec_exhibit(Filing, exhibit_10_1, agreement, filed, SrcExhibit101).\n"
+            ),
+            "forbidden_facts_template.pl": "",
+        },
+    )
+
+    report = import_review_zip(
+        zip_path=package,
+        dest_root=tmp_path / "reviews",
+        review_id="sec_t001_source_review_20260605",
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert "manifestless_review_requires_fixture_id" in report["errors"]
+
+
 def test_import_candidate_oracle_review_blocks_unfilled_template(tmp_path: Path) -> None:
     package = _write_zip(
         tmp_path / "template.zip",

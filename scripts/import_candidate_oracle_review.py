@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -32,11 +33,17 @@ REVIEW_FILE_NAMES = {
     "manifest.json",
     "candidate_expected_facts.pl",
     "expected_facts.pl",
+    "expected_facts_template.pl",
     "candidate_forbidden_facts.pl",
     "forbidden_facts.pl",
+    "forbidden_facts_template.pl",
     "README.md",
+    "REVIEW_TEMPLATE.md",
     "adjudication_notes.md",
+    "review_notes.md",
 }
+FACT_RE = re.compile(r"^\s*([a-z][a-z0-9_]*)\((.*)\)\.\s*$")
+SAFE_ID_RE = re.compile(r"[^a-zA-Z0-9_]+")
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,6 +51,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--zip", required=True, type=Path, dest="zip_path")
     parser.add_argument("--dest-root", type=Path, default=DEFAULT_DEST_ROOT)
     parser.add_argument("--review-id", help="Import a specific review_id when the zip contains more than one manifest.")
+    parser.add_argument(
+        "--fixture-id",
+        help=(
+            "Fixture id for manifestless standalone review returns. "
+            "When no manifest is present, this plus --review-id is required."
+        ),
+    )
+    parser.add_argument(
+        "--source-file",
+        help="Optional repo-relative source file override for manifestless standalone review returns.",
+    )
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path)
@@ -56,6 +74,8 @@ def main() -> int:
         zip_path=args.zip_path,
         dest_root=args.dest_root,
         review_id=args.review_id,
+        fixture_id=args.fixture_id,
+        source_file=args.source_file,
         overwrite=args.overwrite,
         dry_run=args.dry_run,
     )
@@ -72,6 +92,8 @@ def import_review_zip(
     zip_path: Path,
     dest_root: Path = DEFAULT_DEST_ROOT,
     review_id: str | None = None,
+    fixture_id: str | None = None,
+    source_file: str | None = None,
     overwrite: bool = False,
     dry_run: bool = False,
 ) -> dict[str, Any]:
@@ -92,8 +114,17 @@ def import_review_zip(
         if review_id:
             manifest_choices = [item for item in manifest_choices if item["manifest"].get("review_id") == review_id]
         if not manifest_choices:
-            errors.append("no_candidate_review_manifest")
-            return _report(zip_path=zip_path, dest_root=dest_root, errors=errors, warnings=warnings, dry_run=dry_run, entries=entries)
+            return _import_manifestless_standalone_review(
+                zip_path=zip_path,
+                archive=archive,
+                entries=entries,
+                dest_root=dest_root,
+                review_id=review_id,
+                fixture_id=fixture_id,
+                source_file=source_file,
+                overwrite=overwrite,
+                dry_run=dry_run,
+            )
         if len(manifest_choices) > 1 and not _is_same_review_fixture_bundle(manifest_choices):
             errors.append("multiple_candidate_review_manifests")
             return _report(zip_path=zip_path, dest_root=dest_root, errors=errors, warnings=warnings, dry_run=dry_run, entries=entries)
@@ -189,6 +220,183 @@ def import_review_zip(
                 warnings=warnings,
                 entries=entries,
             )
+
+
+def _import_manifestless_standalone_review(
+    *,
+    zip_path: Path,
+    archive: zipfile.ZipFile,
+    entries: list[dict[str, str]],
+    dest_root: Path,
+    review_id: str | None,
+    fixture_id: str | None,
+    source_file: str | None,
+    overwrite: bool,
+    dry_run: bool,
+) -> dict[str, Any]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    base_review_id = _safe_id(review_id or "")
+    fixture = str(fixture_id or "").strip()
+    if not base_review_id:
+        errors.append("manifestless_review_requires_review_id")
+    if not fixture:
+        errors.append("manifestless_review_requires_fixture_id")
+    source_path = _manifestless_source_file(fixture_id=fixture, source_file=source_file)
+    if fixture and not source_path:
+        errors.append(f"source_file_not_found_for_fixture:{fixture}")
+    grouped = _manifestless_fact_groups(archive=archive, entries=entries)
+    invalid_lines = grouped.pop("__invalid__", {"expected": [], "forbidden": []})
+    for role, lines in invalid_lines.items():
+        for line in lines:
+            errors.append(f"manifestless_{role}_fact_line_not_parseable:{line}")
+    if not grouped:
+        errors.append("manifestless_review_has_no_fact_rows")
+    if errors:
+        return _report(
+            zip_path=zip_path,
+            dest_root=dest_root,
+            errors=errors,
+            warnings=warnings,
+            dry_run=dry_run,
+            entries=entries,
+        )
+
+    imported_reviews: list[dict[str, Any]] = []
+    dest_dirs: list[Path] = []
+    for predicate, files in sorted(grouped.items()):
+        selected_review_id = f"{base_review_id}_{predicate}_{_predicate_arity(files)}"
+        dest_dir = dest_root / selected_review_id
+        if dest_dir.exists() and not overwrite:
+            errors.append(f"destination_exists:{selected_review_id}")
+        dest_dirs.append(dest_dir)
+        imported_reviews.append(
+            {
+                "review_id": selected_review_id,
+                "fixture_id": fixture,
+                "predicate": f"{predicate}/{_predicate_arity(files)}",
+                "dest_dir": _rel(dest_dir),
+                "copied_files": [],
+            }
+        )
+    if errors:
+        return _report(
+            zip_path=zip_path,
+            dest_root=dest_root,
+            review_id=base_review_id,
+            dest_dir=dest_dirs[0] if dest_dirs else None,
+            imported_reviews=imported_reviews,
+            errors=errors,
+            warnings=warnings,
+            dry_run=dry_run,
+            entries=entries,
+        )
+
+    with tempfile.TemporaryDirectory(prefix="prethinker_candidate_review_") as tmp:
+        manifest_paths: list[Path] = []
+        copied_all: list[str] = []
+        dropped_all: list[str] = []
+        for index, item in enumerate(imported_reviews):
+            stage_dir = Path(tmp) / item["review_id"]
+            stage_dir.mkdir(parents=True, exist_ok=True)
+            files = grouped[item["predicate"].rsplit("/", 1)[0]]
+            manifest = {
+                "review_id": item["review_id"],
+                "fixture_id": fixture,
+                "predicate": item["predicate"],
+                "source_files": [source_path],
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_forbidden_inputs": False,
+                "source_only_review": True,
+                "bundle_review_id": base_review_id,
+            }
+            (stage_dir / "manifest.json").write_text(
+                json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            (stage_dir / "candidate_expected_facts.pl").write_text(
+                "\n".join(files["expected"]) + ("\n" if files["expected"] else ""),
+                encoding="utf-8",
+            )
+            (stage_dir / "candidate_forbidden_facts.pl").write_text(
+                "\n".join(files["forbidden"]) + ("\n" if files["forbidden"] else ""),
+                encoding="utf-8",
+            )
+            copied = [
+                "manifest.json",
+                "candidate_expected_facts.pl",
+                "candidate_forbidden_facts.pl",
+            ]
+            readme_entry = _entry_by_basename(entries, "README.md") or _entry_by_basename(entries, "REVIEW_TEMPLATE.md")
+            if readme_entry:
+                _copy_entry(archive, readme_entry, stage_dir / "README.md")
+                copied.append("README.md")
+            notes_entry = _entry_by_basename(entries, "adjudication_notes.md") or _entry_by_basename(entries, "review_notes.md")
+            if notes_entry:
+                _copy_entry(archive, notes_entry, stage_dir / "adjudication_notes.md")
+                copied.append("adjudication_notes.md")
+            item["copied_files"] = copied
+            copied_all.extend(f"{item['review_id']}/{name}" for name in copied)
+            manifest_paths.append(stage_dir / "manifest.json")
+        retained = {
+            str(path)
+            for name in {
+                "README.md",
+                "REVIEW_TEMPLATE.md",
+                "adjudication_notes.md",
+                "review_notes.md",
+                "expected_facts.pl",
+                "expected_facts_template.pl",
+                "candidate_expected_facts.pl",
+                "forbidden_facts.pl",
+                "forbidden_facts_template.pl",
+                "candidate_forbidden_facts.pl",
+            }
+            for path in [_entry_by_basename(entries, name)]
+            if path
+        }
+        dropped_all = sorted(entry["name"] for entry in entries if entry["name"] not in retained)
+        if dropped_all:
+            warnings.append(f"dropped_non_review_entries:{len(set(dropped_all))}")
+        audit = audit_reviews(manifest_paths)
+        warnings.extend(f"audit:{warning}" for warning in _audit_warnings(audit))
+        if audit["summary"]["status"] != "pass":
+            errors.extend(f"audit:{error}" for row in audit["reviews"] for error in row["errors"])
+            return _report(
+                zip_path=zip_path,
+                dest_root=dest_root,
+                review_id=base_review_id,
+                dest_dir=dest_dirs[0],
+                copied=copied_all,
+                dropped=sorted(set(dropped_all)),
+                imported_reviews=imported_reviews,
+                audit=audit,
+                dry_run=dry_run,
+                errors=errors,
+                warnings=warnings,
+                entries=entries,
+            )
+        if not dry_run:
+            dest_root.mkdir(parents=True, exist_ok=True)
+            for item in imported_reviews:
+                dest_dir = dest_root / item["review_id"]
+                if dest_dir.exists():
+                    shutil.rmtree(dest_dir)
+                shutil.copytree(Path(tmp) / item["review_id"], dest_dir)
+        return _report(
+            zip_path=zip_path,
+            dest_root=dest_root,
+            review_id=base_review_id,
+            dest_dir=dest_dirs[0],
+            copied=copied_all,
+            dropped=sorted(set(dropped_all)),
+            imported_reviews=imported_reviews,
+            audit=audit,
+            dry_run=dry_run,
+            errors=errors,
+            warnings=warnings,
+            entries=entries,
+        )
 
 
 def _candidate_manifests(archive: zipfile.ZipFile, entries: list[dict[str, str]]) -> list[dict[str, Any]]:
@@ -288,6 +496,98 @@ def _stage_review_files(
         if entry["name"] not in allowed_sources:
             dropped.append(entry["name"])
     return copied, dropped
+
+
+def _manifestless_fact_groups(
+    *,
+    archive: zipfile.ZipFile,
+    entries: list[dict[str, str]],
+) -> dict[str, dict[str, list[str]]]:
+    grouped: dict[str, dict[str, list[str]]] = {}
+    for role, names in {
+        "expected": ("candidate_expected_facts.pl", "expected_facts.pl", "expected_facts_template.pl"),
+        "forbidden": ("candidate_forbidden_facts.pl", "forbidden_facts.pl", "forbidden_facts_template.pl"),
+    }.items():
+        entry_name = ""
+        for name in names:
+            entry_name = _entry_by_basename(entries, name)
+            if entry_name:
+                break
+        if not entry_name:
+            continue
+        text = archive.read(entry_name).decode("utf-8")
+        for raw in text.splitlines():
+            line = raw.strip()
+            if not line or line.startswith("%"):
+                continue
+            match = FACT_RE.match(line)
+            if not match:
+                grouped.setdefault("__invalid__", {"expected": [], "forbidden": []})[role].append(line)
+                continue
+            predicate = match.group(1)
+            grouped.setdefault(predicate, {"expected": [], "forbidden": []})[role].append(line)
+    return grouped
+
+
+def _predicate_arity(files: dict[str, list[str]]) -> int:
+    for role in ("expected", "forbidden"):
+        for line in files.get(role, []):
+            match = FACT_RE.match(line)
+            if match:
+                return len(_split_fact_args(match.group(2)))
+    return 0
+
+
+def _split_fact_args(value: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    quote = False
+    depth = 0
+    for char in value:
+        if char == "'":
+            quote = not quote
+            current.append(char)
+        elif not quote and char in "([":
+            depth += 1
+            current.append(char)
+        elif not quote and char in ")]":
+            depth = max(0, depth - 1)
+            current.append(char)
+        elif not quote and depth == 0 and char == ",":
+            args.append("".join(current).strip())
+            current = []
+        else:
+            current.append(char)
+    tail = "".join(current).strip()
+    if tail or value.strip():
+        args.append(tail)
+    return args
+
+
+def _manifestless_source_file(*, fixture_id: str, source_file: str | None) -> str:
+    if source_file:
+        normalized = source_file.replace("\\", "/").strip()
+        path = REPO_ROOT / normalized
+        return normalized if normalized.startswith("datasets/") and path.exists() else ""
+    if not fixture_id:
+        return ""
+    matches = sorted((REPO_ROOT / "datasets").rglob(f"{fixture_id}/source.md"))
+    if len(matches) != 1:
+        return ""
+    return _rel(matches[0])
+
+
+def _entry_by_basename(entries: list[dict[str, str]], basename: str) -> str:
+    matches = [entry["name"] for entry in entries if Path(entry["name"]).name == basename]
+    return matches[0] if matches else ""
+
+
+def _safe_id(value: str) -> str:
+    lowered = value.strip().lower()
+    safe = SAFE_ID_RE.sub("_", lowered).strip("_")
+    while "__" in safe:
+        safe = safe.replace("__", "_")
+    return safe
 
 
 def _audit_warnings(audit: dict[str, Any]) -> list[str]:
