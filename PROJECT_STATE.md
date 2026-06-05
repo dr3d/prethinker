@@ -26,6 +26,7 @@ The current front-door documents are:
 - `docs/CURRENT_RESEARCH_HEADLINE.md`
 - `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
 - `docs/CURRENT_COMPILE_FACT_QA_STATUS.md`
+- `docs/QUERY_GROUNDING_STATUS.md`
 - `docs/DOMAIN_PACK_STATUS.md`
 - `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`
 - `docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md`
@@ -637,6 +638,7 @@ python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fac
 python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
 python scripts\audit_reference_judge_null_control_reports.py --out-json tmp\reference_judge_null_control_reports.json --out-md tmp\reference_judge_null_control_reports.md
 python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md
+python scripts\summarize_query_grounding_status.py --out-json tmp\query_grounding_status.json --out-md docs\QUERY_GROUNDING_STATUS.md --expect-md docs\QUERY_GROUNDING_STATUS.md
 python scripts\audit_research_artifact_paths.py
 python scripts\audit_historical_score_claims.py
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md

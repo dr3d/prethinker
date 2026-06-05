@@ -38,6 +38,7 @@ propagation = visible recomputation, not hidden belief
 - [Domain predicate schema process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a document family becomes a customizable governed predicate pack.
 - [Domain pack research evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current evidence for the closed-domain transfer thesis.
 - [Current compile-fact QA status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with source/settings provenance and replay gates.
+- [Query grounding status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md) - generated status for atom-library query planning over retained typed artifacts.
 - [Domain pack status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for the active closed predicate packs.
 - [Domain accountability status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
 - [SEC value-axis integrity status](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated audit for the SEC item/exhibit/treatment axis split.
@@ -143,6 +144,7 @@ The short version:
 - [docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
 - [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - current artifact ledger and family-by-family evidence.
 - [docs/CURRENT_COMPILE_FACT_QA_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with replay gates and provenance.
+- [docs/QUERY_GROUNDING_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md) - generated status for atom-library query planning over retained typed artifacts.
 - [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
 - [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission/accountability coverage for active closed predicate packs.
 - [docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated SEC item/exhibit/treatment axis audit.
@@ -193,6 +195,7 @@ Deterministic compile-fact QA bundles can be regenerated in-repo from
 python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
 python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
 python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md
+python scripts\summarize_query_grounding_status.py --out-json tmp\query_grounding_status.json --out-md docs\QUERY_GROUNDING_STATUS.md --expect-md docs\QUERY_GROUNDING_STATUS.md
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json --expect-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
