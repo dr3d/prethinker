@@ -325,7 +325,10 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
             "exact_support": item["exact_support"],
             "verdicts": item["verdicts"],
             "non_exact_answers": sorted(set(item["non_exact_answers"]))[:3],
-            "residue_kind": _residue_kind(item.get("non_exact_details") or []),
+            "residue_kind": _residue_kind(
+                item.get("non_exact_details") or [],
+                exact_support=int(item["exact_support"]),
+            ),
             "max_carrier_candidate_count": _max_detail_int(
                 item.get("non_exact_details") or [],
                 "carrier_candidate_count",
@@ -380,13 +383,15 @@ def _non_exact_detail(
     }
 
 
-def _residue_kind(details: list[dict[str, Any]]) -> str:
+def _residue_kind(details: list[dict[str, Any]], *, exact_support: int) -> str:
     if not details:
         return "no_non_exact_detail"
     candidate_counts = [int(detail.get("carrier_candidate_count") or 0) for detail in details]
     matched_counts = [int(detail.get("matched_constant_slot_count") or 0) for detail in details]
     if all(count <= 0 for count in candidate_counts):
-        return "zero_yield"
+        if exact_support > 0:
+            return "unstable_zero_yield"
+        return "persistent_zero_yield"
     if any(count > 0 for count in matched_counts):
         return "same_signature_drift"
     if any(count > 0 for count in candidate_counts):
@@ -534,6 +539,8 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                     "support_0_count": 0,
                     "support_1_count": 0,
                     "zero_yield_count": 0,
+                    "persistent_zero_yield_count": 0,
+                    "unstable_zero_yield_count": 0,
                     "same_signature_drift_count": 0,
                     "same_signature_no_primary_count": 0,
                     "other_residue_count": 0,
@@ -548,8 +555,12 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                 group["support_0_count"] += 1
             elif support == 1:
                 group["support_1_count"] += 1
-            if residue_kind == "zero_yield":
+            if residue_kind in {"persistent_zero_yield", "unstable_zero_yield", "zero_yield"}:
                 group["zero_yield_count"] += 1
+                if residue_kind == "unstable_zero_yield":
+                    group["unstable_zero_yield_count"] += 1
+                else:
+                    group["persistent_zero_yield_count"] += 1
             elif residue_kind == "same_signature_drift":
                 group["same_signature_drift_count"] += 1
             elif residue_kind == "same_signature_no_primary":
@@ -573,6 +584,8 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                 "support_0_count": group["support_0_count"],
                 "support_1_count": group["support_1_count"],
                 "zero_yield_count": group["zero_yield_count"],
+                "persistent_zero_yield_count": group["persistent_zero_yield_count"],
+                "unstable_zero_yield_count": group["unstable_zero_yield_count"],
                 "same_signature_drift_count": group["same_signature_drift_count"],
                 "same_signature_no_primary_count": group["same_signature_no_primary_count"],
                 "other_residue_count": group["other_residue_count"],
@@ -754,21 +767,23 @@ def render_markdown(report: dict[str, Any]) -> str:
                 [
                     "### By Carrier",
                     "",
-                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Same-Sig Drift | No Primary | Other | Drift Slots | Cells |",
-                    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Zero-Yield Pattern | Same-Sig Drift | No Primary | Other | Drift Slots | Cells |",
+                    "| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | --- |",
                 ]
             )
             for row in carrier_rows:
                 cells = ", ".join(f"`{cell}`" for cell in row.get("cells") or [])
+                zero_yield_pattern = _zero_yield_pattern_markdown(row)
                 drift_slots = _drift_slot_counts_markdown(row.get("drift_slot_counts") or {})
                 lines.append(
-                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                         row.get("family") or "",
                         row.get("carrier") or "",
                         row.get("unsupported_count", 0),
                         row.get("support_0_count", 0),
                         row.get("support_1_count", 0),
                         row.get("zero_yield_count", 0),
+                        zero_yield_pattern,
                         row.get("same_signature_drift_count", 0),
                         row.get("same_signature_no_primary_count", 0),
                         row.get("other_residue_count", 0),
@@ -908,6 +923,17 @@ def _drift_slot_counts_markdown(value: dict[str, Any]) -> str:
         f"`{slot}` x{int(count)}"
         for slot, count in sorted(value.items(), key=lambda item: (-int(item[1]), str(item[0])))
     )
+
+
+def _zero_yield_pattern_markdown(row: dict[str, Any]) -> str:
+    parts: list[str] = []
+    persistent = int(row.get("persistent_zero_yield_count") or 0)
+    unstable = int(row.get("unstable_zero_yield_count") or 0)
+    if persistent:
+        parts.append(f"`persistent_zero_yield` x{persistent}")
+    if unstable:
+        parts.append(f"`unstable_zero_yield` x{unstable}")
+    return ", ".join(parts)
 
 
 def _family_for_cell(*, cell_id: str, fixture_id: str) -> str:

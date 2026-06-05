@@ -91,6 +91,8 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
             "support_0_count": 0,
             "support_1_count": 1,
             "zero_yield_count": 0,
+            "persistent_zero_yield_count": 0,
+            "unstable_zero_yield_count": 0,
             "same_signature_drift_count": 1,
             "same_signature_no_primary_count": 0,
             "other_residue_count": 0,
@@ -113,13 +115,52 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
     assert "Unsupported split support 0 / support 1: `0 / 1`" in md
     assert "Residue kinds are derived from deterministic matcher details" in md
     assert (
-        "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | 0 | 1 | 0 | 0 | "
+        "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | 0 |  | 1 | 0 | 0 | "
         "`arg3` x1 | "
         "`osha_incident_transfer_001` |"
     ) in md
     assert "`same_signature_drift` (2/3; candidates 2)" in md
     assert "| `osha_incident_transfer_001` | `osha_incident_transfer_001` | `osha_penalty_amount/4` | 1 | `same_signature_drift` (2/3; candidates 2) | `arg3` |" in md
     assert "osha_penalty_amount" in md
+
+
+def test_summarize_current_compile_fact_qa_status_marks_unstable_zero_yield(
+    tmp_path: Path,
+) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+    _write_judged_qa_rows(
+        tmp_path,
+        cell_id="osha_incident_transfer_001",
+        fixture_id="osha_incident_transfer_001",
+        rows_by_run={
+            "run1": [
+                _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
+                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "exact"),
+            ],
+            "run2": [
+                _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
+                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "miss"),
+            ],
+            "run3": [
+                _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
+                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "miss"),
+            ],
+        },
+    )
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    md = render_markdown(report)
+
+    carrier = report["unsupported_by_carrier"][0]
+    unsupported = report["cells"][1]["unsupported_expected_facts"][0]
+    assert unsupported["exact_support"] == 1
+    assert unsupported["residue_kind"] == "unstable_zero_yield"
+    assert carrier["zero_yield_count"] == 1
+    assert carrier["persistent_zero_yield_count"] == 0
+    assert carrier["unstable_zero_yield_count"] == 1
+    assert "`unstable_zero_yield` x1" in md
+    assert "`unstable_zero_yield` (candidates 0)" in md
 
 
 def test_summarize_current_compile_fact_qa_status_blocks_failed_source_audit(tmp_path: Path) -> None:

@@ -49,28 +49,28 @@ non-exact runs only; they do not change support scores.
 
 ### By Carrier
 
-| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Same-Sig Drift | No Primary | Other | Drift Slots | Cells |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| `fda_warning_letter` | `fda_violation_detail/5` | 5 | 5 | 0 | 0 | 2 | 3 | 0 | `detail_value` x2 | `fda_warning_letter_transfer_002_current_pack` |
-| `fda_warning_letter` | `fda_correspondence_party/5` | 2 | 2 | 0 | 0 | 0 | 2 | 0 |  | `fda_warning_letter_transfer_002_current_pack` |
-| `fda_warning_letter` | `fda_violation/5` | 1 | 1 | 0 | 0 | 0 | 1 | 0 |  | `fda_warning_letter_transfer_002_current_pack` |
-| `ntsb_investigation` | `ntsb_finding/5` | 2 | 0 | 2 | 2 | 0 | 0 | 0 |  | `ntsb_transfer_surface_001` |
-| `ntsb_investigation` | `ntsb_timeline_event/6` | 1 | 0 | 1 | 0 | 1 | 0 | 0 | `sequence_role` x1 | `ntsb_transfer_surface_001` |
-| `sec_form_8k` | `sec_registrant_identifier/5` | 3 | 1 | 2 | 0 | 3 | 0 | 0 | `identifier_value` x3, `identifier_kind` x2 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_002`, `sec_form_8k_skeleton_transfer_003` |
-| `sec_form_8k` | `sec_filing/6` | 1 | 1 | 0 | 1 | 0 | 0 | 0 |  | `sec_form_8k_skeleton_transfer_001` |
-| `sec_form_8k` | `sec_filing_item_treatment/4` | 1 | 0 | 1 | 1 | 0 | 0 | 0 |  | `sec_form_8k_skeleton_transfer_003` |
+| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Zero-Yield Pattern | Same-Sig Drift | No Primary | Other | Drift Slots | Cells |
+| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | --- |
+| `fda_warning_letter` | `fda_violation_detail/5` | 5 | 5 | 0 | 0 |  | 2 | 3 | 0 | `detail_value` x2 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_correspondence_party/5` | 2 | 2 | 0 | 0 |  | 0 | 2 | 0 |  | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_violation/5` | 1 | 1 | 0 | 0 |  | 0 | 1 | 0 |  | `fda_warning_letter_transfer_002_current_pack` |
+| `ntsb_investigation` | `ntsb_finding/5` | 2 | 0 | 2 | 2 | `unstable_zero_yield` x2 | 0 | 0 | 0 |  | `ntsb_transfer_surface_001` |
+| `ntsb_investigation` | `ntsb_timeline_event/6` | 1 | 0 | 1 | 0 |  | 1 | 0 | 0 | `sequence_role` x1 | `ntsb_transfer_surface_001` |
+| `sec_form_8k` | `sec_registrant_identifier/5` | 3 | 1 | 2 | 0 |  | 3 | 0 | 0 | `identifier_value` x3, `identifier_kind` x2 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_002`, `sec_form_8k_skeleton_transfer_003` |
+| `sec_form_8k` | `sec_filing/6` | 1 | 1 | 0 | 1 | `persistent_zero_yield` x1 | 0 | 0 | 0 |  | `sec_form_8k_skeleton_transfer_001` |
+| `sec_form_8k` | `sec_filing_item_treatment/4` | 1 | 0 | 1 | 1 | `unstable_zero_yield` x1 | 0 | 0 | 0 |  | `sec_form_8k_skeleton_transfer_003` |
 
 ### Rows
 
 | Cell | Fixture | Carrier | Support | Residue | Drift Slots | Verdicts | Expected Fact | Non-Exact Emissions |
 | --- | --- | --- | ---: | --- | --- | --- | --- | --- |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_filing/6` | 0 | `zero_yield` (0/4; candidates 0) |  | run1: miss, run2: miss, run3: miss | `sec_filing(Filing, form_8_k, current_report, v_2025_12_23, not_stated, SrcFiling).` | `` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_filing/6` | 0 | `persistent_zero_yield` (0/4; candidates 0) |  | run1: miss, run2: miss, run3: miss | `sec_filing(Filing, form_8_k, current_report, v_2025_12_23, not_stated, SrcFiling).` | `` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 0 | `same_signature_drift` (1/3; candidates 4) | `identifier_kind`, `identifier_value` | run1: miss, run2: partial, run3: partial | `sec_registrant_identifier(Filing, servicenow_inc, telephone, phone_408_501_8550, SrcPhone).` | `sec_registrant_identifier(filing_sec_8k_servicenow_20251223, servicenow_inc, commission_file_number, file_001_35580, sec_material_event_ugly_003).` |
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | `sec_registrant_identifier/5` | 1 | `same_signature_drift` (2/3; candidates 5) | `identifier_value` | run1: exact, run2: partial, run3: partial | `sec_registrant_identifier(Filing, driven_brands_holdings_inc, commission_file_number, file_139898, SrcFileNumberCover).` | `sec_registrant_identifier(filing_sec_8k_001, driven_brands_holdings_inc, commission_file_number, file_001_39898, sec_material_event_ugly_007).; sec_registrant_identifier(filing_sec_8k_20260225, driven_brands_holdings_inc, commission_file_number, file_001_39898, sec_material_event_ugly_007).` |
-| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_filing_item_treatment/4` | 1 | `zero_yield` (0/2; candidates 0) |  | run1: exact, run2: miss, run3: miss | `sec_filing_item_treatment(Filing, item_2_02, furnished, SrcItem202).` | `` |
+| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_filing_item_treatment/4` | 1 | `unstable_zero_yield` (0/2; candidates 0) |  | run1: exact, run2: miss, run3: miss | `sec_filing_item_treatment(Filing, item_2_02, furnished, SrcItem202).` | `` |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_registrant_identifier/5` | 1 | `same_signature_drift` (1/3; candidates 4) | `identifier_kind`, `identifier_value` | run1: partial, run2: exact, run3: partial | `sec_registrant_identifier(Filing, blackstone_inc, telephone, phone_212_583_5000, SrcPhone).` | `sec_registrant_identifier(filing_sec_8ka_blackstone_20251023, blackstone_inc, commission_file_number, file_001_33551, sec_material_event_ugly_004).; sec_registrant_identifier(sec_filing_8ka_blackstone_20251023, blackstone_inc, commission_file_number, file_001_33551, sec_8ka_blackstone_20251023_amend1).` |
-| `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `zero_yield` (0/1; candidates 0) |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, CauseFinding, probable_cause, FindingValue, SrcCause).` | `` |
-| `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `zero_yield` (0/1; candidates 0) |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, FactorFinding, contributing_factor, FindingValue, SrcFactor).` | `` |
+| `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `unstable_zero_yield` (0/1; candidates 0) |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, CauseFinding, probable_cause, FindingValue, SrcCause).` | `` |
+| `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `unstable_zero_yield` (0/1; candidates 0) |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, FactorFinding, contributing_factor, FindingValue, SrcFactor).` | `` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_timeline_event/6` | 1 | `same_signature_drift` (2/3; candidates 8) | `sequence_role` | run1: miss, run2: partial, run3: exact | `ntsb_timeline_event(Occurrence, Event911, distress_call, t_2023_09_29_2043_cdt, start, Src911).` | `ntsb_timeline_event(occ_hir2506, ev_dispatch, distress_call, t_2023_09_29_2043_cdt, intermediate, ntsb_surface_ugly_001).` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `same_signature_no_primary` (0/2; candidates 2) |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, Recipient, recipient, rechon_life_science_ab, SrcRecipient).` | `` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `same_signature_no_primary` (0/2; candidates 2) |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, ResponsibleOfficial, responsible_official, roland_holmqvist, SrcResponsibleOfficial).` | `` |

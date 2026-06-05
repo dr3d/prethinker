@@ -220,7 +220,11 @@ fixture. It says the skeleton, chronology, vehicles, and conditions are alive,
 scoped injury-count partitions now transfer, and findings/probable-cause
 substance should likely abstain or move to Tier 2 unless a compact,
 reproducible finding taxonomy transfers on fresh documents without prose-shaped
-slots. One distress-call sequence-role row remains unstable. The compiler
+slots. The two `ntsb_finding/5` rows are now classified as
+`unstable_zero_yield`: one run emitted them exactly, while the other runs
+emitted no same-signature candidates. That is compile-stability evidence, not
+a safe deterministic reducer target. One distress-call sequence-role row remains
+unstable. The compiler
 atom-shape gate was also aligned with the external audit so numeric-leading
 registered-carrier atoms are dropped in-path rather than merely reported after
 the run.

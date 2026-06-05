@@ -979,7 +979,7 @@ Current NTSB per-layer read:
 | Timeline | `ntsb_timeline_event` 6/7 | Strong chronological event layer; the distress-call sequence-role row remains unstable. |
 | Safety action | `ntsb_safety_action` 3/3 | Roadway, after-action, and training rows transfer at support>=2 in the current manifest. |
 | Casualty | `ntsb_injury_count` 3/3 | Scoped injury-count partitions transfer after the contract clarified single-severity rows with zeroes for unstated severity slots. |
-| Findings / probable cause | `ntsb_finding` 0/2 | Open causal/probable-cause substance should abstain or remain lower tier unless a compact finding taxonomy transfers. |
+| Findings / probable cause | `ntsb_finding` 0/2 | Open causal/probable-cause substance should abstain or remain lower tier unless a compact finding taxonomy transfers; current misses are `unstable_zero_yield` rows, not safely reducible typed drift. |
 
 NTSB interventions that count as research mechanisms:
 
