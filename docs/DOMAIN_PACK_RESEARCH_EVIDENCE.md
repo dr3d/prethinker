@@ -582,6 +582,8 @@ r5 typed-plan replay: 25/25, pass
 r5 redacted rejudge thesis exact: 25/25, pass
 r6 same-condition repeat: 25/25 product exact, 25/25 typed-plan replay,
   25/25 redacted rejudge thesis exact
+reference-judge null controls: sample_per_fixture=3, 12 sampled exact rows,
+  24 adversarial judgments, 0 exact null verdicts, pass
 compatibility/runtime/write rows: 0/0/0
 status: thesis-clean query-planner diagnostic across four non-SEC cells
 ```
@@ -604,7 +606,9 @@ argument name after removing an `_id` suffix, such as `occurrence` for
 variables. That closed the NTSB timeline row without reading source prose,
 source records, question tokens, or answer keys. A same-local-Qwen repeat
 (`r6`) reproduced the full `25/25` result under the same gates, so this packet
-is no longer just a single favorable draw. It remains a small retained
+is no longer just a single favorable draw. A retained r6 reference-judge
+null-control report also sampled 12 exact rows and produced 24 adversarial
+control judgments with 0 exact null verdicts. It remains a small retained
 query-planner packet over selected typed artifacts, not a compile-transfer
 metric.
 

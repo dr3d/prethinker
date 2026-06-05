@@ -302,7 +302,9 @@ The next work should strengthen the research claim rather than lift one fixture:
    seed, and OSHA transfer_001 single-run artifacts. Local Qwen MoE temp-0
    r5 landed at `25/25` product exact and `25/25` thesis exact, and same-
    condition r6 reproduced `25/25` with typed-plan replay and redacted rejudge
-   both passing and `0` prose-dependent exact rows.
+   both passing and `0` prose-dependent exact rows. The retained r6 judge
+   null-control report sampled 12 exact rows and produced 24 adversarial
+   judgments with `0` exact null verdicts.
    The r5 lift came from LLM-side planning guidance for questions that name an
    emitted predicate signature plus a narrow `_id` slot-label syntax repair.
    Deterministic code still does not parse question text to pick predicates.
