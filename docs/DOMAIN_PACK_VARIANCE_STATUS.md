@@ -6,9 +6,9 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `4`
-- Roots: `9`
-- Warnings: `5`
+- Groups: `5`
+- Roots: `11`
+- Warnings: `6`
 
 Warnings:
 - `stability_r1:value_domain_report_not_recorded`
@@ -16,6 +16,7 @@ Warnings:
 - `gemma4_q4_r1:value_domain_report_not_recorded`
 - `qwen27b_q4_r1:value_domain_report_not_recorded`
 - `related_activity_blank_flag_r1:value_domain_report_not_recorded`
+- `scoped_injury_count_r1:value_domain_report_not_recorded`
 
 ## Groups
 
@@ -25,6 +26,7 @@ Warnings:
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
+| `ntsb_transfer001_qwen_moe_same_condition` | `ntsb_investigation_transfer_surface_001` | 2 | `22/25` | 0 | `16` | `pass` |
 
 ## SEC transfer_003 repaired-schema local Qwen MoE band
 
@@ -103,3 +105,22 @@ Roots:
 
 Roots:
 - `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605\sec-t001-current-pack-r1-20260605`
+
+## NTSB transfer_001 local Qwen MoE same-condition band
+
+- Group: `ntsb_transfer001_qwen_moe_same_condition`
+- Fixture: `ntsb_investigation_transfer_surface_001`
+- Read: Use as a 22/25 same-condition NTSB transfer band with clean governance and 0 supported forbidden rows; precision remains noisy because the fresh rerun produced 16 singleton unexpected same-signature facts.
+- Support band: `22/25`
+- Supported forbidden total: `0`
+- Unexpected band: `16`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `scoped_injury_count_r1` | standing transfer_001 current scoped injury-count root | `22/25` | `60/75` | 0 | 16 | atom `0`; lens `0`; value `not_recorded` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `qwen_mainline_rerun_r1` | same-local-Qwen transfer_001 variance rerun | `22/25` | `60/75` | 0 | 16 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `6` value-mode facts |
+
+Roots:
+- `scoped_injury_count_r1`: `C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\ntsb-transfer-casualty-partition-r1`
+- `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\ntsb_transfer001_variance_probe_20260605\ntsb-transfer-001-variance-r1-20260605`

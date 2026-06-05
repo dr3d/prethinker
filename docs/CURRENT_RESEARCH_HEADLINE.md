@@ -151,6 +151,10 @@ NTSB investigation pack
     60 / 75 per-run exact
     22 / 25 support>=2
     all 60 exact rows pass typed-plan replay and redaction replay
+  same-condition variance rerun:
+    22 / 25 support>=2 again, 0 supported forbidden, clean atom/lens/value
+    gates; precision remains noisy with 16 singleton unexpected
+    same-signature facts
   claim: boundary corroboration; wrapper, chronology, vehicles, and conditions
     transfer more cleanly than findings/probable-cause substance; scoped
     injury-count partitions now clear. The two finding/probable-cause rows are

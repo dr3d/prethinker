@@ -77,6 +77,24 @@
           "path": "C:/prethinker_tmp_archive/sec_t001_current_pack_rerun_negative_20260605/sec-t001-current-pack-r1-20260605"
         }
       ]
+    },
+    {
+      "id": "ntsb_transfer001_qwen_moe_same_condition",
+      "title": "NTSB transfer_001 local Qwen MoE same-condition band",
+      "fixture_id": "ntsb_investigation_transfer_surface_001",
+      "claim_read": "Use as a 22/25 same-condition NTSB transfer band with clean governance and 0 supported forbidden rows; precision remains noisy because the fresh rerun produced 16 singleton unexpected same-signature facts.",
+      "roots": [
+        {
+          "id": "scoped_injury_count_r1",
+          "role": "standing transfer_001 current scoped injury-count root",
+          "path": "C:/prethinker_tmp_archive/ntsb_casualty_partition_contract_20260604/ntsb-transfer-casualty-partition-r1"
+        },
+        {
+          "id": "qwen_mainline_rerun_r1",
+          "role": "same-local-Qwen transfer_001 variance rerun",
+          "path": "C:/prethinker_tmp_archive/ntsb_transfer001_variance_probe_20260605/ntsb-transfer-001-variance-r1-20260605"
+        }
+      ]
     }
   ]
 }
