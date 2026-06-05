@@ -25,6 +25,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.report_freshness import apply_markdown_freshness_check
+from src.carrier_contract_registry import carrier_contract
 
 
 DEFAULT_MANIFEST_RUN = Path("tmp/compile_fact_qa_manifest_run/summary.json")
@@ -310,7 +311,12 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
                 if answer:
                     item["non_exact_answers"].append(answer)
                 item["non_exact_details"].append(
-                    _non_exact_detail(run_id=run_id, verdict=verdict, row=row)
+                    _non_exact_detail(
+                        run_id=run_id,
+                        verdict=verdict,
+                        row=row,
+                        reference_answer=reference,
+                    )
                 )
     unsupported = [
         {
@@ -332,6 +338,7 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
                 item.get("non_exact_details") or [],
                 "total_constant_slots",
             ),
+            "drift_slots": _drift_slots(item.get("non_exact_details") or []),
         }
         for item in by_reference.values()
         if int(item["exact_support"]) < 2
@@ -346,17 +353,30 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
     )
 
 
-def _non_exact_detail(*, run_id: str, verdict: str, row: dict[str, Any]) -> dict[str, Any]:
+def _non_exact_detail(
+    *,
+    run_id: str,
+    verdict: str,
+    row: dict[str, Any],
+    reference_answer: str,
+) -> dict[str, Any]:
     match_detail = row.get("match_detail") if isinstance(row.get("match_detail"), dict) else {}
     matched = match_detail.get("matched_constant_positions")
     differing = match_detail.get("differing_constant_positions")
+    matched_positions = _int_list(matched)
+    differing_positions = _int_list(differing)
+    arg_names = _argument_names(reference_answer)
     return {
         "run": run_id,
         "verdict": verdict,
         "carrier_candidate_count": int(match_detail.get("carrier_candidate_count") or 0),
-        "matched_constant_slot_count": len(matched) if isinstance(matched, list) else 0,
-        "differing_constant_slot_count": len(differing) if isinstance(differing, list) else 0,
+        "matched_constant_slot_count": len(matched_positions),
+        "differing_constant_slot_count": len(differing_positions),
         "total_constant_slots": int(match_detail.get("total_constant_slots") or 0),
+        "matched_constant_slots": [_slot_name(arg_names, position) for position in matched_positions],
+        "differing_constant_slots": [
+            _slot_name(arg_names, position) for position in differing_positions
+        ],
     }
 
 
@@ -378,6 +398,91 @@ def _max_detail_int(details: list[dict[str, Any]], key: str) -> int:
     if not details:
         return 0
     return max(int(detail.get(key) or 0) for detail in details)
+
+
+def _drift_slots(details: list[dict[str, Any]]) -> list[str]:
+    slots: set[str] = set()
+    for detail in details:
+        values = detail.get("differing_constant_slots")
+        if not isinstance(values, list):
+            continue
+        slots.update(str(value).strip() for value in values if str(value).strip())
+    return sorted(slots)
+
+
+def _int_list(value: Any) -> list[int]:
+    if not isinstance(value, list):
+        return []
+    out: list[int] = []
+    for item in value:
+        try:
+            out.append(int(item))
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def _argument_names(fact: str) -> list[str]:
+    parsed = _parse_fact(fact)
+    if parsed is None:
+        return []
+    predicate, args = parsed
+    signature = f"{predicate}/{len(args)}"
+    contract = carrier_contract(signature)
+    names = contract.get("args") if isinstance(contract, dict) else []
+    if isinstance(names, list) and len(names) == len(args):
+        return [str(name) or f"arg{index + 1}" for index, name in enumerate(names)]
+    return [f"arg{index + 1}" for index in range(len(args))]
+
+
+def _slot_name(arg_names: list[str], position: int) -> str:
+    if 0 <= position < len(arg_names):
+        return arg_names[position]
+    return f"arg{position + 1}"
+
+
+def _parse_fact(fact: str) -> tuple[str, list[str]] | None:
+    text = str(fact or "").strip()
+    if not text.endswith(".") or "(" not in text:
+        return None
+    predicate, rest = text[:-1].split("(", 1)
+    predicate = predicate.strip()
+    if not predicate or not rest.endswith(")"):
+        return None
+    return predicate, _split_args(rest[:-1])
+
+
+def _split_args(text: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    quote: str | None = None
+    depth = 0
+    for ch in text:
+        if quote:
+            current.append(ch)
+            if ch == quote:
+                quote = None
+            continue
+        if ch in {"'", '"'}:
+            quote = ch
+            current.append(ch)
+            continue
+        if ch == "(":
+            depth += 1
+            current.append(ch)
+            continue
+        if ch == ")":
+            depth = max(0, depth - 1)
+            current.append(ch)
+            continue
+        if ch == "," and depth == 0:
+            args.append("".join(current).strip())
+            current = []
+            continue
+        current.append(ch)
+    if current or text.strip():
+        args.append("".join(current).strip())
+    return args
 
 
 def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -432,6 +537,7 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                     "same_signature_drift_count": 0,
                     "same_signature_no_primary_count": 0,
                     "other_residue_count": 0,
+                    "drift_slot_counts": {},
                     "cells": set(),
                 },
             )
@@ -450,6 +556,12 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                 group["same_signature_no_primary_count"] += 1
             else:
                 group["other_residue_count"] += 1
+            for slot in row.get("drift_slots") or []:
+                slot_key = str(slot).strip()
+                if slot_key:
+                    group["drift_slot_counts"][slot_key] = (
+                        int(group["drift_slot_counts"].get(slot_key, 0)) + 1
+                    )
             group["cells"].add(str(cell.get("id") or ""))
     rows: list[dict[str, Any]] = []
     for group in groups.values():
@@ -464,6 +576,7 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                 "same_signature_drift_count": group["same_signature_drift_count"],
                 "same_signature_no_primary_count": group["same_signature_no_primary_count"],
                 "other_residue_count": group["other_residue_count"],
+                "drift_slot_counts": dict(sorted(group["drift_slot_counts"].items())),
                 "cell_count": len(group["cells"]),
                 "cells": sorted(group["cells"]),
             }
@@ -641,14 +754,15 @@ def render_markdown(report: dict[str, Any]) -> str:
                 [
                     "### By Carrier",
                     "",
-                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Same-Sig Drift | No Primary | Other | Cells |",
-                    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Same-Sig Drift | No Primary | Other | Drift Slots | Cells |",
+                    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
                 ]
             )
             for row in carrier_rows:
                 cells = ", ".join(f"`{cell}`" for cell in row.get("cells") or [])
+                drift_slots = _drift_slot_counts_markdown(row.get("drift_slot_counts") or {})
                 lines.append(
-                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                         row.get("family") or "",
                         row.get("carrier") or "",
                         row.get("unsupported_count", 0),
@@ -658,6 +772,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                         row.get("same_signature_drift_count", 0),
                         row.get("same_signature_no_primary_count", 0),
                         row.get("other_residue_count", 0),
+                        drift_slots,
                         cells,
                     )
                 )
@@ -666,8 +781,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "",
                 "### Rows",
                 "",
-                "| Cell | Fixture | Carrier | Support | Residue | Verdicts | Expected Fact | Non-Exact Emissions |",
-                "| --- | --- | --- | ---: | --- | --- | --- | --- |",
+                "| Cell | Fixture | Carrier | Support | Residue | Drift Slots | Verdicts | Expected Fact | Non-Exact Emissions |",
+                "| --- | --- | --- | ---: | --- | --- | --- | --- | --- |",
             ]
         )
         for cell, row in unsupported_rows:
@@ -679,13 +794,15 @@ def render_markdown(report: dict[str, Any]) -> str:
             answers = "; ".join(str(item) for item in row.get("non_exact_answers") or [])
             answers = answers.replace("|", "\\|")
             residue = _residue_markdown(row)
+            drift_slots = ", ".join(f"`{slot}`" for slot in row.get("drift_slots") or [])
             lines.append(
-                "| `{}` | `{}` | `{}` | {} | {} | {} | `{}` | `{}` |".format(
+                "| `{}` | `{}` | `{}` | {} | {} | {} | {} | `{}` | `{}` |".format(
                     cell["id"],
                     cell["fixture_id"],
                     row.get("carrier") or "",
                     row.get("exact_support", 0),
                     residue,
+                    drift_slots,
                     verdicts,
                     expected,
                     answers,
@@ -782,6 +899,15 @@ def _residue_markdown(row: dict[str, Any]) -> str:
     if max_total:
         return f"`{kind}` ({max_matched}/{max_total}; candidates {candidate_count})"
     return f"`{kind}` (candidates {candidate_count})"
+
+
+def _drift_slot_counts_markdown(value: dict[str, Any]) -> str:
+    if not isinstance(value, dict) or not value:
+        return ""
+    return ", ".join(
+        f"`{slot}` x{int(count)}"
+        for slot, count in sorted(value.items(), key=lambda item: (-int(item[1]), str(item[0])))
+    )
 
 
 def _family_for_cell(*, cell_id: str, fixture_id: str) -> str:

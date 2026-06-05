@@ -275,13 +275,21 @@ guard now blocks/drops contradictory SEC signatory omissions and unregistered
 omission kind/reason triples; rescoring the repaired transfer_003 stability
 artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
 same-signature facts dropped from 2 to 0.
+The current compile-fact status report now exposes drift slots for unsupported
+rows: the two telephone substitutions drift on both `identifier_kind` and
+`identifier_value`, while the duplicate commission-file row drifts only on
+`identifier_value`. That split is boundary evidence; it is not permission to
+add a deterministic reducer that changes an emitted commission-file row into a
+telephone row.
 The latest guard and manifest artifacts are
 `C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604` and
 `C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`; the
 fresh SEC transfer_003 refresh is archived at
 `C:\prethinker_tmp_archive\sec_t003_refresh_20260605`; the fresh SEC seed
 contract rerun is archived at
-`C:\prethinker_tmp_archive\sec_seed_value_axis_contract_repair_r2_20260605`.
+`C:\prethinker_tmp_archive\sec_seed_value_axis_contract_repair_r2_20260605`;
+the drift-slot status refresh is archived at
+`C:\prethinker_tmp_archive\compile_fact_drift_slot_visibility_20260605`.
 This is governance cleanup, colder provenance refresh, precision visibility,
 and band measurement, not a broad SEC event-substance lift.
 

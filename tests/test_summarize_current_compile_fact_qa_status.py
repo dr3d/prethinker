@@ -94,6 +94,7 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
             "same_signature_drift_count": 1,
             "same_signature_no_primary_count": 0,
             "other_residue_count": 0,
+            "drift_slot_counts": {"arg3": 1},
             "cell_count": 1,
             "cells": ["osha_incident_transfer_001"],
         }
@@ -107,14 +108,17 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
     assert unsupported[0]["max_carrier_candidate_count"] == 2
     assert unsupported[0]["max_matched_constant_slots"] == 2
     assert unsupported[0]["max_total_constant_slots"] == 3
+    assert unsupported[0]["drift_slots"] == ["arg3"]
     assert "Unsupported Expected Facts" in md
     assert "Unsupported split support 0 / support 1: `0 / 1`" in md
     assert "Residue kinds are derived from deterministic matcher details" in md
     assert (
         "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | 0 | 1 | 0 | 0 | "
+        "`arg3` x1 | "
         "`osha_incident_transfer_001` |"
     ) in md
     assert "`same_signature_drift` (2/3; candidates 2)" in md
+    assert "| `osha_incident_transfer_001` | `osha_incident_transfer_001` | `osha_penalty_amount/4` | 1 | `same_signature_drift` (2/3; candidates 2) | `arg3` |" in md
     assert "osha_penalty_amount" in md
 
 
