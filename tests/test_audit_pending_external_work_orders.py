@@ -112,6 +112,56 @@ def test_pending_external_work_order_audit_can_inventory_standalone_tmp_zips(tmp
     assert "standalone_external_work_order" in md
 
 
+def test_pending_external_work_order_audit_accepts_candidate_review_packet_shape(tmp_path: Path) -> None:
+    proposal = _write_proposal(
+        tmp_path,
+        zip_path=tmp_path / "candidate_review.zip",
+        kind="source_only_candidate_oracle_review",
+        fixtures=["fda_transfer_001"],
+    )
+    _write_zip(
+        tmp_path / "candidate_review.zip",
+        [
+            "README.md",
+            "candidate_expected_facts.pl",
+            "candidate_forbidden_facts.pl",
+            "output_template/manifest.json",
+            "example_wrapper_v1.json",
+            "fixtures/fda_transfer_001/manifest.json",
+            "fixtures/fda_transfer_001/source.md",
+        ],
+    )
+
+    report = build_report([proposal])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["work_orders"][0]["errors"] == []
+
+
+def test_pending_external_work_order_audit_blocks_candidate_review_packet_missing_manifest(tmp_path: Path) -> None:
+    proposal = _write_proposal(
+        tmp_path,
+        zip_path=tmp_path / "candidate_review.zip",
+        kind="source_only_candidate_oracle_review",
+        fixtures=["fda_transfer_001"],
+    )
+    _write_zip(
+        tmp_path / "candidate_review.zip",
+        [
+            "README.md",
+            "candidate_expected_facts.pl",
+            "candidate_forbidden_facts.pl",
+            "example_wrapper_v1.json",
+            "fixtures/fda_transfer_001/source.md",
+        ],
+    )
+
+    report = build_report([proposal])
+
+    assert report["summary"]["status"] == "fail"
+    assert "fda_transfer_001:missing_manifest.json" in report["work_orders"][0]["errors"]
+
+
 def test_pending_external_work_order_audit_blocks_absolute_standalone_entries(tmp_path: Path) -> None:
     _write_zip(
         tmp_path / "standalone.zip",
@@ -195,7 +245,13 @@ def test_pending_external_work_order_audit_expect_md_marks_stale_report(
     assert "expected_markdown_stale" in payload["summary"]["blocking_reasons"][0]
 
 
-def _write_proposal(tmp_path: Path, *, zip_path: Path) -> Path:
+def _write_proposal(
+    tmp_path: Path,
+    *,
+    zip_path: Path,
+    kind: str = "source_only_expected_forbidden_oracle",
+    fixtures: list[str] | None = None,
+) -> Path:
     path = tmp_path / "proposal.json"
     path.write_text(
         json.dumps(
@@ -203,9 +259,9 @@ def _write_proposal(tmp_path: Path, *, zip_path: Path) -> Path:
                 "proposal_id": "example_wrapper_v1",
                 "pending_external_work_orders": [
                     {
-                        "kind": "source_only_expected_forbidden_oracle",
+                        "kind": kind,
                         "path": str(zip_path),
-                        "fixtures": ["fixture_a"],
+                        "fixtures": fixtures or ["fixture_a"],
                     }
                 ],
             }

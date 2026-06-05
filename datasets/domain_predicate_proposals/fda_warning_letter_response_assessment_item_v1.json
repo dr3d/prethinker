@@ -100,6 +100,18 @@
     "support_threshold": 2,
     "heldout_policy": "unlike FDA warning letters not used to shape the response-assessment carrier or value domains"
   },
+  "pending_external_work_orders": [
+    {
+      "kind": "source_only_candidate_oracle_review",
+      "path": "tmp/fda_response_assessment_item_blind_review_work_order_20260604.zip",
+      "fixtures": [
+        "fda_warning_letter_domain_transfer_001",
+        "fda_warning_letter_domain_transfer_002",
+        "fda_warning_letter_domain_transfer_003"
+      ],
+      "purpose": "Independent source-only review before deciding whether the candidate response-assessment carrier should promote or abstain."
+    }
+  ],
   "promotion_gates": [
     "n_ge_3",
     "support_ge_2",

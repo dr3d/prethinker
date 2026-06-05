@@ -257,16 +257,21 @@ def _validate_entries(
     if not fixtures:
         warnings.append("no_declared_fixtures")
     for fixture in fixtures:
-        prefix = f"{fixture}/"
-        fixture_entries = {entry[len(prefix) :] for entry in entry_set if entry.startswith(prefix)}
-        if "source.md" not in fixture_entries:
-            errors.append(f"{fixture}:missing_source.md")
-        if "metadata.json" not in fixture_entries:
-            errors.append(f"{fixture}:missing_metadata.json")
-        if "provenance.md" not in fixture_entries:
-            errors.append(f"{fixture}:missing_provenance.md")
-        if "fixture_notes.md" not in fixture_entries:
-            warnings.append(f"{fixture}:missing_fixture_notes.md")
+        fixture_entries = _fixture_entries(entry_set, fixture)
+        if kind == "source_only_candidate_oracle_review":
+            if "source.md" not in fixture_entries:
+                errors.append(f"{fixture}:missing_source.md")
+            if "manifest.json" not in fixture_entries:
+                errors.append(f"{fixture}:missing_manifest.json")
+        else:
+            if "source.md" not in fixture_entries:
+                errors.append(f"{fixture}:missing_source.md")
+            if "metadata.json" not in fixture_entries:
+                errors.append(f"{fixture}:missing_metadata.json")
+            if "provenance.md" not in fixture_entries:
+                errors.append(f"{fixture}:missing_provenance.md")
+            if "fixture_notes.md" not in fixture_entries:
+                warnings.append(f"{fixture}:missing_fixture_notes.md")
 
 
 def _validate_standalone_entries(
@@ -348,7 +353,17 @@ def _fixture_dirs(entries: list[str]) -> list[str]:
     dirs = sorted({entry.rsplit("/", 1)[0] for entry in entries if "/" in entry and entry.endswith("/source.md")})
     if dirs:
         return dirs
-    return ["."]
+    return ["."] 
+
+
+def _fixture_entries(entry_set: set[str], fixture: str) -> set[str]:
+    prefixes = [f"{fixture}/"]
+    if not fixture.startswith("fixtures/"):
+        prefixes.append(f"fixtures/{fixture}/")
+    found: set[str] = set()
+    for prefix in prefixes:
+        found.update(entry[len(prefix) :] for entry in entry_set if entry.startswith(prefix))
+    return found
 
 
 def _normalize_entry(value: str) -> str:
