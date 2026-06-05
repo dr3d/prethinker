@@ -189,6 +189,22 @@ State-AG settlement/AOD process probe
     any expected rows. Treat State-AG as a boundary/process signal: the closed
     language can constrain output, but the pack is not yet a claim-bearing
     transfer family.
+
+PUC order and GAO bid-protest wrapper draft packs
+  status: registered draft packs with source-only expected/forbidden reviews,
+    not promoted transfer families
+  artifact root:
+    C:\prethinker_tmp_archive\puc_procurement_wrapper_probe_20260605
+  PUC wrapper cells:
+    puc_order_ugly_002: 0 / 1 support>=2, 0 / 8 supported forbidden
+    puc_order_ugly_003: 0 / 1 support>=2, 0 / 7 supported forbidden
+  GAO wrapper cells:
+    procurement_contract_ugly_002: 0 / 1 support>=2, 0 / 8 supported forbidden
+    procurement_contract_ugly_003: 0 / 1 support>=2, 0 / 8 supported forbidden
+  claim: process/boundary evidence only. The carrier language is caged and
+    source-reviewed, but exact support currently fails from compact-id,
+    source-coordinate, and zero-yield delivery instability. Do not count these
+    as transfer support.
 ```
 
 ## Current Verdict

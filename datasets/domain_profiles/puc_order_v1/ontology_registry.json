@@ -1,0 +1,43 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "puc_order_v1",
+  "source": "Closed PUC order wrapper carrier pack drafted from retained PUC public-order fixtures and source-only oracle reviews.",
+  "purpose": "Constrain public utility commission order compiles to recurring wrapper anatomy: agency, docket/proceeding id, order kind, issue date, and compact current disposition. This pack does not attempt settlement terms, findings, votes, service lists, or ordering-paragraph substance.",
+  "selection": {
+    "mode": "source_oracle_reviewed_wrapper_pack",
+    "date": "2026-06-05",
+    "source_reviews": [
+      "datasets/source_oracle_reviews/puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604"
+    ],
+    "source_families": [
+      "datasets/real_world_transfer/fresh_ugly_public_20260528_01/puc_order_ugly_002",
+      "datasets/real_world_transfer/fresh_ugly_public_20260529_01/puc_order_ugly_003"
+    ]
+  },
+  "accountability_requirements": [],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "PUC order/resolution wrapper, issuing agency, proceeding or docket id, order kind, issue date, and compact current disposition.",
+      "allowed_signatures": [
+        "puc_order/7"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "puc_order/7",
+      "args": [
+        "order_id",
+        "agency_id",
+        "docket_id",
+        "order_kind",
+        "issued_date",
+        "decision_status",
+        "source_or_scope"
+      ],
+      "category": "puc_order_wrapper",
+      "notes": "Identifies one source-stated PUC order, resolution, ruling, proposed decision, notice, or memorializing decision. Do not hide settlement terms, findings, ordering paragraphs, votes, certificate-of-service rows, party rosters, or full captions in wrapper slots."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "procurement_gao_decision_v1",
+  "source": "Closed GAO bid-protest decision wrapper carrier pack drafted from retained GAO public-decision fixtures and source-only oracle reviews.",
+  "purpose": "Constrain GAO bid-protest decision compiles to recurring wrapper anatomy: forum, docket/B-number, procurement identifier, decision date, and compact current disposition. This pack does not attempt protest grounds, OCI analysis, CPAR detail, recommendations, or legal reasoning.",
+  "selection": {
+    "mode": "source_oracle_reviewed_wrapper_pack",
+    "date": "2026-06-05",
+    "source_reviews": [
+      "datasets/source_oracle_reviews/procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605"
+    ],
+    "source_families": [
+      "datasets/real_world_transfer/fresh_ugly_public_20260528_01/procurement_contract_ugly_002",
+      "datasets/real_world_transfer/fresh_ugly_public_20260529_01/procurement_contract_ugly_003"
+    ]
+  },
+  "accountability_requirements": [],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "GAO bid-protest decision wrapper, forum, current docket/B-number, procurement identifier, decision date, and compact overall disposition.",
+      "allowed_signatures": [
+        "gao_bid_protest_decision/7"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "gao_bid_protest_decision/7",
+      "args": [
+        "decision_id",
+        "forum_id",
+        "docket_id",
+        "procurement_id",
+        "decision_date",
+        "decision_status",
+        "source_or_scope"
+      ],
+      "category": "gao_bid_protest_decision_wrapper",
+      "notes": "Identifies one source-stated GAO bid-protest decision and compact bottom-line disposition. Do not hide protest grounds, findings, recommendations, OCI/CPAR analysis, cited precedents, prior decision status, or full captions in wrapper slots."
+    }
+  ]
+}

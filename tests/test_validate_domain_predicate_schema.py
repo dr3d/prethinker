@@ -44,6 +44,21 @@ def test_sec_form_8k_domain_predicate_schema_registry_matches_contracts():
     assert report["registries"][0]["errors"] == []
 
 
+def test_puc_and_procurement_domain_predicate_schema_registries_match_contracts():
+    report = build_report(
+        [
+            Path("datasets/domain_profiles/puc_order_v1/ontology_registry.json"),
+            Path("datasets/domain_profiles/procurement_gao_decision_v1/ontology_registry.json"),
+        ]
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["registry_count"] == 2
+    assert report["summary"]["predicate_count"] == 2
+    assert all(row["lens_count"] == 1 for row in report["registries"])
+    assert all(row["errors"] == [] for row in report["registries"])
+
+
 def test_domain_predicate_schema_validator_blocks_unregistered_signature(tmp_path):
     path = tmp_path / "ontology_registry.json"
     path.write_text(

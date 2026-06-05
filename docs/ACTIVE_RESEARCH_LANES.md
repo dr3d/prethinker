@@ -457,6 +457,16 @@ current State-AG boundary signal: the same closed pack handles AOD skeleton
 best, while broader consent-judgment structure may need a more specific layer
 or should remain outside the first State-AG transfer claim.
 
+Two additional retained-fixture wrapper packs are now registered but not
+promoted: `puc_order_v1` and `procurement_gao_decision_v1`. Their external
+source-only oracle reviews are retained under `datasets/source_oracle_reviews`,
+and their first local-Qwen N=3 wrapper probes are archived at
+`C:\prethinker_tmp_archive\puc_procurement_wrapper_probe_20260605`. Current
+strict support is zero in all four reviewed cells: PUC `0/1`, `0/1`; GAO
+`0/1`, `0/1`; all have `0` supported forbidden rows and clean atom/lens/value
+governance. Treat them as process/boundary evidence for fast pack construction,
+not as transfer support.
+
 Before the next technical claim:
 
 1. Keep FDA as the primary case study and keep the per-layer boundary table

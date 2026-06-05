@@ -5,13 +5,13 @@ This report does not read source prose, QA questions, or judge outputs.
 
 ## Summary
 
-- Domains: `5`
-- Predicates: `60` (`55` domain-specific plus shared carriers)
-- Lenses: `29`
-- Associated fixtures: `26`
+- Domains: `7`
+- Predicates: `62` (`57` domain-specific plus shared carriers)
+- Lenses: `31`
+- Associated fixtures: `30`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `569`
-- Forbidden facts in associated fixtures: `209`
+- Expected facts in associated fixtures: `573`
+- Forbidden facts in associated fixtures: `240`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
 
@@ -20,6 +20,8 @@ This report does not read source prose, QA questions, or judge outputs.
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
+| `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
+| `puc_order_v1` | 1 | 1 | 1 | 2 | 2 | 15 |
 | `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 32 |
 | `state_ag_settlement_v1` | 9 | 8 | 5 | 3 | 74 | 33 |
 
@@ -114,6 +116,48 @@ This report does not read source prose, QA questions, or judge outputs.
 | `osha_incident_transfer_001` | `manifest_domain_profile` | 15 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_injured_employee/7`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:4, `osha_related_activity/5`:1, `osha_violation_count/5`:4, `osha_violation_item/8`:1, `osha_violation_status/5`:1 |
 | `osha_incident_transfer_002` | `manifest_domain_profile` | 53 | 8 | `osha_accident/7`:1, `osha_establishment/5`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:8, `osha_related_activity/5`:2, `osha_violation_count/5`:8, `osha_violation_item/8`:16, `osha_violation_status/5`:16 |
 | `osha_incident_transfer_003` | `manifest_domain_profile` | 21 | 10 | `domain_omission/5`:1, `osha_establishment/5`:1, `osha_inspection/7`:1, `osha_penalty_amount/5`:6, `osha_related_activity/5`:1, `osha_violation_count/5`:5, `osha_violation_item/8`:3, `osha_violation_status/5`:3 |
+
+## procurement_gao_decision_v1
+
+- Registry: `datasets/domain_profiles/procurement_gao_decision_v1/ontology_registry.json`
+- Predicates: `1`
+- Domain-specific predicates: `1`
+- Lenses: `1`
+- Accountability requirements: `0`
+
+### Lenses
+
+| Lens | Allowed signatures |
+| --- | --- |
+| `wrapper` | `gao_bid_protest_decision/7` |
+
+### Fixture Oracles
+
+| Fixture | Association | Expected | Forbidden | Expected signatures |
+| --- | --- | ---: | ---: | --- |
+| `procurement_contract_ugly_002` | `manifest_domain_profile` | 1 | 8 | `gao_bid_protest_decision/7`:1 |
+| `procurement_contract_ugly_003` | `manifest_domain_profile` | 1 | 8 | `gao_bid_protest_decision/7`:1 |
+
+## puc_order_v1
+
+- Registry: `datasets/domain_profiles/puc_order_v1/ontology_registry.json`
+- Predicates: `1`
+- Domain-specific predicates: `1`
+- Lenses: `1`
+- Accountability requirements: `0`
+
+### Lenses
+
+| Lens | Allowed signatures |
+| --- | --- |
+| `wrapper` | `puc_order/7` |
+
+### Fixture Oracles
+
+| Fixture | Association | Expected | Forbidden | Expected signatures |
+| --- | --- | ---: | ---: | --- |
+| `puc_order_ugly_002` | `manifest_domain_profile` | 1 | 8 | `puc_order/7`:1 |
+| `puc_order_ugly_003` | `manifest_domain_profile` | 1 | 7 | `puc_order/7`:1 |
 
 ## sec_form_8k_v1
 

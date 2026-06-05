@@ -8,7 +8,7 @@ This page shows which omission contracts exist and which typed fixture oracles e
 
 ## Summary
 
-- Domains: `5`
+- Domains: `7`
 - Registry accountability requirements: `8`
 - Requirements covered by fixture omissions: `8`
 - Requirements not yet covered by fixture omissions: `0`
@@ -21,6 +21,8 @@ This page shows which omission contracts exist and which typed fixture oracles e
 | `fda_warning_letter_v1` | 3 | 3 | 6 | 0 |
 | `ntsb_investigation_v1` | 2 | 2 | 2 | 0 |
 | `osha_incident_v1` | 2 | 2 | 2 | 0 |
+| `procurement_gao_decision_v1` | 0 | 0 | 0 | 0 |
+| `puc_order_v1` | 0 | 0 | 0 | 0 |
 | `sec_form_8k_v1` | 1 | 1 | 1 | 0 |
 | `state_ag_settlement_v1` | 0 | 0 | 0 | 0 |
 
@@ -81,6 +83,34 @@ All declared requirements have fixture coverage, and no fixture-only omission pa
 | --- | --- | --- | ---: | --- | --- |
 | `osha_accident/7` | `none_found` | `accident_summary_not_stated` | 1 | `declared` | `osha_incident_transfer_003` |
 | `osha_inspection/7` | `role_missing` | `inspection_identifier_not_stated` | 1 | `declared` | `osha_incident_inspection_id_omission_v1` |
+
+### Accountability Read
+
+All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
+
+## procurement_gao_decision_v1
+
+### Registry Requirements
+
+_No registry accountability requirements declared._
+
+### Fixture Omission Patterns
+
+_No expected `domain_omission/5` facts in associated fixtures._
+
+### Accountability Read
+
+All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
+
+## puc_order_v1
+
+### Registry Requirements
+
+_No registry accountability requirements declared._
+
+### Fixture Omission Patterns
+
+_No expected `domain_omission/5` facts in associated fixtures._
 
 ### Accountability Read
 

@@ -1056,25 +1056,22 @@ The next technical work should serve one of four purposes:
    seeded/local probes stay diagnostic unless they are promoted through the
    same N>=3/support>=2 gates.
 7. Use `docs/FIXTURE_BANK_DOMAIN_INVENTORY.md` to choose any next domain from
-   retained fixtures. The first new pre-registry candidate is the draft
-   `puc_order/7` wrapper proposal, based on two local Qwen MoE profile-only PUC
-   bootstraps archived under
-   `C:\prethinker_tmp_archive\puc_domain_bootstrap_20260604`. It is not a
-   domain-pack claim. Its source-only expected/forbidden review is now retained
-   under
-   `datasets/source_oracle_reviews/puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604`;
-   the next step, if pursued, is registration plus same-condition compile
-   measurement, not another oracle packet.
-   A second pre-registry candidate is the draft
-   `gao_bid_protest_decision/7` wrapper proposal for retained procurement/GAO
-   bid-protest decisions, based on two local Qwen MoE profile-only bootstraps
-   archived under
-   `C:\prethinker_tmp_archive\procurement_domain_bootstrap_20260605`. It is
-   likewise not a domain-pack claim. Its source-only expected/forbidden review
-   is now retained under
-   `datasets/source_oracle_reviews/procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605`;
-   the next step, if pursued, is registration plus same-condition compile
-   measurement, not another oracle packet.
+   retained fixtures. Two reviewed wrapper proposals have now been converted
+   into registered draft packs and measured once, without promotion:
+   `puc_order/7` for retained PUC orders and
+   `gao_bid_protest_decision/7` for retained GAO bid-protest decisions. Their
+   source-only expected/forbidden reviews are retained under
+   `datasets/source_oracle_reviews/`, and their first local-Qwen N=3 wrapper
+   probes are archived under
+   `C:\prethinker_tmp_archive\puc_procurement_wrapper_probe_20260605`.
+   Both packs are caged and source-reviewed, but neither supports its exact
+   source oracle yet:
+   PUC wrapper cells are `0/1`, `0/1` with `0` supported forbidden; GAO wrapper
+   cells are `0/1`, `0/1` with `0` supported forbidden. GAO emits semantically
+   close rows whose docket/procurement/status/date slots are mostly correct but
+   whose local ids and source coordinates drift. One PUC cell behaves the same
+   way; the other is zero-yield. Treat these as process/boundary evidence for
+   fast pack construction, not as transfer support.
    A source-only FTC public-order pre-registry probe was also run over two
    retained ACH-stress fixtures and archived under
    `C:\prethinker_tmp_archive\ftc_domain_bootstrap_20260605`. It is a negative:

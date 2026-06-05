@@ -165,6 +165,42 @@
       "evidence_roots": [
         "datasets\\compile_micro_fixtures\\state_ag_settlement_aod_transfer_003"
       ]
+    },
+    {
+      "fixture_id": "puc_order_ugly_002",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "registered_draft_wrapper_probe_not_promoted",
+      "note": "PUC wrapper draft-pack probe: 0/1 support>=2 with 0/8 supported forbidden. Retained as process/boundary evidence for compact-id and source-coordinate instability, not a standing manifest cell.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\puc_procurement_wrapper_probe_20260605\\puc-order-ugly-002-wrapper-direct-r1-20260605"
+      ]
+    },
+    {
+      "fixture_id": "puc_order_ugly_003",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "registered_draft_wrapper_probe_not_promoted",
+      "note": "PUC wrapper draft-pack probe: 0/1 support>=2 with 0/7 supported forbidden. Retained as process/boundary evidence for zero-yield delivery under the reviewed compact carrier, not a standing manifest cell.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\puc_procurement_wrapper_probe_20260605\\puc-order-ugly-003-wrapper-direct-r1-20260605"
+      ]
+    },
+    {
+      "fixture_id": "procurement_contract_ugly_002",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "registered_draft_wrapper_probe_not_promoted",
+      "note": "GAO bid-protest wrapper draft-pack probe: 0/1 support>=2 with 0/8 supported forbidden. Retained as process/boundary evidence for compact-id and source-coordinate instability, not a standing manifest cell.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\puc_procurement_wrapper_probe_20260605\\procurement-gao-ugly-002-wrapper-direct-r1-20260605"
+      ]
+    },
+    {
+      "fixture_id": "procurement_contract_ugly_003",
+      "reason_code": "diagnostic_boundary_probe",
+      "status": "registered_draft_wrapper_probe_not_promoted",
+      "note": "GAO bid-protest wrapper draft-pack probe: 0/1 support>=2 with 0/8 supported forbidden. Retained as process/boundary evidence for compact-id, procurement-id, and source-coordinate instability, not a standing manifest cell.",
+      "evidence_roots": [
+        "C:\\prethinker_tmp_archive\\puc_procurement_wrapper_probe_20260605\\procurement-gao-ugly-003-wrapper-direct-r1-20260605"
+      ]
     }
   ]
 }

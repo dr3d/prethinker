@@ -539,6 +539,57 @@ def test_sec_material_event_probe_is_not_offered_by_promoted_sec_profile() -> No
     assert "sec_material_event/6" not in offered_signatures
 
 
+def test_puc_and_gao_wrapper_contracts_keep_substance_out_of_slots() -> None:
+    puc = carrier_contract("puc_order/7")
+    gao = carrier_contract("gao_bid_protest_decision/7")
+
+    assert puc is not None
+    assert puc["args"] == [
+        "order_id",
+        "agency_id",
+        "docket_id",
+        "order_kind",
+        "issued_date",
+        "decision_status",
+        "source_or_scope",
+    ]
+    puc_text = " ".join(puc["contract"] + puc["forbidden_uses"])
+    assert "settlement terms" in puc_text
+    assert "certificate-of-service" in puc_text
+    assert "doc_control_number_as_docket" in puc_text
+    assert "resolution" in puc["value_domains"]["order_kind"]
+    assert "memorializes_decision" in puc["value_domains"]["decision_status"]
+
+    assert gao is not None
+    assert gao["args"] == [
+        "decision_id",
+        "forum_id",
+        "docket_id",
+        "procurement_id",
+        "decision_date",
+        "decision_status",
+        "source_or_scope",
+    ]
+    gao_text = " ".join(gao["contract"] + gao["forbidden_uses"])
+    assert "current GAO file or B-number" in gao_text
+    assert "recommendations" in gao_text
+    assert "cited_precedent_as_current_docket" in gao_text
+    assert "gao" in gao["value_domains"]["forum_id"]
+    assert "sustained" in gao["value_domains"]["decision_status"]
+
+
+def test_puc_and_gao_domain_profiles_match_registered_contracts() -> None:
+    for registry_path in [
+        REPO_ROOT / "datasets" / "domain_profiles" / "puc_order_v1" / "ontology_registry.json",
+        REPO_ROOT / "datasets" / "domain_profiles" / "procurement_gao_decision_v1" / "ontology_registry.json",
+    ]:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        for item in registry["predicates"]:
+            contract = carrier_contract(item["signature"])
+            assert contract is not None
+            assert item["args"] == contract["args"]
+
+
 def test_ntsb_domain_profile_registry_matches_registered_contracts() -> None:
     registry_path = REPO_ROOT / "datasets" / "domain_profiles" / "ntsb_investigation_v1" / "ontology_registry.json"
     registry = json.loads(registry_path.read_text(encoding="utf-8"))

@@ -1,0 +1,16 @@
+{
+  "fixture_id": "procurement_contract_ugly_002",
+  "source_family": "gao_bid_protest_decision",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260528_01/procurement_contract_ugly_002",
+  "purpose": "Source-oracle-reviewed GAO wrapper cell for Castro & Company, LLC, B-423689. Exercises current docket/procurement separation, decision date, and sustained disposition without protest-ground substance.",
+  "domain_profile": "datasets/domain_profiles/procurement_gao_decision_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "governance": {
+    "claim_gate": "N>=3/support>=2",
+    "source_record_prose_allowed": false,
+    "query_text_allowed": false,
+    "lens_scoped": true,
+    "source_oracle_review": "datasets/source_oracle_reviews/procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605/manifest.json"
+  }
+}

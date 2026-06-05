@@ -1,0 +1,16 @@
+{
+  "fixture_id": "puc_order_ugly_002",
+  "source_family": "puc_order",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260528_01/puc_order_ugly_002",
+  "purpose": "Source-oracle-reviewed PUC wrapper cell for CPUC Resolution ALJ-445. Exercises order/docket separation, issue date, and compact settlement-approval disposition without settlement-term substance.",
+  "domain_profile": "datasets/domain_profiles/puc_order_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "governance": {
+    "claim_gate": "N>=3/support>=2",
+    "source_record_prose_allowed": false,
+    "query_text_allowed": false,
+    "lens_scoped": true,
+    "source_oracle_review": "datasets/source_oracle_reviews/puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604/manifest.json"
+  }
+}
