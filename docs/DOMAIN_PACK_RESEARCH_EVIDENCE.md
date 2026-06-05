@@ -506,6 +506,22 @@ against treating one-shot retry prompt guidance as a sufficient query repair.
 It does not justify deterministic query rewriting unless that rewriting is
 separately specified as a syntax-normalization policy and gated as such.
 
+Non-claim normalization diagnostic:
+
+```text
+artifact: C:\prethinker_tmp_archive\sec_atom_library_query_slot_label_feedback_20260605\atom_library_slot_label_normalization_diagnostic_20260605
+method: replace only constants already blocked and classified as predicate
+  argument-name labels, then replay the normalized query over typed facts
+result: 15/15 normalized replays returned typed rows
+status: diagnostic ceiling only; not a QA score and not a runtime path
+```
+
+This suggests the failing rows are mostly planner-syntax failures over a
+sufficient typed KB, not compile-recall misses. The open design question is
+whether a deterministic slot-label-to-variable normalization policy can be made
+claim-safe. Until that policy is specified, tested, and disclosed, these
+normalized rows do not count toward product or thesis exact rates.
+
 Retained diagnostic artifact:
 
 ```text
