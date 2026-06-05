@@ -138,8 +138,9 @@ NTSB investigation pack
     all 60 exact rows pass typed-plan replay and redaction replay
   claim: boundary corroboration; wrapper, chronology, vehicles, and conditions
     transfer more cleanly than findings/probable-cause substance; scoped
-    injury-count partitions now clear, while one timeline sequence-role row
-    remains unstable
+    injury-count partitions now clear. The two finding/probable-cause rows are
+    unstable zero-yield rows: one run emits them, two runs emit no
+    same-signature candidates. One timeline sequence-role row remains unstable.
 
 OSHA accident/inspection pack
   seed micro: 21 / 21 support>=2 after the high-arity registry intake fix
