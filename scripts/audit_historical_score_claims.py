@@ -23,10 +23,44 @@ DISCLAIMER_PATTERN = re.compile(
     r"("
     r"not\s+current|historical|contaminated|does\s+not\s+support|do\s+not\s+claim|"
     r"not\s+a\s+claim|not\s+claim-bearing|not\s+current\s+public|not\s+current\s+accuracy|"
-    r"not\s+evidence|non-claims|what\s+this\s+does\s+not\s+support|old\s+high-score"
+    r"not\s+evidence|non-claims|what\s+this\s+does\s+not\s+support|old\s+high-score|"
+    r"older|previous|stale|claim-blocked"
     r")",
     re.IGNORECASE,
 )
+STALE_STATUS_PATTERNS = [
+    (
+        "fda_transfer_002_red_cell",
+        re.compile(
+            r"("
+            r"current\s+standing\s+status\s+is\s+deliberately\s+red|"
+            r"claim-blocking\s+FDA\s+transfer_002|"
+            r"FDA\s+transfer_002\s+emits\s+one\s+source-rejected\s+forbidden|"
+            r"22\s*/\s*29\s+support>=2\s+with\s+one\s+source-rejected|"
+            r"22\s*/\s*29\s+support>=2,\s*1\s*/\s*8\s+forbidden\s+emitted|"
+            r"source-rejected\s+`?fda_adulteration_basis/5`?.*501\(a\)\(2\)\(A\)"
+            r")",
+            re.IGNORECASE | re.DOTALL,
+        ),
+    ),
+    (
+        "fda_documentation_gap_pending_review",
+        re.compile(
+            r"("
+            r"active\s+FDA\s+documentation-gap\s+proposal\s+lane\s+is\s+waiting\s+on\s+blind\s+oracle\s+review|"
+            r"fda_response_documentation_gap_oracle_review_work_order_20260603"
+            r")",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "old_osha_seed_transfer_pair",
+        re.compile(
+            r"18\s*/\s*20[`']?,\s*[`']?12\s*/\s*15[`']?,\s*both\s+[`']?0[`']?\s+supported\s+forbidden",
+            re.IGNORECASE,
+        ),
+    ),
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,6 +90,7 @@ def main() -> int:
 def audit_docs(*, root: Path, docs: list[Path]) -> dict[str, Any]:
     occurrences: list[dict[str, Any]] = []
     blockers: list[dict[str, Any]] = []
+    stale_status_occurrences: list[dict[str, Any]] = []
     skipped_docs: list[str] = []
     for doc in docs:
         path = doc if doc.is_absolute() else root / doc
@@ -75,16 +110,27 @@ def audit_docs(*, root: Path, docs: list[Path]) -> dict[str, Any]:
             occurrences.append(item)
             if not item["disclaimed"]:
                 blockers.append(item)
+        for pattern_name, pattern in STALE_STATUS_PATTERNS:
+            for match in pattern.finditer(text):
+                item = {
+                    "doc": str(doc),
+                    "pattern": pattern_name,
+                    "line": _line_number(text, match.start()),
+                    "context": _context(text, match.start(), match.end()).strip(),
+                }
+                stale_status_occurrences.append(item)
     return {
         "schema": "prethinker.historical_score_claim_audit.v1",
         "summary": {
             "occurrence_count": len(occurrences),
             "blocking_occurrence_count": len(blockers),
+            "stale_status_occurrence_count": len(stale_status_occurrences),
             "skipped_doc_count": len(skipped_docs),
-            "status": "pass" if not blockers and not skipped_docs else "fail",
+            "status": "pass" if not blockers and not stale_status_occurrences and not skipped_docs else "fail",
         },
         "occurrences": occurrences,
         "blocking_occurrences": blockers,
+        "stale_status_occurrences": stale_status_occurrences,
         "skipped_docs": skipped_docs,
     }
 
@@ -138,6 +184,7 @@ def _report_md(report: dict[str, Any]) -> str:
         f"Status: `{report['summary']['status']}`",
         f"Occurrences: `{report['summary']['occurrence_count']}`",
         f"Blocking occurrences: `{report['summary']['blocking_occurrence_count']}`",
+        f"Stale status occurrences: `{report['summary']['stale_status_occurrence_count']}`",
         f"Skipped docs: `{report['summary']['skipped_doc_count']}`",
         "",
     ]
@@ -146,6 +193,12 @@ def _report_md(report: dict[str, Any]) -> str:
         lines.append("")
         for item in report["blocking_occurrences"]:
             lines.append(f"- `{item['doc']}:{item['line']}` contains `{item['score']}` without nearby disclaimer language")
+        lines.append("")
+    if report["stale_status_occurrences"]:
+        lines.append("## Stale Status Occurrences")
+        lines.append("")
+        for item in report["stale_status_occurrences"]:
+            lines.append(f"- `{item['doc']}:{item['line']}` matches `{item['pattern']}`")
         lines.append("")
     return "\n".join(lines)
 
