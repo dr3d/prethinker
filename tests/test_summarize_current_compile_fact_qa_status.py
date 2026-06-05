@@ -58,7 +58,17 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
             ],
             "run2": [
                 _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
-                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "partial"),
+                _judged_row(
+                    "osha_penalty_amount(inspection_1, total, usd_1000, Src).",
+                    "partial",
+                    answer="osha_penalty_amount(inspection_1, total, usd_1200, osha_source_row_1).",
+                    match_detail={
+                        "carrier_candidate_count": 2,
+                        "matched_constant_positions": [0, 1],
+                        "differing_constant_positions": [2],
+                        "total_constant_slots": 3,
+                    },
+                ),
             ],
             "run3": [
                 _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
@@ -80,6 +90,10 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
             "unsupported_count": 1,
             "support_0_count": 0,
             "support_1_count": 1,
+            "zero_yield_count": 0,
+            "same_signature_drift_count": 1,
+            "same_signature_no_primary_count": 0,
+            "other_residue_count": 0,
             "cell_count": 1,
             "cells": ["osha_incident_transfer_001"],
         }
@@ -89,9 +103,18 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
         "osha_penalty_amount(inspection_1, total, usd_1000, Src)."
     )
     assert unsupported[0]["exact_support"] == 1
+    assert unsupported[0]["residue_kind"] == "same_signature_drift"
+    assert unsupported[0]["max_carrier_candidate_count"] == 2
+    assert unsupported[0]["max_matched_constant_slots"] == 2
+    assert unsupported[0]["max_total_constant_slots"] == 3
     assert "Unsupported Expected Facts" in md
     assert "Unsupported split support 0 / support 1: `0 / 1`" in md
-    assert "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | `osha_incident_transfer_001` |" in md
+    assert "Residue kinds are derived from deterministic matcher details" in md
+    assert (
+        "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | 0 | 1 | 0 | 0 | "
+        "`osha_incident_transfer_001` |"
+    ) in md
+    assert "`same_signature_drift` (2/3; candidates 2)" in md
     assert "osha_penalty_amount" in md
 
 
@@ -373,11 +396,18 @@ def _write_judged_qa_rows(
         )
 
 
-def _judged_row(reference_answer: str, verdict: str) -> dict:
-    answer = reference_answer if verdict == "exact" else ""
+def _judged_row(
+    reference_answer: str,
+    verdict: str,
+    *,
+    answer: str = "",
+    match_detail: dict | None = None,
+) -> dict:
+    rendered_answer = reference_answer if verdict == "exact" else answer
     return {
-        "answer": answer,
+        "answer": rendered_answer,
         "reference_answer": reference_answer,
         "reference_answer_carrier": reference_answer.split("(", 1)[0] + "/4",
         "reference_judge": {"verdict": verdict},
+        "match_detail": match_detail or {},
     }

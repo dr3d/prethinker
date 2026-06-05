@@ -298,6 +298,7 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
                     "exact_support": 0,
                     "verdicts": [],
                     "non_exact_answers": [],
+                    "non_exact_details": [],
                 },
             )
             verdict = str((row.get("reference_judge") or {}).get("verdict") or "")
@@ -308,6 +309,9 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
                 answer = str(row.get("answer") or "").strip()
                 if answer:
                     item["non_exact_answers"].append(answer)
+                item["non_exact_details"].append(
+                    _non_exact_detail(run_id=run_id, verdict=verdict, row=row)
+                )
     unsupported = [
         {
             "reference_answer": item["reference_answer"],
@@ -315,6 +319,19 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
             "exact_support": item["exact_support"],
             "verdicts": item["verdicts"],
             "non_exact_answers": sorted(set(item["non_exact_answers"]))[:3],
+            "residue_kind": _residue_kind(item.get("non_exact_details") or []),
+            "max_carrier_candidate_count": _max_detail_int(
+                item.get("non_exact_details") or [],
+                "carrier_candidate_count",
+            ),
+            "max_matched_constant_slots": _max_detail_int(
+                item.get("non_exact_details") or [],
+                "matched_constant_slot_count",
+            ),
+            "max_total_constant_slots": _max_detail_int(
+                item.get("non_exact_details") or [],
+                "total_constant_slots",
+            ),
         }
         for item in by_reference.values()
         if int(item["exact_support"]) < 2
@@ -327,6 +344,40 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
             str(item.get("reference_answer") or ""),
         ),
     )
+
+
+def _non_exact_detail(*, run_id: str, verdict: str, row: dict[str, Any]) -> dict[str, Any]:
+    match_detail = row.get("match_detail") if isinstance(row.get("match_detail"), dict) else {}
+    matched = match_detail.get("matched_constant_positions")
+    differing = match_detail.get("differing_constant_positions")
+    return {
+        "run": run_id,
+        "verdict": verdict,
+        "carrier_candidate_count": int(match_detail.get("carrier_candidate_count") or 0),
+        "matched_constant_slot_count": len(matched) if isinstance(matched, list) else 0,
+        "differing_constant_slot_count": len(differing) if isinstance(differing, list) else 0,
+        "total_constant_slots": int(match_detail.get("total_constant_slots") or 0),
+    }
+
+
+def _residue_kind(details: list[dict[str, Any]]) -> str:
+    if not details:
+        return "no_non_exact_detail"
+    candidate_counts = [int(detail.get("carrier_candidate_count") or 0) for detail in details]
+    matched_counts = [int(detail.get("matched_constant_slot_count") or 0) for detail in details]
+    if all(count <= 0 for count in candidate_counts):
+        return "zero_yield"
+    if any(count > 0 for count in matched_counts):
+        return "same_signature_drift"
+    if any(count > 0 for count in candidate_counts):
+        return "same_signature_no_primary"
+    return "other_or_unparsed"
+
+
+def _max_detail_int(details: list[dict[str, Any]], key: str) -> int:
+    if not details:
+        return 0
+    return max(int(detail.get(key) or 0) for detail in details)
 
 
 def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -377,15 +428,28 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                     "unsupported_count": 0,
                     "support_0_count": 0,
                     "support_1_count": 0,
+                    "zero_yield_count": 0,
+                    "same_signature_drift_count": 0,
+                    "same_signature_no_primary_count": 0,
+                    "other_residue_count": 0,
                     "cells": set(),
                 },
             )
             support = int(row.get("exact_support") or 0)
+            residue_kind = str(row.get("residue_kind") or "")
             group["unsupported_count"] += 1
             if support <= 0:
                 group["support_0_count"] += 1
             elif support == 1:
                 group["support_1_count"] += 1
+            if residue_kind == "zero_yield":
+                group["zero_yield_count"] += 1
+            elif residue_kind == "same_signature_drift":
+                group["same_signature_drift_count"] += 1
+            elif residue_kind == "same_signature_no_primary":
+                group["same_signature_no_primary_count"] += 1
+            else:
+                group["other_residue_count"] += 1
             group["cells"].add(str(cell.get("id") or ""))
     rows: list[dict[str, Any]] = []
     for group in groups.values():
@@ -396,6 +460,10 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                 "unsupported_count": group["unsupported_count"],
                 "support_0_count": group["support_0_count"],
                 "support_1_count": group["support_1_count"],
+                "zero_yield_count": group["zero_yield_count"],
+                "same_signature_drift_count": group["same_signature_drift_count"],
+                "same_signature_no_primary_count": group["same_signature_no_primary_count"],
+                "other_residue_count": group["other_residue_count"],
                 "cell_count": len(group["cells"]),
                 "cells": sorted(group["cells"]),
             }
@@ -562,6 +630,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "These rows are the current coverage boundary: expected typed facts",
                 "with exact support below the claim threshold of 2. They are",
                 "diagnostic planning data, not permission to repair rows one by one.",
+                "Residue kinds are derived from deterministic matcher details on",
+                "non-exact runs only; they do not change support scores.",
                 "",
             ]
         )
@@ -571,19 +641,23 @@ def render_markdown(report: dict[str, Any]) -> str:
                 [
                     "### By Carrier",
                     "",
-                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Cells |",
-                    "| --- | --- | ---: | ---: | ---: | --- |",
+                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Same-Sig Drift | No Primary | Other | Cells |",
+                    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
                 ]
             )
             for row in carrier_rows:
                 cells = ", ".join(f"`{cell}`" for cell in row.get("cells") or [])
                 lines.append(
-                    "| `{}` | `{}` | {} | {} | {} | {} |".format(
+                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                         row.get("family") or "",
                         row.get("carrier") or "",
                         row.get("unsupported_count", 0),
                         row.get("support_0_count", 0),
                         row.get("support_1_count", 0),
+                        row.get("zero_yield_count", 0),
+                        row.get("same_signature_drift_count", 0),
+                        row.get("same_signature_no_primary_count", 0),
+                        row.get("other_residue_count", 0),
                         cells,
                     )
                 )
@@ -592,8 +666,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "",
                 "### Rows",
                 "",
-                "| Cell | Fixture | Carrier | Support | Verdicts | Expected Fact | Non-Exact Emissions |",
-                "| --- | --- | --- | ---: | --- | --- | --- |",
+                "| Cell | Fixture | Carrier | Support | Residue | Verdicts | Expected Fact | Non-Exact Emissions |",
+                "| --- | --- | --- | ---: | --- | --- | --- | --- |",
             ]
         )
         for cell, row in unsupported_rows:
@@ -604,12 +678,14 @@ def render_markdown(report: dict[str, Any]) -> str:
             expected = str(row.get("reference_answer") or "").replace("|", "\\|")
             answers = "; ".join(str(item) for item in row.get("non_exact_answers") or [])
             answers = answers.replace("|", "\\|")
+            residue = _residue_markdown(row)
             lines.append(
-                "| `{}` | `{}` | `{}` | {} | {} | `{}` | `{}` |".format(
+                "| `{}` | `{}` | `{}` | {} | {} | {} | `{}` | `{}` |".format(
                     cell["id"],
                     cell["fixture_id"],
                     row.get("carrier") or "",
                     row.get("exact_support", 0),
+                    residue,
                     verdicts,
                     expected,
                     answers,
@@ -698,6 +774,16 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _residue_markdown(row: dict[str, Any]) -> str:
+    kind = str(row.get("residue_kind") or "unknown")
+    max_matched = int(row.get("max_matched_constant_slots") or 0)
+    max_total = int(row.get("max_total_constant_slots") or 0)
+    candidate_count = int(row.get("max_carrier_candidate_count") or 0)
+    if max_total:
+        return f"`{kind}` ({max_matched}/{max_total}; candidates {candidate_count})"
+    return f"`{kind}` (candidates {candidate_count})"
+
+
 def _family_for_cell(*, cell_id: str, fixture_id: str) -> str:
     text = f"{cell_id} {fixture_id}".lower()
     for prefix, family in [
@@ -713,7 +799,8 @@ def _family_for_cell(*, cell_id: str, fixture_id: str) -> str:
 
 def _load_json(path: Path) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        with open(_io_path(path), encoding="utf-8") as handle:
+            payload = json.load(handle)
     except OSError as exc:
         raise SystemExit(f"Cannot read JSON file {path}: {exc}") from exc
     except json.JSONDecodeError as exc:
@@ -721,6 +808,16 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise SystemExit(f"JSON file must contain an object: {path}")
     return payload
+
+
+def _io_path(path: Path) -> str:
+    text = str(path)
+    if not sys.platform.startswith("win") or text.startswith("\\\\?\\"):
+        return text
+    absolute = str(path if path.is_absolute() else path.resolve())
+    if absolute.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + absolute[2:]
+    return "\\\\?\\" + absolute
 
 
 if __name__ == "__main__":
