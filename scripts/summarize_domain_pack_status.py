@@ -28,12 +28,22 @@ from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E40
 
 DEFAULT_PROFILE_ROOT = REPO_ROOT / "datasets" / "domain_profiles"
 DEFAULT_FIXTURE_ROOT = REPO_ROOT / "datasets" / "compile_micro_fixtures"
+DEFAULT_UNASSIGNED_LEDGER = (
+    REPO_ROOT / "datasets" / "domain_pack_measurements" / "unassigned_typed_micro_fixtures.json"
+)
+
+UNASSIGNED_STATUSES = {
+    "generic_method_probe",
+    "retired_boundary_probe",
+    "not_domain_pack_candidate",
+}
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile-root", type=Path, default=DEFAULT_PROFILE_ROOT)
     parser.add_argument("--fixture-root", type=Path, default=DEFAULT_FIXTURE_ROOT)
+    parser.add_argument("--unassigned-ledger", type=Path, default=DEFAULT_UNASSIGNED_LEDGER)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument(
@@ -48,7 +58,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    report = build_report(profile_root=args.profile_root, fixture_root=args.fixture_root)
+    report = build_report(
+        profile_root=args.profile_root,
+        fixture_root=args.fixture_root,
+        unassigned_ledger=args.unassigned_ledger,
+    )
     rendered_md = render_markdown(report)
     if args.expect_md:
         apply_markdown_freshness_check(
@@ -74,6 +88,7 @@ def build_report(
     *,
     profile_root: Path = DEFAULT_PROFILE_ROOT,
     fixture_root: Path = DEFAULT_FIXTURE_ROOT,
+    unassigned_ledger: Path = DEFAULT_UNASSIGNED_LEDGER,
 ) -> dict[str, Any]:
     registry_paths = sorted(profile_root.glob("*/ontology_registry.json"))
     schema_report = build_schema_report(registry_paths)
@@ -87,6 +102,18 @@ def build_report(
         for fixture in domain.get("fixtures", [])
     }
     unassigned = [fixture for fixture in fixtures if fixture["fixture_id"] not in assigned_ids]
+    unassigned_ledger_rows, ledger_blockers = _load_unassigned_ledger(unassigned_ledger)
+    unassigned_by_id = {fixture["fixture_id"]: fixture for fixture in unassigned}
+    ledger_ids = set(unassigned_ledger_rows)
+    for fixture in unassigned:
+        ledger_row = unassigned_ledger_rows.get(fixture["fixture_id"], {})
+        fixture["ledger_status"] = str(ledger_row.get("status") or "")
+        fixture["ledger_reason"] = str(ledger_row.get("reason") or "")
+        fixture["ledger_owner"] = str(ledger_row.get("owner") or "")
+        if not ledger_row:
+            ledger_blockers.append(f"{fixture['fixture_id']}:unassigned_fixture_missing_ledger_entry")
+    for fixture_id in sorted(ledger_ids - set(unassigned_by_id)):
+        ledger_blockers.append(f"{fixture_id}:unassigned_ledger_entry_not_currently_unassigned")
     expected_total = sum(int(domain["expected_fact_count"]) for domain in domains)
     forbidden_total = sum(int(domain["forbidden_fact_count"]) for domain in domains)
     predicate_total = sum(int(domain["predicate_count"]) for domain in domains)
@@ -105,13 +132,16 @@ def build_report(
             "lens_count": lens_total,
             "associated_fixture_count": sum(len(domain.get("fixtures", [])) for domain in domains),
             "unassigned_fixture_count": len(unassigned),
+            "unassigned_accounted_count": sum(1 for fixture in unassigned if fixture.get("ledger_status")),
+            "unassigned_unaccounted_count": sum(1 for fixture in unassigned if not fixture.get("ledger_status")),
             "expected_fact_count": expected_total,
             "forbidden_fact_count": forbidden_total,
             "schema_blocking_errors": int(schema_report["summary"]["blocking_errors"]),
             "schema_warning_count": int(schema_report["summary"]["warning_count"]),
             "schema_status": str(schema_report["summary"]["status"]),
-            "blocking_reasons": [],
-            "status": "fail" if int(schema_report["summary"]["blocking_errors"]) else "pass",
+            "unassigned_ledger_blocking_errors": len(ledger_blockers),
+            "blocking_reasons": ledger_blockers,
+            "status": "fail" if int(schema_report["summary"]["blocking_errors"]) or ledger_blockers else "pass",
         },
         "domains": domains,
         "unassigned_fixtures": unassigned,
@@ -134,10 +164,13 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Lenses: `{summary['lens_count']}`",
         f"- Associated fixtures: `{summary['associated_fixture_count']}`",
         f"- Unassigned fixtures: `{summary['unassigned_fixture_count']}`",
+        f"- Unassigned fixtures accounted for: `{summary['unassigned_accounted_count']} / "
+        f"{summary['unassigned_fixture_count']}`",
         f"- Expected facts in associated fixtures: `{summary['expected_fact_count']}`",
         f"- Forbidden facts in associated fixtures: `{summary['forbidden_fact_count']}`",
         f"- Schema status: `{summary['schema_status']}` "
         f"({summary['schema_blocking_errors']} errors, {summary['schema_warning_count']} warnings)",
+        f"- Unassigned ledger errors: `{summary['unassigned_ledger_blocking_errors']}`",
         f"- Status: `{summary['status']}`",
         "",
         "| Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |",
@@ -210,19 +243,25 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.extend(
             [
                 "These fixtures are retained, but they are not currently associated with a closed domain registry.",
+                "Each one must have an explicit ledger status so generic method probes do not look like forgotten domain-pack work.",
                 "",
-                "| Fixture | Expected | Forbidden |",
-                "| --- | ---: | ---: |",
+                "| Fixture | Status | Expected | Forbidden | Reason |",
+                "| --- | --- | ---: | ---: | --- |",
             ]
         )
         for fixture in unassigned:
             lines.append(
-                "| `{}` | {} | {} |".format(
+                "| `{}` | `{}` | {} | {} | {} |".format(
                     fixture["fixture_id"],
+                    fixture.get("ledger_status", ""),
                     fixture["expected_fact_count"],
                     fixture["forbidden_fact_count"],
+                    fixture.get("ledger_reason", ""),
                 )
             )
+    if summary.get("blocking_reasons"):
+        lines.extend(["", "## Blocking Reasons", ""])
+        lines.extend(f"- `{reason}`" for reason in summary["blocking_reasons"])
     return "\n".join(lines) + "\n"
 
 
@@ -310,6 +349,40 @@ def _assign_fixtures(domains: list[dict[str, Any]], fixtures: list[dict[str, Any
         domain["forbidden_fact_count"] = forbidden_total
         domain["expected_signature_counts"] = dict(sorted(expected_counter.items()))
         domain["forbidden_signature_counts"] = dict(sorted(forbidden_counter.items()))
+
+
+def _load_unassigned_ledger(path: Path) -> tuple[dict[str, dict[str, str]], list[str]]:
+    payload = _load_json(path)
+    entries = payload.get("entries")
+    blockers: list[str] = []
+    if not isinstance(entries, list):
+        return {}, [f"{_display_path(path)}:missing_entries_array"]
+    rows: dict[str, dict[str, str]] = {}
+    for index, entry in enumerate(entries, start=1):
+        if not isinstance(entry, dict):
+            blockers.append(f"{_display_path(path)}:entry_{index}_not_object")
+            continue
+        fixture_id = str(entry.get("fixture_id") or "").strip()
+        status = str(entry.get("status") or "").strip()
+        reason = str(entry.get("reason") or "").strip()
+        owner = str(entry.get("owner") or "").strip()
+        if not fixture_id:
+            blockers.append(f"{_display_path(path)}:entry_{index}_missing_fixture_id")
+            continue
+        if fixture_id in rows:
+            blockers.append(f"{fixture_id}:duplicate_unassigned_ledger_entry")
+            continue
+        if status not in UNASSIGNED_STATUSES:
+            blockers.append(f"{fixture_id}:unknown_unassigned_status:{status}")
+        if not reason:
+            blockers.append(f"{fixture_id}:missing_unassigned_reason")
+        rows[fixture_id] = {
+            "fixture_id": fixture_id,
+            "status": status,
+            "reason": reason,
+            "owner": owner,
+        }
+    return rows, blockers
 
 
 def _signature_counts(facts: list[str]) -> Counter[str]:

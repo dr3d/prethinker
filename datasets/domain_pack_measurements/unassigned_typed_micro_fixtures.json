@@ -1,0 +1,29 @@
+{
+  "schema_version": "prethinker.unassigned_typed_micro_fixture_ledger.v1",
+  "entries": [
+    {
+      "fixture_id": "claim_ground_overlapping_subsets_v1",
+      "owner": "compile_recall_research",
+      "reason": "Generic overlapping-subset governed-atom micro; not an official-document family pack.",
+      "status": "generic_method_probe"
+    },
+    {
+      "fixture_id": "claim_ground_set_relation_v1",
+      "owner": "compile_recall_research",
+      "reason": "Generic set-relation governed-atom micro; not an official-document family pack.",
+      "status": "generic_method_probe"
+    },
+    {
+      "fixture_id": "numbered_inventory_segments_v1",
+      "owner": "compile_recall_research",
+      "reason": "Generic numbered-list accounting micro used to pressure inventory/list carriers before domain packs.",
+      "status": "generic_method_probe"
+    },
+    {
+      "fixture_id": "party_role_context_v1",
+      "owner": "compile_recall_research",
+      "reason": "Generic party-role attachment micro; not an official-document family pack.",
+      "status": "generic_method_probe"
+    }
+  ]
+}

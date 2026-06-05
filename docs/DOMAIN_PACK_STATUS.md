@@ -10,9 +10,11 @@ This report does not read source prose, QA questions, or judge outputs.
 - Lenses: `31`
 - Associated fixtures: `30`
 - Unassigned fixtures: `4`
+- Unassigned fixtures accounted for: `4 / 4`
 - Expected facts in associated fixtures: `573`
 - Forbidden facts in associated fixtures: `240`
 - Schema status: `pass` (0 errors, 0 warnings)
+- Unassigned ledger errors: `0`
 - Status: `pass`
 
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
@@ -215,10 +217,11 @@ This report does not read source prose, QA questions, or judge outputs.
 ## Unassigned Typed Micro-Fixtures
 
 These fixtures are retained, but they are not currently associated with a closed domain registry.
+Each one must have an explicit ledger status so generic method probes do not look like forgotten domain-pack work.
 
-| Fixture | Expected | Forbidden |
-| --- | ---: | ---: |
-| `claim_ground_overlapping_subsets_v1` | 24 | 6 |
-| `claim_ground_set_relation_v1` | 4 | 4 |
-| `numbered_inventory_segments_v1` | 3 | 3 |
-| `party_role_context_v1` | 2 | 2 |
+| Fixture | Status | Expected | Forbidden | Reason |
+| --- | --- | ---: | ---: | --- |
+| `claim_ground_overlapping_subsets_v1` | `generic_method_probe` | 24 | 6 | Generic overlapping-subset governed-atom micro; not an official-document family pack. |
+| `claim_ground_set_relation_v1` | `generic_method_probe` | 4 | 4 | Generic set-relation governed-atom micro; not an official-document family pack. |
+| `numbered_inventory_segments_v1` | `generic_method_probe` | 3 | 3 | Generic numbered-list accounting micro used to pressure inventory/list carriers before domain packs. |
+| `party_role_context_v1` | `generic_method_probe` | 2 | 2 | Generic party-role attachment micro; not an official-document family pack. |

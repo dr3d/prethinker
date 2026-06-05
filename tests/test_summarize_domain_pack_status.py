@@ -32,6 +32,8 @@ def test_domain_pack_status_keeps_generic_micro_fixtures_unassigned():
 
     assert "claim_ground_set_relation_v1" in unassigned
     assert "numbered_inventory_segments_v1" in unassigned
+    assert report["summary"]["unassigned_unaccounted_count"] == 0
+    assert all(fixture["ledger_status"] == "generic_method_probe" for fixture in report["unassigned_fixtures"])
 
 
 def test_domain_pack_status_markdown_names_no_source_prose_boundary():
