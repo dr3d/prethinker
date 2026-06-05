@@ -36,6 +36,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest-run", type=Path, default=DEFAULT_MANIFEST_RUN)
     parser.add_argument("--source-audit", type=Path, default=DEFAULT_SOURCE_AUDIT)
+    parser.add_argument(
+        "--variance-status",
+        type=Path,
+        default=None,
+        help="Optional domain-pack variance status JSON to attach registered variance bands to matching cells.",
+    )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument(
@@ -53,6 +59,7 @@ def main() -> int:
     report = build_report(
         manifest_run_path=args.manifest_run,
         source_audit_path=args.source_audit,
+        variance_status_path=args.variance_status,
     )
     rendered_md = render_markdown(report)
     if args.expect_md:
@@ -74,9 +81,16 @@ def main() -> int:
     return 0 if args.exit_zero or not blocked else 1
 
 
-def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[str, Any]:
+def build_report(
+    *,
+    manifest_run_path: Path,
+    source_audit_path: Path,
+    variance_status_path: Path | None = None,
+) -> dict[str, Any]:
     manifest_run = _load_json(manifest_run_path)
     source_audit = _load_json(source_audit_path)
+    variance_status = _load_json(variance_status_path) if variance_status_path else {}
+    variance_by_fixture = _variance_groups_by_fixture(variance_status)
     source_by_id = {
         str(cell.get("id") or ""): cell
         for cell in source_audit.get("cells", [])
@@ -87,6 +101,7 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
             cell=cell,
             source=source_by_id.get(str(cell.get("id") or ""), {}),
             manifest_root=manifest_run_path.parent,
+            variance_groups=variance_by_fixture.get(str(cell.get("fixture_id") or ""), []),
         )
         for cell in manifest_run.get("cells", [])
         if isinstance(cell, dict)
@@ -103,6 +118,7 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
         "created_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "manifest_run_path": str(manifest_run_path),
         "source_audit_path": str(source_audit_path),
+        "variance_status_path": str(variance_status_path or ""),
         "summary": {
             "status": "pass" if not blockers else "fail",
             "blocking_reasons": blockers,
@@ -122,6 +138,7 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
                 int(cell["unregistered_plan_exact_rows"]) for cell in cells
             ),
             "source_warning_count": sum(int(cell["source_warning_count"]) for cell in cells),
+            "variance_group_count": sum(len(cell.get("variance_groups") or []) for cell in cells),
             "unsupported_expected_fact_count": sum(
                 len(cell.get("unsupported_expected_facts") or []) for cell in cells
             ),
@@ -144,7 +161,13 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
     }
 
 
-def _cell_row(*, cell: dict[str, Any], source: dict[str, Any], manifest_root: Path) -> dict[str, Any]:
+def _cell_row(
+    *,
+    cell: dict[str, Any],
+    source: dict[str, Any],
+    manifest_root: Path,
+    variance_groups: list[dict[str, Any]],
+) -> dict[str, Any]:
     cell_id = str(cell.get("id") or "")
     fixture_id = str(cell.get("fixture_id") or "")
     support = dict((cell.get("support_summary_by_fixture") or {}).get(fixture_id) or {})
@@ -205,7 +228,30 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any], manifest_root: Pa
             manifest_root=manifest_root,
             cell_id=cell_id,
         ),
+        "variance_groups": variance_groups,
     }
+
+
+def _variance_groups_by_fixture(report: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    out: dict[str, list[dict[str, Any]]] = {}
+    for group in report.get("groups") or []:
+        if not isinstance(group, dict):
+            continue
+        fixture_id = str(group.get("fixture_id") or "").strip()
+        if not fixture_id:
+            continue
+        row = {
+            "id": str(group.get("id") or ""),
+            "title": str(group.get("title") or ""),
+            "claim_read": str(group.get("claim_read") or ""),
+            "support_band": _support_band(group),
+            "unexpected_band": _count_band(group.get("unexpected_min"), group.get("unexpected_max")),
+            "supported_forbidden_total": int(group.get("supported_forbidden_total") or 0),
+            "status": str(group.get("status") or ""),
+            "root_count": int(group.get("root_count") or 0),
+        }
+        out.setdefault(fixture_id, []).append(row)
+    return out
 
 
 def _per_run_counts(verdict_summary_by_file: dict[str, Any]) -> dict[str, int]:
@@ -662,7 +708,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Current Compile-Fact QA Status",
         "",
-        "Generated from the current compile-fact QA manifest run and manifest source/settings audit.",
+        "Generated from the current compile-fact QA manifest run, manifest source/settings audit,",
+        "and registered variance status when available.",
         "This page does not read source prose, call an LLM, or judge messy human questions.",
         "",
         "## Summary",
@@ -676,6 +723,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Prose-dependent exact rows: `{summary['prose_dependent_exact']}`",
         f"- Unregistered exact typed plans: `{summary['unregistered_plan_exact_rows']}`",
         f"- Source/provenance warnings: `{summary['source_warning_count']}`",
+        f"- Registered variance groups on current cells: `{summary['variance_group_count']}`",
         f"- Unsupported expected facts support<2: `{summary['unsupported_expected_fact_count']}`",
         f"- Unsupported split support 0 / support 1: `{summary['unsupported_support_0_count']} / {summary['unsupported_support_1_count']}`",
         "",
@@ -728,6 +776,9 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"top_p `{cell['top_p']}`; ctx `{cell['num_ctx']}`; matcher `{cell['matcher']}`; "
             f"lens compiles `{cell['lens_compile_count']}`; manifest `{cell['bundle_manifest_status']}`"
         )
+        variance = _cell_variance_summary(cell)
+        if variance:
+            source = f"{source}; variance {variance}"
         lines.append(
             "| `{}` | `{}` | {} / {} | {} / {} | {} | {} | {} | {} |".format(
                 cell["id"],
@@ -742,6 +793,38 @@ def render_markdown(report: dict[str, Any]) -> str:
                 source,
             )
         )
+    variance_rows = [
+        (cell, group)
+        for cell in report["cells"]
+        for group in cell.get("variance_groups") or []
+    ]
+    if variance_rows:
+        lines.extend(
+            [
+                "",
+                "## Registered Variance Evidence",
+                "",
+                "These bands come from retained same-fixture variance groups.",
+                "They are attached to current cells so a favorable retained root is not promoted as a fixed score.",
+                "",
+                "| Cell | Fixture | Group | Roots | Support Band | Forbidden Total | Unexpected Band | Read |",
+                "| --- | --- | --- | ---: | --- | ---: | --- | --- |",
+            ]
+        )
+        for cell, group in variance_rows:
+            read = str(group.get("claim_read") or "").replace("|", "\\|")
+            lines.append(
+                "| `{}` | `{}` | `{}` | {} | {} | {} | {} | {} |".format(
+                    cell["id"],
+                    cell["fixture_id"],
+                    group.get("id", ""),
+                    group.get("root_count", 0),
+                    group.get("support_band", "`n/a`"),
+                    group.get("supported_forbidden_total", 0),
+                    group.get("unexpected_band", "`n/a`"),
+                    read,
+                )
+            )
     unsupported_rows = [
         (cell, row)
         for cell in report["cells"]
@@ -934,6 +1017,46 @@ def _zero_yield_pattern_markdown(row: dict[str, Any]) -> str:
     if unstable:
         parts.append(f"`unstable_zero_yield` x{unstable}")
     return ", ".join(parts)
+
+
+def _cell_variance_summary(cell: dict[str, Any]) -> str:
+    groups = cell.get("variance_groups") or []
+    if not groups:
+        return ""
+    return ", ".join(
+        f"`{group.get('id', '')}` {group.get('support_band', '`n/a`')}"
+        for group in groups
+    )
+
+
+def _support_band(group: dict[str, Any]) -> str:
+    return _band(
+        group.get("supported_min"),
+        group.get("supported_max"),
+        group.get("expected_min"),
+        group.get("expected_max"),
+    )
+
+
+def _band(
+    supported_min: Any,
+    supported_max: Any,
+    expected_min: Any,
+    expected_max: Any,
+) -> str:
+    if supported_min is None or supported_max is None:
+        return "`n/a`"
+    expected = str(expected_min) if expected_min == expected_max else f"{expected_min}-{expected_max}"
+    supported = str(supported_min) if supported_min == supported_max else f"{supported_min}-{supported_max}"
+    return f"`{supported}/{expected}`"
+
+
+def _count_band(min_value: Any, max_value: Any) -> str:
+    if min_value is None or max_value is None:
+        return "`n/a`"
+    if min_value == max_value:
+        return f"`{min_value}`"
+    return f"`{min_value}-{max_value}`"
 
 
 def _family_for_cell(*, cell_id: str, fixture_id: str) -> str:

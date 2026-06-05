@@ -289,6 +289,8 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(out_root / "compile_fact_qa_manifest" / "summary.json"),
                 "--source-audit",
                 str(report_root / "compile_fact_qa_manifest_sources.json"),
+                "--variance-status",
+                str(report_root / "domain_pack_variance_status.json"),
                 "--out-json",
                 str(report_root / "current_compile_fact_qa_status.json"),
                 "--out-md",

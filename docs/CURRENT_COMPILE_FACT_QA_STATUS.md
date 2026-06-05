@@ -1,6 +1,7 @@
 # Current Compile-Fact QA Status
 
-Generated from the current compile-fact QA manifest run and manifest source/settings audit.
+Generated from the current compile-fact QA manifest run, manifest source/settings audit,
+and registered variance status when available.
 This page does not read source prose, call an LLM, or judge messy human questions.
 
 ## Summary
@@ -14,6 +15,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
+- Registered variance groups on current cells: `2`
 - Unsupported expected facts support<2: `16`
 - Unsupported split support 0 / support 1: `10 / 6`
 
@@ -33,11 +35,21 @@ This page does not read source prose, call an LLM, or judge messy human question
 | `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | 13 / 13 | 39 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 11 / 13 | 28 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | 11 / 12 | 32 / 36 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
-| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 35 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
+| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 35 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t003_qwen_moe_repaired_schema` `11-13/13`, `sec_t003_dense_compile_substitution_controls` `10/12` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | 22 / 25 | 60 / 75 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `18`; manifest `present` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 21 / 29 | 61 / 87 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `30`; manifest `present` |
 | `osha_incident_seed` | `osha_incident_domain_v1` | 21 / 21 | 57 / 63 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | 15 / 15 | 36 / 45 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
+
+## Registered Variance Evidence
+
+These bands come from retained same-fixture variance groups.
+They are attached to current cells so a favorable retained root is not promoted as a fixed score.
+
+| Cell | Fixture | Group | Roots | Support Band | Forbidden Total | Unexpected Band | Read |
+| --- | --- | --- | ---: | --- | ---: | --- | --- |
+| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_qwen_moe_repaired_schema` | 4 | `11-13/13` | 0 | `0-2` | Use as an 11-13/13 same-condition band. Do not promote a favorable 13/13 draw as a fixed score. |
+| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_dense_compile_substitution_controls` | 2 | `10/12` | 0 | `3-6` | Use as model-path robustness evidence: closed-language governance held, but recall did not reproduce the Qwen MoE favorable cell. |
 
 ## Unsupported Expected Facts
 

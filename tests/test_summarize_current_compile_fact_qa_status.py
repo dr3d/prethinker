@@ -11,8 +11,13 @@ from scripts.summarize_current_compile_fact_qa_status import (
 def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_path: Path) -> None:
     manifest_run = _write_manifest_run(tmp_path)
     source_audit = _write_source_audit(tmp_path)
+    variance_status = _write_variance_status(tmp_path)
 
-    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    report = build_report(
+        manifest_run_path=manifest_run,
+        source_audit_path=source_audit,
+        variance_status_path=variance_status,
+    )
     md = render_markdown(report)
 
     assert report["summary"]["status"] == "pass"
@@ -31,6 +36,8 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
         }
     ]
     assert report["summary"]["source_warning_count"] == 1
+    assert report["summary"]["variance_group_count"] == 1
+    assert report["cells"][0]["variance_groups"][0]["support_band"] == "`1-2/2`"
     assert "Support>=2: `3 / 4`" in md
     assert "Unexpected same-signature facts support>=2: `1`" in md
     assert "Forbidden fact emissions support>=1 / support>=2: `0 / 0`" in md
@@ -40,6 +47,9 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert "artifact atom pass/pass; value pass/pass" in md
     assert "lens compiles `12`" in md
     assert "missing_bundle_manifest_recovered_from_compile_json" in md
+    assert "Registered Variance Evidence" in md
+    assert "`sec_seed_variance`" in md
+    assert "Do not promote favorable draw." in md
 
 
 def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_facts(
@@ -292,6 +302,36 @@ def _write_source_audit(tmp_path: Path, *, source_status: str = "pass") -> Path:
                         warning="sec_form_8k_skeleton_seed:missing_bundle_manifest_recovered_from_compile_json",
                     ),
                     _source_cell("osha_incident_transfer_001"),
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_variance_status(tmp_path: Path) -> Path:
+    path = tmp_path / "variance_status.json"
+    path.write_text(
+        json.dumps(
+            {
+                "summary": {"status": "pass"},
+                "groups": [
+                    {
+                        "id": "sec_seed_variance",
+                        "title": "SEC seed variance",
+                        "fixture_id": "sec_form_8k_skeleton_v1",
+                        "claim_read": "Do not promote favorable draw.",
+                        "root_count": 2,
+                        "supported_min": 1,
+                        "supported_max": 2,
+                        "expected_min": 2,
+                        "expected_max": 2,
+                        "supported_forbidden_total": 0,
+                        "unexpected_min": 0,
+                        "unexpected_max": 1,
+                        "status": "pass",
+                    }
                 ],
             }
         ),
