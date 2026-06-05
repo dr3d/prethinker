@@ -18,6 +18,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "domain_predicate_proposal_status",
         "pending_external_work_orders",
         "query_micro_fixture_contracts",
+        "query_grounding_status",
         "candidate_oracle_reviews",
         "source_oracle_reviews",
         "sec_value_axis_integrity",
@@ -34,6 +35,9 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
     query_contract_command = next(command for command in commands if command["id"] == "query_micro_fixture_contracts")
     assert "--expect-md" in query_contract_command["command"]
     assert "docs/QUERY_MICRO_FIXTURE_CONTRACT_STATUS.md" in query_contract_command["command"]
+    query_status_command = next(command for command in commands if command["id"] == "query_grounding_status")
+    assert "--expect-md" in query_status_command["command"]
+    assert "docs/QUERY_GROUNDING_STATUS.md" in query_status_command["command"]
     review_command = next(command for command in commands if command["id"] == "candidate_oracle_reviews")
     assert "--expect-md" in review_command["command"]
     assert "docs/CANDIDATE_ORACLE_REVIEW_STATUS.md" in review_command["command"]

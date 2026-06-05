@@ -198,6 +198,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "query_grounding_status",
+            "command": [
+                python,
+                "scripts/summarize_query_grounding_status.py",
+                "--out-json",
+                str(report_root / "query_grounding_status.json"),
+                "--out-md",
+                str(report_root / "query_grounding_status.md"),
+                "--expect-md",
+                "docs/QUERY_GROUNDING_STATUS.md",
+            ],
+        },
+        {
             "id": "candidate_oracle_reviews",
             "command": [
                 python,

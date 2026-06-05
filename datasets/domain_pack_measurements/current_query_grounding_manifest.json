@@ -1,0 +1,53 @@
+{
+  "schema": "prethinker.current_query_grounding_manifest.v1",
+  "description": "Current retained atom-library query-grounding measurements. These cells measure query planning over already-compiled typed atoms; they are not compile-recall scores and do not authorize source prose or source-record fallback.",
+  "cells": [
+    {
+      "id": "sec_atom_library_query_qwen_moe_r2",
+      "query_packet": "sec_form_8k_atom_library_query_v1",
+      "artifact_root": "C:\\prethinker_tmp_archive\\sec_atom_library_query_contract_correction_20260605\\qwen_moe_temp0_r2_full",
+      "typed_plan_replay_json": "C:\\prethinker_tmp_archive\\sec_atom_library_query_contract_correction_20260605\\qwen_moe_temp0_r2_full_typed_plan_replay.json",
+      "redaction_replay_json": "C:\\prethinker_tmp_archive\\sec_atom_library_query_contract_correction_20260605\\qwen_moe_temp0_r2_full_redaction_rejudge.json",
+      "expect": {
+        "row_count": 25,
+        "product_exact": 25,
+        "typed_plan_exact": 25,
+        "redaction_survived": 25,
+        "prose_dependent_exact": 0,
+        "unregistered_plan_exact_rows": 0,
+        "blocked_source_record_plan_rows": 0,
+        "runtime_load_error_rows": 0
+      }
+    },
+    {
+      "id": "current_domain_atom_library_query_qwen_moe_r5",
+      "query_packet": "current_domain_atom_library_query_v1",
+      "artifact_root": "C:\\prethinker_tmp_archive\\current_domain_atom_library_query_20260605\\qwen_moe_temp0_r5",
+      "expect": {
+        "row_count": 25,
+        "product_exact": 25,
+        "typed_plan_exact": 25,
+        "redaction_survived": 25,
+        "prose_dependent_exact": 0,
+        "unregistered_plan_exact_rows": 0,
+        "blocked_source_record_plan_rows": 0,
+        "runtime_load_error_rows": 0
+      }
+    },
+    {
+      "id": "current_domain_atom_library_query_qwen_moe_r6",
+      "query_packet": "current_domain_atom_library_query_v1",
+      "artifact_root": "C:\\prethinker_tmp_archive\\current_domain_atom_library_query_20260605\\qwen_moe_temp0_r6",
+      "expect": {
+        "row_count": 25,
+        "product_exact": 25,
+        "typed_plan_exact": 25,
+        "redaction_survived": 25,
+        "prose_dependent_exact": 0,
+        "unregistered_plan_exact_rows": 0,
+        "blocked_source_record_plan_rows": 0,
+        "runtime_load_error_rows": 0
+      }
+    }
+  ]
+}
