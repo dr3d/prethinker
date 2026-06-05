@@ -296,6 +296,7 @@ def test_atom_library_query_grounding_forces_strict_typed_execution(monkeypatch:
     kb_context_pack = captured["kb_context_pack"]
     inventory = kb_context_pack["compiled_predicate_inventory"]
     assert inventory["signatures"] == ["document_date/2"]
+    assert inventory["arg_names"]["document_date/2"] == ["arg1", "arg2"]
     atom_policy = "\n".join(kb_context_pack["atom_library_query_grounding"]["policy"])
     assert "Predicate-contract argument names describe slots; they are not data constants." in atom_policy
     assert "Never use role labels" in atom_policy
@@ -319,6 +320,25 @@ def test_atom_library_query_validation_retry_replans_after_inventory_block(monke
         if attempt == "retry":
             feedback = kwargs["kb_context_pack"]["atom_library_query_validation_feedback"]
             assert feedback["blocked_queries"][0]["absent_constants"][0]["value"] == "registrantname"
+            assert feedback["slot_label_constant_hints"] == [
+                {
+                    "query": "sec_registrant(Filing, registrantname, jurisdiction, Source).",
+                    "signature": "sec_registrant/4",
+                    "value": "jurisdiction",
+                    "blocked_arg_index": 3,
+                    "slot_arg_name": "jurisdiction",
+                    "slot_arg_index": 3,
+                    "same_argument_position": True,
+                    "suggested_variable": "Jurisdiction",
+                }
+            ]
+            assert feedback["slot_label_hint_messages"] == [
+                "sec_registrant/4 arg3: `jurisdiction` is the slot label `jurisdiction`, "
+                "not a data atom; replace it with variable `Jurisdiction`."
+            ]
+            retry_policy = "\n".join(feedback["policy"])
+            assert "slot_label_constant_hints" in retry_policy
+            assert any("slot-label retry hint" in str(item) for item in kwargs["domain_context"])
         return {
             "parsed": {
                 "decision": "query",
@@ -11818,13 +11838,17 @@ def test_run_query_plan_blocks_constants_absent_from_atom_inventory_slots() -> N
         assert runtime.assert_fact(fact).get("status") == "success"
 
     original = "sec_registrant(X, registrantname, jurisdiction, Source)."
+    inventory = compiled_kb_inventory(facts=facts, rules=[])
+    inventory["arg_names"] = {
+        "sec_registrant/4": ["filing_id", "registrant_id", "jurisdiction", "source_or_scope"],
+    }
     results = _run_query_plan(
         runtime,
         [original],
         helper_companions_enabled=False,
         sign_clean_strict=True,
         allow_relaxed_constant_fallback=False,
-        atom_library_kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        atom_library_kb_inventory=inventory,
     )
 
     assert results == [
@@ -11847,6 +11871,13 @@ def test_run_query_plan_blocks_constants_absent_from_atom_inventory_slots() -> N
                         "signature": "sec_registrant/4",
                         "arg_index": 3,
                         "value": "jurisdiction",
+                        "slot_label_misuse": {
+                            "arg_name": "jurisdiction",
+                            "arg_index": 3,
+                            "same_argument_position": True,
+                            "suggested_variable": "Jurisdiction",
+                            "rationale": "blocked constant normalizes to a predicate-contract argument name",
+                        },
                     },
                 ],
                 "reasoning_basis": {

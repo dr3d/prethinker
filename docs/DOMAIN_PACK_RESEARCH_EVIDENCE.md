@@ -486,12 +486,33 @@ LLM-proposes / deterministic-code-validates: one second planner call can see
 the atom-slot validation failure, but Python still cannot rewrite a blocked
 query.
 
+Follow-up slot-label feedback experiment:
+
+```text
+artifact: C:\prethinker_tmp_archive\sec_atom_library_query_slot_label_feedback_20260605
+change: classify blocked constants that normalize to predicate argument names
+targeted rerun: still blocked on q001/q006 seed, q001/q005/q006 transfer_002,
+  and q001/q005 transfer_003; q004 transfer_003 remained product-exact but
+  still carried the dead `itemtreatment` companion query.
+status: diagnostic improvement only, no score claim
+```
+
+This narrowed the blocker. The deterministic validator can now identify
+`reportkind`, `exhibitnumber`, `exhibitkind`, `exhibitrole`, `itemtreatment`,
+and `signatorytitle` as slot-label constants and propose the corresponding
+uppercase variable names in retry feedback. The local Qwen MoE planner largely
+ignored that feedback and repeated the invalid constants. That is evidence
+against treating one-shot retry prompt guidance as a sufficient query repair.
+It does not justify deterministic query rewriting unless that rewriting is
+separately specified as a syntax-normalization policy and gated as such.
+
 Retained diagnostic artifact:
 
 ```text
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_smoke_20260604
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_variable_fix_smoke_20260604_r2
 C:\prethinker_tmp_archive\sec_atom_library_query_20260605\qwen_moe_temp0_r1
+C:\prethinker_tmp_archive\sec_atom_library_query_slot_label_feedback_20260605
 ```
 
 Retained governance artifact:

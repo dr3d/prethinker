@@ -1542,6 +1542,21 @@ def compiled_kb_contracts(signatures: list[str]) -> list[dict[str, Any]]:
     return contracts
 
 
+def _predicate_contract_arg_names(predicate_contracts: list[dict[str, Any]]) -> dict[str, list[str]]:
+    arg_names: dict[str, list[str]] = {}
+    for contract in predicate_contracts or []:
+        if not isinstance(contract, dict):
+            continue
+        signature = str(contract.get("signature", "") or "").strip()
+        args = contract.get("args")
+        if not signature or not isinstance(args, list):
+            continue
+        names = [str(arg or "").strip() for arg in args]
+        if names and all(names):
+            arg_names[signature] = names
+    return arg_names
+
+
 def _predicate_name_from_contract(contract: dict[str, Any]) -> str:
     predicate = str(contract.get("predicate", "") or "").strip()
     if predicate:
@@ -1917,6 +1932,11 @@ def _atom_library_filtered_inventory(kb_inventory: dict[str, Any]) -> dict[str, 
         "examples": examples,
         "arg_profiles": arg_profiles,
         "arg_values": arg_values,
+        "arg_names": {
+            str(signature): value
+            for signature, value in (kb_inventory.get("arg_names", {}) or {}).items()
+            if str(signature) in allowed_signatures
+        },
         "query_templates": query_templates,
         "surface_alias_inventory": surface_alias_inventory,
     }
@@ -2410,6 +2430,7 @@ def build_evidence_bundle_plan(
             "examples": kb_inventory.get("examples", {}),
             "arg_profiles": kb_inventory.get("arg_profiles", {}),
             "arg_values": kb_inventory.get("arg_values", {}),
+            "arg_names": kb_inventory.get("arg_names", {}),
         },
         "compiled_predicate_contracts": list(predicate_contracts or [])[:120],
         "compiled_surface_alias_inventory": kb_inventory.get("surface_alias_inventory", [])[:32],
@@ -3092,6 +3113,10 @@ def run_one_question(
             for contract in query_predicate_contracts
             if _predicate_name_from_contract(contract) in actual_predicates
         ]
+        query_kb_inventory = {
+            **query_kb_inventory,
+            "arg_names": _predicate_contract_arg_names(query_predicate_contracts),
+        }
         query_facts = _atom_library_filtered_clauses(query_facts)
         query_rules = _atom_library_filtered_clauses(query_rules)
     kb_context_pack = {
@@ -3107,6 +3132,7 @@ def run_one_question(
             "examples": query_kb_inventory.get("examples", {}),
             "arg_profiles": query_kb_inventory.get("arg_profiles", {}),
             "arg_values": query_kb_inventory.get("arg_values", {}),
+            "arg_names": query_kb_inventory.get("arg_names", {}),
         },
         "compiled_surface_alias_inventory": query_kb_inventory.get("surface_alias_inventory", [])[:32],
         "compiled_query_templates": query_kb_inventory.get("query_templates", [])[:120],
@@ -3284,16 +3310,20 @@ def run_one_question(
         and atom_inventory_blocks
         and not evidence_plan_query_results
     ):
+        slot_label_hint_messages = _atom_inventory_slot_label_hint_messages(atom_inventory_blocks)
         retry_context_pack = {
             **kb_context_pack,
             "atom_library_query_validation_feedback": {
                 "schema_version": "atom_library_query_validation_feedback_v1",
                 "blocked_queries": atom_inventory_blocks,
+                "slot_label_constant_hints": _atom_inventory_slot_label_hints(atom_inventory_blocks),
+                "slot_label_hint_messages": slot_label_hint_messages,
                 "policy": [
                     "The previous candidate query plan failed deterministic atom-inventory validation.",
                     "Do not repair by inventing replacement constants.",
                     "Use uppercase variables for unconstrained slots.",
                     "Bind only constants copied exactly from compiled_predicate_inventory.arg_values for the same predicate signature and argument position.",
+                    "If slot_label_constant_hints lists a blocked value, that value is an argument label, not data. Replace that constant with the listed uppercase suggested_variable in the same slot.",
                 ],
             },
         }
@@ -3303,6 +3333,10 @@ def run_one_question(
                 "Atom-library validation retry: the previous query plan was blocked by deterministic "
                 "atom-inventory validation. Re-plan over the same compiled atom inventory; do not use "
                 "source prose and do not invent constants absent from the matching argument slot."
+            ),
+            *(
+                f"Atom-library slot-label retry hint: {message}"
+                for message in slot_label_hint_messages[:8]
             ),
         ]
         retry_record: dict[str, Any] = {
@@ -3586,14 +3620,22 @@ def _atom_inventory_failure_surface(row: dict[str, Any]) -> dict[str, Any] | Non
             continue
         for constant in result.get("absent_constants", []) or []:
             if isinstance(constant, dict):
-                blocked_constants.append(
-                    {
-                        "predicate": str(constant.get("predicate", "")).strip(),
-                        "signature": str(constant.get("signature", "")).strip(),
-                        "arg_index": constant.get("arg_index"),
-                        "value": str(constant.get("value", "")).strip(),
+                row = {
+                    "predicate": str(constant.get("predicate", "")).strip(),
+                    "signature": str(constant.get("signature", "")).strip(),
+                    "arg_index": constant.get("arg_index"),
+                    "value": str(constant.get("value", "")).strip(),
+                }
+                slot_label_misuse = constant.get("slot_label_misuse")
+                if isinstance(slot_label_misuse, dict):
+                    row["slot_label_misuse"] = {
+                        "arg_name": str(slot_label_misuse.get("arg_name", "")).strip(),
+                        "arg_index": slot_label_misuse.get("arg_index"),
+                        "same_argument_position": bool(slot_label_misuse.get("same_argument_position")),
+                        "suggested_variable": str(slot_label_misuse.get("suggested_variable", "")).strip(),
+                        "rationale": str(slot_label_misuse.get("rationale", "")).strip(),
                     }
-                )
+                blocked_constants.append(row)
     if not blocked_constants:
         return None
     examples = ", ".join(
@@ -33140,6 +33182,55 @@ def _compiled_inventory_arg_values(kb_inventory: dict[str, Any], signature: str,
     return {str(value).strip() for value in arg_values[offset].keys() if str(value).strip()}
 
 
+def _compiled_inventory_arg_names(kb_inventory: dict[str, Any], signature: str) -> list[str]:
+    arg_names_by_signature = kb_inventory.get("arg_names", {})
+    if not isinstance(arg_names_by_signature, dict):
+        return []
+    arg_names = arg_names_by_signature.get(signature)
+    if not isinstance(arg_names, list):
+        return []
+    return [str(value or "").strip() for value in arg_names]
+
+
+def _normalized_slot_label(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", str(value or "").casefold())
+
+
+def _variable_name_from_slot_label(value: str) -> str:
+    parts = re.findall(r"[A-Za-z0-9]+", str(value or ""))
+    name = "".join(part[:1].upper() + part[1:] for part in parts if part)
+    if not name:
+        return "Value"
+    if name[:1].isdigit():
+        return f"Value{name}"
+    return name
+
+
+def _compiled_inventory_slot_label_misuse(
+    kb_inventory: dict[str, Any],
+    signature: str,
+    arg_index: int,
+    value: str,
+) -> dict[str, Any] | None:
+    normalized_value = _normalized_slot_label(value)
+    if not normalized_value:
+        return None
+    arg_names = _compiled_inventory_arg_names(kb_inventory, signature)
+    if not arg_names:
+        return None
+    for index, arg_name in enumerate(arg_names, start=1):
+        if normalized_value != _normalized_slot_label(arg_name):
+            continue
+        return {
+            "arg_name": arg_name,
+            "arg_index": index,
+            "same_argument_position": bool(index == arg_index),
+            "suggested_variable": _variable_name_from_slot_label(arg_name),
+            "rationale": "blocked constant normalizes to a predicate-contract argument name",
+        }
+    return None
+
+
 def _atom_inventory_blocked_query(query: str, *, kb_inventory: dict[str, Any] | None) -> dict[str, Any] | None:
     if not isinstance(kb_inventory, dict):
         return None
@@ -33155,14 +33246,21 @@ def _atom_inventory_blocked_query(query: str, *, kb_inventory: dict[str, Any] | 
                 continue
             allowed = _compiled_inventory_arg_values(kb_inventory, signature, index)
             if allowed and item not in allowed:
-                absent.append(
-                    {
-                        "predicate": predicate,
-                        "signature": signature,
-                        "arg_index": index,
-                        "value": item,
-                    }
+                blocked_constant = {
+                    "predicate": predicate,
+                    "signature": signature,
+                    "arg_index": index,
+                    "value": item,
+                }
+                slot_label_misuse = _compiled_inventory_slot_label_misuse(
+                    kb_inventory,
+                    signature,
+                    index,
+                    item,
                 )
+                if slot_label_misuse:
+                    blocked_constant["slot_label_misuse"] = slot_label_misuse
+                absent.append(blocked_constant)
     if not absent:
         return None
     return {
@@ -33195,16 +33293,26 @@ def _atom_inventory_blocked_query_results(query_results: Any) -> list[dict[str, 
             continue
         if str(result.get("status", "")).strip() != "blocked_by_atom_inventory":
             continue
-        absent_constants = [
-            {
+        absent_constants: list[dict[str, Any]] = []
+        for constant in result.get("absent_constants", []) or []:
+            if not isinstance(constant, dict):
+                continue
+            row = {
                 "predicate": str(constant.get("predicate", "")).strip(),
                 "signature": str(constant.get("signature", "")).strip(),
                 "arg_index": constant.get("arg_index"),
                 "value": str(constant.get("value", "")).strip(),
             }
-            for constant in result.get("absent_constants", []) or []
-            if isinstance(constant, dict)
-        ]
+            slot_label_misuse = constant.get("slot_label_misuse")
+            if isinstance(slot_label_misuse, dict):
+                row["slot_label_misuse"] = {
+                    "arg_name": str(slot_label_misuse.get("arg_name", "")).strip(),
+                    "arg_index": slot_label_misuse.get("arg_index"),
+                    "same_argument_position": bool(slot_label_misuse.get("same_argument_position")),
+                    "suggested_variable": str(slot_label_misuse.get("suggested_variable", "")).strip(),
+                    "rationale": str(slot_label_misuse.get("rationale", "")).strip(),
+                }
+            absent_constants.append(row)
         blocked.append(
             {
                 "query": str(item.get("query", "")).strip(),
@@ -33212,6 +33320,50 @@ def _atom_inventory_blocked_query_results(query_results: Any) -> list[dict[str, 
             }
         )
     return blocked
+
+
+def _atom_inventory_slot_label_hints(blocked_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    hints: list[dict[str, Any]] = []
+    for blocked in blocked_results:
+        if not isinstance(blocked, dict):
+            continue
+        query = str(blocked.get("query", "")).strip()
+        for constant in blocked.get("absent_constants", []) or []:
+            if not isinstance(constant, dict):
+                continue
+            slot_label_misuse = constant.get("slot_label_misuse")
+            if not isinstance(slot_label_misuse, dict):
+                continue
+            hints.append(
+                {
+                    "query": query,
+                    "signature": str(constant.get("signature", "")).strip(),
+                    "value": str(constant.get("value", "")).strip(),
+                    "blocked_arg_index": constant.get("arg_index"),
+                    "slot_arg_name": str(slot_label_misuse.get("arg_name", "")).strip(),
+                    "slot_arg_index": slot_label_misuse.get("arg_index"),
+                    "same_argument_position": bool(slot_label_misuse.get("same_argument_position")),
+                    "suggested_variable": str(slot_label_misuse.get("suggested_variable", "")).strip(),
+                }
+            )
+    return hints
+
+
+def _atom_inventory_slot_label_hint_messages(blocked_results: list[dict[str, Any]]) -> list[str]:
+    messages: list[str] = []
+    for hint in _atom_inventory_slot_label_hints(blocked_results):
+        signature = str(hint.get("signature", "")).strip()
+        value = str(hint.get("value", "")).strip()
+        slot_arg_name = str(hint.get("slot_arg_name", "")).strip()
+        suggested_variable = str(hint.get("suggested_variable", "")).strip() or "Value"
+        blocked_arg_index = hint.get("blocked_arg_index")
+        if not signature or not value or not slot_arg_name:
+            continue
+        messages.append(
+            f"{signature} arg{blocked_arg_index}: `{value}` is the slot label `{slot_arg_name}`, "
+            f"not a data atom; replace it with variable `{suggested_variable}`."
+        )
+    return messages
 
 
 def _status_from_event_type(value: str) -> str:
