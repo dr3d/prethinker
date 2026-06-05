@@ -33298,7 +33298,7 @@ def _compiled_inventory_slot_label_misuse(
     if not arg_names:
         return None
     for index, arg_name in enumerate(arg_names, start=1):
-        if normalized_value != _normalized_slot_label(arg_name):
+        if normalized_value not in _normalized_slot_label_aliases(arg_name):
             continue
         return {
             "arg_name": arg_name,
@@ -33308,6 +33308,14 @@ def _compiled_inventory_slot_label_misuse(
             "rationale": "blocked constant normalizes to a predicate-contract argument name",
         }
     return None
+
+
+def _normalized_slot_label_aliases(arg_name: str) -> set[str]:
+    normalized = _normalized_slot_label(arg_name)
+    aliases = {normalized} if normalized else set()
+    if normalized.endswith("id") and len(normalized) > 2:
+        aliases.add(normalized[:-2])
+    return aliases
 
 
 def _atom_library_slot_label_normalized_query(

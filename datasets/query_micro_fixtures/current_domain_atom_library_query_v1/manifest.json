@@ -1,0 +1,52 @@
+{
+  "schema": "prethinker.query_micro_fixture_manifest.v1",
+  "fixture_id": "current_domain_atom_library_query_v1",
+  "created": "2026-06-05",
+  "purpose": "Measure sign-clean atom-library query planning across current FDA, NTSB, and OSHA retained typed artifacts.",
+  "claim_boundary": [
+    "This is a query-planner viability measurement over selected retained typed run artifacts.",
+    "It is not a compile-recall score.",
+    "It is not messy human QA.",
+    "It is not a permission path for source prose, source-record fallback, or Python query-language parsing."
+  ],
+  "required_runner_flags": [
+    "--sign-clean-strict",
+    "--judge-reference-answers",
+    "--atom-library-query-grounding"
+  ],
+  "optional_runner_flags": [
+    "--atom-library-query-validation-retry",
+    "--atom-library-slot-label-normalization",
+    "--classify-failure-surfaces"
+  ],
+  "cells": [
+    {
+      "id": "fda_transfer_002_run1_query",
+      "fixture_id": "fda_warning_letter_domain_transfer_002",
+      "qa_file": "datasets/query_micro_fixtures/current_domain_atom_library_query_v1/fda_transfer_002_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/fda_adulteration_basis_contract_only_20260605/domain_lens_bundle/fda-t002-contract-only-full-r1-20260605/unions/run1/domain_bootstrap_file_20260605T103934650960Z_fda-t002-contract-only-full-r1-20260605-run1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 7
+    },
+    {
+      "id": "ntsb_transfer_001_run1_query",
+      "fixture_id": "ntsb_investigation_transfer_surface_001",
+      "qa_file": "datasets/query_micro_fixtures/current_domain_atom_library_query_v1/ntsb_transfer_001_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/ntsb_casualty_partition_contract_20260604/ntsb-transfer-casualty-partition-r1/unions/run1/domain_bootstrap_file_20260604T205234851096Z_ntsb-transfer-casualty-partition-r1-run1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 7
+    },
+    {
+      "id": "osha_seed_run1_query",
+      "fixture_id": "osha_incident_domain_v1",
+      "qa_file": "datasets/query_micro_fixtures/current_domain_atom_library_query_v1/osha_seed_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/osha_seed_current_contract_rerun_20260604/osha-seed-current-contract-r1/unions/run1/domain_bootstrap_file_20260604T202430528697Z_osha-seed-current-contract-r1-run1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 5
+    },
+    {
+      "id": "osha_transfer_001_run1_query",
+      "fixture_id": "osha_incident_transfer_001",
+      "qa_file": "datasets/query_micro_fixtures/current_domain_atom_library_query_v1/osha_transfer_001_qa.md",
+      "run_json": "C:/prethinker_tmp_archive/osha_related_activity_flag_contract_20260604/osha-transfer-001-related-activity-blank-flag-r1/unions/run1/domain_bootstrap_file_20260604T195839845328Z_osha-transfer-001-related-activity-blank-flag-r1_qwen-qwen3-6-35b-a3b.json",
+      "question_count": 6
+    }
+  ]
+}

@@ -11994,6 +11994,57 @@ def test_run_query_plan_optionally_normalizes_atom_library_slot_label_constants(
     ]
 
 
+def test_slot_label_normalization_accepts_id_suffix_placeholder() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    fact = (
+        "ntsb_timeline_event(occurrence_a, event_1, road_closure_ordered, "
+        "t_2023_09_29_2055_cdt, start, src)."
+    )
+    assert runtime.assert_fact(fact).get("status") == "success"
+
+    inventory = compiled_kb_inventory(facts=[fact], rules=[])
+    inventory["arg_names"] = {
+        "ntsb_timeline_event/6": [
+            "occurrence_id",
+            "event_id",
+            "event_kind",
+            "event_time_or_date",
+            "sequence_role",
+            "source_or_scope",
+        ],
+    }
+
+    normalized = _run_query_plan(
+        runtime,
+        [
+            "ntsb_timeline_event(occurrence, Event, EventKind, EventTime, SequenceRole, Source).",
+        ],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        allow_relaxed_constant_fallback=False,
+        atom_library_kb_inventory=inventory,
+        atom_library_slot_label_normalization=True,
+    )
+
+    assert normalized[0]["query"] == (
+        "ntsb_timeline_event(OccurrenceId, Event, EventKind, EventTime, SequenceRole, Source)."
+    )
+    assert normalized[0]["result"]["status"] == "success"
+    assert normalized[0]["result"]["rows"][0]["OccurrenceId"] == "occurrence_a"
+    basis = normalized[0]["result"]["reasoning_basis"]
+    assert basis["repairs"] == [
+        {
+            "kind": "atom_library_slot_label_to_variable",
+            "predicate": "ntsb_timeline_event",
+            "signature": "ntsb_timeline_event/6",
+            "arg_index": 1,
+            "value": "occurrence",
+            "arg_name": "occurrence_id",
+            "variable": "OccurrenceId",
+        }
+    ]
+
+
 def test_run_query_plan_adds_typed_subject_identifier_sibling_rows() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
