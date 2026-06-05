@@ -8,17 +8,17 @@ This page does not read source prose, call an LLM, or judge messy human question
 
 - Status: `pass`
 - Cells: `8` across `4` families
-- Support>=2: `125 / 141` expected typed facts
-- Per-run exact: `348 / 423` deterministic fact rows
-- Unexpected same-signature facts support>=2: `0`
+- Support>=2: `115 / 141` expected typed facts
+- Per-run exact: `320 / 423` deterministic fact rows
+- Unexpected same-signature facts support>=2: `2`
 - Forbidden fact emissions support>=1 / support>=2: `0 / 0`
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
-- Registered variance groups on current cells: `5`
-- Unsupported expected facts support<2: `16`
-- Unsupported split support 0 / support 1: `10 / 6`
-- Unsupported repair postures: `primary_constant_boundary` x6, `compile_stability_boundary` x3, `source_choice_boundary` x3, `value_choice_variance_boundary` x3, `compile_recall_boundary` x1
+- Registered variance groups on current cells: `6`
+- Unsupported expected facts support<2: `26`
+- Unsupported split support 0 / support 1: `20 / 6`
+- Unsupported repair postures: `compile_recall_boundary` x17, `compile_stability_boundary` x3, `value_choice_variance_boundary` x3, `primary_constant_boundary` x2, `source_choice_boundary` x1
 - Excluded associated fixtures: `22` (audit `pass`; missing `0`)
 
 ## Excluded Associated Fixtures
@@ -69,7 +69,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 
 | Family | Cells | Support>=2 | Per-run exact | Unexpected>=2 | Forbidden | Prose-dependent | Unregistered plans |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `fda_warning_letter` | 1 | 21 / 29 | 61 / 87 | 0 | 0 / 0 | 0 | 0 |
+| `fda_warning_letter` | 1 | 11 / 29 | 33 / 87 | 2 | 0 / 0 | 0 | 0 |
 | `ntsb_investigation` | 1 | 22 / 25 | 60 / 75 | 0 | 0 / 0 | 0 | 0 |
 | `osha_incident` | 2 | 36 / 36 | 93 / 108 | 0 | 0 / 0 | 0 | 0 |
 | `sec_form_8k` | 4 | 46 / 51 | 134 / 153 | 0 | 0 / 0 | 0 | 0 |
@@ -83,7 +83,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | 11 / 12 | 32 / 36 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 35 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t003_qwen_moe_repaired_schema` `11-13/13`, `sec_t003_dense_compile_substitution_controls` `10/12` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | 22 / 25 | 60 / 75 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `18`; manifest `present`; variance `ntsb_transfer001_qwen_moe_same_condition` `22/25` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 21 / 29 | 61 / 87 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `30`; manifest `present` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 11 / 29 | 33 / 87 | 2 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `30`; manifest `present`; variance `fda_transfer002_qwen_moe_same_condition_negative` `11/29` |
 | `osha_incident_seed` | `osha_incident_domain_v1` | 21 / 21 | 57 / 63 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | 15 / 15 | 36 / 45 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `osha_transfer001_qwen_moe_same_condition` `15/15` |
 
@@ -98,6 +98,7 @@ They are attached to current cells so a favorable retained root is not promoted 
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_qwen_moe_repaired_schema` | 4 | `11-13/13` | 0 | `0-2` | Use as an 11-13/13 same-condition band. Do not promote a favorable 13/13 draw as a fixed score. |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_dense_compile_substitution_controls` | 2 | `10/12` | 0 | `3-6` | Use as model-path robustness evidence: closed-language governance held, but recall did not reproduce the Qwen MoE favorable cell. |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_transfer001_qwen_moe_same_condition` | 2 | `22/25` | 0 | `16` | Use as a 22/25 same-condition NTSB transfer band with clean governance and 0 supported forbidden rows; precision remains noisy because the fresh rerun produced 16 singleton unexpected same-signature facts. |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_transfer002_qwen_moe_same_condition_negative` | 1 | `11/29` | 0 | `33` | Use as a current-pack negative retest: governance stayed clean, but the same-condition N=3 rerun supported only 11/29 expected facts at support>=2. Do not retain earlier higher transfer_002 numbers as current-pack recall claims. |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | `osha_transfer001_qwen_moe_same_condition` | 2 | `15/15` | 0 | `3` | Use as a 15/15 same-condition OSHA transfer band with visible per-run jitter; do not infer long-table or mixed-section transfer from this bounded cell. |
 
 ## Unsupported Expected Facts
@@ -112,9 +113,14 @@ non-exact runs only; they do not change support scores.
 
 | Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Zero-Yield Pattern | Same-Sig Drift | No Primary | Other | Drift Slots | Repair Postures | Cells |
 | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | --- | --- |
-| `fda_warning_letter` | `fda_violation_detail/5` | 5 | 5 | 0 | 0 |  | 2 | 3 | 0 | `detail_value` x2 | `primary_constant_boundary` x3, `source_choice_boundary` x2 | `fda_warning_letter_transfer_002_current_pack` |
-| `fda_warning_letter` | `fda_correspondence_party/5` | 2 | 2 | 0 | 0 |  | 0 | 2 | 0 |  | `primary_constant_boundary` x2 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_violation_detail/5` | 8 | 8 | 0 | 8 | `persistent_zero_yield` x8 | 0 | 0 | 0 |  | `compile_recall_boundary` x8 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_correspondence_party/5` | 4 | 4 | 0 | 4 | `persistent_zero_yield` x4 | 0 | 0 | 0 |  | `compile_recall_boundary` x4 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `domain_omission/5` | 1 | 1 | 0 | 1 | `persistent_zero_yield` x1 | 0 | 0 | 0 |  | `compile_recall_boundary` x1 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_form483_response/4` | 1 | 1 | 0 | 1 | `persistent_zero_yield` x1 | 0 | 0 | 0 |  | `compile_recall_boundary` x1 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_inspection_event/6` | 1 | 1 | 0 | 1 | `persistent_zero_yield` x1 | 0 | 0 | 0 |  | `compile_recall_boundary` x1 | `fda_warning_letter_transfer_002_current_pack` |
 | `fda_warning_letter` | `fda_violation/5` | 1 | 1 | 0 | 0 |  | 0 | 1 | 0 |  | `primary_constant_boundary` x1 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_violation_citation/4` | 1 | 1 | 0 | 0 |  | 0 | 1 | 0 |  | `primary_constant_boundary` x1 | `fda_warning_letter_transfer_002_current_pack` |
+| `fda_warning_letter` | `fda_warning_letter/5` | 1 | 1 | 0 | 1 | `persistent_zero_yield` x1 | 0 | 0 | 0 |  | `compile_recall_boundary` x1 | `fda_warning_letter_transfer_002_current_pack` |
 | `ntsb_investigation` | `ntsb_finding/5` | 2 | 0 | 2 | 2 | `unstable_zero_yield` x2 | 0 | 0 | 0 |  | `compile_stability_boundary` x2 | `ntsb_transfer_surface_001` |
 | `ntsb_investigation` | `ntsb_timeline_event/6` | 1 | 0 | 1 | 0 |  | 1 | 0 | 0 | `sequence_role` x1 | `value_choice_variance_boundary` x1 | `ntsb_transfer_surface_001` |
 | `sec_form_8k` | `sec_registrant_identifier/5` | 3 | 1 | 2 | 0 |  | 3 | 0 | 0 | `identifier_value` x3, `identifier_kind` x2 | `value_choice_variance_boundary` x2, `source_choice_boundary` x1 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_002`, `sec_form_8k_skeleton_transfer_003` |
@@ -133,14 +139,35 @@ non-exact runs only; they do not change support scores.
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `unstable_zero_yield` (0/1; candidates 0) | `compile_stability_boundary` |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, CauseFinding, probable_cause, FindingValue, SrcCause).` | `` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `unstable_zero_yield` (0/1; candidates 0) | `compile_stability_boundary` |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, FactorFinding, contributing_factor, FindingValue, SrcFactor).` | `` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_timeline_event/6` | 1 | `same_signature_drift` (2/3; candidates 8) | `value_choice_variance_boundary` | `sequence_role` | run1: miss, run2: partial, run3: exact | `ntsb_timeline_event(Occurrence, Event911, distress_call, t_2023_09_29_2043_cdt, start, Src911).` | `ntsb_timeline_event(occ_hir2506, ev_dispatch, distress_call, t_2023_09_29_2043_cdt, intermediate, ntsb_surface_ugly_001).` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `same_signature_no_primary` (0/2; candidates 2) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, Recipient, recipient, rechon_life_science_ab, SrcRecipient).` | `` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `same_signature_no_primary` (0/2; candidates 2) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, ResponsibleOfficial, responsible_official, roland_holmqvist, SrcResponsibleOfficial).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `domain_omission/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `domain_omission(Letter, 'fda_regulatory_meeting/4', none_found, future_eligibility_only_no_meeting_held, SrcOmit1).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `persistent_zero_yield` (0/2; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, Contact, contact, erika_v_butler, SrcContact).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `persistent_zero_yield` (0/2; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, Recipient, recipient, rechon_life_science_ab, SrcRecipient).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `persistent_zero_yield` (0/2; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, ResponsibleOfficial, responsible_official, roland_holmqvist, SrcResponsibleOfficial).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_correspondence_party/5` | 0 | `persistent_zero_yield` (0/2; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_correspondence_party(Letter, Signatory, signatory, francis_godwin, SrcSignatory).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_form483_response/4` | 0 | `persistent_zero_yield` (0/1; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_form483_response(Response483, Inspection, v_2024_09_27, SrcResponse483).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_inspection_event/6` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_inspection_event(Inspection, Facility, v_2024_08_26, v_2024_09_06, fda, SrcInspection).` | `` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation/5` | 0 | `same_signature_no_primary` (0/2; candidates 3) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation(Viol3, Letter, violation_3, aseptic_processing, SrcViol3).` | `` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `same_signature_no_primary` (0/2; candidates 7) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol1, response_status, inadequate, ResponseRole1, SrcDetail2).` | `` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `same_signature_no_primary` (0/2; candidates 7) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol2, response_status, inadequate, ResponseRole2, SrcDetail4).` | `` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `same_signature_drift` (2/3; candidates 7) | `source_choice_boundary` | `detail_value` | run1: partial, run2: partial, run3: partial | `fda_violation_detail(Viol3, procedure_scope, decontamination_effectiveness_validation, violation_scope, SrcDetail5).` | `fda_violation_detail(violation_1, procedure_scope, sop_0870_3_0, violation_scope, direct).` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `same_signature_no_primary` (0/3; candidates 7) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol4, process_area, iso_7, violation_scope, SrcDetail6).` | `` |
-| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `same_signature_drift` (4/5; candidates 7) | `source_choice_boundary` | `detail_value` | run1: partial, run2: partial, run3: partial | `fda_violation_detail(violation_4, observation_subject, peeling_paint_ceiling, violation_scope, direct).` | `fda_violation_detail(violation_4, observation_subject, peeling_paint_and_rust, violation_scope, direct).; fda_violation_detail(violation_4, observation_subject, peeling_paint_bubbled_paint_rust, violation_scope, direct).; fda_violation_detail(violation_4, observation_subject, peeling_paint_on_ceiling, violation_scope, direct).` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_citation/4` | 0 | `same_signature_no_primary` (0/2; candidates 5) | `primary_constant_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_citation(Viol4, cfr_21_211_58, cgmps_requirement, SrcCite4).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol1, procedure_scope, sop_0870_3_0, violation_scope, SrcDetail1).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/2; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol1, response_status, inadequate, ResponseRole1, SrcDetail2).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol2, record_review_subject, environmental_monitoring_excursion, violation_scope, SrcDetail3).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/2; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol2, response_status, inadequate, ResponseRole2, SrcDetail4).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol3, procedure_scope, decontamination_effectiveness_validation, violation_scope, SrcDetail5).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(Viol4, process_area, iso_7, violation_scope, SrcDetail6).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/5; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(violation_2, record_review_subject, out_of_specification_assay, violation_scope, direct).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/5; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(violation_4, observation_subject, peeling_paint_ceiling, violation_scope, direct).` | `` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_warning_letter/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_warning_letter(Letter, cder, rechon_life_science_ab, v_2025_04_30, SrcLetter).` | `` |
+
+## Unexpected Same-Signature Support>=2
+
+These rows are precision-pressure diagnostics only. They are not
+promoted expected facts unless an independent source-only oracle
+adds them to the fixture.
+
+| Cell | Fixture | Support | Fact |
+| --- | --- | ---: | --- |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 3 | `fda_violation_citation(fda_warning_letter_320_25_68, fdca_501_a_2_b, adulteration_authority, source_url).` |
+| `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 3 | `fda_violation_citation(fda_warning_letter_320_25_68, fdca_801_a_3, adulteration_authority, source_url).` |
 
 ## Cell Notes
 
@@ -151,7 +178,7 @@ non-exact runs only; they do not change support scores.
 | `sec_form_8k_skeleton_transfer_002` | SEC Form 8-K skeleton transfer 002, current repaired breadth bundle against the axis-clean oracle. |
 | `sec_form_8k_skeleton_transfer_003` | SEC Form 8-K/A skeleton transfer 003, current axis-clean item/exhibit/treatment repair rerun. |
 | `ntsb_transfer_surface_001` | NTSB first unlike transfer, rerun with scoped injury-count partition contract. |
-| `fda_warning_letter_transfer_002_current_pack` | FDA warning-letter transfer 002 current-pack boundary bundle, rerun after explicit adulteration-basis contract tightening. |
+| `fda_warning_letter_transfer_002_current_pack` | FDA warning-letter transfer 002 current-pack negative retest; governance stays clean but current full-lens recall falls to 11/29. |
 | `osha_incident_seed` | OSHA accident/inspection seed skeleton/table probe, rerun with current related-activity blank-flag contract. |
 | `osha_incident_transfer_001` | OSHA accident/inspection first unlike skeleton/table transfer, with blank Safety/Health related-activity flags constrained to not_stated. |
 

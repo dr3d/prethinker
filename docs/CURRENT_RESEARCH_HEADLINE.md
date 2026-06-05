@@ -105,7 +105,7 @@ SEC Form 8-K skeleton pack
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
     status: pass
-    125/141 expected facts at support>=2 and 348/423 deterministic per-run
+    115/141 expected facts at support>=2 and 320/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
     plans, and 0 supported forbidden emissions across the standing cells.
 
@@ -119,10 +119,12 @@ FDA warning-letter pack
     status: historical/pre-review compile-fact evidence, not the current
       transfer_002 claim-bearing status
   current standing transfer_002 current-pack cell:
-    21 / 29 support>=2, 0 / 8 supported forbidden
-    status: clean but incomplete boundary cell after explicit adulteration-basis
-      contract tightening removed the false 501(a)(2)(A) insanitary-basis row
-      and lowered support from the previous claim-blocked 22/29 cell
+    11 / 29 support>=2, 0 / 8 supported forbidden
+    status: clean-governance negative retest under the current full-lens pack.
+      A prior contract-only root reported 21/29 after explicit
+      adulteration-basis contract tightening removed the false 501(a)(2)(A)
+      insanitary-basis row, but a fresh same-local-Qwen current-pack rerun
+      dropped to 11/29. Do not retain the older 21/29 as current recall.
   transfer_003 fresh current-pack local rerun:
     19 / 26 support>=2, 0 / 10 forbidden
     atom-shape / registered-signature / lens-scope blockers: 0

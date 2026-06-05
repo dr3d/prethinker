@@ -65,11 +65,11 @@
     {
       "id": "fda_warning_letter_transfer_002_current_pack",
       "fixture_id": "fda_warning_letter_domain_transfer_002",
-      "description": "FDA warning-letter transfer 002 current-pack boundary bundle, rerun after explicit adulteration-basis contract tightening.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\fda_adulteration_basis_contract_only_20260605\\domain_lens_bundle\\fda-t002-contract-only-full-r1-20260605",
+      "description": "FDA warning-letter transfer 002 current-pack negative retest; governance stays clean but current full-lens recall falls to 11/29.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\fda_t002_variance_probe_20260605\\fda-t002-variance-r1-20260605",
       "expect": {
         "support.reference_count": 29,
-        "support.exact_support_ge_2": 21,
+        "support.exact_support_ge_2": 11,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

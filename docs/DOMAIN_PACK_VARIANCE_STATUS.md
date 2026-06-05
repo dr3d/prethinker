@@ -6,8 +6,8 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `5`
-- Roots: `11`
+- Groups: `6`
+- Roots: `12`
 - Warnings: `6`
 
 Warnings:
@@ -25,6 +25,7 @@ Warnings:
 | `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 4 | `11-13/13` | 0 | `0-2` | `pass` |
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
+| `fda_transfer002_qwen_moe_same_condition_negative` | `fda_warning_letter_domain_transfer_002` | 1 | `11/29` | 0 | `33` | `pass` |
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
 | `ntsb_transfer001_qwen_moe_same_condition` | `ntsb_investigation_transfer_surface_001` | 2 | `22/25` | 0 | `16` | `pass` |
 
@@ -88,6 +89,23 @@ Roots:
 Roots:
 - `related_activity_blank_flag_r1`: `C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1`
 - `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\osha_transfer001_variance_probe_20260605\osha-transfer-001-variance-r1`
+
+## FDA transfer_002 current-pack local Qwen MoE retest negative
+
+- Group: `fda_transfer002_qwen_moe_same_condition_negative`
+- Fixture: `fda_warning_letter_domain_transfer_002`
+- Read: Use as a current-pack negative retest: governance stayed clean, but the same-condition N=3 rerun supported only 11/29 expected facts at support>=2. Do not retain earlier higher transfer_002 numbers as current-pack recall claims.
+- Support band: `11/29`
+- Supported forbidden total: `0`
+- Unexpected band: `33`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `qwen_mainline_rerun_r1` | same-local-Qwen transfer_002 current-pack variance rerun | `11/29` | `33/87` | 0 | 33 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `45` value-mode facts |
+
+Roots:
+- `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\fda_t002_variance_probe_20260605\fda-t002-variance-r1-20260605`
 
 ## SEC transfer_001 current-mainline full-bundle retest negative
 

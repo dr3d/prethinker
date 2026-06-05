@@ -66,6 +66,19 @@
       ]
     },
     {
+      "id": "fda_transfer002_qwen_moe_same_condition_negative",
+      "title": "FDA transfer_002 current-pack local Qwen MoE retest negative",
+      "fixture_id": "fda_warning_letter_domain_transfer_002",
+      "claim_read": "Use as a current-pack negative retest: governance stayed clean, but the same-condition N=3 rerun supported only 11/29 expected facts at support>=2. Do not retain earlier higher transfer_002 numbers as current-pack recall claims.",
+      "roots": [
+        {
+          "id": "qwen_mainline_rerun_r1",
+          "role": "same-local-Qwen transfer_002 current-pack variance rerun",
+          "path": "C:/prethinker_tmp_archive/fda_t002_variance_probe_20260605/fda-t002-variance-r1-20260605"
+        }
+      ]
+    },
+    {
       "id": "sec_t001_current_mainline_retest_negative",
       "title": "SEC transfer_001 current-mainline full-bundle retest negative",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",

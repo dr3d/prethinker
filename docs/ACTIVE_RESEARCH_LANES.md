@@ -120,7 +120,7 @@ fda_transfer_judged_qa_v2 deterministic compile-fact QA:
     source-only review changed the oracle; retain as historical/pre-review
     compile-fact evidence only
 
-transfer_002 fresh current-pack lens-scoped bundle:
+transfer_002 prior contract-only lens-scoped bundle:
   artifact root:
     C:\prethinker_tmp_archive\fda_adulteration_basis_contract_only_20260605\domain_lens_bundle\fda-t002-contract-only-full-r1-20260605
   21 / 29 expected, 0 / 8 supported forbidden
@@ -134,6 +134,18 @@ transfer_002 fresh current-pack lens-scoped bundle:
     context-dependent violation-3 category/substance
     response/detail value flesh
     documentation-gap candidate false positives confirmed by blind review
+  current status:
+    historical/context evidence only after the fresh full-lens retest below
+
+transfer_002 fresh current-pack full-lens retest:
+  artifact root:
+    C:\prethinker_tmp_archive\fda_t002_variance_probe_20260605\fda-t002-variance-r1-20260605
+  11 / 29 expected, 0 / 8 supported forbidden
+  atom-shape / registered-signature / lens-scope / value-domain blockers: 0
+  unexpected same-signature support>=2: 2
+  read:
+    clean-governance negative; do not retain the older 21/29 contract-only
+    root as current-pack recall
 
 transfer_003 fresh current-pack local lens bundle:
   artifact root:
@@ -155,7 +167,8 @@ The `transfer_001` replay is the clean FDA transfer cell.
 `transfer_003` is a clean boundary cell: current gates hold, but the richer
 rows do not all transfer. `transfer_002` is now a clean-but-incomplete boundary
 cell after the source-only focused review and explicit adulteration-basis
-contract tightening: 21/29 with 0/8 supported forbidden. A blind candidate
+contract tightening, but the fresh current-pack full-lens retest is 11/29 with
+0/8 supported forbidden. A blind candidate
 review of `fda_response_documentation_gap/5` on `transfer_002` found 0
 expected facts and 13 forbidden boundaries, so retained stable
 documentation-gap emissions for violations 1, 2, and 3 are false positives.
