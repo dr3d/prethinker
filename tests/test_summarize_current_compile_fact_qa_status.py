@@ -93,6 +93,9 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
     assert report["summary"]["unsupported_expected_fact_count"] == 1
     assert report["summary"]["unsupported_support_0_count"] == 0
     assert report["summary"]["unsupported_support_1_count"] == 1
+    assert report["summary"]["unsupported_repair_postures"] == {
+        "value_choice_variance_boundary": 1
+    }
     assert report["unsupported_by_carrier"] == [
         {
             "family": "osha_incident",
@@ -107,6 +110,7 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
             "same_signature_no_primary_count": 0,
             "other_residue_count": 0,
             "drift_slot_counts": {"arg3": 1},
+            "repair_posture_counts": {"value_choice_variance_boundary": 1},
             "cell_count": 1,
             "cells": ["osha_incident_transfer_001"],
         }
@@ -121,16 +125,18 @@ def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_fac
     assert unsupported[0]["max_matched_constant_slots"] == 2
     assert unsupported[0]["max_total_constant_slots"] == 3
     assert unsupported[0]["drift_slots"] == ["arg3"]
+    assert unsupported[0]["repair_posture"] == "value_choice_variance_boundary"
     assert "Unsupported Expected Facts" in md
     assert "Unsupported split support 0 / support 1: `0 / 1`" in md
+    assert "Unsupported repair postures: `value_choice_variance_boundary` x1" in md
     assert "Residue kinds are derived from deterministic matcher details" in md
     assert (
         "| `osha_incident` | `osha_penalty_amount/4` | 1 | 0 | 1 | 0 |  | 1 | 0 | 0 | "
-        "`arg3` x1 | "
+        "`arg3` x1 | `value_choice_variance_boundary` x1 | "
         "`osha_incident_transfer_001` |"
     ) in md
     assert "`same_signature_drift` (2/3; candidates 2)" in md
-    assert "| `osha_incident_transfer_001` | `osha_incident_transfer_001` | `osha_penalty_amount/4` | 1 | `same_signature_drift` (2/3; candidates 2) | `arg3` |" in md
+    assert "| `osha_incident_transfer_001` | `osha_incident_transfer_001` | `osha_penalty_amount/4` | 1 | `same_signature_drift` (2/3; candidates 2) | `value_choice_variance_boundary` | `arg3` |" in md
     assert "osha_penalty_amount" in md
 
 
@@ -166,9 +172,15 @@ def test_summarize_current_compile_fact_qa_status_marks_unstable_zero_yield(
     unsupported = report["cells"][1]["unsupported_expected_facts"][0]
     assert unsupported["exact_support"] == 1
     assert unsupported["residue_kind"] == "unstable_zero_yield"
+    assert unsupported["repair_posture"] == "compile_stability_boundary"
+    assert report["summary"]["unsupported_repair_postures"] == {
+        "compile_stability_boundary": 1
+    }
     assert carrier["zero_yield_count"] == 1
     assert carrier["persistent_zero_yield_count"] == 0
     assert carrier["unstable_zero_yield_count"] == 1
+    assert carrier["repair_posture_counts"] == {"compile_stability_boundary": 1}
+    assert "`compile_stability_boundary` x1" in md
     assert "`unstable_zero_yield` x1" in md
     assert "`unstable_zero_yield` (candidates 0)" in md
 

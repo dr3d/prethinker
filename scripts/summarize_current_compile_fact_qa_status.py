@@ -108,6 +108,7 @@ def build_report(
     ]
     families = _family_rows(cells)
     unsupported_by_carrier = _unsupported_by_carrier_rows(cells)
+    unsupported_repair_postures = _unsupported_repair_postures(cells)
     blockers = _blocking_reasons(
         manifest_run=manifest_run,
         source_audit=source_audit,
@@ -154,6 +155,7 @@ def build_report(
                 for row in cell.get("unsupported_expected_facts") or []
                 if int(row.get("exact_support") or 0) == 1
             ),
+            "unsupported_repair_postures": unsupported_repair_postures,
         },
         "families": families,
         "unsupported_by_carrier": unsupported_by_carrier,
@@ -364,8 +366,11 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
                         reference_answer=reference,
                     )
                 )
-    unsupported = [
-        {
+    unsupported: list[dict[str, Any]] = []
+    for item in by_reference.values():
+        if int(item["exact_support"]) >= 2:
+            continue
+        row = {
             "reference_answer": item["reference_answer"],
             "carrier": item["carrier"],
             "exact_support": item["exact_support"],
@@ -389,9 +394,8 @@ def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[di
             ),
             "drift_slots": _drift_slots(item.get("non_exact_details") or []),
         }
-        for item in by_reference.values()
-        if int(item["exact_support"]) < 2
-    ]
+        row["repair_posture"] = _repair_posture(row)
+        unsupported.append(row)
     return sorted(
         unsupported,
         key=lambda item: (
@@ -459,6 +463,34 @@ def _drift_slots(details: list[dict[str, Any]]) -> list[str]:
             continue
         slots.update(str(value).strip() for value in values if str(value).strip())
     return sorted(slots)
+
+
+def _repair_posture(row: dict[str, Any]) -> str:
+    """Classify unsupported rows for planning without changing their score.
+
+    This is a churn guard: it separates rows that need more compile evidence
+    from rows that would require source-aware value selection and therefore
+    are not safe deterministic reducer candidates.
+    """
+
+    kind = str(row.get("residue_kind") or "")
+    exact_support = int(row.get("exact_support") or 0)
+    drift_slots = {str(slot) for slot in row.get("drift_slots") or []}
+    if kind == "persistent_zero_yield":
+        return "compile_recall_boundary"
+    if kind == "unstable_zero_yield":
+        return "compile_stability_boundary"
+    if kind == "same_signature_no_primary":
+        return "primary_constant_boundary"
+    if kind == "same_signature_drift":
+        if exact_support == 1:
+            if drift_slots:
+                return "value_choice_variance_boundary"
+            return "support_variance_boundary"
+        if drift_slots:
+            return "source_choice_boundary"
+        return "same_signature_boundary"
+    return "unclassified_boundary"
 
 
 def _int_list(value: Any) -> list[int]:
@@ -591,11 +623,13 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                     "same_signature_no_primary_count": 0,
                     "other_residue_count": 0,
                     "drift_slot_counts": {},
+                    "repair_posture_counts": {},
                     "cells": set(),
                 },
             )
             support = int(row.get("exact_support") or 0)
             residue_kind = str(row.get("residue_kind") or "")
+            repair_posture = str(row.get("repair_posture") or "unclassified_boundary")
             group["unsupported_count"] += 1
             if support <= 0:
                 group["support_0_count"] += 1
@@ -619,6 +653,9 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                     group["drift_slot_counts"][slot_key] = (
                         int(group["drift_slot_counts"].get(slot_key, 0)) + 1
                     )
+            group["repair_posture_counts"][repair_posture] = (
+                int(group["repair_posture_counts"].get(repair_posture, 0)) + 1
+            )
             group["cells"].add(str(cell.get("id") or ""))
     rows: list[dict[str, Any]] = []
     for group in groups.values():
@@ -636,6 +673,7 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
                 "same_signature_no_primary_count": group["same_signature_no_primary_count"],
                 "other_residue_count": group["other_residue_count"],
                 "drift_slot_counts": dict(sorted(group["drift_slot_counts"].items())),
+                "repair_posture_counts": dict(sorted(group["repair_posture_counts"].items())),
                 "cell_count": len(group["cells"]),
                 "cells": sorted(group["cells"]),
             }
@@ -648,6 +686,15 @@ def _unsupported_by_carrier_rows(cells: list[dict[str, Any]]) -> list[dict[str, 
             str(row["carrier"]),
         ),
     )
+
+
+def _unsupported_repair_postures(cells: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for cell in cells:
+        for row in cell.get("unsupported_expected_facts") or []:
+            posture = str(row.get("repair_posture") or "unclassified_boundary")
+            counts[posture] = counts.get(posture, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _blocking_reasons(
@@ -726,6 +773,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Registered variance groups on current cells: `{summary['variance_group_count']}`",
         f"- Unsupported expected facts support<2: `{summary['unsupported_expected_fact_count']}`",
         f"- Unsupported split support 0 / support 1: `{summary['unsupported_support_0_count']} / {summary['unsupported_support_1_count']}`",
+        f"- Unsupported repair postures: {_repair_postures_markdown(summary.get('unsupported_repair_postures') or {})}",
         "",
     ]
     if summary["blocking_reasons"]:
@@ -850,16 +898,17 @@ def render_markdown(report: dict[str, Any]) -> str:
                 [
                     "### By Carrier",
                     "",
-                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Zero-Yield Pattern | Same-Sig Drift | No Primary | Other | Drift Slots | Cells |",
-                    "| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | --- |",
+                    "| Family | Carrier | Unsupported | Support 0 | Support 1 | Zero Yield | Zero-Yield Pattern | Same-Sig Drift | No Primary | Other | Drift Slots | Repair Postures | Cells |",
+                    "| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | --- | --- |",
                 ]
             )
             for row in carrier_rows:
                 cells = ", ".join(f"`{cell}`" for cell in row.get("cells") or [])
                 zero_yield_pattern = _zero_yield_pattern_markdown(row)
                 drift_slots = _drift_slot_counts_markdown(row.get("drift_slot_counts") or {})
+                repair_postures = _repair_postures_markdown(row.get("repair_posture_counts") or {})
                 lines.append(
-                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                    "| `{}` | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                         row.get("family") or "",
                         row.get("carrier") or "",
                         row.get("unsupported_count", 0),
@@ -871,6 +920,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                         row.get("same_signature_no_primary_count", 0),
                         row.get("other_residue_count", 0),
                         drift_slots,
+                        repair_postures,
                         cells,
                     )
                 )
@@ -879,8 +929,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "",
                 "### Rows",
                 "",
-                "| Cell | Fixture | Carrier | Support | Residue | Drift Slots | Verdicts | Expected Fact | Non-Exact Emissions |",
-                "| --- | --- | --- | ---: | --- | --- | --- | --- | --- |",
+                "| Cell | Fixture | Carrier | Support | Residue | Repair Posture | Drift Slots | Verdicts | Expected Fact | Non-Exact Emissions |",
+                "| --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- |",
             ]
         )
         for cell, row in unsupported_rows:
@@ -892,14 +942,16 @@ def render_markdown(report: dict[str, Any]) -> str:
             answers = "; ".join(str(item) for item in row.get("non_exact_answers") or [])
             answers = answers.replace("|", "\\|")
             residue = _residue_markdown(row)
+            repair_posture = f"`{row.get('repair_posture') or 'unclassified_boundary'}`"
             drift_slots = ", ".join(f"`{slot}`" for slot in row.get("drift_slots") or [])
             lines.append(
-                "| `{}` | `{}` | `{}` | {} | {} | {} | {} | `{}` | `{}` |".format(
+                "| `{}` | `{}` | `{}` | {} | {} | {} | {} | {} | `{}` | `{}` |".format(
                     cell["id"],
                     cell["fixture_id"],
                     row.get("carrier") or "",
                     row.get("exact_support", 0),
                     residue,
+                    repair_posture,
                     drift_slots,
                     verdicts,
                     expected,
@@ -1005,6 +1057,15 @@ def _drift_slot_counts_markdown(value: dict[str, Any]) -> str:
     return ", ".join(
         f"`{slot}` x{int(count)}"
         for slot, count in sorted(value.items(), key=lambda item: (-int(item[1]), str(item[0])))
+    )
+
+
+def _repair_postures_markdown(value: dict[str, Any]) -> str:
+    if not isinstance(value, dict) or not value:
+        return "`none`"
+    return ", ".join(
+        f"`{posture}` x{int(count)}"
+        for posture, count in sorted(value.items(), key=lambda item: (-int(item[1]), str(item[0])))
     )
 
 
