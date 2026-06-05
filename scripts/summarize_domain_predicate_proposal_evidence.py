@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,11 @@ from scripts.summarize_typed_micro_series import build_report as build_series_re
 from scripts.summarize_typed_micro_series import _fact_supported  # noqa: E402
 from scripts.validate_typed_micro_fixtures import _facts_from_compile_json  # noqa: E402
 from scripts.validate_domain_predicate_proposals import DEFAULT_ROOT as DEFAULT_PROPOSAL_ROOT  # noqa: E402
+from scripts.oracle_fact_governance import audit_oracle_fact_clause  # noqa: E402
+
+
+SIGNATURE_RE = re.compile(r"^([a-z][a-z0-9_]*)/([1-9][0-9]*)$")
+FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -150,7 +156,8 @@ def build_report(
             "candidate_signature": signature,
             "proposal_path": _rel(path),
             "state": state,
-            "errors": row_errors,
+            "errors": row_errors + list(series_report.get("oracle_review_errors") or []),
+            "warnings": list(series_report.get("oracle_review_warnings") or []),
             "summary": series_report.get("summary", {}) if series_report else {},
             "candidate_reviews": series_report.get("candidate_reviews", []) if series_report else [],
             "source_oracle_reviews": series_report.get("source_oracle_reviews", []) if series_report else [],
@@ -159,6 +166,9 @@ def build_report(
         }
         rows.append(row)
         errors.extend(f"{proposal_id}:{error}" for error in row_errors)
+        errors.extend(
+            f"{proposal_id}:{error}" for error in list(series_report.get("oracle_review_errors") or [])
+        )
     return {
         "schema_version": "domain_predicate_proposal_evidence_v1",
         "fixture_id": fixture_id,
@@ -219,6 +229,15 @@ def render_markdown(report: dict[str, Any]) -> str:
                 unexpected_supported,
             )
         )
+    for row in report.get("proposals", []):
+        if row.get("errors"):
+            lines.extend(["", f"## Blocking Review Errors: {row.get('proposal_id', '')}", ""])
+            for error in row.get("errors", []):
+                lines.append(f"- `{error}`")
+        if row.get("warnings"):
+            lines.extend(["", f"## Review Warnings: {row.get('proposal_id', '')}", ""])
+            for warning in row.get("warnings", []):
+                lines.append(f"- `{warning}`")
     for row in report.get("proposals", []):
         examples = row.get("supported_unexpected_examples") or []
         if not examples:
@@ -286,41 +305,24 @@ def _apply_candidate_reviews_to_series_report(
     ]
     if not reviews:
         return
+    _record_oracle_review_findings(series_report, reviews=reviews, prefix="candidate_review")
     compile_facts_by_run = _compile_facts_by_run(series_report)
     forbidden_rows = list(series_report.get("forbidden_rows") or [])
     expected_rows = list(series_report.get("rows") or [])
     expected_facts = {str(row.get("expected_fact") or "") for row in expected_rows}
     forbidden_facts = {str(row.get("forbidden_fact") or "") for row in forbidden_rows}
     for review in reviews:
-        for fact in review.get("expected_facts", []):
-            if fact in expected_facts:
-                continue
-            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
-            expected_rows.append(
-                {
-                    "expected_fact": fact,
-                    "support_count": len(run_ids),
-                    "support_runs": run_ids,
-                    "meets_threshold": len(run_ids) >= int(series_report.get("support_threshold") or 2),
-                    "same_predicate_variants": [],
-                    "candidate_review_id": review.get("review_id", ""),
-                }
-            )
-            expected_facts.add(fact)
-        for fact in review.get("forbidden_facts", []):
-            if fact in forbidden_facts:
-                continue
-            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
-            forbidden_rows.append(
-                {
-                    "forbidden_fact": fact,
-                    "support_count": len(run_ids),
-                    "support_runs": run_ids,
-                    "supported": bool(run_ids),
-                    "candidate_review_id": review.get("review_id", ""),
-                }
-            )
-            forbidden_facts.add(fact)
+        _add_review_facts(
+            review=review,
+            expected_rows=expected_rows,
+            expected_facts=expected_facts,
+            forbidden_rows=forbidden_rows,
+            forbidden_facts=forbidden_facts,
+            compile_facts_by_run=compile_facts_by_run,
+            matcher=matcher,
+            support_threshold=int(series_report.get("support_threshold") or 2),
+            review_id_field="candidate_review_id",
+        )
     supported_rows = [
         row for row in expected_rows if int(row.get("support_count") or 0) >= int(series_report.get("support_threshold") or 2)
     ]
@@ -365,41 +367,24 @@ def _apply_source_oracle_reviews_to_series_report(
     ]
     if not reviews:
         return
+    _record_oracle_review_findings(series_report, reviews=reviews, prefix="source_oracle_review")
     compile_facts_by_run = _compile_facts_by_run(series_report)
     forbidden_rows = list(series_report.get("forbidden_rows") or [])
     expected_rows = list(series_report.get("rows") or [])
     expected_facts = {str(row.get("expected_fact") or "") for row in expected_rows}
     forbidden_facts = {str(row.get("forbidden_fact") or "") for row in forbidden_rows}
     for review in reviews:
-        for fact in review.get("expected_facts", []):
-            if fact in expected_facts:
-                continue
-            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
-            expected_rows.append(
-                {
-                    "expected_fact": fact,
-                    "support_count": len(run_ids),
-                    "support_runs": run_ids,
-                    "meets_threshold": len(run_ids) >= int(series_report.get("support_threshold") or 2),
-                    "same_predicate_variants": [],
-                    "source_oracle_review_id": review.get("review_id", ""),
-                }
-            )
-            expected_facts.add(fact)
-        for fact in review.get("forbidden_facts", []):
-            if fact in forbidden_facts:
-                continue
-            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
-            forbidden_rows.append(
-                {
-                    "forbidden_fact": fact,
-                    "support_count": len(run_ids),
-                    "support_runs": run_ids,
-                    "supported": bool(run_ids),
-                    "source_oracle_review_id": review.get("review_id", ""),
-                }
-            )
-            forbidden_facts.add(fact)
+        _add_review_facts(
+            review=review,
+            expected_rows=expected_rows,
+            expected_facts=expected_facts,
+            forbidden_rows=forbidden_rows,
+            forbidden_facts=forbidden_facts,
+            compile_facts_by_run=compile_facts_by_run,
+            matcher=matcher,
+            support_threshold=int(series_report.get("support_threshold") or 2),
+            review_id_field="source_oracle_review_id",
+        )
     supported_rows = [
         row for row in expected_rows if int(row.get("support_count") or 0) >= int(series_report.get("support_threshold") or 2)
     ]
@@ -435,6 +420,51 @@ def _compile_facts_by_run(series_report: dict[str, Any]) -> dict[str, list[str]]
         facts = _facts_from_compile_json(path)
         out[str(run.get("run_id") or path.parent.name or path.stem)] = facts
     return out
+
+
+def _add_review_facts(
+    *,
+    review: dict[str, Any],
+    expected_rows: list[dict[str, Any]],
+    expected_facts: set[str],
+    forbidden_rows: list[dict[str, Any]],
+    forbidden_facts: set[str],
+    compile_facts_by_run: dict[str, list[str]],
+    matcher: str,
+    support_threshold: int,
+    review_id_field: str,
+) -> None:
+    if not review.get("expected_fact_errors"):
+        for fact in review.get("expected_facts", []):
+            if fact in expected_facts:
+                continue
+            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
+            expected_rows.append(
+                {
+                    "expected_fact": fact,
+                    "support_count": len(run_ids),
+                    "support_runs": run_ids,
+                    "meets_threshold": len(run_ids) >= support_threshold,
+                    "same_predicate_variants": [],
+                    review_id_field: review.get("review_id", ""),
+                }
+            )
+            expected_facts.add(fact)
+    if not review.get("forbidden_fact_errors"):
+        for fact in review.get("forbidden_facts", []):
+            if fact in forbidden_facts:
+                continue
+            run_ids = _supporting_runs(fact, compile_facts_by_run, matcher=matcher)
+            forbidden_rows.append(
+                {
+                    "forbidden_fact": fact,
+                    "support_count": len(run_ids),
+                    "support_runs": run_ids,
+                    "supported": bool(run_ids),
+                    review_id_field: review.get("review_id", ""),
+                }
+            )
+            forbidden_facts.add(fact)
 
 
 def _supporting_runs(fact: str, compile_facts_by_run: dict[str, list[str]], *, matcher: str) -> list[str]:
@@ -505,14 +535,34 @@ def _load_candidate_review(path: Path) -> dict[str, Any]:
     expected_path = review_dir / "candidate_expected_facts.pl"
     forbidden_path = review_dir / "candidate_forbidden_facts.pl"
     predicate = str(manifest.get("predicate") or "").strip()
+    expected_facts, expected_errors, expected_warnings = _review_fact_lines(
+        expected_path,
+        signature=predicate,
+        role="expected",
+    )
+    forbidden_facts, forbidden_errors, forbidden_warnings = _review_fact_lines(
+        forbidden_path,
+        signature=predicate,
+        role="forbidden",
+    )
     return {
         "path": manifest_path,
         "review_id": str(manifest.get("review_id") or review_dir.name).strip(),
         "fixture_id": str(manifest.get("fixture_id") or "").strip(),
         "proposal_id": str(manifest.get("proposal_id") or "").strip(),
         "candidate_signature": predicate,
-        "expected_facts": _review_fact_lines(expected_path),
-        "forbidden_facts": _review_fact_lines(forbidden_path),
+        "expected_facts": expected_facts,
+        "forbidden_facts": forbidden_facts,
+        "expected_fact_errors": expected_errors,
+        "forbidden_fact_errors": forbidden_errors,
+        "errors": [
+            *(f"candidate_expected_facts.pl:{error}" for error in expected_errors),
+            *(f"candidate_forbidden_facts.pl:{error}" for error in forbidden_errors),
+        ],
+        "warnings": [
+            *(f"candidate_expected_facts.pl:{warning}" for warning in expected_warnings),
+            *(f"candidate_forbidden_facts.pl:{warning}" for warning in forbidden_warnings),
+        ],
         "reviewer_blind_to_model_outputs": manifest.get("reviewer_blind_to_model_outputs"),
         "reviewer_read_forbidden_inputs": manifest.get("reviewer_read_forbidden_inputs"),
         "context_caveat": str(manifest.get("reviewer_context_caveat") or "").strip(),
@@ -539,32 +589,143 @@ def _load_source_oracle_review(path: Path, *, fixture_id: str) -> dict[str, Any]
     fixture_dir = review_dir / fixture_id
     expected_path = fixture_dir / "expected_facts.pl"
     forbidden_path = fixture_dir / "forbidden_facts.pl"
+    predicate = str(manifest.get("predicate") or "").strip()
+    expected_facts, expected_errors, expected_warnings = _review_fact_lines(
+        expected_path,
+        signature=predicate,
+        role="expected",
+    )
+    forbidden_facts, forbidden_errors, forbidden_warnings = _review_fact_lines(
+        forbidden_path,
+        signature=predicate,
+        role="forbidden",
+    )
     return {
         "path": manifest_path,
         "review_id": str(manifest.get("review_id") or review_dir.name).strip(),
         "proposal_id": str(manifest.get("proposal_id") or "").strip(),
         "fixture_id": fixture_id,
-        "candidate_signature": str(manifest.get("predicate") or "").strip(),
-        "expected_facts": _review_fact_lines(expected_path),
-        "forbidden_facts": _review_fact_lines(forbidden_path),
+        "candidate_signature": predicate,
+        "expected_facts": expected_facts,
+        "forbidden_facts": forbidden_facts,
+        "expected_fact_errors": expected_errors,
+        "forbidden_fact_errors": forbidden_errors,
+        "errors": [
+            *(f"expected_facts.pl:{error}" for error in expected_errors),
+            *(f"forbidden_facts.pl:{error}" for error in forbidden_errors),
+        ],
+        "warnings": [
+            *(f"expected_facts.pl:{warning}" for warning in expected_warnings),
+            *(f"forbidden_facts.pl:{warning}" for warning in forbidden_warnings),
+        ],
         "source_only_review": manifest.get("source_only_review"),
         "reviewer_blind_to_model_outputs": manifest.get("reviewer_blind_to_model_outputs"),
         "reviewer_read_model_outputs": manifest.get("reviewer_read_model_outputs"),
     }
 
 
-def _review_fact_lines(path: Path) -> list[str]:
+def _record_oracle_review_findings(
+    series_report: dict[str, Any],
+    *,
+    reviews: list[dict[str, Any]],
+    prefix: str,
+) -> None:
+    errors = series_report.setdefault("oracle_review_errors", [])
+    warnings = series_report.setdefault("oracle_review_warnings", [])
+    for review in reviews:
+        review_id = str(review.get("review_id") or "")
+        errors.extend(f"{prefix}:{review_id}:{error}" for error in review.get("errors", []))
+        warnings.extend(f"{prefix}:{review_id}:{warning}" for warning in review.get("warnings", []))
+
+
+def _review_fact_lines(path: Path, *, signature: str, role: str) -> tuple[list[str], list[str], list[str]]:
     if not path.exists():
-        return []
+        return [], [], []
     lines: list[str] = []
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    errors: list[str] = []
+    warnings: list[str] = []
+    parsed_signature = _parse_signature(signature)
+    for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         text = raw.strip()
         if not text or text.startswith("%"):
             continue
         if not text.endswith(".") or "(" not in text:
+            errors.append(f"line_{line_no}:not_fact_clause")
             continue
+        parsed = _parse_review_fact(text)
+        if parsed is None:
+            errors.append(f"line_{line_no}:invalid_fact_clause")
+            continue
+        name, args = parsed
+        if parsed_signature is not None:
+            sig_name, sig_arity = parsed_signature
+            if name != sig_name:
+                errors.append(f"line_{line_no}:predicate_mismatch:{name}")
+            if len(args) != sig_arity:
+                errors.append(f"line_{line_no}:arity_mismatch:{len(args)}")
+        fact_errors, fact_warnings = audit_oracle_fact_clause(
+            predicate=name,
+            args=args,
+            clause=text,
+            line_no=line_no,
+            role=role,
+        )
+        errors.extend(fact_errors)
+        warnings.extend(fact_warnings)
         lines.append(text)
-    return lines
+    return lines, errors, warnings
+
+
+def _parse_signature(value: str) -> tuple[str, int] | None:
+    match = SIGNATURE_RE.match(str(value or "").strip())
+    if not match:
+        return None
+    return match.group(1), int(match.group(2))
+
+
+def _parse_review_fact(text: str) -> tuple[str, list[str]] | None:
+    match = FACT_RE.match(str(text or "").strip())
+    if not match:
+        return None
+    return match.group(1), _split_review_args(match.group(2))
+
+
+def _split_review_args(raw: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    quote: str | None = None
+    escape = False
+    depth = 0
+    for char in raw:
+        if quote:
+            current.append(char)
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            current.append(char)
+            continue
+        if char == "(":
+            depth += 1
+            current.append(char)
+            continue
+        if char == ")":
+            depth = max(0, depth - 1)
+            current.append(char)
+            continue
+        if char == "," and depth == 0:
+            args.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    if current or raw.strip():
+        args.append("".join(current).strip())
+    return args
 
 
 def _compile_paths(compile_root: Path | None, explicit: list[Path]) -> list[Path]:

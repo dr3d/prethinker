@@ -135,6 +135,68 @@ def test_candidate_review_forbidden_facts_block_prior_candidate_signal(tmp_path:
     assert row["candidate_reviews"][0]["reviewer_blind_to_model_outputs"] is True
 
 
+def test_candidate_review_bad_expected_fact_does_not_become_support(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    proposal = _proposal(tmp_path / "proposal.json", signature="fda_response_documentation_gap/5")
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        [
+            (
+                "fda_response_documentation_gap("
+                "gap_1, violation_1, cfr_21_211_113_b, investigation_failure, src_a)."
+            )
+        ],
+    )
+    run2 = _compile(
+        tmp_path / "run2" / "compile.json",
+        [
+            (
+                "fda_response_documentation_gap("
+                "gap_1, violation_1, cfr_21_211_113_b, investigation_failure, src_a)."
+            )
+        ],
+    )
+    review_dir = tmp_path / "reviews" / "demo_review"
+    _write(
+        review_dir / "manifest.json",
+        json.dumps(
+            {
+                "review_id": "demo_review",
+                "fixture_id": "demo_fixture",
+                "predicate": "fda_response_documentation_gap/5",
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_forbidden_inputs": False,
+            },
+            indent=2,
+        ),
+    )
+    _write(
+        review_dir / "candidate_expected_facts.pl",
+        "fda_response_documentation_gap(Gap, violation_1, cfr_21_211_113_b, investigation_failure, Src).\n",
+    )
+    _write(review_dir / "candidate_forbidden_facts.pl", "")
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[proposal],
+        micro_root=micro_root,
+        compile_paths=[run1, run2],
+        support_threshold=2,
+        matcher="constant_slot",
+        candidate_review_paths=[review_dir / "manifest.json"],
+    )
+
+    row = report["proposals"][0]
+    assert report["summary"]["status"] == "fail"
+    assert row["summary"]["expected_fact_count"] == 0
+    assert row["summary"]["supported_fact_count"] == 0
+    assert row["state"] == "candidate_signal_no_oracle"
+    assert any("expected_value_domain:gap_kind:value_not_allowed" in error for error in row["errors"])
+
+
 def test_source_oracle_review_expected_facts_become_oracle_support(tmp_path: Path) -> None:
     micro_root = tmp_path / "micro"
     fixture = micro_root / "demo_fixture"
@@ -180,6 +242,71 @@ def test_source_oracle_review_expected_facts_become_oracle_support(tmp_path: Pat
     assert row["source_oracle_reviews"][0]["source_only_review"] is True
     rendered = render_markdown(report)
     assert "Source oracle review files: `1`" in rendered
+
+
+def test_source_oracle_review_bad_expected_fact_does_not_become_support(tmp_path: Path) -> None:
+    micro_root = tmp_path / "micro"
+    fixture = micro_root / "demo_fixture"
+    _write(fixture / "expected_facts.pl", "")
+    _write(fixture / "forbidden_facts.pl", "")
+    proposal = _proposal(tmp_path / "proposal.json", signature="fda_response_documentation_gap/5")
+    run1 = _compile(
+        tmp_path / "run1" / "compile.json",
+        [
+            (
+                "fda_response_documentation_gap("
+                "gap_1, violation_1, cfr_21_211_113_b, investigation_failure, src_a)."
+            )
+        ],
+    )
+    run2 = _compile(
+        tmp_path / "run2" / "compile.json",
+        [
+            (
+                "fda_response_documentation_gap("
+                "gap_1, violation_1, cfr_21_211_113_b, investigation_failure, src_a)."
+            )
+        ],
+    )
+    review_dir = tmp_path / "source_reviews" / "demo_source_review"
+    _write(
+        review_dir / "manifest.json",
+        json.dumps(
+            {
+                "review_id": "demo_source_review",
+                "proposal_id": "demo_candidate_v1",
+                "predicate": "fda_response_documentation_gap/5",
+                "status": "complete",
+                "source_only_review": True,
+                "reviewer_blind_to_model_outputs": True,
+                "reviewer_read_model_outputs": False,
+                "outputs": {"demo_fixture": {"expected_fact_count": 1, "forbidden_fact_count": 0}},
+            },
+            indent=2,
+        ),
+    )
+    _write(
+        review_dir / "demo_fixture" / "expected_facts.pl",
+        "fda_response_documentation_gap(Gap, violation_1, cfr_21_211_113_b, investigation_failure, Src).\n",
+    )
+    _write(review_dir / "demo_fixture" / "forbidden_facts.pl", "")
+
+    report = build_report(
+        fixture_id="demo_fixture",
+        proposal_paths=[proposal],
+        micro_root=micro_root,
+        compile_paths=[run1, run2],
+        support_threshold=2,
+        matcher="constant_slot",
+        source_oracle_review_paths=[review_dir / "manifest.json"],
+    )
+
+    row = report["proposals"][0]
+    assert report["summary"]["status"] == "fail"
+    assert row["summary"]["expected_fact_count"] == 0
+    assert row["summary"]["supported_fact_count"] == 0
+    assert row["state"] == "candidate_signal_no_oracle"
+    assert any("expected_value_domain:gap_kind:value_not_allowed" in error for error in row["errors"])
 
 
 def test_source_oracle_review_forbidden_facts_block_prior_candidate_signal(tmp_path: Path) -> None:

@@ -379,7 +379,9 @@ hard-gated for compact atom shape and registered carrier value domains before
 they can be consumed. Forbidden facts are negative sentinels: they may name
 off-domain or prose-shaped bad outputs so the compiler can be caught emitting
 them, but those values are reported as warnings and never count as positive
-support.
+support. The proposal-evidence summarizer repeats that check at consumption
+time and refuses to count expected support from any review expected-fact file
+that fails the oracle fact-governance gate.
 
 10. Require omission/accountability.
 
