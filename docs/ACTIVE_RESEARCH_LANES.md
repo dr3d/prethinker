@@ -465,7 +465,11 @@ and their first local-Qwen N=3 wrapper probes are archived at
 strict support is zero in all four reviewed cells: PUC `0/1`, `0/1`; GAO
 `0/1`, `0/1`; all have `0` supported forbidden rows and clean atom/lens/value
 governance. Treat them as process/boundary evidence for fast pack construction,
-not as transfer support.
+not as transfer support. A same-artifact reducer/reconciliation review found
+that GAO has stable internal rows and one pure syntax-normalization signal
+(`b423689` versus `b_423689`), but the cells still fail without source-aware
+agency, local-id, procurement-type, or source-coordinate decisions. Those are
+not promoted as deterministic reducers.
 
 Before the next technical claim:
 

@@ -204,7 +204,11 @@ PUC order and GAO bid-protest wrapper draft packs
   claim: process/boundary evidence only. The carrier language is caged and
     source-reviewed, but exact support currently fails from compact-id,
     source-coordinate, and zero-yield delivery instability. Do not count these
-    as transfer support.
+    as transfer support. A follow-up reducer adjudication found one narrow
+    syntax-only GAO B-number normalization signal, but it is insufficient to
+    close the cells; the remaining PUC/GAO mismatches require source-aware
+    agency, instrument-id, procurement-type, or source-coordinate choices and
+    therefore are not safe deterministic reducer promotions.
 ```
 
 ## Current Verdict

@@ -1071,7 +1071,12 @@ The next technical work should serve one of four purposes:
    close rows whose docket/procurement/status/date slots are mostly correct but
    whose local ids and source coordinates drift. One PUC cell behaves the same
    way; the other is zero-yield. Treat these as process/boundary evidence for
-   fast pack construction, not as transfer support.
+   fast pack construction, not as transfer support. A reducer adjudication over
+   the archived N=3 artifacts found that the only pure syntax-level GAO signal
+   was B-number punctuation (`b423689` versus `b_423689`); it did not close the
+   reviewed rows, and the remaining gaps require source-aware local-id,
+   agency/procurement-type, or provenance choices. No PUC/GAO reducer was
+   promoted.
    A source-only FTC public-order pre-registry probe was also run over two
    retained ACH-stress fixtures and archived under
    `C:\prethinker_tmp_archive\ftc_domain_bootstrap_20260605`. It is a negative:
