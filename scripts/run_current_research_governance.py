@@ -302,7 +302,7 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
         commands.append(
             {
                 "id": "pytest",
-                "command": [python, "-m", "pytest", "-q"],
+                "command": [python, "-m", "pytest", "-q", "tests"],
             }
         )
     return commands

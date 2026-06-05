@@ -45,7 +45,7 @@ def test_governance_commands_can_include_pytest(tmp_path: Path) -> None:
     commands = governance_commands(out_root=tmp_path / "out", include_pytest=True)
 
     assert commands[-1]["id"] == "pytest"
-    assert commands[-1]["command"][-3:] == ["-m", "pytest", "-q"]
+    assert commands[-1]["command"][-4:] == ["-m", "pytest", "-q", "tests"]
 
 
 def test_report_md_marks_failures() -> None:
