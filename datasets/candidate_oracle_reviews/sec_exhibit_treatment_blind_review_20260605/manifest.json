@@ -1,0 +1,10 @@
+{
+  "review_id": "sec_exhibit_treatment_blind_review_20260605",
+  "fixture_id": "sec_form_8k_skeleton_v1",
+  "predicate": "sec_exhibit/5",
+  "source_files": [
+    "datasets/real_world_transfer/20260523_wild_01/sec_8k_material_event_001/source.md"
+  ],
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_forbidden_inputs": false
+}

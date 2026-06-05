@@ -4,3 +4,7 @@ sec_registrant_identifier(Filing, hamilton_lane_incorporated, identifier_bundle,
 sec_filing_item(Filing, item_1_01, second_amendment_to_multi_draw_term_loan_and_security_agreement_with_jpmorgan_chase_bank_na, substantive, SrcItem101).
 sec_exhibit(Filing, exhibit_10_1, multi_draw_term_loan_and_security_agreement_dated_october_20_2022_between_jpmorgan_chase_bank_na_and_hamilton_lane_advisors_llc_conformed_through_second_amendment, filed, SrcExhibit101).
 sec_signatory(Filing, hamilton_lane_incorporated_by_s_lydia_a_gavalis_name_lydia_a_gavalis_title_general_counsel_and_secretary, general_counsel_and_secretary, v_2025_10_06, SrcSignature).
+
+% Source-only review 2026-06-05: Exhibit 10.1 is filed; item-body incorporation
+% does not make the exhibit-role treatment incorporated_by_reference.
+sec_exhibit(_, exhibit_10_1, _, incorporated_by_reference, _).

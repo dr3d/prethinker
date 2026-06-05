@@ -90,14 +90,16 @@ SEC Form 8-K skeleton pack
     `sec_value_axis_integrity`, `compile_fact_qa_exclusions`,
     retained candidate/source oracle reviews, fixture-bank inventory freshness,
     and pending external work-order packet hygiene. The pending packet audit is
-    green over 4 standalone `tmp` work-order zips with 0 blocking errors and 1
-    focused-review warning. Manifest-source audit, redaction replay, and
-    typed-plan replay still pass at the artifact level. The two red checks are
-    `compile_fact_qa_manifest` and `current_compile_fact_qa_status`, both
-    because FDA transfer_002 now propagates supported forbidden emissions:
+    now green with 0 pending standalone `tmp` work-order zips after the restored
+    returned packets were retained or archived. Manifest-source audit,
+    redaction replay, and typed-plan replay still pass at the artifact level.
+    The two red checks are `compile_fact_qa_manifest` and
+    `current_compile_fact_qa_status`, both because current cells still propagate
+    supported forbidden emissions:
     125/141 expected facts at support>=2 and 347/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
-    plans, and one source-rejected FDA transfer_002 forbidden fact emitted at
+    plans, one source-rejected SEC seed forbidden fact emitted at support=3,
+    and one source-rejected FDA transfer_002 forbidden fact emitted at
     support=2.
 
 FDA warning-letter pack
@@ -151,12 +153,9 @@ OSHA accident/inspection pack
   forbidden support: 0 in both measured cells
   governance: registered signatures, atom-shape, and lens-scope clean
   caveat: the previous repeated FTA total-penalty extra was adjudicated
-    source-backed and folded into the seed oracle; an independent source-only
-    review packet is now queued at
-    `tmp/osha_fta_total_penalty_blind_review_work_order_20260605.zip`. OSHA
-    now has 0 unexpected same-signature support>=2 in the standing manifest,
-    but that uplift remains project-adjudicated until the external review
-    returns.
+    source-backed, then independently accepted by the returned source-only
+    review `osha_fta_total_penalty_blind_review_20260605`. OSHA now has 0
+    unexpected same-signature support>=2 in the standing manifest.
   claim: fourth-family corroboration; accident, employee injury, violation
     counts, penalties, item, status, and related-activity rows transfer in
     the standing cells, while larger long-table and mixed-document diagnostics
@@ -219,9 +218,11 @@ The next work should strengthen the research claim rather than lift one fixture:
    pre-registered repaired-schema rerun materially tightens the current
    seed/transfer boundary, with exact fixture, gate, model, and artifact
    references kept in DOMAIN_PACK_RESEARCH_EVIDENCE.md.
-2. Keep FDA transfer_002 red in the current manifest until the false
+2. Keep the current manifest red until both supported forbidden emissions are
+   removed by typed, non-prose mechanisms: SEC seed's false Exhibit 10.1
+   `incorporated_by_reference` exhibit-role row, and FDA transfer_002's false
    501(a)(2)(A) adulteration-basis emission is removed by a general typed
-   mechanism. The older v2 judged-QA bundle remains historical/pre-review
+   mechanism. The older FDA v2 judged-QA bundle remains historical/pre-review
    evidence and must stay separated from messy-query claims.
 3. Keep NTSB as corroborating boundary evidence, with the current scoped
    injury-count manifest separated from older reducer-aligned diagnostics.

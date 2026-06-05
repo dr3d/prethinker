@@ -910,6 +910,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "Loan agreements, security agreements, amendments, merger agreements, and other contract exhibits use exhibit_kind=agreement unless a narrower closed kind exists.",
             "Severance policies, compensation plans, committee charters, and other policy/plan exhibits use exhibit_kind=other_exhibit unless a narrower closed kind exists.",
             "exhibit_role is legal treatment only: filed, furnished, incorporated_by_reference, or not_stated.",
+            "Item-body language saying an agreement is incorporated herein by reference belongs to sec_filing_item_treatment/4, not to sec_exhibit/5, when the exhibit table/source row states the exhibit is filed or furnished.",
             "Do not put content-format values such as embedded_ixbrl or inline_xbrl in exhibit_role; cover-page Inline XBRL rows use exhibit_kind=cover_page_ixbrl.",
             "Use exhibit_role=not_stated when the source table states a cover-page Inline XBRL exhibit but does not state whether that exhibit is filed, furnished, or incorporated by reference; never infer legal treatment from cover_page_ixbrl format alone.",
             "source_or_scope should be a source handle such as exhibit_table_row_10_1 or exhibit_table_row_104, not the exhibit description or contract title.",

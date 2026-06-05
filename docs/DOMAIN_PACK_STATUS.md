@@ -11,7 +11,7 @@ This report does not read source prose, QA questions, or judge outputs.
 - Associated fixtures: `26`
 - Unassigned fixtures: `4`
 - Expected facts in associated fixtures: `569`
-- Forbidden facts in associated fixtures: `208`
+- Forbidden facts in associated fixtures: `209`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
 
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
-| `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 31 |
+| `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 32 |
 | `state_ag_settlement_v1` | 9 | 8 | 5 | 3 | 74 | 33 |
 
 ## fda_warning_letter_v1
@@ -140,7 +140,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `sec_form_8k_skeleton_transfer_001` | `manifest_domain_profile` | 13 | 8 | `sec_exhibit/5`:3, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_transfer_002` | `manifest_domain_profile` | 12 | 6 | `sec_exhibit/5`:1, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:6, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_transfer_003` | `fixture_id_prefix` | 13 | 10 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_filing_item_treatment/4`:1, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
-| `sec_form_8k_skeleton_v1` | `manifest_domain_profile` | 13 | 6 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:3, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
+| `sec_form_8k_skeleton_v1` | `manifest_domain_profile` | 13 | 7 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:3, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 
 ## state_ag_settlement_v1
 

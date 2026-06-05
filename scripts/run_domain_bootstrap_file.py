@@ -2290,6 +2290,7 @@ def main() -> int:
         _apply_fda_date_atom_reduction(record["source_compile"])
         _apply_registered_date_slot_atom_reduction(record["source_compile"])
         _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
+        _apply_sec_exhibit_treatment_specificity_integrity(record["source_compile"])
         _apply_sec_filing_id_atom_reduction(record["source_compile"])
         _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
         _apply_sec_identifier_value_atom_reduction(record["source_compile"])
@@ -2303,6 +2304,7 @@ def main() -> int:
         _apply_fda_correspondence_party_role_integrity(record["source_compile"])
         _apply_fda_no_fei_omission_reduction(record["source_compile"])
         _apply_fda_adulteration_basis_authority_reduction(record["source_compile"])
+        _apply_fda_insanitary_adulteration_basis_support_integrity(record["source_compile"])
         _apply_ntsb_timestamp_atom_reduction(record["source_compile"])
         _apply_ntsb_actor_id_atom_reduction(record["source_compile"])
         _apply_ntsb_condition_atom_reduction(record["source_compile"])
@@ -2348,6 +2350,7 @@ def main() -> int:
         _apply_fda_date_atom_reduction(record["source_compile"])
         _apply_registered_date_slot_atom_reduction(record["source_compile"])
         _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
+        _apply_sec_exhibit_treatment_specificity_integrity(record["source_compile"])
         _apply_sec_filing_id_atom_reduction(record["source_compile"])
         _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
         _apply_sec_identifier_value_atom_reduction(record["source_compile"])
@@ -2425,6 +2428,7 @@ def main() -> int:
         _apply_fda_date_atom_reduction(record["source_compile"])
         _apply_registered_date_slot_atom_reduction(record["source_compile"])
         _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
+        _apply_sec_exhibit_treatment_specificity_integrity(record["source_compile"])
         _apply_sec_filing_id_atom_reduction(record["source_compile"])
         _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
         _apply_sec_identifier_value_atom_reduction(record["source_compile"])
@@ -2440,6 +2444,7 @@ def main() -> int:
         _apply_fda_no_fei_omission_reduction(record["source_compile"])
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
         _apply_fda_adulteration_basis_authority_reduction(record["source_compile"])
+        _apply_fda_insanitary_adulteration_basis_support_integrity(record["source_compile"])
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_cgmp_violation_item_projection(record["source_compile"])
         _apply_fda_violation_category_from_unique_citation_reduction(record["source_compile"])
@@ -8985,6 +8990,63 @@ def _apply_fda_adulteration_basis_authority_reduction(source_compile: dict[str, 
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
 
 
+def _apply_fda_insanitary_adulteration_basis_support_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop unsupported 501(a)(2)(A) adulteration-basis rows using typed co-support only."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    insanitary_letters: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "fda_insanitary_condition" and len(args) == 5:
+            letter_id = str(args[1]).strip()
+            if letter_id:
+                insanitary_letters.add(letter_id)
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        drop_reason = ""
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "fda_adulteration_basis"
+                and len(args) == 5
+                and args[1] == "adulteration_insanitary_conditions"
+                and args[2] == "fdca_501_a_2_a"
+                and args[0] not in insanitary_letters
+            ):
+                drop_reason = "missing_same_letter_fda_insanitary_condition"
+        if drop_reason:
+            dropped.append(fact)
+            continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_insanitary_adulteration_basis_support_integrity_drop_count"] = len(dropped)
+    source_compile["deterministic_fda_insanitary_adulteration_basis_support_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_fda_insanitary_adulteration_basis_support_integrity_policy"] = {
+        "schema_version": "deterministic_fda_insanitary_adulteration_basis_support_integrity_v1",
+        "authority": "typed_same_letter_carrier_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops fda_adulteration_basis/5 rows for "
+            "adulteration_insanitary_conditions/fdca_501_a_2_a unless the same typed compile "
+            "also emits at least one fda_insanitary_condition/5 row for the same letter id. "
+            "It does not inspect source prose or infer whether a 501(a)(2)(A) statement is present."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped_facts": dropped[:100]}
+
+
 def _canonical_fda_lot_identifier(value: str) -> str:
     text = str(value or "").strip().strip("'\"").casefold()
     match = re.fullmatch(r"(?:lot|batch)_([a-z])_?(\d+)", text)
@@ -10596,6 +10658,63 @@ def _apply_sec_exhibit_number_atom_reduction(source_compile: dict[str, Any]) -> 
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _apply_sec_exhibit_treatment_specificity_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop weaker incorporated-by-reference exhibit rows when a concrete exhibit role exists."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    explicit_table_roles: set[tuple[str, str]] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "sec_exhibit" and len(args) == 5 and args[3] in {"filed", "furnished"}:
+            explicit_table_roles.add((args[0], args[1]))
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if (
+                predicate == "sec_exhibit"
+                and len(args) == 5
+                and args[3] == "incorporated_by_reference"
+                and (args[0], args[1]) in explicit_table_roles
+            ):
+                dropped.append(
+                    {
+                        "fact": fact,
+                        "arg_name": "exhibit_role",
+                        "value": args[3],
+                        "issue": "incorporated_by_reference_conflicts_with_filed_or_furnished_exhibit_role",
+                    }
+                )
+                continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_exhibit_treatment_specificity_integrity_count"] = len(dropped)
+    source_compile["deterministic_sec_exhibit_treatment_specificity_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_sec_exhibit_treatment_specificity_integrity_policy"] = {
+        "schema_version": "deterministic_sec_exhibit_treatment_specificity_integrity_v1",
+        "authority": "typed_same_exhibit_role_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops sec_exhibit/5 rows whose exhibit_role is incorporated_by_reference when the same "
+            "typed compile already emits filed or furnished for the same filing_id and exhibit_number. "
+            "It does not inspect source prose or infer a replacement treatment."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped": dropped[:100]}
 
 
 SEC_TYPED_SLOT_PREFIX_REDUCTIONS: dict[tuple[str, int], dict[int, tuple[str, ...]]] = {

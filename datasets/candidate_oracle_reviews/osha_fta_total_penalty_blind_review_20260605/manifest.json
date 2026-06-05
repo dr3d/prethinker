@@ -1,0 +1,10 @@
+{
+  "review_id": "osha_fta_total_penalty_blind_review_20260605",
+  "fixture_id": "osha_incident_domain_v1",
+  "predicate": "osha_penalty_amount/5",
+  "source_files": [
+    "datasets/real_world_transfer/fresh_ugly_public_20260524_01/osha_incident_ugly_001/source.md"
+  ],
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_forbidden_inputs": false
+}

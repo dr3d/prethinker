@@ -326,10 +326,10 @@ standing manifest note: after source-only adjudication, the FTA total-penalty
   same-signature support>=2
 ```
 
-The FTA total-penalty correction is source-backed project adjudication and is
-now queued for independent source-only review at
-`tmp\osha_fta_total_penalty_blind_review_work_order_20260605.zip`; it should
-not be treated as a fully independent uplift until that review returns.
+The FTA total-penalty correction was source-backed project adjudication and is
+now independently accepted by returned source-only review
+`osha_fta_total_penalty_blind_review_20260605`, retained under
+`datasets/candidate_oracle_reviews/`. It is no longer a pending packet.
 
 The first unlike retained OSHA transfer also ran under the same local settings:
 

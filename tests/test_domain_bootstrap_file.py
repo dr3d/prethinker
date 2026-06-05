@@ -107,6 +107,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_date_atom_reduction,
     _apply_registered_date_slot_atom_reduction,
     _apply_sec_exhibit_number_atom_reduction,
+    _apply_sec_exhibit_treatment_specificity_integrity,
     _apply_sec_filing_id_atom_reduction,
     _apply_sec_identifier_value_atom_reduction,
     _apply_sec_signature_omission_contradiction_integrity,
@@ -123,6 +124,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_lot_identifier_atom_reduction,
     _apply_fda_no_fei_omission_reduction,
     _apply_fda_adulteration_basis_authority_reduction,
+    _apply_fda_insanitary_adulteration_basis_support_integrity,
     _apply_fda_violation_detail_atom_reduction,
     _apply_fda_violation_detail_value_kind_integrity,
     _apply_fda_violation_detail_slot_projection,
@@ -8539,6 +8541,31 @@ def test_sec_exhibit_number_atom_reduction_canonicalizes_typed_exhibit_slots_onl
     assert policy["not_query_interpretation"] is True
 
 
+def test_sec_exhibit_treatment_specificity_drops_weaker_same_exhibit_incorporation() -> None:
+    source_compile = {
+        "facts": [
+            "sec_exhibit(filing_1, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).",
+            "sec_exhibit(filing_1, exhibit_10_1, agreement, incorporated_by_reference, exhibit_table_row_10_1).",
+            "sec_exhibit(filing_1, exhibit_99_1, press_release, incorporated_by_reference, exhibit_table_row_99_1).",
+            "sec_exhibit(filing_2, exhibit_10_1, agreement, incorporated_by_reference, exhibit_table_row_10_1).",
+        ]
+    }
+
+    report = _apply_sec_exhibit_treatment_specificity_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "sec_exhibit(filing_1, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).",
+        "sec_exhibit(filing_1, exhibit_99_1, press_release, incorporated_by_reference, exhibit_table_row_99_1).",
+        "sec_exhibit(filing_2, exhibit_10_1, agreement, incorporated_by_reference, exhibit_table_row_10_1).",
+    ]
+    dropped = source_compile["deterministic_sec_exhibit_treatment_specificity_integrity_dropped_facts"]
+    assert dropped[0]["issue"] == "incorporated_by_reference_conflicts_with_filed_or_furnished_exhibit_role"
+    policy = source_compile["deterministic_sec_exhibit_treatment_specificity_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
 def test_sec_typed_slot_prefix_reduction_canonicalizes_role_prefixed_slots_only() -> None:
     source_compile = {
         "facts": [
@@ -9084,6 +9111,31 @@ def test_fda_adulteration_basis_authority_reduction_and_integrity_are_closed_slo
         }
     ]
     policy = source_compile["deterministic_fda_adulteration_basis_authority_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_fda_insanitary_adulteration_basis_requires_typed_condition_support() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(letter_1, cder, acme_pharmacy, v_2025_01_01, src_letter).",
+            "fda_adulteration_basis(letter_1, adulteration_insanitary_conditions, fdca_501_a_2_a, drug_products, src_basis_a).",
+            "fda_adulteration_basis(letter_1, adulteration_cgmp, fdca_501_a_2_b, drug_products, src_basis_b).",
+            "fda_insanitary_condition(condition_1, letter_2, condition_1, sterility_assurance, src_condition).",
+            "fda_adulteration_basis(letter_2, adulteration_insanitary_conditions, fdca_501_a_2_a, drug_products, src_basis_c).",
+        ]
+    }
+
+    report = _apply_fda_insanitary_adulteration_basis_support_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_1, cder, acme_pharmacy, v_2025_01_01, src_letter).",
+        "fda_adulteration_basis(letter_1, adulteration_cgmp, fdca_501_a_2_b, drug_products, src_basis_b).",
+        "fda_insanitary_condition(condition_1, letter_2, condition_1, sterility_assurance, src_condition).",
+        "fda_adulteration_basis(letter_2, adulteration_insanitary_conditions, fdca_501_a_2_a, drug_products, src_basis_c).",
+    ]
+    policy = source_compile["deterministic_fda_insanitary_adulteration_basis_support_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 
