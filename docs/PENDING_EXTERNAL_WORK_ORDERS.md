@@ -3,6 +3,7 @@
 This report validates proposal-declared work-order zip structure plus entry-name and template-content leak policy only.
 It blocks pending packets that include filled oracle files, judged-QA manifests, model outputs, compile/run artifacts, or literal fact examples inside oracle templates.
 It may read packet-control/template files, but it does not read source prose or decide expected/forbidden facts.
+Standalone tmp packets are outside this tracked report; run with `--include-tmp-zips` for local packet preflight.
 
 - Proposals scanned: `4`
 - Pending work orders: `0`

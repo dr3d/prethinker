@@ -29,6 +29,7 @@ def test_pending_external_work_order_audit_accepts_source_only_zip(tmp_path: Pat
     assert report["summary"]["work_order_count"] == 1
     assert report["work_orders"][0]["errors"] == []
     assert "source_only_expected_forbidden_oracle" in md
+    assert "Standalone tmp packets are outside this tracked report" in md
 
 
 def test_pending_external_work_order_audit_blocks_missing_fixture_package(tmp_path: Path) -> None:
@@ -110,6 +111,7 @@ def test_pending_external_work_order_audit_can_inventory_standalone_tmp_zips(tmp
     assert report["summary"]["standalone_work_order_count"] == 1
     assert any(row["source"] == "tmp_zip" for row in report["work_orders"])
     assert "standalone_external_work_order" in md
+    assert "Standalone tmp packets are included in this run" in md
 
 
 def test_pending_external_work_order_audit_accepts_candidate_review_packet_shape(tmp_path: Path) -> None:

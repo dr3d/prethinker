@@ -154,6 +154,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"This report validates {scope} plus entry-name and template-content leak policy only.",
         "It blocks pending packets that include filled oracle files, judged-QA manifests, model outputs, compile/run artifacts, or literal fact examples inside oracle templates.",
         "It may read packet-control/template files, but it does not read source prose or decide expected/forbidden facts.",
+        (
+            "Standalone tmp packets are included in this run."
+            if summary.get("standalone_work_order_count")
+            else "Standalone tmp packets are outside this tracked report; run with `--include-tmp-zips` for local packet preflight."
+        ),
         "",
         f"- Proposals scanned: `{summary['proposal_count']}`",
         f"- Pending work orders: `{summary['work_order_count']}`",
