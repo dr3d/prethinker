@@ -27,6 +27,7 @@ from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E40
 
 DEFAULT_ROOT = REPO_ROOT / "datasets" / "domain_predicate_proposals"
 DEFAULT_PROFILE_ROOT = REPO_ROOT / "datasets" / "domain_profiles"
+DEFAULT_CANDIDATE_REVIEW_ROOT = REPO_ROOT / "datasets" / "candidate_oracle_reviews"
 
 SIGNATURE_RE = re.compile(r"^[a-z][a-z0-9_]*/[1-9][0-9]*$")
 ARG_RE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -128,6 +129,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--profile-root", type=Path, default=DEFAULT_PROFILE_ROOT)
+    parser.add_argument("--candidate-review-root", type=Path, default=DEFAULT_CANDIDATE_REVIEW_ROOT)
     parser.add_argument("--proposal", action="append", default=[], type=Path)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
@@ -148,7 +150,7 @@ def main() -> int:
         print(json.dumps(TEMPLATE, indent=2, sort_keys=True))
         return 0
     paths = _proposal_paths(root=args.root, explicit=args.proposal)
-    report = build_report(paths, profile_root=args.profile_root)
+    report = build_report(paths, profile_root=args.profile_root, candidate_review_root=args.candidate_review_root)
     rendered_md = render_markdown(report)
     if args.expect_md:
         apply_markdown_freshness_check(
@@ -168,8 +170,14 @@ def main() -> int:
     return 0 if args.exit_zero or report["summary"]["status"] == "pass" else 1
 
 
-def build_report(paths: list[Path], *, profile_root: Path = DEFAULT_PROFILE_ROOT) -> dict[str, Any]:
-    rows = [_validate_proposal(path, profile_root=profile_root) for path in paths]
+def build_report(
+    paths: list[Path],
+    *,
+    profile_root: Path = DEFAULT_PROFILE_ROOT,
+    candidate_review_root: Path = DEFAULT_CANDIDATE_REVIEW_ROOT,
+) -> dict[str, Any]:
+    retained_reviews = _retained_candidate_reviews(candidate_review_root)
+    rows = [_validate_proposal(path, profile_root=profile_root, retained_reviews=retained_reviews) for path in paths]
     blocking_errors = sum(len(row["errors"]) for row in rows)
     warning_count = sum(len(row["warnings"]) for row in rows)
     return {
@@ -228,7 +236,7 @@ def _proposal_paths(*, root: Path, explicit: list[Path]) -> list[Path]:
     return list(unique.values())
 
 
-def _validate_proposal(path: Path, *, profile_root: Path) -> dict[str, Any]:
+def _validate_proposal(path: Path, *, profile_root: Path, retained_reviews: list[dict[str, str]]) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
     data = _load_json(path)
@@ -256,6 +264,13 @@ def _validate_proposal(path: Path, *, profile_root: Path) -> dict[str, Any]:
     arity = _signature_arity(signature)
     if arity < 1:
         errors.append("invalid_candidate_signature")
+    _validate_review_links(
+        proposal_id=str(data.get("proposal_id") or "").strip(),
+        candidate_signature=signature,
+        review_results=review_results,
+        retained_reviews=retained_reviews,
+        errors=errors,
+    )
 
     domain_profile = str(data.get("domain_profile") or "").strip()
     profile = _load_profile(domain_profile, profile_root=profile_root)
@@ -417,6 +432,56 @@ def _validate_pending_work_orders(value: Any, warnings: list[str]) -> None:
             warnings.append(f"pending_external_work_order_{index + 1}:empty_fixtures")
 
 
+def _validate_review_links(
+    *,
+    proposal_id: str,
+    candidate_signature: str,
+    review_results: list[Any],
+    retained_reviews: list[dict[str, str]],
+    errors: list[str],
+) -> None:
+    linked_review_ids: set[str] = set()
+    linked_paths: set[str] = set()
+    for index, item in enumerate(review_results):
+        if not isinstance(item, dict):
+            errors.append(f"review_result_{index + 1}:not_object")
+            continue
+        review_id = str(item.get("review_id") or "").strip()
+        fixture_id = str(item.get("fixture_id") or "").strip()
+        review_path = str(item.get("review_path") or "").strip()
+        if review_id:
+            linked_review_ids.add(review_id)
+        if review_path:
+            resolved = _resolve_path(review_path)
+            linked_paths.add(_rel(resolved))
+            manifest = _load_json(resolved)
+            if not manifest:
+                errors.append(f"review_result_{index + 1}:missing_or_invalid_review_path")
+                continue
+            manifest_review_id = str(manifest.get("review_id") or "").strip()
+            manifest_fixture_id = str(manifest.get("fixture_id") or "").strip()
+            manifest_predicate = str(manifest.get("predicate") or "").strip()
+            if review_id and manifest_review_id and review_id != manifest_review_id:
+                errors.append(f"review_result_{index + 1}:review_id_mismatch")
+            if fixture_id and manifest_fixture_id and fixture_id != manifest_fixture_id:
+                errors.append(f"review_result_{index + 1}:fixture_id_mismatch")
+            if candidate_signature and manifest_predicate and candidate_signature != manifest_predicate:
+                errors.append(f"review_result_{index + 1}:predicate_mismatch")
+        elif review_id:
+            retained = [review for review in retained_reviews if review["review_id"] == review_id]
+            if retained and retained[0].get("predicate") != candidate_signature:
+                errors.append(f"review_result_{index + 1}:predicate_mismatch")
+
+    for review in retained_reviews:
+        if review.get("predicate") != candidate_signature:
+            continue
+        review_proposal_id = review.get("proposal_id", "")
+        if review_proposal_id and proposal_id and review_proposal_id != proposal_id:
+            continue
+        if review["review_id"] not in linked_review_ids and review["path"] not in linked_paths:
+            errors.append(f"retained_review_missing_from_proposal:{review['review_id']}")
+
+
 def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[str]) -> dict[str, Any]:
     return {
         "path": str(path),
@@ -478,6 +543,27 @@ def _work_order_summary(value: Any) -> str:
     return "; ".join(parts)
 
 
+def _retained_candidate_reviews(root: Path) -> list[dict[str, str]]:
+    root_path = root.resolve()
+    if not root_path.exists():
+        return []
+    rows: list[dict[str, str]] = []
+    for manifest_path in sorted(root_path.rglob("manifest.json")):
+        manifest = _load_json(manifest_path)
+        if not manifest:
+            continue
+        rows.append(
+            {
+                "path": _rel(manifest_path),
+                "review_id": str(manifest.get("review_id") or manifest_path.parent.name).strip(),
+                "proposal_id": str(manifest.get("proposal_id") or "").strip(),
+                "fixture_id": str(manifest.get("fixture_id") or "").strip(),
+                "predicate": str(manifest.get("predicate") or "").strip(),
+            }
+        )
+    return rows
+
+
 def _signature_arity(signature: str) -> int:
     if not SIGNATURE_RE.match(signature):
         return -1
@@ -516,6 +602,20 @@ def _load_json(path: Path) -> dict[str, Any]:
     except Exception:
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _resolve_path(value: str) -> Path:
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return REPO_ROOT / path
+
+
+def _rel(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
+    except ValueError:
+        return str(path)
 
 
 def _string_list(value: Any) -> list[str]:

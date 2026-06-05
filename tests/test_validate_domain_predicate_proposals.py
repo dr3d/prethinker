@@ -137,6 +137,82 @@ def test_rejected_blocked_review_does_not_warn_about_unregistered_signature(tmp_
     assert report["proposals"][0]["warnings"] == []
 
 
+def test_retained_review_for_signature_must_be_linked_from_proposal(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    proposal = _write(tmp_path / "proposal.json", payload)
+    review_root = tmp_path / "reviews"
+    _write(
+        review_root / "demo_review" / "manifest.json",
+        {
+            "review_id": "demo_review",
+            "fixture_id": "fda_warning_letter_domain_transfer_002",
+            "predicate": payload["candidate_signature"],
+            "reviewer_blind_to_model_outputs": True,
+            "reviewer_read_forbidden_inputs": False,
+            "source_files": ["fixtures/demo/source.md"],
+        },
+    )
+
+    report = build_report([proposal], candidate_review_root=review_root)
+
+    assert report["summary"]["status"] == "fail"
+    assert "retained_review_missing_from_proposal:demo_review" in report["proposals"][0]["errors"]
+
+
+def test_linked_review_path_must_match_signature_and_fixture(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["review_results"] = [
+        {
+            "review_id": "demo_review",
+            "fixture_id": "wrong_fixture",
+            "review_path": str(tmp_path / "reviews" / "demo_review" / "manifest.json"),
+            "result": "oracle_supported",
+        }
+    ]
+    proposal = _write(tmp_path / "proposal.json", payload)
+    _write(
+        tmp_path / "reviews" / "demo_review" / "manifest.json",
+        {
+            "review_id": "demo_review",
+            "fixture_id": "right_fixture",
+            "predicate": "other_candidate/3",
+        },
+    )
+
+    report = build_report([proposal], candidate_review_root=tmp_path / "reviews")
+
+    errors = report["proposals"][0]["errors"]
+    assert "review_result_1:fixture_id_mismatch" in errors
+    assert "review_result_1:predicate_mismatch" in errors
+
+
+def test_linked_retained_review_passes_when_metadata_matches(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    review_path = tmp_path / "reviews" / "demo_review" / "manifest.json"
+    payload["review_results"] = [
+        {
+            "review_id": "demo_review",
+            "fixture_id": "fda_warning_letter_domain_transfer_002",
+            "review_path": str(review_path),
+            "result": "oracle_supported",
+        }
+    ]
+    proposal = _write(tmp_path / "proposal.json", payload)
+    _write(
+        review_path,
+        {
+            "review_id": "demo_review",
+            "fixture_id": "fda_warning_letter_domain_transfer_002",
+            "predicate": payload["candidate_signature"],
+        },
+    )
+
+    report = build_report([proposal], candidate_review_root=tmp_path / "reviews")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["proposals"][0]["errors"] == []
+
+
 def test_domain_predicate_proposal_status_report_disclaims_promotion(tmp_path: Path) -> None:
     path = _write(tmp_path / "proposal.json", _valid_payload())
     report = build_report([path])
