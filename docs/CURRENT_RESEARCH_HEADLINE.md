@@ -155,7 +155,7 @@ OSHA accident/inspection pack
 State-AG settlement/AOD process probe
   seed micro: 17 / 27 support>=2, 0 / 9 supported forbidden, atom/lens/value
     gates clean; all 57 unexpected same-signature rows are support=1 only
-  source-only unlike intakes, no oracle scoring:
+  source-only unlike intakes:
     Mercedes-Benz consent judgment t001: 36 typed facts, 100% registered,
       4 value-mode reconciled support>=2 facts, 0 skipped/conflicts; stable
       layer is authority citations only
@@ -163,11 +163,23 @@ State-AG settlement/AOD process probe
       reconciled support>=2 facts, 0 skipped/conflicts
     Equifax AOD t003: 103 typed facts, 100% registered, 24 value-mode
       reconciled support>=2 facts, 0 skipped/conflicts
-  claim: fifth-domain process evidence only, not transfer scoring. t003
-    suggests richer settlement/AOD skeleton can stabilize; t001 shows broader
-    consent-judgment shape currently thins to authority citations. Independent
-    expected/forbidden transfer oracles are still needed before State-AG
-    supports the cross-family claim.
+  first scored transfer-oracle probe on Equifax AOD t003:
+    artifact root:
+      C:\prethinker_tmp_archive\state_ag_transfer_oracle_probe_20260605\state-ag-aod-t003-transfer-r1-20260605
+    0 / 29 support>=2, 0 / 12 supported forbidden
+    123 registered typed facts across 3 runs, 8 registered signatures,
+      atom-shape / lens-scope / carrier value-domain gates clean
+    diagnostic: source anatomy is being seen, but strict atom choices drift.
+      Only 1 / 29 unsupported rows would close by dropping the source-coordinate
+      slot alone; 24 / 29 have same-subject/same-predicate stable variants.
+      The gap is therefore value/canonicalization/source-coordinate stability,
+      not a missing-output or prose-leak result.
+  claim: fifth-domain process evidence only, not transfer support. t003
+    source-only intake suggested richer settlement/AOD skeleton could
+    stabilize, but the first strict oracle-scored transfer probe did not
+    support any expected rows. Treat State-AG as a boundary/process signal:
+    the closed language can constrain output, but the pack is not yet a
+    claim-bearing transfer family.
 ```
 
 ## Current Verdict
@@ -209,12 +221,13 @@ The next work should strengthen the research claim rather than lift one fixture:
    pre-registered repaired-schema rerun materially tightens the current
    seed/transfer boundary, with exact fixture, gate, model, and artifact
    references kept in DOMAIN_PACK_RESEARCH_EVIDENCE.md.
-2. Keep the current manifest red until both supported forbidden emissions are
-   removed by typed, non-prose mechanisms: SEC seed's false Exhibit 10.1
-   `incorporated_by_reference` exhibit-role row, and FDA transfer_002's false
-   501(a)(2)(A) adulteration-basis emission is removed by a general typed
-   mechanism. The older FDA v2 judged-QA bundle remains historical/pre-review
-   evidence and must stay separated from messy-query claims.
+2. Keep the current manifest green by treating forbidden-emission removal as
+   an integrity gate, not a score lift. The SEC seed false Exhibit 10.1
+   `incorporated_by_reference` exhibit-role row and the FDA transfer_002 false
+   501(a)(2)(A) adulteration-basis row are now removed under typed,
+   non-prose mechanisms. The older FDA v2 judged-QA bundle remains
+   historical/pre-review evidence and must stay separated from messy-query
+   claims.
 3. Keep NTSB as corroborating boundary evidence, with the current scoped
    injury-count manifest separated from older reducer-aligned diagnostics.
 4. Keep OSHA as fourth-family corroborating evidence inside the standing

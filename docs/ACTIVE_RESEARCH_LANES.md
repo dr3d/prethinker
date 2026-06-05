@@ -389,10 +389,8 @@ same-signature facts and clean registered-signature, atom-shape, lens-scope,
 and carrier value-domain gates. All 57 unexpected rows are support=1 only; none
 survives the support>=2 claim threshold. It is useful because it pressures
 settlement/AOD anatomy, obligation ids, authority citations, contacts, payment,
-and signature rows; it should not be cited as cross-family transfer until an
-unlike state-AG fixture exists. The current overproduction is precision pressure
-inside closed value domains, not a prose-shaped atom or unregistered-language
-leak.
+and signature rows. The current overproduction is precision pressure inside
+closed value domains, not a prose-shaped atom or unregistered-language leak.
 
 A source-only unlike intake has also been run on the retained Equinox AOD
 fixture (`state_ag_settlement_ugly_002`) with the same closed registry and no
@@ -412,7 +410,29 @@ carrier value-domain audit clean, and 24 value-mode support>=2 reconciled facts
 with 0 skipped/conflicts. The stable set includes instrument wrapper, authority
 citations, contacts, one effective-date event, parties, signatures, and a
 repeated obligation sequence. This is a stronger process signal than t002, but
-still pre-oracle source-only intake rather than scored transfer evidence.
+the first strict oracle-scored transfer probe did not confirm it.
+
+The retained Equifax AOD fixture (`state_ag_settlement_aod_transfer_003`) now
+has an independent expected/forbidden transfer oracle and one strict local-Qwen
+N=3/support>=2 measurement:
+
+```text
+fixture: state_ag_settlement_aod_transfer_003
+artifact root:
+  C:\prethinker_tmp_archive\state_ag_transfer_oracle_probe_20260605\state-ag-aod-t003-transfer-r1-20260605
+supported expected facts: 0 / 29
+supported forbidden facts: 0 / 12
+typed facts: 123 across 3 runs, all registered
+atom-shape/signature/lens-scope/value-domain blockers: 0
+diagnostic: only 1 / 29 unsupported rows would close by dropping the
+  source-coordinate slot alone; 24 / 29 have stable same-subject/same-predicate
+  variants. The pack sees the document anatomy, but strict value,
+  canonicalization, and source-coordinate choices do not reproduce.
+```
+
+Read this as a boundary result, not as a row-repair invitation. The closed
+language cage held, forbidden support stayed at 0, and no prose-shaped atom leak
+appeared; the pack is simply not strict-transfer-ready for State-AG AODs.
 
 A third source-only unlike intake on the retained Mercedes-Benz consent
 order/judgment fixture (`state_ag_ugly_001`) is governance-clean but much
@@ -433,10 +453,12 @@ Before the next technical claim:
    becomes lower tier.
 4. Keep OSHA as fourth-family corroboration for skeleton/table transfer and
    compile variance, not as a new row-grinding target.
-5. Keep State-AG in seed/process-probe status unless an independent
-   expected/forbidden transfer micro is deliberately added for the Equinox AOD
-   to answer a named research gap. If that happens, focus first on
-   authority/contact/wrapper skeleton rather than broad obligation substance.
+5. Keep State-AG in seed/process-probe status. The first independent
+   expected/forbidden transfer micro on the Equifax AOD is a clean boundary
+   result (`0/29`, `0/12` forbidden), showing closed-language containment but
+   unstable strict atom/value choices. Do not grind it upward unless a specific
+   research question asks whether a narrow canonicalization/source-coordinate
+   contract generalizes across another unlike State-AG AOD.
 6. Run answer-judge null controls and oracle-isolation checks for any
    LLM-judged QA result that becomes claim-bearing; deterministic compile-fact
    QA still needs typed-plan and redaction replay.
