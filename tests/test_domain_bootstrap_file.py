@@ -8500,21 +8500,49 @@ def test_registered_date_slot_atom_reduction_canonicalizes_date_slots_only() -> 
         "facts": [
             "sec_filing(filing_sec_8k_20251001, form_8_k, current_report, 2025_10_01, 2025_10_06, src_filing).",
             "sec_signatory(sec_8k_material_event_001, lydia_a_gavalis, general_counsel_and_secretary, 2025_10_06, src_signature).",
+            "state_ag_event(aod_24_099, event_1, investigation_initiated, 2021_09, equinox, findings_para_16).",
+            "state_ag_instrument(aod_24_099, assurance_of_discontinuance, new_york_attorney_general, equinox_group_llc, assurance_24_099, 2024, caption).",
             "sec_registrant_identifier(filing_sec_8k_20251001, hamilton_lane_incorporated, cik, cik_1433642, src_cik).",
         ]
     }
 
     report = _apply_registered_date_slot_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 2
+    assert report["reduction_count"] == 4
     assert source_compile["facts"] == [
         "sec_filing(filing_sec_8k_20251001, form_8_k, current_report, v_2025_10_01, v_2025_10_06, src_filing).",
         "sec_signatory(sec_8k_material_event_001, lydia_a_gavalis, general_counsel_and_secretary, v_2025_10_06, src_signature).",
+        "state_ag_event(aod_24_099, event_1, investigation_initiated, v_2021_09, equinox, findings_para_16).",
+        "state_ag_instrument(aod_24_099, assurance_of_discontinuance, new_york_attorney_general, equinox_group_llc, assurance_24_099, v_2024, caption).",
         "sec_registrant_identifier(filing_sec_8k_20251001, hamilton_lane_incorporated, cik, cik_1433642, src_cik).",
     ]
     policy = source_compile["deterministic_registered_date_slot_atom_reduction_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
+
+
+def test_atom_shape_integrity_drops_unreduced_numeric_leading_date_shapes() -> None:
+    source_compile = {
+        "facts": [
+            "state_ag_event(aod_24_099, event_1, investigation_initiated, v_2021_09, equinox, findings_para_16).",
+            "state_ag_party(aod_24_099, 2021_09, respondent, equinox_group_llc, caption).",
+        ]
+    }
+
+    report = _apply_atom_shape_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "state_ag_event(aod_24_099, event_1, investigation_initiated, v_2021_09, equinox, findings_para_16).",
+    ]
+    assert source_compile["deterministic_atom_shape_integrity_dropped_facts"] == [
+        {
+            "fact": "state_ag_party(aod_24_099, 2021_09, respondent, equinox_group_llc, caption).",
+            "arg": "arg2",
+            "value": "2021_09",
+            "issue": "numeric_leading",
+        }
+    ]
 
 
 def test_sec_exhibit_number_atom_reduction_canonicalizes_typed_exhibit_slots_only() -> None:

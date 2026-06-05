@@ -163,23 +163,32 @@ State-AG settlement/AOD process probe
       reconciled support>=2 facts, 0 skipped/conflicts
     Equifax AOD t003: 103 typed facts, 100% registered, 24 value-mode
       reconciled support>=2 facts, 0 skipped/conflicts
-  first scored transfer-oracle probe on Equifax AOD t003:
-    artifact root:
-      C:\prethinker_tmp_archive\state_ag_transfer_oracle_probe_20260605\state-ag-aod-t003-transfer-r1-20260605
-    0 / 29 support>=2, 0 / 12 supported forbidden
-    123 registered typed facts across 3 runs, 8 registered signatures,
+  first scored transfer-oracle probes:
+    Equinox AOD t002 artifact root:
+      C:\prethinker_tmp_archive\state_ag_transfer_oracle_probe_20260605\state-ag-aod-t002-transfer-r1-20260605
+    t002: 0 / 18 support>=2, 0 / 12 supported forbidden
+      76 registered typed facts across 3 runs, 5 registered signatures,
       atom-shape / lens-scope / carrier value-domain gates clean
-    diagnostic: source anatomy is being seen, but strict atom choices drift.
+      diagnostic: 14 / 18 unsupported rows have stable same-predicate variants,
+      but none share the expected subject id; the gap is instrument-id,
+      contact-party, citation spelling, event-kind/date/scope, and
+      source-coordinate stability.
+    Equifax AOD t003 artifact root:
+      C:\prethinker_tmp_archive\state_ag_transfer_oracle_probe_20260605\state-ag-aod-t003-transfer-r1-20260605
+    t003: 0 / 29 support>=2, 0 / 12 supported forbidden
+      123 registered typed facts across 3 runs, 8 registered signatures,
+      atom-shape / lens-scope / carrier value-domain gates clean
+      diagnostic: source anatomy is being seen, but strict atom choices drift.
       Only 1 / 29 unsupported rows would close by dropping the source-coordinate
       slot alone; 24 / 29 have same-subject/same-predicate stable variants.
       The gap is therefore value/canonicalization/source-coordinate stability,
       not a missing-output or prose-leak result.
-  claim: fifth-domain process evidence only, not transfer support. t003
-    source-only intake suggested richer settlement/AOD skeleton could
-    stabilize, but the first strict oracle-scored transfer probe did not
-    support any expected rows. Treat State-AG as a boundary/process signal:
-    the closed language can constrain output, but the pack is not yet a
-    claim-bearing transfer family.
+  claim: fifth-domain process evidence only, not transfer support. The AOD
+    source-only intakes suggested richer settlement/AOD skeleton could
+    stabilize, but strict oracle-scored t002 and t003 probes did not support
+    any expected rows. Treat State-AG as a boundary/process signal: the closed
+    language can constrain output, but the pack is not yet a claim-bearing
+    transfer family.
 ```
 
 ## Current Verdict

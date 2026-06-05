@@ -10493,6 +10493,29 @@ def _canonical_fda_date_atom(value: str) -> str:
     return f"v_{int(match.group(1)):04d}_{int(match.group(2)):02d}_{int(match.group(3)):02d}"
 
 
+def _canonical_registered_date_slot_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.fullmatch(r"(?:v_)?(\d{4})(?:[_-](\d{1,2}))?(?:[_-](\d{1,2}))?", text)
+    if not match:
+        return ""
+    year = int(match.group(1))
+    if year < 1900 or year > 2100:
+        return ""
+    month = match.group(2)
+    day = match.group(3)
+    if month is None:
+        return f"v_{year:04d}"
+    month_int = int(month)
+    if month_int < 1 or month_int > 12:
+        return ""
+    if day is None:
+        return f"v_{year:04d}_{month_int:02d}"
+    day_int = int(day)
+    if day_int < 1 or day_int > 31:
+        return ""
+    return f"v_{year:04d}_{month_int:02d}_{day_int:02d}"
+
+
 def _apply_fda_date_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
     """Canonicalize FDA date slots to v_YYYY_MM_DD atoms."""
 
@@ -10561,7 +10584,7 @@ def _registered_date_slot_indexes(predicate: str, arity: int) -> set[int]:
 
 
 def _apply_registered_date_slot_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
-    """Canonicalize date-shaped atoms in registered date slots to v_YYYY_MM_DD."""
+    """Canonicalize date-shaped atoms in registered date slots to v_YYYY[_MM[_DD]]."""
 
     facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
     out: list[str] = []
@@ -10579,7 +10602,7 @@ def _apply_registered_date_slot_atom_reduction(source_compile: dict[str, Any]) -
         for index in _registered_date_slot_indexes(predicate, len(args)):
             if index >= len(args):
                 continue
-            canonical = _canonical_fda_date_atom(args[index])
+            canonical = _canonical_registered_date_slot_atom(args[index])
             if canonical and args[index] != canonical:
                 args[index] = canonical
                 changed = True
@@ -10602,7 +10625,7 @@ def _apply_registered_date_slot_atom_reduction(source_compile: dict[str, Any]) -
         "not_query_interpretation": True,
         "description": (
             "Canonicalizes date-shaped values already emitted in registered carrier date slots "
-            "from YYYY_MM_DD atoms to v_YYYY_MM_DD atoms. It does not read source prose, "
+            "from YYYY, YYYY_MM, or YYYY_MM_DD atoms to v_-prefixed typed date atoms. It does not read source prose, "
             "query text, or infer missing dates."
         ),
     }
@@ -12129,7 +12152,7 @@ def _atom_shape_exempt(value: str) -> bool:
     text = str(value or "").strip().strip("'\"")
     if re.fullmatch(r"-?\d+(?:\.\d+)?", text):
         return True
-    if re.fullmatch(r"(?:v_)?\d{4}(?:[_-]\d{1,2}){0,2}", text):
+    if re.fullmatch(r"v_\d{4}(?:[_-]\d{1,2}){0,2}", text):
         return True
     if re.search(r"^src_(?:line|row)_\d+$|^source_", text, flags=re.IGNORECASE):
         return True

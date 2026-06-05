@@ -401,7 +401,22 @@ narrow State-AG instrument-id alias handling, 7 value-mode facts survive
 support>=2 with 0 skipped/conflicts: 5 authority citations and 2 contact
 channels. Wrapper parties, obligations, chronology, monetary rows, and
 signatures remain unstable or zero-yield. Treat this as a pre-oracle
-transfer-intake signal only.
+transfer-intake signal only. A later strict oracle-scored transfer probe on the
+same Equinox AOD did not confirm the source-only signal:
+
+```text
+fixture: state_ag_settlement_aod_transfer_002
+artifact root:
+  C:\prethinker_tmp_archive\state_ag_transfer_oracle_probe_20260605\state-ag-aod-t002-transfer-r1-20260605
+supported expected facts: 0 / 18
+supported forbidden facts: 0 / 12
+typed facts: 76 across 3 runs, all registered
+atom-shape/signature/lens-scope/value-domain blockers: 0
+diagnostic: 14 / 18 unsupported rows have stable same-predicate variants, but
+  none share the expected subject id. The pack sees authority/contact/party
+  anatomy but does not stabilize instrument ids, contact-party attachment,
+  citation spelling, event-kind/date/scope, or source coordinates.
+```
 
 A second source-only unlike intake has now run on the retained Equifax AOD
 fixture (`state_ag_settlement_ugly_003`). It is also governance-clean:
@@ -453,12 +468,13 @@ Before the next technical claim:
    becomes lower tier.
 4. Keep OSHA as fourth-family corroboration for skeleton/table transfer and
    compile variance, not as a new row-grinding target.
-5. Keep State-AG in seed/process-probe status. The first independent
-   expected/forbidden transfer micro on the Equifax AOD is a clean boundary
-   result (`0/29`, `0/12` forbidden), showing closed-language containment but
-   unstable strict atom/value choices. Do not grind it upward unless a specific
-   research question asks whether a narrow canonicalization/source-coordinate
-   contract generalizes across another unlike State-AG AOD.
+5. Keep State-AG in seed/process-probe status. The first two independent
+   expected/forbidden transfer micros on unlike AODs are clean boundary
+   results: Equinox t002 is `0/18`, `0/12` forbidden; Equifax t003 is `0/29`,
+   `0/12` forbidden. Both show closed-language containment but unstable strict
+   atom/value choices. Do not grind them upward unless a specific research
+   question asks whether a narrow canonicalization/source-coordinate contract
+   generalizes across another unlike State-AG AOD.
 6. Run answer-judge null controls and oracle-isolation checks for any
    LLM-judged QA result that becomes claim-bearing; deterministic compile-fact
    QA still needs typed-plan and redaction replay.
