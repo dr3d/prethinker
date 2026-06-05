@@ -122,6 +122,18 @@ def import_review_zip(
                 dry_run=dry_run,
                 entries=entries,
             )
+        independence_errors = _manifest_independence_errors(manifest)
+        if independence_errors:
+            errors.extend(independence_errors)
+            return _report(
+                zip_path=zip_path,
+                proposal_path=proposal_path,
+                dest_root=dest_root,
+                errors=errors,
+                warnings=warnings,
+                dry_run=dry_run,
+                entries=entries,
+            )
         proposed_review_id = review_id or str(manifest.get("review_id") or "").strip()
         selected_review_id = _safe_id(proposed_review_id or f"{proposal['proposal_id']}_{zip_path.stem}")
         if not selected_review_id:
@@ -355,6 +367,17 @@ def _manifest_fixture_ids(manifest: dict[str, Any]) -> list[str]:
     if not isinstance(outputs, dict):
         return []
     return [str(key).strip() for key in outputs if str(key).strip()]
+
+
+def _manifest_independence_errors(manifest: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if manifest.get("reviewer_blind_to_model_outputs") is False:
+        errors.append("returned_manifest_declares_not_blind_to_model_outputs")
+    if manifest.get("reviewer_read_model_outputs") is True:
+        errors.append("returned_manifest_declares_model_output_exposure")
+    if manifest.get("source_only_review") is False:
+        errors.append("returned_manifest_declares_not_source_only")
+    return errors
 
 
 def _source_file_map(fixture_ids: list[str]) -> tuple[dict[str, str], list[str]]:

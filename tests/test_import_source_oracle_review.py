@@ -169,3 +169,37 @@ def test_import_source_oracle_review_blocks_missing_source_fixture(tmp_path: Pat
 
     assert report["summary"]["status"] == "fail"
     assert "source_file_not_found_for_fixture:missing_fixture_001" in report["errors"]
+
+
+def test_import_source_oracle_review_blocks_explicit_model_output_exposure(tmp_path: Path) -> None:
+    package = _write_zip(
+        tmp_path / "review.zip",
+        {
+            "manifest.json": _manifest(reviewer_read_model_outputs=True),
+            f"{FIXTURE_ID}/expected_facts.pl": "demo_oracle(Row, alpha, Src).\n",
+            f"{FIXTURE_ID}/forbidden_facts.pl": "demo_oracle(_, forbidden_value, _).\n",
+        },
+    )
+    proposal = _proposal(tmp_path / "proposal.json")
+
+    report = import_review_zip(zip_path=package, proposal_path=proposal, dest_root=tmp_path / "reviews")
+
+    assert report["summary"]["status"] == "fail"
+    assert "returned_manifest_declares_model_output_exposure" in report["errors"]
+
+
+def test_import_source_oracle_review_blocks_explicit_non_source_only_manifest(tmp_path: Path) -> None:
+    package = _write_zip(
+        tmp_path / "review.zip",
+        {
+            "manifest.json": _manifest(source_only_review=False),
+            f"{FIXTURE_ID}/expected_facts.pl": "demo_oracle(Row, alpha, Src).\n",
+            f"{FIXTURE_ID}/forbidden_facts.pl": "demo_oracle(_, forbidden_value, _).\n",
+        },
+    )
+    proposal = _proposal(tmp_path / "proposal.json")
+
+    report = import_review_zip(zip_path=package, proposal_path=proposal, dest_root=tmp_path / "reviews")
+
+    assert report["summary"]["status"] == "fail"
+    assert "returned_manifest_declares_not_source_only" in report["errors"]
