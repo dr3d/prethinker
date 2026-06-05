@@ -482,9 +482,21 @@ diagnostic: only 1 / 29 unsupported rows would close by dropping the
   canonicalization, and source-coordinate choices do not reproduce.
 ```
 
-Read this as a boundary result, not as a row-repair invitation. The closed
-language cage held, forbidden support stayed at 0, and no prose-shaped atom leak
-appeared; the pack is simply not strict-transfer-ready for State-AG AODs.
+The typed near-miss audit is retained here:
+
+```text
+C:\prethinker_tmp_archive\state_ag_near_miss_audit_20260605\state-ag-transfer-near-miss-r1-20260605
+```
+
+Across both strict transfer-oracle probes, the mechanized split is 47
+unsupported rows, 41 rows with stable same-predicate variants, 24 rows with
+same-primary-subject stable variants, 1 source-coordinate-only row, 6 rows with
+no stable same-predicate variant, and diagnosis buckets of 23 same-subject
+value/slot drift, 17 subject/key drift, 6 no-stable-variant, and 1
+source-coordinate-only. Read this as a boundary result, not as a row-repair
+invitation. The closed language cage held, forbidden support stayed at 0, and
+no prose-shaped atom leak appeared; the pack is simply not strict-transfer-ready
+for State-AG AODs.
 
 A third source-only unlike intake on the retained Mercedes-Benz consent
 order/judgment fixture (`state_ag_ugly_001`) is governance-clean but much

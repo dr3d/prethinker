@@ -225,6 +225,11 @@ State-AG settlement/AOD process probe
       slot alone; 24 / 29 have same-subject/same-predicate stable variants.
       The gap is therefore value/canonicalization/source-coordinate stability,
       not a missing-output or prose-leak result.
+  retained typed near-miss audit:
+    C:\prethinker_tmp_archive\state_ag_near_miss_audit_20260605\state-ag-transfer-near-miss-r1-20260605
+    across t002+t003: 47 unsupported rows; 23 same-subject value/slot drift,
+      17 subject/key drift, 6 no-stable-same-predicate rows, and 1
+      source-coordinate-only row
   claim: fifth-domain process evidence only, not transfer support. The AOD
     source-only intakes suggested richer settlement/AOD skeleton could
     stabilize, but strict oracle-scored t002 and t003 probes did not support
