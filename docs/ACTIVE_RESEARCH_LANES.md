@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 This page is the compact public map of current work. It is not a rolling
 session journal. Older lane notes, fixture-specific repair slices, retired
@@ -231,22 +231,25 @@ inference. Repaired transfer_003 Qwen MoE reruns landed at `12/13` and
 pre-registered stability rerun then landed at `12/13`, again with `0`
 supported forbidden and clean atom/signature/lens/value-axis gates. A later
 fresh r4 manifest refresh landed at `11/13`, `0/10` supported forbidden, and
-`34/39` per-run exact. Treat this as a same-condition `11-12/13` band, not a
-fixed single score. Do not use the older SEC cells as a pristine methods-anchor
-claim without this caveat. A
+`34/39` per-run exact. Do not use the older SEC cells as a pristine
+methods-anchor claim without this caveat. A
 follow-up item-treatment seam check tightened the SEC profile note and added
 `sec_filing_item_treatment/4` to typed SEC filing-id normalization. The second
 fresh rerun landed at `11/13`, `0/10` supported forbidden, and `35/39` per-run
 exact with clean atom/lens/value-axis gates. One run now preserves the item
 treatment row as a valid typed fact, but support remains below threshold; this
-is a seam fix, not a score lift.
-Do not use it to claim item-treatment recall is solved. A
-source-only typed reconciliation report over that same current transfer_003
-root now shows 11 value-mode facts at support>=2, all with support=3, and 0
+is a seam fix, not a score lift. A 2026-06-05 same-local-Qwen refresh then
+landed at `13/13`, `0/10` supported forbidden, and `37/39` per-run exact with
+clean atom/lens/value-domain/value-axis gates and one support=1 unexpected
+item-treatment row. Treat the current repaired-schema SEC picture as an
+`11-13/13` same-condition band, not a fixed single score. Do not use the
+favorable draw to claim item-treatment recall is solved. A
+source-only typed reconciliation report over the earlier 11/13 transfer_003
+root shows 11 value-mode facts at support>=2, all with support=3, and 0
 skipped/conflicts. The reconciled facts cover filing wrapper, registrant, four
 identifiers excluding telephone, both filing items, both exhibits, and the
-signatory. The missing reconciled rows are the known boundary: item 2.02
-treatment and telephone.
+signatory. The missing reconciled rows in that root were item 2.02 treatment
+and telephone.
 A repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
 supported forbidden and clean atom/lens gates. The remaining boundary is
@@ -264,10 +267,12 @@ same-signature facts dropped from 2 to 0.
 The latest guard and manifest artifacts are
 `C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604` and
 `C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`; the
-latest full governance run passed 13 checks and now prints repeated unexpected
-same-signature rows as a standing precision diagnostic. This is governance
-cleanup, colder provenance refresh, and precision visibility, not a support
-lift.
+fresh SEC refresh is archived at
+`C:\prethinker_tmp_archive\sec_t003_refresh_20260605`; the latest full
+governance run passed 16 checks and prints repeated unexpected same-signature
+rows as a standing precision diagnostic. This is governance cleanup, colder
+provenance refresh, precision visibility, and band measurement, not a fixed
+support lift.
 
 A fenced SEC event-substance probe then registered `sec_material_event/6` in
 the global carrier contract registry but did not offer it in the promoted SEC
