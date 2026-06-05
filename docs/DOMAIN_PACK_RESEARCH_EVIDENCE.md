@@ -583,6 +583,7 @@ Retained governance artifact:
 
 ```text
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\current_research_governance_atom_library_query_20260604
+C:\prethinker_tmp_archive\sec_atom_library_query_contract_correction_20260605\current_research_governance_after_sec_query_contract_correction_20260605
 ```
 
 This is a governance hardening result, not a new accuracy score. It keeps the
