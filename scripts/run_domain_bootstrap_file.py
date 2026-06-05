@@ -10797,6 +10797,7 @@ SEC_FILING_ID_SIGNATURES = {
     "sec_registrant",
     "sec_registrant_identifier",
     "sec_filing_item",
+    "sec_filing_item_treatment",
     "sec_exhibit",
     "sec_signatory",
 }
@@ -10856,6 +10857,172 @@ def _apply_sec_filing_id_atom_reduction(source_compile: dict[str, Any]) -> dict[
             "Canonicalizes numeric-leading values already emitted in SEC registered carrier filing_id "
             "slots to filing_* atoms so atom-shape governance can evaluate the row. It reads only typed "
             "carrier arguments and creates no new facts."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+STATE_AG_TYPED_SLOT_ATOM_REDUCTIONS: dict[tuple[str, int], dict[int, dict[str, str]]] = {
+    ("state_ag_instrument", 7): {
+        2: {
+            "nyag": "new_york_attorney_general",
+            "state_of_new_york": "new_york_attorney_general",
+            "state_of_new_york_office_of_the_attorney_general": "new_york_attorney_general",
+            "new_york_state_attorney_general": "new_york_attorney_general",
+        },
+        3: {
+            "equifax": "equifax_information_services_llc",
+            "equifax_info_services_llc": "equifax_information_services_llc",
+        },
+    },
+    ("state_ag_party", 5): {
+        1: {
+            "equifax": "equifax_information_services_llc",
+            "equifax_info_services_llc": "equifax_information_services_llc",
+            "alston_bird_llp": "alston_and_bird_llp",
+            "ny_ag": "nyag",
+        },
+        3: {
+            "alston_bird_llp": "alston_and_bird_llp",
+            "state_of_new_york_office_of_the_attorney_general": "new_york_attorney_general",
+        },
+    },
+    ("state_ag_obligation", 7): {
+        1: {
+            "equifax": "equifax_information_services_llc",
+            "equifax_info_services_llc": "equifax_information_services_llc",
+        },
+    },
+    ("state_ag_monetary_payment", 7): {
+        1: {
+            "equifax": "equifax_information_services_llc",
+            "equifax_info_services_llc": "equifax_information_services_llc",
+        },
+    },
+    ("state_ag_contact_channel", 7): {
+        1: {
+            "equifax": "equifax_information_services_llc",
+            "equifax_info_services_llc": "equifax_information_services_llc",
+            "state_of_new_york": "nyag",
+            "new_york_attorney_general": "nyag",
+            "nyag_office": "nyag",
+            "ny_ag": "nyag",
+            "alston_bird_llp": "alston_and_bird_llp",
+        },
+    },
+    ("state_ag_signature", 6): {
+        1: {
+            "equifax": "equifax_information_services_llc",
+            "equifax_info_services_llc": "equifax_information_services_llc",
+            "state_of_new_york": "nyag",
+            "new_york_attorney_general": "nyag",
+            "nyag_office": "nyag",
+            "ny_ag": "nyag",
+            "alston_bird_llp": "alston_and_bird_llp",
+        },
+    },
+}
+
+STATE_AG_CITATION_ATOM_REDUCTIONS = {
+    "exec_law_63_12": "executive_law_63_12",
+    "n_y_exec_law_63_12": "executive_law_63_12",
+    "ny_exec_law_63_12": "executive_law_63_12",
+    "executive_law_section_63_12": "executive_law_63_12",
+    "gb_349_350": "gbl_349_350",
+    "gbll_349_350": "gbl_349_350",
+    "gb_law_349_350": "gbl_349_350",
+    "gbllaw_349_350": "gbl_349_350",
+    "gbl_349_and_350": "gbl_349_350",
+    "fcra_1681e_b": "fcra_15_usc_1681e_b",
+    "fcra_15_u_s_c_1681e_b": "fcra_15_usc_1681e_b",
+    "15_usc_1681e_b": "fcra_15_usc_1681e_b",
+    "gbll_380_j_a": "gbl_380_j_a",
+}
+
+STATE_AG_EMAIL_ATOM_REDUCTIONS = {
+    "glenna_goldis_ag_ny_gov": "glenna_goldis_at_ag_ny_gov",
+    "jane_azia_ag_ny_gov": "jane_azia_at_ag_ny_gov",
+    "john_redding_alston_com": "john_redding_at_alston_com",
+    "nicholas_oldham_equifax_com": "nicholas_oldham_at_equifax_com",
+}
+
+
+def _canonical_state_ag_slot_atom(*, predicate: str, arity: int, index: int, value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if not text:
+        return ""
+    slot_map = STATE_AG_TYPED_SLOT_ATOM_REDUCTIONS.get((predicate, arity), {}).get(index, {})
+    canonical = slot_map.get(text, "")
+    if canonical:
+        return canonical if canonical != text else ""
+    if predicate == "state_ag_authority_citation" and arity == 4 and index == 1:
+        canonical = STATE_AG_CITATION_ATOM_REDUCTIONS.get(text, "")
+        return canonical if canonical and canonical != text else ""
+    if predicate == "state_ag_contact_channel" and arity == 7 and index == 5:
+        canonical = STATE_AG_EMAIL_ATOM_REDUCTIONS.get(text, "")
+        return canonical if canonical and canonical != text else ""
+    return ""
+
+
+def _apply_state_ag_typed_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize finite state-AG typed carrier aliases without reading prose."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        fact_reductions: list[dict[str, str]] = []
+        for index, value in enumerate(args):
+            canonical = _canonical_state_ag_slot_atom(
+                predicate=predicate,
+                arity=len(args),
+                index=index,
+                value=value,
+            )
+            if canonical:
+                original = args[index]
+                args[index] = canonical
+                changed = True
+                fact_reductions.append(
+                    {
+                        "from": fact,
+                        "slot_index": str(index),
+                        "value": original,
+                        "canonical": canonical,
+                    }
+                )
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            for reduction in fact_reductions:
+                reduction["to"] = reduced
+            reductions.extend(fact_reductions)
+            fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_state_ag_typed_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_state_ag_typed_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_state_ag_typed_atom_reduction_policy"] = {
+        "schema_version": "deterministic_state_ag_typed_atom_reduction_v1",
+        "authority": "typed_carrier_slot_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes a finite set of state-AG values already emitted inside registered typed "
+            "carrier slots, such as NYAG party aliases, compact Equifax/Alston organization atoms, "
+            "known legal-citation spellings, and compact email atoms. It reads no source prose, "
+            "no query text, and creates no new facts."
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}

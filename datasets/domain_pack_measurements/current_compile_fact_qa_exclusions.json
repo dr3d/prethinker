@@ -138,6 +138,15 @@
       "evidence_roots": [
         "datasets\\compile_micro_fixtures\\sec_form_8k_signature_omission_v1"
       ]
+    },
+    {
+      "fixture_id": "state_ag_settlement_aod_v1",
+      "reason_code": "seed_or_component_micro_fixture",
+      "status": "fixture_bank_seed",
+      "note": "State-AG settlement/AOD seed micro starts a fifth closed-domain pack candidate; it is schema and pressure evidence only until same-condition compiles and unlike transfer fixtures are measured.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\state_ag_settlement_aod_v1"
+      ]
     }
   ]
 }

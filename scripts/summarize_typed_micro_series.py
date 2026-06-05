@@ -65,6 +65,7 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_sec_identifier_value_atom_reduction,
     _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
+    _apply_state_ag_typed_atom_reduction,
     _apply_atom_shape_integrity,
     _apply_carrier_value_domain_integrity,
     _apply_domain_omission_registry_value_integrity,
@@ -288,6 +289,10 @@ def build_report(
         for fact, run_ids in unexpected_support.items()
     ]
     unexpected_rows.sort(key=lambda item: (-int(item["support_count"]), item["fact"]))
+    unexpected_signature_rows = _summarize_unexpected_by_signature(
+        unexpected_rows,
+        support_threshold=support_threshold,
+    )
     return {
         "schema_version": "typed_micro_series_summary_v1",
         "fixture_id": fixture_id,
@@ -310,6 +315,7 @@ def build_report(
         "rows": rows,
         "forbidden_rows": forbidden_rows,
         "unexpected_rows": unexpected_rows,
+        "unexpected_signature_rows": unexpected_signature_rows,
     }
 
 
@@ -365,6 +371,30 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append(f"- {row.get('support_count', 0)} run(s): `{row.get('forbidden_fact')}` [{runs}]")
     unexpected_rows = report.get("unexpected_rows", [])
     if unexpected_rows:
+        signature_rows = report.get("unexpected_signature_rows", [])
+        if signature_rows:
+            lines.extend(["", "## Unexpected Same-Signature Buckets", ""])
+            lines.append(
+                "| Signature | Facts | Support>=threshold | Max support | Support distribution |"
+            )
+            lines.append("| --- | ---: | ---: | ---: | --- |")
+            for row in signature_rows:
+                distribution = ", ".join(
+                    f"{support}:{count}"
+                    for support, count in sorted(
+                        (row.get("support_distribution") or {}).items(),
+                        key=lambda item: int(item[0]),
+                    )
+                )
+                lines.append(
+                    "| `{}` | {} | {} | {} | `{}` |".format(
+                        row.get("signature") or "unparsed",
+                        row.get("fact_count", 0),
+                        row.get("support_ge_threshold_fact_count", 0),
+                        row.get("max_support", 0),
+                        distribution,
+                    )
+                )
         lines.extend(["", "## Unexpected Same-Signature Facts", ""])
         lines.append(
             "These facts were emitted in the selected signatures but matched neither expected nor forbidden facts. "
@@ -396,6 +426,46 @@ def _fact_signature(fact: str) -> str:
     if not predicate or not isinstance(args, list):
         return ""
     return f"{predicate}/{len(args)}"
+
+
+def _summarize_unexpected_by_signature(
+    unexpected_rows: list[dict[str, Any]],
+    *,
+    support_threshold: int,
+) -> list[dict[str, Any]]:
+    buckets: dict[str, dict[str, Any]] = {}
+    for row in unexpected_rows:
+        fact = str(row.get("fact") or "")
+        signature = _fact_signature(fact) or "unparsed"
+        support_count = int(row.get("support_count") or 0)
+        bucket = buckets.setdefault(
+            signature,
+            {
+                "signature": signature,
+                "fact_count": 0,
+                "support_ge_threshold_fact_count": 0,
+                "total_support": 0,
+                "max_support": 0,
+                "support_distribution": {},
+            },
+        )
+        bucket["fact_count"] += 1
+        bucket["total_support"] += support_count
+        bucket["max_support"] = max(int(bucket.get("max_support") or 0), support_count)
+        if support_count >= support_threshold:
+            bucket["support_ge_threshold_fact_count"] += 1
+        distribution = bucket.setdefault("support_distribution", {})
+        key = str(support_count)
+        distribution[key] = int(distribution.get(key) or 0) + 1
+    rows = list(buckets.values())
+    rows.sort(
+        key=lambda item: (
+            -int(item.get("support_ge_threshold_fact_count") or 0),
+            -int(item.get("fact_count") or 0),
+            str(item.get("signature") or ""),
+        )
+    )
+    return rows
 
 
 def _fact_matches_expected_signature_filter(fact: str, signature_filter: set[str]) -> bool:
@@ -533,6 +603,7 @@ def _apply_domain_reducers(source_compile: dict[str, Any]) -> dict[str, Any]:
         ("sec_filing_id_atom_reduction", _apply_sec_filing_id_atom_reduction),
         ("sec_typed_slot_prefix_reduction", _apply_sec_typed_slot_prefix_reduction),
         ("sec_identifier_value_atom_reduction", _apply_sec_identifier_value_atom_reduction),
+        ("state_ag_typed_atom_reduction", _apply_state_ag_typed_atom_reduction),
         ("ntsb_timestamp_atom_reduction", _apply_ntsb_timestamp_atom_reduction),
         ("ntsb_actor_id_atom_reduction", _apply_ntsb_actor_id_atom_reduction),
         ("ntsb_condition_atom_reduction", _apply_ntsb_condition_atom_reduction),

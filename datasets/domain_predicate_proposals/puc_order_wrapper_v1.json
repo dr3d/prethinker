@@ -1,0 +1,152 @@
+{
+  "schema": "domain_predicate_proposal_v1",
+  "proposal_id": "puc_order_wrapper_v1",
+  "status": "draft",
+  "domain_profile": "puc_order_v1",
+  "bounded_document_family": "Public utility commission orders, resolutions, and memorializing decisions that identify an agency, docket, order type, issuance date, and compact decision status.",
+  "candidate_signature": "puc_order/7",
+  "lens_owner": "wrapper",
+  "allowed_lenses": [
+    "wrapper"
+  ],
+  "recurring_anatomy": [
+    "PUC orders identify an issuing commission or administrative law body and a docket, case, proceeding, resolution, or order identifier.",
+    "PUC orders state a compact order kind such as resolution, order memorializing decision, ruling, or final order.",
+    "PUC orders state or imply a compact decision status such as settlement approved, decision memorialized, request denied, matter remanded, or status not stated."
+  ],
+  "answer_classes": [
+    "document_wrapper",
+    "docket_identifier",
+    "order_status",
+    "puc_order"
+  ],
+  "argument_roles": [
+    {
+      "name": "order_id",
+      "purpose": "Stable local id for one source-stated PUC order, resolution, ruling, or memorializing decision.",
+      "source_coordinate": false
+    },
+    {
+      "name": "agency_id",
+      "purpose": "Compact source-stated issuing agency or commission atom.",
+      "source_coordinate": false
+    },
+    {
+      "name": "docket_id",
+      "purpose": "Source-stated docket, case, resolution, or proceeding identifier atom.",
+      "source_coordinate": false
+    },
+    {
+      "name": "order_kind",
+      "purpose": "Closed compact type of PUC instrument.",
+      "source_coordinate": false
+    },
+    {
+      "name": "issued_date",
+      "purpose": "Source-stated issue, decision, or order date as a date atom, or not_stated.",
+      "source_coordinate": false
+    },
+    {
+      "name": "decision_status",
+      "purpose": "Closed compact current disposition or decision status for the order wrapper.",
+      "source_coordinate": false
+    },
+    {
+      "name": "source_or_scope",
+      "purpose": "Source coordinate or governed scope atom.",
+      "source_coordinate": true
+    }
+  ],
+  "value_domains": {
+    "order_kind": [
+      "resolution",
+      "order_memorializing_decision",
+      "final_order",
+      "ruling",
+      "proposed_decision",
+      "notice"
+    ],
+    "decision_status": [
+      "approves_settlement",
+      "memorializes_decision",
+      "denies_request",
+      "remands",
+      "not_stated"
+    ]
+  },
+  "positive_examples": [
+    {
+      "fixture_id": "puc_order_ugly_002",
+      "fact": "puc_order(cpuc_alj_445, cpuc, h_22_07_010, resolution, v_2023_10_16, approves_settlement, src_header)."
+    },
+    {
+      "fixture_id": "puc_order_ugly_003",
+      "fact": "puc_order(utah_psc_24_035_04_omd, utah_psc, docket_24_035_04, order_memorializing_decision, v_2025_06_24, memorializes_decision, src_header)."
+    }
+  ],
+  "forbidden_examples": [
+    {
+      "fixture_id": "puc_order_ugly_002",
+      "fact": "puc_order(cpuc_alj_445, cpuc, h_22_07_010, full_header_sentence_blob, v_2023_10_16, approves_settlement, src_header)."
+    },
+    {
+      "fixture_id": "puc_order_ugly_003",
+      "fact": "puc_order(utah_psc_24_035_04_omd, utah_psc, docket_24_035_04, order_memorializing_decision, v_2025_06_24, settlement_is_fair_just_and_reasonable_full_phrase, src_header)."
+    }
+  ],
+  "unlike_transfer_plan": {
+    "minimum_fixtures": 2,
+    "n": 3,
+    "support_threshold": 2,
+    "heldout_policy": "unlike PUC orders or resolutions not used to shape the wrapper carrier or value domains"
+  },
+  "pending_external_work_orders": [
+    {
+      "kind": "source_only_expected_forbidden_oracle",
+      "path": "tmp/puc_order_wrapper_oracle_work_order_20260604.zip",
+      "fixtures": [
+        "puc_order_ugly_002",
+        "puc_order_ugly_003"
+      ],
+      "purpose": "Independent source-only review decides expected and forbidden wrapper facts before this draft can become a candidate."
+    }
+  ],
+  "promotion_gates": [
+    "n_ge_3",
+    "support_ge_2",
+    "zero_forbidden",
+    "atom_shape",
+    "lens_scope",
+    "value_domain",
+    "unlike_transfer"
+  ],
+  "anti_leak_guards": [
+    "no_source_prose",
+    "no_query_text_routing",
+    "no_fixture_vocabulary",
+    "no_answer_key_influence",
+    "atom_shape_gate"
+  ],
+  "abstention_boundary": [
+    "Do not emit when the source lacks a docket, case, proceeding, or order identifier.",
+    "Do not use this carrier to preserve settlement terms, findings, ordering paragraphs, certificate-of-service rows, commissioner votes, or party rosters; those require separate closed carriers.",
+    "Do not put the full caption, settlement finding sentence, rehearing notice text, or service-list prose into any atom slot.",
+    "Do not infer legal effectiveness or finality from generic order wording when the source states only a procedural notice or proposed status."
+  ],
+  "proposal_evidence": [
+    {
+      "artifact_root": "C:\\prethinker_tmp_archive\\puc_domain_bootstrap_20260604\\puc_order_ugly_002_profile",
+      "result": "profile_bootstrap_parsed",
+      "candidate_predicates": 14,
+      "rough_score": 1.0,
+      "note": "Local Qwen MoE profile-only bootstrap proposed docket/order/procedure/settlement/citation anatomy without schema errors."
+    },
+    {
+      "artifact_root": "C:\\prethinker_tmp_archive\\puc_domain_bootstrap_20260604\\puc_order_ugly_003_profile",
+      "result": "profile_bootstrap_parsed_with_warnings",
+      "candidate_predicates": 14,
+      "rough_score": 0.825,
+      "note": "Local Qwen MoE profile-only bootstrap proposed the same broad PUC skeleton but drifted on wrapper/date and settlement-approval naming."
+    }
+  ]
+}

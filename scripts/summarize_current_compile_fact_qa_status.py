@@ -127,6 +127,9 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
     unexpected = dict(
         (cell.get("unexpected_same_signature_summary_by_fixture") or {}).get(fixture_id) or {}
     )
+    unexpected_support = _unexpected_same_signature_support(
+        cell.get("unexpected_same_signature_emissions_by_file") or {}
+    )
     redaction = dict(cell.get("redaction_summary") or {})
     typed_plan = dict(cell.get("typed_plan_summary") or {})
     per_run_counts = _per_run_counts(cell.get("verdict_summary_by_file") or {})
@@ -145,6 +148,7 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
         "per_run_miss": int(per_run_counts["miss"]),
         "unexpected_same_signature_ge_2": int(unexpected.get("unexpected_same_signature_ge_2") or 0),
         "unexpected_same_signature_ge_1": int(unexpected.get("unexpected_same_signature_ge_1") or 0),
+        "unexpected_same_signature_support_ge_2": unexpected_support,
         "redaction_status": str(redaction.get("status") or ""),
         "prose_dependent_exact": int(redaction.get("prose_dependent_exact") or 0),
         "typed_plan_status": str(typed_plan.get("status") or ""),
@@ -185,6 +189,23 @@ def _per_run_counts(verdict_summary_by_file: dict[str, Any]) -> dict[str, int]:
         totals["miss"] += miss
         totals["rows"] += exact + partial + miss + other
     return totals
+
+
+def _unexpected_same_signature_support(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, dict):
+        return []
+    counts: dict[str, int] = {}
+    for emissions in value.values():
+        if not isinstance(emissions, list):
+            continue
+        for fact in {str(item).strip() for item in emissions if str(item).strip()}:
+            counts[fact] = counts.get(fact, 0) + 1
+    rows = [
+        {"fact": fact, "support": support}
+        for fact, support in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+        if support >= 2
+    ]
+    return rows
 
 
 def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -320,6 +341,35 @@ def render_markdown(report: dict[str, Any]) -> str:
                 source,
             )
         )
+    unexpected_rows = [
+        (cell, row)
+        for cell in report["cells"]
+        for row in cell.get("unexpected_same_signature_support_ge_2", [])
+    ]
+    if unexpected_rows:
+        lines.extend(
+            [
+                "",
+                "## Unexpected Same-Signature Support>=2",
+                "",
+                "These rows are precision-pressure diagnostics only. They are not",
+                "promoted expected facts unless an independent source-only oracle",
+                "adds them to the fixture.",
+                "",
+                "| Cell | Fixture | Support | Fact |",
+                "| --- | --- | ---: | --- |",
+            ]
+        )
+        for cell, row in unexpected_rows:
+            fact = str(row.get("fact") or "").replace("|", "\\|")
+            lines.append(
+                "| `{}` | `{}` | {} | `{}` |".format(
+                    cell["id"],
+                    cell["fixture_id"],
+                    row.get("support", 0),
+                    fact,
+                )
+            )
     warnings = [warning for cell in report["cells"] for warning in cell.get("source_warnings", [])]
     if warnings:
         lines.extend(["", "## Source Warnings", ""])

@@ -146,3 +146,21 @@ def test_domain_predicate_proposal_status_report_disclaims_promotion(tmp_path: P
     assert "validates proposal shape only" in rendered
     assert "not a" in rendered
     assert "promoted domain-pack claim" in rendered
+
+
+def test_domain_predicate_proposal_status_report_shows_pending_work_order(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["pending_external_work_orders"] = [
+        {
+            "kind": "source_only_expected_forbidden_oracle",
+            "path": "tmp/example_domain_work_order.zip",
+            "fixtures": ["example_transfer_v1"],
+        }
+    ]
+    path = _write(tmp_path / "proposal.json", payload)
+    report = build_report([path])
+
+    rendered = render_markdown(report)
+
+    assert "Pending Work" in rendered
+    assert "source_only_expected_forbidden_oracle:tmp/example_domain_work_order.zip" in rendered

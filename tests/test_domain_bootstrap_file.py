@@ -111,6 +111,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_sec_identifier_value_atom_reduction,
     _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
+    _apply_state_ag_typed_atom_reduction,
     _apply_ntsb_actor_id_atom_reduction,
     _apply_ntsb_condition_atom_reduction,
     _apply_ntsb_injury_count_scope_specificity,
@@ -8600,6 +8601,7 @@ def test_sec_filing_id_atom_reduction_canonicalizes_numeric_leading_ids_only() -
     source_compile = {
         "facts": [
             "sec_filing_item(001_39898, item_4_02, non_reliance, substantive, item_heading_4_02).",
+            "sec_filing_item_treatment(001_39898, item_4_02, furnished, item_heading_4_02).",
             "sec_exhibit(10.2, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_104).",
             "sec_signatory(sec_form_8k_007, scott_o_melia, chief_legal_officer, v_2026_02_25, source_signature).",
             "fda_violation(001_39898, cfr_21_211_192, data_integrity, observation, src).",
@@ -8608,14 +8610,59 @@ def test_sec_filing_id_atom_reduction_canonicalizes_numeric_leading_ids_only() -
 
     report = _apply_sec_filing_id_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 2
+    assert report["reduction_count"] == 3
     assert source_compile["facts"] == [
         "sec_filing_item(filing_001_39898, item_4_02, non_reliance, substantive, item_heading_4_02).",
+        "sec_filing_item_treatment(filing_001_39898, item_4_02, furnished, item_heading_4_02).",
         "sec_exhibit(filing_10_2, exhibit_104, cover_page_ixbrl, embedded_ixbrl, exhibit_table_row_104).",
         "sec_signatory(sec_form_8k_007, scott_o_melia, chief_legal_officer, v_2026_02_25, source_signature).",
         "fda_violation(001_39898, cfr_21_211_192, data_integrity, observation, src).",
     ]
     policy = source_compile["deterministic_sec_filing_id_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_state_ag_typed_atom_reduction_canonicalizes_closed_slot_aliases_only() -> None:
+    source_compile = {
+        "facts": [
+            "state_ag_instrument(aod_24_102, assurance_of_discontinuance, nyag, equifax, aod_24_102, v_2025_01_02, source_document).",
+            "state_ag_party(aod_24_102, equifax, respondent, equifax_information_services_llc, source_document).",
+            "state_ag_party(aod_24_102, alston_bird_llp, counsel_for_respondent, alston_bird_llp, source_document).",
+            "state_ag_authority_citation(aod_24_102, exec_law_63_12, investigation_authority, source_document).",
+            "state_ag_authority_citation(aod_24_102, gb_law_349_350, investigation_authority, source_document).",
+            "state_ag_authority_citation(aod_24_102, fcra_1681e_b, prospective_relief_authority, source_document).",
+            "state_ag_authority_citation(aod_24_102, fcra_15_u_s_c_1681e_b, prospective_relief_authority, source_document).",
+            "state_ag_authority_citation(aod_24_102, fcra, prospective_relief_authority, source_document).",
+            "state_ag_contact_channel(aod_24_102, state_of_new_york, glenna_goldis, regulator_contact, email, glenna_goldis_ag_ny_gov, source_document).",
+            "state_ag_contact_channel(aod_24_102, ny_ag, glenna_goldis, regulator_contact, email, glenna_goldis_ag_ny_gov, source_document).",
+            "state_ag_signature(aod_24_102, state_of_new_york, jane_azia, bureau_chief_consumer_frauds_protection_bureau, v_2025_01_02, source_document).",
+            "state_ag_signature(aod_24_102, ny_ag, glenna_goldis, assistant_attorney_general_consumer_frauds_protection_bureau, v_2025_01_02, source_document).",
+            "state_ag_signature(aod_24_102, alston_bird_llp, john_c_redding, counsel_for_equifax_information_services_llc, v_2025_01_02, source_document).",
+            "state_ag_monetary_payment(aod_24_102, equifax_info_services_llc, nyag_office, usd_725000, restitution_and_penalties, within_30_days_after_assurance_date, source_document).",
+            "fda_warning_letter(wl_1, cder, firm_1, v_2025_01_02, source_document).",
+        ]
+    }
+
+    report = _apply_state_ag_typed_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 17
+    assert source_compile["facts"] == [
+        "state_ag_instrument(aod_24_102, assurance_of_discontinuance, new_york_attorney_general, equifax_information_services_llc, aod_24_102, v_2025_01_02, source_document).",
+        "state_ag_party(aod_24_102, equifax_information_services_llc, respondent, equifax_information_services_llc, source_document).",
+        "state_ag_party(aod_24_102, alston_and_bird_llp, counsel_for_respondent, alston_and_bird_llp, source_document).",
+        "state_ag_authority_citation(aod_24_102, executive_law_63_12, investigation_authority, source_document).",
+        "state_ag_authority_citation(aod_24_102, gbl_349_350, investigation_authority, source_document).",
+        "state_ag_authority_citation(aod_24_102, fcra_15_usc_1681e_b, prospective_relief_authority, source_document).",
+        "state_ag_authority_citation(aod_24_102, fcra, prospective_relief_authority, source_document).",
+        "state_ag_contact_channel(aod_24_102, nyag, glenna_goldis, regulator_contact, email, glenna_goldis_at_ag_ny_gov, source_document).",
+        "state_ag_signature(aod_24_102, nyag, jane_azia, bureau_chief_consumer_frauds_protection_bureau, v_2025_01_02, source_document).",
+        "state_ag_signature(aod_24_102, nyag, glenna_goldis, assistant_attorney_general_consumer_frauds_protection_bureau, v_2025_01_02, source_document).",
+        "state_ag_signature(aod_24_102, alston_and_bird_llp, john_c_redding, counsel_for_equifax_information_services_llc, v_2025_01_02, source_document).",
+        "state_ag_monetary_payment(aod_24_102, equifax_information_services_llc, nyag_office, usd_725000, restitution_and_penalties, within_30_days_after_assurance_date, source_document).",
+        "fda_warning_letter(wl_1, cder, firm_1, v_2025_01_02, source_document).",
+    ]
+    policy = source_compile["deterministic_state_ag_typed_atom_reduction_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 

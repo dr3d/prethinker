@@ -57,3 +57,105 @@ def test_unmapped_subject_facts_are_reported_but_not_reconciled(tmp_path: Path) 
     assert report["artifact"]["source_compile"]["facts"] == []
     skipped_reasons = {item["reason"] for item in report["artifact"]["source_compile"]["governed_reconciliation"]["skipped"]}
     assert skipped_reasons == {"unmapped_subject"}
+
+
+def test_reconciles_state_ag_registered_facts_with_instrument_aliases(tmp_path: Path) -> None:
+    first = _write_compile(
+        tmp_path / "run_a" / "compile.json",
+        [
+            "state_ag_authority_citation(assurance_24_099, executive_law_63_12, investigation_authority, caption).",
+            "state_ag_contact_channel(assurance_no_24_099, soulcycle_llc, yoursoulmatters_soul_cycle_com, respondent_contact, email, yoursoulmatters_soul_cycle_com, findings_58).",
+        ],
+    )
+    second = _write_compile(
+        tmp_path / "run_b" / "compile.json",
+        [
+            "state_ag_authority_citation(aod_24_099, executive_law_63_12, investigation_authority, source_md).",
+            "state_ag_contact_channel(aod_24_099, soulcycle_llc, yoursoulmatters_soul_cycle_com, respondent_contact, email, yoursoulmatters_soul_cycle_com, source_document).",
+        ],
+    )
+
+    report = build_reconciliation(
+        fixture_id="state_ag_fixture",
+        compile_paths=[first, second],
+        min_support=2,
+        support_mode="value",
+    )
+
+    facts = set(report["artifact"]["source_compile"]["facts"])
+    assert (
+        "state_ag_authority_citation(aod_24_099, executive_law_63_12, investigation_authority, caption)."
+        in facts
+    )
+    assert (
+        "state_ag_contact_channel(aod_24_099, soulcycle_llc, yoursoulmatters_soul_cycle_com, "
+        "respondent_contact, email, yoursoulmatters_soul_cycle_com, findings_58)."
+        in facts
+    )
+    assert report["summary"]["reconciled_fact_count"] == 2
+    assert report["summary"]["skipped_count"] == 0
+    support_counts = {
+        item["fact"]: item["support_count"]
+        for item in report["artifact"]["source_compile"]["governed_reconciliation"]["fact_support"]
+    }
+    assert all(count == 2 for count in support_counts.values())
+
+
+def test_reconciles_sec_registered_facts_with_filing_aliases(tmp_path: Path) -> None:
+    first = _write_compile(
+        tmp_path / "run_a" / "compile.json",
+        [
+            "sec_filing_item_treatment(sec_filing_8ka_blackstone_20251023, item_2_02, furnished, item_body_2_02).",
+            "sec_exhibit(sec_filing_8ka_blackstone_20251023, exhibit_99_1, press_release, furnished, exhibit_table).",
+            "sec_exhibit(sec_filing_8ka_blackstone_20251023, exhibit_104, cover_page_ixbrl, not_stated, exhibit_table).",
+        ],
+    )
+    second = _write_compile(
+        tmp_path / "run_b" / "compile.json",
+        [
+            "sec_filing_item_treatment(filing_sec_8ka_blackstone_20251023, item_2_02, furnished, source_body).",
+            "sec_exhibit(filing_sec_8ka_blackstone_20251023, exhibit_99_1, press_release, furnished, source_table).",
+            "sec_exhibit(filing_sec_8ka_blackstone_20251023, exhibit_104, cover_page_ixbrl, filed, source_table).",
+        ],
+    )
+
+    report = build_reconciliation(
+        fixture_id="sec_fixture",
+        compile_paths=[first, second],
+        min_support=2,
+        support_mode="value",
+    )
+
+    facts = set(report["artifact"]["source_compile"]["facts"])
+    assert (
+        "sec_filing_item_treatment(filing_sec_8ka_blackstone_20251023, item_2_02, furnished, item_body_2_02)."
+        in facts
+    )
+    assert (
+        "sec_exhibit(filing_sec_8ka_blackstone_20251023, exhibit_99_1, press_release, furnished, exhibit_table)."
+        in facts
+    )
+    assert not any("exhibit_104" in fact for fact in facts)
+    assert report["summary"]["reconciled_fact_count"] == 2
+    assert report["summary"]["skipped_count"] == 0
+
+
+def test_reconciles_registry_loaded_domain_signatures_without_bespoke_allowlist(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "run_a" / "compile.json",
+        [
+            "ntsb_report(report_hwy_2024, highway_accident, final_report, date_2024_02_10, cover_page).",
+        ],
+    )
+
+    report = build_reconciliation(
+        fixture_id="ntsb_fixture",
+        compile_paths=[compile_json],
+        min_support=1,
+    )
+
+    assert report["artifact"]["source_compile"]["facts"] == [
+        "ntsb_report(report_hwy_2024, highway_accident, final_report, date_2024_02_10, cover_page)."
+    ]
+    assert report["summary"]["reconciled_fact_count"] == 1
+    assert report["summary"]["skipped_count"] == 0

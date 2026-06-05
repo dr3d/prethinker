@@ -1,6 +1,6 @@
 # Closed Domain Predicate Packs Technical Note
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Abstract
 
@@ -23,6 +23,14 @@ compact domain layer reproduces on unlike documents.
 This is not a claim of general document understanding, product readiness,
 self-serve schema induction, or 90%+ QA accuracy. It is a falsifiable
 compile-stability result for bounded official-document families.
+
+Important robustness boundary: the strict gates travel better than the recall
+rate. Dense compile substitutions on the SEC transfer_003 cell stayed inside
+the closed predicate language with clean gates and `0` supported forbidden rows,
+but both Gemma 4 12B Q4 and Qwen 27B Q4 landed below the local Qwen MoE
+reference on the same role-semantics rows. Current evidence supports
+"governed language constrains model behavior"; it does not support
+"compile recall is model-independent."
 
 This note has two co-headline findings:
 
@@ -163,10 +171,11 @@ compiler proposes facts; deterministic gates decide what counts.
 
 | Family | Scope | Current result | What it supports |
 | --- | --- | --- | --- |
-| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, item treatment, exhibits, signature block | Historical pre-axis-repair cells: seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Repaired axis-clean breadth: seed `12/13`, transfer_001 `11/13`, transfer_002 `11/12`, transfer_003 `12/13` then `11/13`; a pre-registered transfer_003 stability rerun and omission-accountability guard rescore landed at `12/13`, but the latest fresh manifest refresh is `11/13` with `34/39` per-run exact. All repaired cells have clean governance | Useful skeleton-transfer and boundary evidence, not a pristine methods anchor. The repaired schema exposes exhibit treatment ambiguity, wrapper/telephone recall gaps, duplicate file-number instability, item-treatment recall, and MoE jitter. |
+| SEC Form 8-K | Skeleton only: filing wrapper, registrant, identifiers, item headings, item treatment, exhibits, signature block | Historical pre-axis-repair cells: seed `13/13`; three unlike transfers `13/13`, `12/12`, `12/12`; `0` supported forbidden. Repaired axis-clean breadth: seed `12/13`, transfer_001 `11/13`, transfer_002 `11/12`, transfer_003 `12/13` then `11/13`; a pre-registered transfer_003 stability rerun and omission-accountability guard rescore landed at `12/13`, but fresh manifest refreshes remain in an `11-12/13` band. The latest item-treatment filing-id seam check is `11/13` with `35/39` per-run exact. Source-only typed reconciliation over that current root has 11 value-mode support>=2 facts, all support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone remain absent from stable support. Dense compile substitutions on transfer_003 both landed at `10/12`, `0` forbidden, clean gates. All repaired cells have clean governance | Useful skeleton-transfer and boundary evidence under the local-Qwen-MoE lane, not a pristine or model-independent methods anchor. The repaired schema exposes exhibit treatment ambiguity, wrapper/telephone recall gaps, duplicate file-number instability, item-treatment recall, MoE jitter, and model-path role-semantics sensitivity. |
 | FDA warning letters | Richer regulatory case: wrapper, chronology, CGMP skeleton, citations, insanitary condition, response lanes | Deterministic judged-QA v2 across transfer_001 and transfer_002: `137/159` exact; support>=2 transfer_001 `26/26`, transfer_002 `20/27`; all `137` exact rows pass typed-plan and redaction replay. Fresh current-pack transfer_003: `19/26`, `0/10` supported forbidden, clean atom/lens/signature gates | Primary richer case study: skeleton/citation/regulatory boilerplate transfers better than role semantics, context-dependent categories, and value/detail flesh. V2 measures oracle-shaped compile-fact support, not messy human query planning. |
 | NTSB investigations | Incident skeleton, occurrence, vehicles, parties, conditions, chronology, safety action, casualty, finding | Seed `13/13`; first unlike transfer `22/25` in the current scoped injury-count manifest; compile-fact QA `60/75` per-run exact and `22/25` support>=2; `0` supported forbidden | Corroborating boundary: wrapper, chronology, vehicles, conditions, and scoped injury-count partitions transfer more cleanly than findings/probable-cause substance. One timeline sequence-role row remains unstable. The earlier raw/no-reducer view was `18/25` support>=2. |
-| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `21/21` support>=2 after a high-arity registry intake fix, blank-flag contract, and source-only FTA total-penalty oracle correction; first unlike transfer `15/15`; both `0` supported forbidden with clean atom/lens gates. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `0/10` supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than long-table enumeration and mixed-section attachment. |
+| OSHA accident/inspection | Skeleton/table anatomy: inspection wrapper, establishment, accident, injured employees, violation counts, penalties, violation item/status, related activity | Seed `21/21` support>=2 after a high-arity registry intake fix, blank-flag contract, and source-only FTA total-penalty oracle correction; first unlike transfer `15/15`; both `0` supported forbidden with clean atom/lens gates. The source-only FTA correction is queued for independent review in `tmp/osha_fta_total_penalty_blind_review_work_order_20260605.zip` and should remain project-adjudicated until that returns. Diagnostics: transfer_002 `18/53`, `0` forbidden; transfer_003 `2/21`, `0/10` supported forbidden after the typed accident-omission contradiction guard | Fourth-family corroboration, not a promoted pack: accident/injury rows and compact violation tables transfer better than long-table enumeration and mixed-section attachment. |
+| State-AG settlement/AOD | Process probe: instrument wrapper, parties, authority citations, chronology, obligations, payments, contacts, signatures | Seed rerun `17/27`, `0/9` supported forbidden, clean atom/lens/value-domain gates; all 57 unexpected same-signature rows are support=1 only. Source-only unlike intake t002 reconciles 7 stable facts; t003 reconciles 24 stable facts; broader consent-judgment t001 reconciles 4 authority-citation facts. All intakes are 100% registered with clean atom/lens/value-domain gates and 0 skipped/conflicts | Fifth-domain process evidence only, not transfer scoring. t003 suggests richer settlement/AOD skeleton can stabilize under the closed pack, while t001 shows the broader consent-judgment shape currently thins to authority citations. Independent expected/forbidden transfer oracles are still needed before State-AG supports the cross-family claim. |
 
 ## SEC Methods Example
 
@@ -175,6 +184,10 @@ skeleton-only, but it is no longer described as the cleanest methods cell. The
 value-axis repair split item structure, item legal treatment, and exhibit legal
 treatment. Repaired reruns across the retained seed and transfers show clean
 governance but lower support than the historical pre-axis-repair claims.
+Dense compile substitutions on the same repaired transfer_003 cell further show
+that recall is model/path sensitive: both Gemma 4 12B Q4 and Qwen 27B Q4 missed
+the same role-semantics rows at `10/12`, while staying inside the closed
+language with `0` supported forbidden rows.
 
 ```text
 profile: datasets/domain_profiles/sec_form_8k_v1/ontology_registry.json
@@ -215,9 +228,18 @@ stayed at `12/13` with `0` supported forbidden and reduced unexpected
 same-signature facts from 2 to 0 by blocking unregistered omission kind/reason
 triples and contradictory SEC signatory omissions. That guard is governance
 cleanup, not a support increase. A later fresh r4 manifest refresh landed at
-`11/13`, `0/10` supported forbidden, and `34/39` per-run exact; use that
-colder root as the current manifest provenance. A repaired breadth
-check over the retained
+`11/13`, `0/10` supported forbidden, and `34/39` per-run exact as colder
+same-condition provenance. A later follow-up fixed a
+typed-slot seam: `sec_filing_item_treatment/4` now shares
+SEC filing-id normalization, so a valid admitted treatment row is no longer
+lost to atom-shape governance when emitted. The fresh check after that fix
+landed at `11/13`, `0/10` supported forbidden, and `35/39` per-run exact; it is
+a guard/seam cleanup and the current standing manifest root, not evidence that
+item-treatment recall is solved. A source-only typed reconciliation report over
+that current root records 11 stable value-mode facts at support>=2, all
+support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone remain
+below threshold. A
+repaired breadth check over the retained
 seed, transfer_001, and transfer_002 cells then landed at `12/13`, `11/13`,
 and `11/12`, all with `0` supported forbidden and clean atom/lens gates. The
 remaining breadth boundaries are Exhibit 10.1 dual filed/incorporated treatment
@@ -358,6 +380,11 @@ standing manifest note: the previous repeated
   source-backed from the violation summary table and folded into the seed
   oracle; OSHA now has 0 unexpected same-signature support>=2 in the manifest
 ```
+
+The FTA total-penalty correction is a source-only project adjudication. It is
+not model-output fitting, and it is queued for independent source-only review
+in `tmp/osha_fta_total_penalty_blind_review_work_order_20260605.zip`, but it
+should not be treated as a fully independent uplift until that review returns.
 
 The seed run exposed and fixed a general harness bug: profile-registry lens
 intake only preserved predicate signatures with arities `/1` through `/6`, so

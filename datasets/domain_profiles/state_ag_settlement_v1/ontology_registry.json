@@ -1,0 +1,181 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "state_ag_settlement_v1",
+  "source": "Closed state attorney-general settlement/AOD skeleton carrier pack drafted from retained public state-AG fixtures under datasets/real_world_transfer.",
+  "purpose": "Constrain state-AG settlement and assurance compiles to recurring wrapper, party, authority, chronology, obligation, monetary, contact, and signature anatomy before attempting open-ended findings or liability substance.",
+  "selection": {
+    "mode": "fixture_bank_internal_pack",
+    "date": "2026-06-04",
+    "source_families": [
+      "datasets/real_world_transfer/fresh_ugly_public_20260526_01/state_ag_ugly_001",
+      "datasets/real_world_transfer/fresh_ugly_public_20260528_01/state_ag_settlement_ugly_002",
+      "datasets/real_world_transfer/fresh_ugly_public_20260529_01/state_ag_settlement_ugly_003"
+    ]
+  },
+  "accountability_requirements": [],
+  "lenses": [
+    {
+      "id": "wrapper",
+      "purpose": "Instrument wrapper, issuing authority, respondent, instrument number, and party roster.",
+      "allowed_signatures": [
+        "state_ag_instrument/7",
+        "state_ag_party/5",
+        "state_ag_authority_citation/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "chronology",
+      "purpose": "Compact issue, investigation, resolution, effective-date, and signature-date chronology.",
+      "allowed_signatures": [
+        "state_ag_event/6",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "obligations",
+      "purpose": "Compact prospective-relief, compliance, cooperation, and monetary-payment obligations.",
+      "allowed_signatures": [
+        "state_ag_obligation/7",
+        "state_ag_monetary_payment/7",
+        "state_ag_authority_citation/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "contacts",
+      "purpose": "Notice, report, payment, and correspondence channels.",
+      "allowed_signatures": [
+        "state_ag_contact_channel/7",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "signature",
+      "purpose": "Signature-block signing acts and signing capacities.",
+      "allowed_signatures": [
+        "state_ag_signature/6",
+        "domain_omission/5"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "state_ag_instrument/7",
+      "args": [
+        "instrument_id",
+        "instrument_type",
+        "issuing_authority",
+        "primary_respondent",
+        "instrument_number",
+        "effective_date",
+        "source_or_scope"
+      ],
+      "category": "state_ag_instrument_wrapper",
+      "notes": "Identifies one source-stated state-AG assurance, consent order, consent judgment, complaint, or settlement instrument. Companion carriers preserve parties, authorities, obligations, payments, contacts, and signatures."
+    },
+    {
+      "signature": "state_ag_party/5",
+      "args": [
+        "instrument_id",
+        "party_id",
+        "party_role",
+        "party_name",
+        "source_or_scope"
+      ],
+      "category": "state_ag_party_roster",
+      "notes": "Links one source-stated regulator, respondent, counsel, contact, registered agent, or signatory organization to the instrument."
+    },
+    {
+      "signature": "state_ag_authority_citation/4",
+      "args": [
+        "subject_id",
+        "citation",
+        "citation_role",
+        "source_or_scope"
+      ],
+      "category": "state_ag_authority_citation",
+      "notes": "Links an instrument or obligation subject to one source-stated legal citation with a compact structural citation role."
+    },
+    {
+      "signature": "state_ag_event/6",
+      "args": [
+        "instrument_id",
+        "event_id",
+        "event_kind",
+        "event_date",
+        "event_subject",
+        "source_or_scope"
+      ],
+      "category": "state_ag_chronology",
+      "notes": "Preserves one compact source-stated event date relevant to the instrument or investigated matter, without causal narrative."
+    },
+    {
+      "signature": "state_ag_obligation/7",
+      "args": [
+        "instrument_id",
+        "obligated_party",
+        "obligation_id",
+        "obligation_kind",
+        "frequency_or_status",
+        "due_or_effective_date",
+        "source_or_scope"
+      ],
+      "category": "state_ag_obligation",
+      "notes": "Preserves one compact source-stated prospective, reporting, compliance, cooperation, or notice obligation. For numbered agreement paragraphs, prefer source-anchored obligation_<paragraph_number> identifiers and do not copy a document-wide effective date into every obligation's due_or_effective_date slot."
+    },
+    {
+      "signature": "state_ag_monetary_payment/7",
+      "args": [
+        "instrument_id",
+        "payor",
+        "payee",
+        "amount",
+        "payment_kind",
+        "deadline_or_timing",
+        "source_or_scope"
+      ],
+      "category": "state_ag_monetary_payment",
+      "notes": "Preserves one source-stated monetary payment obligation using compact amount, payment-kind, and timing atoms."
+    },
+    {
+      "signature": "state_ag_contact_channel/7",
+      "args": [
+        "instrument_id",
+        "party_id",
+        "contact_id",
+        "contact_role",
+        "channel_kind",
+        "channel_value",
+        "source_or_scope"
+      ],
+      "category": "state_ag_contact_channel",
+      "notes": "Preserves one source-stated notice, report, payment, or correspondence channel. This row proves routing only."
+    },
+    {
+      "signature": "state_ag_signature/6",
+      "args": [
+        "instrument_id",
+        "party_id",
+        "signatory_id",
+        "signatory_title",
+        "signature_date",
+        "source_or_scope"
+      ],
+      "category": "state_ag_signature",
+      "notes": "Preserves one source-stated signature-block signing act and signing capacity."
+    },
+    {
+      "signature": "domain_omission/5",
+      "args": [
+        "domain_or_subject_id",
+        "carrier_signature",
+        "omission_kind",
+        "reason_code",
+        "source_or_scope"
+      ],
+      "category": "compile_accountability",
+      "notes": "Records accountable omissions for expected state-AG settlement carrier families. It is not an answer substitute."
+    }
+  ]
+}

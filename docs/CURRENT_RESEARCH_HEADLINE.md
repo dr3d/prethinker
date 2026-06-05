@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 Prethinker is currently a lab/research project, not a product sprint. The
 claim-bearing question is:
@@ -53,6 +53,11 @@ SEC Form 8-K skeleton pack
       12 / 13, 0 / 10 supported forbidden; unexpected facts 2 -> 0
     R4 fresh manifest refresh:
       11 / 13, 0 / 10 supported forbidden; per-run exact 34 / 39
+    R5 item-treatment filing-id seam fix:
+      11 / 13, 0 / 10 supported forbidden; per-run exact 35 / 39
+      The fix lets admitted `sec_filing_item_treatment/4` rows share SEC
+      filing-id normalization and survive atom-shape governance. It is a real
+      typed-slot cleanup, not a support-threshold lift.
     axis/value/atom/lens gates clean in the repaired cells
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     12 / 13; 11 / 13; 11 / 12
@@ -65,18 +70,27 @@ SEC Form 8-K skeleton pack
     than counted as an open support boundary. The fenced
     `sec_material_event/6` seed probe kept skeleton support at 12 / 13 but
     produced no event row at support>=2, so the promoted skeleton profile
-    remains event-substance-free.
+    remains event-substance-free. Source-only typed reconciliation over the
+    current transfer_003 root shows 11 value-mode facts at support>=2, all
+    support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone
+    remain absent from stable support.
   latest governance artifact:
-    C:\prethinker_tmp_archive\ntsb_casualty_partition_contract_20260604\gov_r3
-    14 governance checks passed, including full pytest,
-    `sec_value_axis_integrity`, and
-    `compile_fact_qa_exclusions`; the standing manifest now prints
+    C:\prethinker_tmp_archive\pending_external_work_order_status_20260605\current_research_governance
+    15 research-governance checks passed, including sign-clean,
+    `sec_value_axis_integrity`, `compile_fact_qa_exclusions`,
+    fixture-bank inventory freshness, pending external work-order audit over
+    the 8 active proposal and standalone `tmp` zip packets with 0 blocking
+    errors and 0 warnings, manifest-source audit, redaction replay,
+    typed-plan replay, and checked-in status freshness. The standing manifest
+    now prints
     same-signature unexpected support (`4` rows at support>=2 across all
-    standing cells) as a precision diagnostic. A typed SEC identifier-value
+    standing cells) as a precision diagnostic, and
+    `CURRENT_COMPILE_FACT_QA_STATUS.md` now lists the exact repeated
+    unexpected facts rather than only the count. A typed SEC identifier-value
     normalization pass raised only per-run exact support in transfer_002
     (commission-file/EIN punctuation loss), not support>=2. The current
     standing compile-fact QA status is 123/139 expected facts at support>=2
-    and 342/417 deterministic per-run exact rows, with 0 prose-dependent exact
+    and 343/417 deterministic per-run exact rows, with 0 prose-dependent exact
     rows and 0 unregistered exact typed plans.
 
 FDA warning-letter pack
@@ -122,12 +136,33 @@ OSHA accident/inspection pack
   forbidden support: 0 in both measured cells
   governance: registered signatures, atom-shape, and lens-scope clean
   caveat: the previous repeated FTA total-penalty extra was adjudicated
-    source-backed and folded into the seed oracle; OSHA now has 0 unexpected
-    same-signature support>=2 in the standing manifest
+    source-backed and folded into the seed oracle; an independent source-only
+    review packet is now queued at
+    `tmp/osha_fta_total_penalty_blind_review_work_order_20260605.zip`. OSHA
+    now has 0 unexpected same-signature support>=2 in the standing manifest,
+    but that uplift remains project-adjudicated until the external review
+    returns.
   claim: fourth-family corroboration; accident, employee injury, violation
     counts, penalties, item, status, and related-activity rows transfer in
     the standing cells, while larger long-table and mixed-document diagnostics
     remain boundary evidence
+
+State-AG settlement/AOD process probe
+  seed micro: 17 / 27 support>=2, 0 / 9 supported forbidden, atom/lens/value
+    gates clean; all 57 unexpected same-signature rows are support=1 only
+  source-only unlike intakes, no oracle scoring:
+    Mercedes-Benz consent judgment t001: 36 typed facts, 100% registered,
+      4 value-mode reconciled support>=2 facts, 0 skipped/conflicts; stable
+      layer is authority citations only
+    Equinox AOD t002: 54 typed facts, 100% registered, 7 value-mode
+      reconciled support>=2 facts, 0 skipped/conflicts
+    Equifax AOD t003: 103 typed facts, 100% registered, 24 value-mode
+      reconciled support>=2 facts, 0 skipped/conflicts
+  claim: fifth-domain process evidence only, not transfer scoring. t003
+    suggests richer settlement/AOD skeleton can stabilize; t001 shows broader
+    consent-judgment shape currently thins to authority citations. Independent
+    expected/forbidden transfer oracles are still needed before State-AG
+    supports the cross-family claim.
 ```
 
 ## Current Verdict
@@ -140,6 +175,14 @@ anatomy under strict governance. Open-ended substance remains an abstention or
 lower-tier boundary unless a compact domain layer reproduces on unlike
 documents.
 ```
+
+The sharper robustness result is two-part: the governance cage is stronger than
+the recall claim. Dense SEC compile substitutions stayed inside the closed
+predicate language with clean gates and `0` supported forbidden rows, but both
+Gemma 4 12B Q4 and Qwen 27B Q4 landed below the local Qwen MoE reference on the
+same role-semantics rows. Current evidence supports "closed domains constrain
+the language across model paths"; it does not support "compile recall is
+model-independent."
 
 This does not support claims of 90%+ general QA accuracy, arbitrary-domain
 document understanding, product readiness, or self-serve schema induction.
@@ -210,4 +253,6 @@ The next work should strengthen the research claim rather than lift one fixture:
 - [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
+- [Fixture Bank Domain Inventory](https://github.com/dr3d/prethinker/blob/main/docs/FIXTURE_BANK_DOMAIN_INVENTORY.md)
+- [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)

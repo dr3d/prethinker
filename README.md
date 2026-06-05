@@ -41,6 +41,7 @@ propagation = visible recomputation, not hidden belief
 - [Domain pack status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for the active closed predicate packs.
 - [Domain accountability status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
 - [Domain predicate proposal status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated review queue for candidate predicate surfaces before they become claims.
+- [Pending external work orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for the docs that still describe the living project.
 - [Compiled KB artifact package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - what a compiled document product contains and what Q&A may use.
@@ -82,7 +83,9 @@ SEC Form 8-K skeleton pack:
     forbidden support: 0 in repaired cells
   boundary: exhibit legal-treatment ambiguity, wrapper/telephone recall,
     duplicate commission-file value, and ordinary MoE jitter;
-    SEC is useful skeleton evidence, not a pristine methods anchor
+    dense compile substitutions on transfer_003 landed lower on the same
+    role-semantics rows, so SEC is useful skeleton evidence, not a pristine
+    or model-independent methods anchor
 
 FDA warning-letter pack:
   deterministic judged-QA v2: 137 / 159 exact
@@ -133,6 +136,7 @@ The short version:
 - [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
 - [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission/accountability coverage for active closed predicate packs.
 - [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
+- [docs/PENDING_EXTERNAL_WORK_ORDERS.md](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
 - [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - maintained public-doc reading map.
 - [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - boundary-coordinate and transfer-safe fixture method.
 - [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
@@ -175,6 +179,7 @@ python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\co
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json --expect-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
+python scripts\audit_pending_external_work_orders.py --include-tmp-zips --out-json tmp\pending_external_work_orders.json --out-md docs\PENDING_EXTERNAL_WORK_ORDERS.md --expect-md docs\PENDING_EXTERNAL_WORK_ORDERS.md
 
 python scripts\build_compile_fact_judged_qa.py --out-dir tmp\judged_qa_probe `
   --domain-lens-bundle fixture_id=tmp\domain_lens_bundle\bundle_root
@@ -199,7 +204,8 @@ Current high-signal evidence:
   exhibit legal treatment. The current repaired breadth cells land at
   `12 / 13`, `11 / 13`, `11 / 12`, and transfer_003 `12 / 13` then
   `11 / 13`, all with `0` supported forbidden and clean governance. This is
-  boundary-aware skeleton evidence, not the old pristine anchor claim.
+  boundary-aware skeleton evidence, not the old pristine or model-independent
+  anchor claim.
 - FDA warning-letter domain pack: deterministic judged-QA v2 across
   transfer_001 and transfer_002 is `137 / 159` exact; all `137` exact rows pass
   typed-plan replay and redaction replay. This is compile-fact transfer

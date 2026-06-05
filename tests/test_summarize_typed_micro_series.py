@@ -357,7 +357,19 @@ def test_typed_micro_series_reports_unexpected_same_signature_facts(tmp_path: Pa
             "support_runs": ["run1"],
         }
     ]
+    assert report["unexpected_signature_rows"] == [
+        {
+            "signature": "demo_fact/3",
+            "fact_count": 1,
+            "support_ge_threshold_fact_count": 1,
+            "total_support": 1,
+            "max_support": 1,
+            "support_distribution": {"1": 1},
+        }
+    ]
     rendered = render_markdown(report)
+    assert "Unexpected Same-Signature Buckets" in rendered
+    assert "| `demo_fact/3` | 1 | 1 | 1 | `1:1` |" in rendered
     assert "Unexpected Same-Signature Facts" in rendered
     assert "other_fact" not in rendered
 

@@ -22,9 +22,17 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert report["summary"]["per_run_rows"] == 12
     assert report["summary"]["per_run_exact"] == 8
     assert report["summary"]["unexpected_same_signature_ge_2"] == 1
+    assert report["cells"][0]["unexpected_same_signature_support_ge_2"] == [
+        {
+            "fact": "sec_exhibit(sec_8k_material_event_001, exhibit_10_1, agreement, incorporated_by_reference, exhibit_table_row_10_1).",
+            "support": 3,
+        }
+    ]
     assert report["summary"]["source_warning_count"] == 1
     assert "Support>=2: `3 / 4`" in md
     assert "Unexpected same-signature facts support>=2: `1`" in md
+    assert "Unexpected Same-Signature Support>=2" in md
+    assert "incorporated_by_reference" in md
     assert "`sec_form_8k_skeleton_seed`" in md
     assert "missing_bundle_manifest_recovered_from_compile_json" in md
 
@@ -171,6 +179,9 @@ def _cell(
                 "unexpected_same_signature_ge_2": unexpected_same_signature_ge_2,
             }
         },
+        "unexpected_same_signature_emissions_by_file": _unexpected_emissions(
+            unexpected_same_signature_ge_2
+        ),
         "redaction_summary": {
             "status": "pass",
             "row_count": row_count,
@@ -183,6 +194,17 @@ def _cell(
             "unregistered_plan_exact_rows": 0,
         },
         "verdict_summary_by_file": verdict_summary,
+    }
+
+
+def _unexpected_emissions(unexpected_same_signature_ge_2: int) -> dict:
+    if not unexpected_same_signature_ge_2:
+        return {}
+    fact = "sec_exhibit(sec_8k_material_event_001, exhibit_10_1, agreement, incorporated_by_reference, exhibit_table_row_10_1)."
+    return {
+        "run1.json": [fact],
+        "run2.json": [fact],
+        "run3.json": [fact],
     }
 
 

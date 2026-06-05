@@ -1,0 +1,27 @@
+{
+  "schema": "typed_micro_fixture_v1",
+  "fixture_id": "state_ag_settlement_aod_v1",
+  "purpose": "Seed-test the closed state-AG settlement/AOD skeleton domain pack on a retained NY AG Assurance of Discontinuance without packing findings, full obligations, captions, addresses, or signature blocks into atoms.",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260529_01/state_ag_settlement_ugly_003",
+  "domain_profile": "datasets/domain_profiles/state_ag_settlement_v1/ontology_registry.json",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "expected_predicates": [
+    "state_ag_instrument",
+    "state_ag_party",
+    "state_ag_authority_citation",
+    "state_ag_event",
+    "state_ag_obligation",
+    "state_ag_monetary_payment",
+    "state_ag_contact_channel",
+    "state_ag_signature"
+  ],
+  "forbidden_classes": [
+    "full_caption_blob",
+    "address_blob",
+    "full_obligation_text",
+    "admission_or_liability_inference",
+    "bare_money_number",
+    "full_signature_block"
+  ]
+}

@@ -230,12 +230,29 @@ fresh r4 manifest refresh landed at `11/13`, `0/10` supported forbidden, and
 `34/39` per-run exact. Treat this as a same-condition `11-12/13` band, not a
 fixed single score. Do not use the older SEC cells as a pristine methods-anchor
 claim without this caveat. A
-repaired breadth check over the retained seed, transfer_001, and
+follow-up item-treatment seam check tightened the SEC profile note and added
+`sec_filing_item_treatment/4` to typed SEC filing-id normalization. The second
+fresh rerun landed at `11/13`, `0/10` supported forbidden, and `35/39` per-run
+exact with clean atom/lens/value-axis gates. One run now preserves the item
+treatment row as a valid typed fact, but support remains below threshold; this
+is a seam fix, not a score lift.
+Do not use it to claim item-treatment recall is solved. A
+source-only typed reconciliation report over that same current transfer_003
+root now shows 11 value-mode facts at support>=2, all with support=3, and 0
+skipped/conflicts. The reconciled facts cover filing wrapper, registrant, four
+identifiers excluding telephone, both filing items, both exhibits, and the
+signatory. The missing reconciled rows are the known boundary: item 2.02
+treatment and telephone.
+A repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
 supported forbidden and clean atom/lens gates. The remaining boundary is
 exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
 duplicate commission-file value, unstable item-treatment recall, and MoE
-jitter rather than prose leakage. A follow-up typed omission-accountability
+jitter rather than prose leakage. Dense compile substitutions on transfer_003
+with Gemma 4 12B Q4 and Qwen 27B Q4 both landed at `10/12`, `0` forbidden,
+with clean gates, missing the same role-semantics rows. SEC therefore supports
+closed-language governance across model paths more strongly than it supports
+model-independent recall. A follow-up typed omission-accountability
 guard now blocks/drops contradictory SEC signatory omissions and unregistered
 omission kind/reason triples; rescoring the repaired transfer_003 stability
 artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
@@ -386,6 +403,11 @@ standing manifest note: after source-only adjudication, the FTA total-penalty
   same-signature support>=2
 ```
 
+The FTA total-penalty correction is source-backed project adjudication and is
+now queued for independent source-only review at
+`tmp\osha_fta_total_penalty_blind_review_work_order_20260605.zip`; it should
+not be treated as a fully independent uplift until that review returns.
+
 The first unlike retained OSHA transfer also ran under the same local settings:
 
 ```text
@@ -434,6 +456,46 @@ rows, blank-value semantics, long-table enumeration, and mixed-source section
 attachment. Keep it as fourth-family corroboration; do not grind the wrapper
 or mixed-document lanes unless a named research question requires it.
 
+State-AG settlement/AOD is a fifth-domain process probe, not transfer evidence.
+The fresh seed micro rerun (`state_ag_settlement_aod_v1`) currently lands at
+`17/27` support>=2, `0/9` supported forbidden, with 57 unexpected
+same-signature facts and clean registered-signature, atom-shape, lens-scope,
+and carrier value-domain gates. All 57 unexpected rows are support=1 only; none
+survives the support>=2 claim threshold. It is useful because it pressures
+settlement/AOD anatomy, obligation ids, authority citations, contacts, payment,
+and signature rows; it should not be cited as cross-family transfer until an
+unlike state-AG fixture exists. The current overproduction is precision pressure
+inside closed value domains, not a prose-shaped atom or unregistered-language
+leak.
+
+A source-only unlike intake has also been run on the retained Equinox AOD
+fixture (`state_ag_settlement_ugly_002`) with the same closed registry and no
+oracle scoring. The N=3 intake is governance-clean: 54 typed facts, 100%
+registered, atom-shape/lens-scope/value-domain clean. After extending the
+typed reconcile harness to load closed-registry signatures generally, with
+narrow State-AG instrument-id alias handling, 7 value-mode facts survive
+support>=2 with 0 skipped/conflicts: 5 authority citations and 2 contact
+channels. Wrapper parties, obligations, chronology, monetary rows, and
+signatures remain unstable or zero-yield. Treat this as a pre-oracle
+transfer-intake signal only.
+
+A second source-only unlike intake has now run on the retained Equifax AOD
+fixture (`state_ag_settlement_ugly_003`). It is also governance-clean:
+103 typed facts, 8 signatures, 100% registered, atom-shape/lens-scope clean,
+carrier value-domain audit clean, and 24 value-mode support>=2 reconciled facts
+with 0 skipped/conflicts. The stable set includes instrument wrapper, authority
+citations, contacts, one effective-date event, parties, signatures, and a
+repeated obligation sequence. This is a stronger process signal than t002, but
+still pre-oracle source-only intake rather than scored transfer evidence.
+
+A third source-only unlike intake on the retained Mercedes-Benz consent
+order/judgment fixture (`state_ag_ugly_001`) is governance-clean but much
+thinner: 36 typed facts, 5 signatures, 100% registered, clean atom/lens/value
+gates, and 4 support>=2 reconciled facts, all authority citations. This is the
+current State-AG boundary signal: the same closed pack handles AOD skeleton
+best, while broader consent-judgment structure may need a more specific layer
+or should remain outside the first State-AG transfer claim.
+
 Before the next technical claim:
 
 1. Keep FDA as the primary case study and keep the per-layer boundary table
@@ -445,12 +507,16 @@ Before the next technical claim:
    becomes lower tier.
 4. Keep OSHA as fourth-family corroboration for skeleton/table transfer and
    compile variance, not as a new row-grinding target.
-5. Run answer-judge null controls and oracle-isolation checks for any
+5. Keep State-AG in seed/process-probe status unless an independent
+   expected/forbidden transfer micro is deliberately added for the Equinox AOD
+   to answer a named research gap. If that happens, focus first on
+   authority/contact/wrapper skeleton rather than broad obligation substance.
+6. Run answer-judge null controls and oracle-isolation checks for any
    LLM-judged QA result that becomes claim-bearing; deterministic compile-fact
    QA still needs typed-plan and redaction replay.
-6. Report transfer, reproducibility, abstention boundaries, and failure classes
+7. Report transfer, reproducibility, abstention boundaries, and failure classes
    together; do not turn a clean sub-layer into a broad accuracy claim.
-7. Treat stale-number re-gating as a first-class research finding: older clean
+8. Treat stale-number re-gating as a first-class research finding: older clean
    cells are historical unless they survive today's gates.
 
 ## What Stays Off The Front Door

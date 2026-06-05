@@ -94,6 +94,14 @@ TEMPLATE: dict[str, Any] = {
         "support_threshold": 2,
         "heldout_policy": "unlike_same_family_document_not_used_to_shape_the_carrier",
     },
+    "pending_external_work_orders": [
+        {
+            "kind": "source_only_expected_forbidden_oracle",
+            "path": "tmp/example_work_order.zip",
+            "fixtures": ["example_transfer_v1"],
+            "purpose": "Independent source-only review before promotion.",
+        }
+    ],
     "promotion_gates": [
         "n_ge_3",
         "support_ge_2",
@@ -191,15 +199,16 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Warnings: `{summary['warning_count']}`",
         f"- Status: `{summary['status']}`",
         "",
-        "| Proposal | Signature | Status | Reviews | Errors | Warnings |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| Proposal | Signature | Status | Pending Work | Reviews | Errors | Warnings |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in report.get("proposals", []):
         lines.append(
-            "| `{}` | `{}` | `{}` | `{}` | `{}` | `{}` |".format(
+            "| `{}` | `{}` | `{}` | `{}` | `{}` | `{}` | `{}` |".format(
                 row.get("proposal_id") or row.get("path", ""),
                 row.get("candidate_signature", ""),
                 row.get("status", ""),
+                _work_order_summary(row.get("pending_external_work_orders")),
                 _review_summary(row.get("review_results")),
                 row.get("errors", []),
                 row.get("warnings", []),
@@ -318,6 +327,7 @@ def _validate_proposal(path: Path, *, profile_root: Path) -> dict[str, Any]:
     _validate_examples(data.get("positive_examples"), signature, "positive", errors)
     _validate_examples(data.get("forbidden_examples"), signature, "forbidden", errors)
     _validate_transfer_plan(data.get("unlike_transfer_plan"), errors)
+    _validate_pending_work_orders(data.get("pending_external_work_orders"), warnings)
 
     anti_leak_guards = set(_string_list(data.get("anti_leak_guards")))
     missing_anti_leak = sorted(REQUIRED_ANTI_LEAK_GUARDS - anti_leak_guards)
@@ -386,6 +396,27 @@ def _validate_transfer_plan(value: Any, errors: list[str]) -> None:
         errors.append("unlike_transfer_plan_missing_heldout_policy")
 
 
+def _validate_pending_work_orders(value: Any, warnings: list[str]) -> None:
+    if value is None:
+        return
+    if not isinstance(value, list):
+        warnings.append("pending_external_work_orders_not_list")
+        return
+    for index, item in enumerate(value):
+        if not isinstance(item, dict):
+            warnings.append(f"pending_external_work_order_{index + 1}:not_object")
+            continue
+        kind = str(item.get("kind") or "").strip()
+        path = str(item.get("path") or "").strip()
+        if not kind:
+            warnings.append(f"pending_external_work_order_{index + 1}:missing_kind")
+        if not path:
+            warnings.append(f"pending_external_work_order_{index + 1}:missing_path")
+        fixtures = item.get("fixtures")
+        if fixtures is not None and not _string_list(fixtures):
+            warnings.append(f"pending_external_work_order_{index + 1}:empty_fixtures")
+
+
 def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[str]) -> dict[str, Any]:
     return {
         "path": str(path),
@@ -394,6 +425,11 @@ def _row(*, path: Path, data: dict[str, Any], errors: list[str], warnings: list[
         "domain_profile": str(data.get("domain_profile") or "").strip(),
         "candidate_signature": str(data.get("candidate_signature") or "").strip(),
         "lens_owner": str(data.get("lens_owner") or "").strip(),
+        "pending_external_work_orders": (
+            data.get("pending_external_work_orders")
+            if isinstance(data.get("pending_external_work_orders"), list)
+            else []
+        ),
         "review_results": data.get("review_results") if isinstance(data.get("review_results"), list) else [],
         "errors": errors,
         "warnings": warnings,
@@ -423,6 +459,22 @@ def _review_summary(value: Any) -> str:
         result = str(item.get("result") or "").strip()
         if fixture or result:
             parts.append(f"{fixture}:{result}".strip(":"))
+    return "; ".join(parts)
+
+
+def _work_order_summary(value: Any) -> str:
+    if not isinstance(value, list) or not value:
+        return ""
+    parts: list[str] = []
+    for item in value[:3]:
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind") or "").strip()
+        path = str(item.get("path") or "").strip()
+        if kind and path:
+            parts.append(f"{kind}:{path}")
+        elif kind or path:
+            parts.append(kind or path)
     return "; ".join(parts)
 
 

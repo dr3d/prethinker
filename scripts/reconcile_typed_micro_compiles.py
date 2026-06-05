@@ -25,7 +25,7 @@ from src.carrier_contract_registry import carrier_contract  # noqa: E402
 
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 
-DEFAULT_GOVERNED_SIGNATURES = {
+BASE_GOVERNED_SIGNATURES = {
     "claim_ground/4",
     "claim_range/4",
     "item_range/4",
@@ -42,6 +42,35 @@ SOURCE_SUBJECT_PREDICATES = {
     "list_member",
     "review_outcome",
 }
+
+
+def _default_governed_signatures() -> set[str]:
+    """Return signatures allowed for typed reconciliation.
+
+    The domain-pack path should not need script edits every time a closed
+    registry adds a carrier. This loader reads registered domain profiles and
+    combines them with the older generic claim-set micro-fixture signatures.
+    """
+
+    signatures = set(BASE_GOVERNED_SIGNATURES)
+    for registry_path in sorted((REPO_ROOT / "datasets" / "domain_profiles").glob("*/ontology_registry.json")):
+        try:
+            data = json.loads(registry_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        predicates = data.get("predicates")
+        if not isinstance(predicates, list):
+            continue
+        for item in predicates:
+            if not isinstance(item, dict):
+                continue
+            signature = str(item.get("signature") or "").strip()
+            if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*/[0-9]+", signature):
+                signatures.add(signature)
+    return signatures
+
+
+DEFAULT_GOVERNED_SIGNATURES = _default_governed_signatures()
 
 
 def parse_args() -> argparse.Namespace:
@@ -343,6 +372,10 @@ def _fact_support_key(fact: str, *, support_mode: str) -> str:
     args = [str(arg).strip() for arg in parsed.get("args") or []]
     if predicate in {"claim_range", "item_range", "legal_citation_detail", "list_member", "review_outcome"} and len(args) >= 4:
         return _render_fact(predicate, args[:-1] + ["_"])
+    if predicate.startswith("sec_") and args:
+        return _render_fact(predicate, ["_"] + args[1:-1] + ["_"])
+    if predicate.startswith("state_ag_") and args:
+        return _render_fact(predicate, args[:-1] + ["_"])
     return fact
 
 
@@ -367,6 +400,10 @@ def _normalize_fact_text(fact: str) -> str:
     elif predicate == "review_outcome" and len(args) == 4:
         args[1] = _governed_review_actor_atom(args[1])
         args[2] = _governed_review_outcome_atom(args[2])
+    elif predicate.startswith("sec_"):
+        args = _normalize_sec_args(predicate, args)
+    elif predicate.startswith("state_ag_"):
+        args = _normalize_state_ag_args(predicate, args)
     return _render_fact(predicate, args)
 
 
@@ -491,6 +528,47 @@ def _governed_review_outcome_atom(value: str) -> str:
     if normalized in {"reversal_outcome", "reversal", "reverse"}:
         return "reversed"
     return str(value or "").strip()
+
+
+def _normalize_state_ag_args(predicate: str, args: list[str]) -> list[str]:
+    normalized = list(args)
+    if not normalized:
+        return normalized
+    normalized[0] = _state_ag_instrument_atom(normalized[0])
+    if predicate == "state_ag_instrument" and len(normalized) >= 5:
+        normalized[4] = _state_ag_instrument_atom(normalized[4])
+    return normalized
+
+
+def _normalize_sec_args(predicate: str, args: list[str]) -> list[str]:
+    normalized = list(args)
+    if not normalized:
+        return normalized
+    normalized[0] = _sec_filing_atom(normalized[0])
+    return normalized
+
+
+def _sec_filing_atom(value: str) -> str:
+    text = str(value or "").strip()
+    atom = _atom_part(text)
+    if re.fullmatch(r"[0-9]{3}_[0-9]{5}", atom):
+        return f"filing_{atom}"
+    if atom.startswith("filing_sec_"):
+        return atom
+    if atom.startswith("sec_filing_"):
+        return f"filing_sec_{atom.removeprefix('sec_filing_')}"
+    if atom.startswith("filing_"):
+        return atom
+    return text
+
+
+def _state_ag_instrument_atom(value: str) -> str:
+    text = str(value or "").strip()
+    normalized = _atom_part(text)
+    match = re.search(r"(?:aod|assurance|assurance_no|instrument)[_]*([0-9]{2})[_-]*([0-9]{3})", normalized)
+    if match:
+        return f"aod_{match.group(1)}_{match.group(2)}"
+    return text
 
 
 if __name__ == "__main__":

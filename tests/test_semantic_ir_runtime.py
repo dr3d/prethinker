@@ -1084,6 +1084,52 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertFalse(any("non-temporal atom" in warning for warning in warnings))
         self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
 
+    def test_mapper_allows_due_or_effective_date_as_compact_timing_atom(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "state_ag_obligation",
+                    "args": [
+                        "aod_24_102",
+                        "equifax_information_services_llc",
+                        "obligation_9",
+                        "review_change_control",
+                        "ongoing",
+                        "effective_on_assurance_date",
+                        "agreement_para_9",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["state_ag_obligation/7"],
+            predicate_contracts=[
+                {
+                    "signature": "state_ag_obligation/7",
+                    "args": [
+                        "instrument_id",
+                        "obligated_party",
+                        "obligation_id",
+                        "obligation_kind",
+                        "frequency_or_status",
+                        "due_or_effective_date",
+                        "source_or_scope",
+                    ],
+                },
+            ],
+        )
+
+        assert parsed["facts"] == [
+            "state_ag_obligation(aod_24_102, equifax_information_services_llc, obligation_9, review_change_control, ongoing, effective_on_assurance_date, agreement_para_9)."
+        ]
+        assert not any("non-temporal atom" in warning for warning in warnings)
+        assert parsed["admission_diagnostics"]["admitted_count"] == 1
+
     def test_mapper_allows_date_kind_role_as_structural_role_slot(self) -> None:
         ir = _ir(
             candidate_operations=[

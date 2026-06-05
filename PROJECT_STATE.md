@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## One-Sentence Shape
 
@@ -29,6 +29,7 @@ The current front-door documents are:
 - `docs/DOMAIN_PACK_STATUS.md`
 - `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`
 - `docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md`
+- `docs/PENDING_EXTERNAL_WORK_ORDERS.md`
 - `docs/ACTIVE_RESEARCH_LANES.md`
 - `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
 - `docs/PUBLIC_DOCS_GUIDE.md`
@@ -112,6 +113,22 @@ SEC Form 8-K skeleton pack
     R3 omission-accountability guard rescore:
       12 / 13, 0 / 10 supported forbidden, unexpected same-signature facts
       reduced from 2 to 0 by typed registry/contradiction guards
+    R4/R5 item-treatment seam diagnostics:
+      profile-clarity rerun: 12 / 13, 0 / 10 supported forbidden, clean
+      atom/lens/value-axis gates, but item-treatment support stayed below
+      threshold. SEC filing-id normalization now includes
+      `sec_filing_item_treatment/4`; this lets a valid admitted treatment row
+      survive typed atom-shape governance when it appears. Fresh rerun after
+      that seam fix: 11 / 13, 0 / 10 supported forbidden, clean gates.
+      Read this as a real typed-slot seam fix, not a support lift.
+    source-only typed reconciliation over the current transfer_003 root:
+      artifact:
+        C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604\sec8k-t003-item-treatment-filing-id-r2-20260604\reports\typed_reconcile_support_ge2_value.md
+      result:
+        11 reconciled facts, all support=3, 0 skipped, 0 conflicts
+        stable facts are filing wrapper, registrant, four identifiers
+        excluding telephone, two filing items, two exhibits, and signatory
+        item 2.02 treatment and telephone remain below support threshold
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     seed: 12 / 13, 0 / 6 supported forbidden, clean atom/lens gates
     transfer_001: 11 / 13, 0 / 8 supported forbidden, clean atom/lens gates
@@ -131,7 +148,16 @@ SEC Form 8-K skeleton pack
     prompt polishing or a favorable same-condition draw.
   latest SEC governance artifact:
     C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
-    This guard cleanup did not raise SEC support; it tightened the axis cage.
+    C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604
+    These guard/seam cleanups did not raise SEC support; they tightened the
+      axis cage and stopped valid companion rows from being lost to typed
+      filing-id normalization when emitted.
+  current compile-fact QA precision detail:
+    docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
+    unexpected same-signature facts at support>=2. The current rows are
+    diagnostics only: SEC seed dual Exhibit 10.1 treatment and FDA
+    transfer_002 boundary/detail extras. They are not expected facts unless an
+    independent source-only oracle adds them.
 
 FDA warning-letter pack
   deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -187,9 +213,152 @@ OSHA accident/inspection pack
     employee injury, violation counts, penalties, item, and status rows transfer
     better than long-table enumeration and mixed-source section attachment. The
     prior repeated FTA total-penalty extra was adjudicated as source-backed and
-    is now in the seed oracle. The transfer_003 guard is cleanup only: support
+    is now in the seed oracle; an independent source-only review packet is
+    queued at `tmp\osha_fta_total_penalty_blind_review_work_order_20260605.zip`,
+    so treat that uplift as project-adjudicated until review returns. The
+    transfer_003 guard is cleanup only: support
     stays 2 / 21 while the current news-release accident/injury rows are
     blocked from contaminating the prior inspection detail.
+
+State-AG settlement/AOD seed
+  fixture:
+    state_ag_settlement_aod_v1
+  profile:
+    datasets/domain_profiles/state_ag_settlement_v1/ontology_registry.json
+  retained seed artifact root:
+    C:\prethinker_tmp_archive\state_ag_settlement_seed_20260604\state-ag-seed-all-lenses-r2-20260604
+  current fresh local Qwen MoE all-lens seed rerun:
+    C:\prethinker_tmp_archive\state_ag_current_rerun_20260604\state-ag-seed-current-rerun-r1-20260604
+    17 / 27 support>=2
+    0 / 9 supported forbidden
+    57 unexpected same-signature facts
+    registered-signature / atom-shape / lens-scope gates clean
+    carrier value-domain audit clean: 0 violations across 134 checked slots
+  read:
+    fifth-domain process probe only, not transfer evidence. Wrapper,
+    contacts, several chronology rows, and several obligation rows stabilize.
+    Citation subsection specificity, event-subject naming,
+    counsel/registered-agent attachment, monetary payment support, and likely
+    obligation-oracle design remain boundaries. The overproduction is currently
+    inside the closed value domains, not an atom-shape or unregistered-language
+    leak. A regenerated unexpected-bucket report shows all 57 unexpected
+    same-signature rows at support=1 only; no unexpected State-AG row currently
+    survives the support>=2 claim threshold.
+  source-only unlike transfer intake:
+    t002 fixture source:
+      datasets/real_world_transfer/fresh_ugly_public_20260528_01/state_ag_settlement_ugly_002/source.md
+    retained artifact root:
+      C:\prethinker_tmp_archive\state_ag_t002_source_only_n3_20260604\state-ag-t002-source-only-intake-n3-r1-20260604
+    run:
+      local Qwen MoE, N=3, skip-score, same closed state-AG registry
+      union atom audit: 54 typed facts, 5 signatures, 100% registered,
+        atom-shape/lens-scope clean
+      carrier value-domain audit: 0 violations across 68 checked slots
+      value-mode typed reconcile after state-AG reconcile harness coverage:
+        7 support>=2 facts, 0 conflicts, 0 skipped
+        stable facts are 5 authority-citation rows and 2 contact-channel rows
+    read:
+      useful pre-oracle transfer-intake signal, not QA/expected-fact evidence.
+      The pack transfers authority/contact anatomy cleanly on the unlike
+      Equinox AOD, while wrapper party, obligation, chronology, monetary, and
+      signature support are not stable enough to claim without an independent
+      transfer oracle and likely pack work.
+    t003 fixture source:
+      datasets/real_world_transfer/fresh_ugly_public_20260529_01/state_ag_settlement_ugly_003/source.md
+    retained artifact root:
+      C:\prethinker_tmp_archive\state_ag_t003_source_only_n3_20260604\state-ag-t003-source-only-intake-n3-r1-20260604
+    run:
+      local Qwen MoE, N=3, skip-score, same closed state-AG registry
+      union atom audit: 103 typed facts, 8 signatures, 100% registered,
+        atom-shape/lens-scope clean
+      carrier value-domain audit: 0 violations across 134 checked slots
+      value-mode typed reconcile:
+        24 support>=2 facts, 0 conflicts, 0 skipped
+        stable layers include instrument wrapper, authority citations,
+        contacts, one effective-date event, parties, signatures, and a
+        repeated obligation sequence
+    read:
+      second useful source-only intake and notably stronger than t002, but
+      still not a scored transfer claim. It suggests the State-AG pack can
+      stabilize richer settlement/AOD skeleton on some unlike documents while
+      source family shape and oracle design remain unresolved.
+    t001 fixture source:
+      datasets/real_world_transfer/fresh_ugly_public_20260526_01/state_ag_ugly_001/source.md
+    retained artifact root:
+      C:\prethinker_tmp_archive\state_ag_t001_source_only_n3_20260604\state-ag-t001-source-only-intake-n3-r1-20260604
+    run:
+      local Qwen MoE, N=3, skip-score, same closed state-AG registry
+      union atom audit: 36 typed facts, 5 signatures, 100% registered,
+        atom-shape/lens-scope clean
+      carrier value-domain audit: 0 violations across 39 checked slots
+      value-mode typed reconcile:
+        4 support>=2 facts, 0 conflicts, 0 skipped
+        stable facts are all authority-citation rows
+    read:
+      broader consent-order/judgment source is governance-clean but much
+      thinner under this AOD/settlement pack. It is boundary evidence: the
+      current State-AG pack transfers authority citations across this shape,
+      but wrapper, parties, obligations, contacts, signatures, and payments
+      are unstable without a more specific consent-judgment layer or oracle.
+  harness note:
+    scripts\run_domain_lens_bundle.py now has --reconcile-unions for future
+    source-only intakes. It runs typed value-mode reconciliation across union
+    artifacts without reading source prose, QA, or oracle answers.
+    scripts\reconcile_typed_micro_compiles.py now loads allowed signatures
+    from closed domain registries instead of requiring each domain predicate
+    to be hand-added to a script allowlist; SEC and State-AG still have narrow
+    typed value-key normalization for known document-id aliases.
+
+Fixture-bank / next-domain inventory
+  generated status:
+    docs\FIXTURE_BANK_DOMAIN_INVENTORY.md
+  current read:
+    88 retained real-world metadata fixtures, 52 metadata families, 5 closed
+    profiles, 7 unprofiled/profile-unrelated multi-fixture families, of which
+    3 are QA-bearing. This is a domain-selection map only; it reads metadata
+    and profile selection paths, not source prose, QA, oracle answers, or judge
+    outputs.
+  PUC pre-registry proposal:
+    datasets\domain_predicate_proposals\puc_order_wrapper_v1.json
+    status: draft
+    candidate signature: puc_order/7
+    evidence: two local Qwen MoE profile-only PUC bootstraps archived at
+      C:\prethinker_tmp_archive\puc_domain_bootstrap_20260604
+    read: the two PUC sources agree on wrapper/docket/order/procedure anatomy
+      but drift in candidate predicate names, so PUC should proceed through
+      closed carrier/oracle review rather than open profile induction.
+    external oracle packet:
+      tmp\puc_order_wrapper_oracle_work_order_20260604.zip
+    proposal-status traceability:
+      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this pending
+      source-only oracle work order directly in the proposal table.
+    next step: wait for source-only expected/forbidden wrapper facts before
+      creating or scoring a PUC closed registry.
+  Procurement / GAO bid-protest pre-registry proposal:
+    datasets\domain_predicate_proposals\procurement_gao_decision_wrapper_v1.json
+    status: draft
+    candidate signature: gao_bid_protest_decision/7
+    evidence: two local Qwen MoE profile-only procurement bootstraps archived
+      at C:\prethinker_tmp_archive\procurement_domain_bootstrap_20260605
+    read: both retained GAO bid-protest decisions expose recurring wrapper,
+      docket, decision-date, procurement, party/procedural, protest-ground,
+      evaluation-factor, and citation anatomy. The first bootstrap drifted on
+      protest-ground/finding surfaces and the second flagged timeliness
+      slot-loss, so only the wrapper carrier is drafted; merits/finding lanes
+      stay out of scope.
+    external oracle packet:
+      tmp\procurement_gao_decision_wrapper_oracle_work_order_20260605.zip
+    proposal-status traceability:
+      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this pending
+      source-only oracle work order directly in the proposal table.
+    next step: wait for source-only expected/forbidden wrapper facts before
+      creating or scoring a procurement closed registry.
+  active external work-order packet audit:
+    C:\prethinker_tmp_archive\pending_external_work_order_status_20260605
+    status: pass
+    coverage: 8 active proposal and standalone tmp work-order zip packets
+    blocking errors: 0
+    warnings: 0
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,
@@ -343,10 +512,10 @@ The repo should not currently claim:
 
 ## Verification Commands
 
-Current full-suite result on 2026-06-04:
+Current full-suite result on 2026-06-05:
 
 ```text
-2400 passed, 59 skipped, 9 xfailed
+2463 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
@@ -369,7 +538,9 @@ python scripts\audit_research_artifact_paths.py
 python scripts\audit_historical_score_claims.py
 python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
 python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json --expect-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md
+python scripts\summarize_fixture_bank_domains.py --out-md docs\FIXTURE_BANK_DOMAIN_INVENTORY.md --out-json tmp\fixture_bank_domain_inventory.json --expect-md docs\FIXTURE_BANK_DOMAIN_INVENTORY.md
 python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
+python scripts\audit_pending_external_work_orders.py --include-tmp-zips --out-json tmp\pending_external_work_orders.json --out-md docs\PENDING_EXTERNAL_WORK_ORDERS.md --expect-md docs\PENDING_EXTERNAL_WORK_ORDERS.md
 ```
 
 Before a public/docs cleanup commit, also run stale-claim greps over

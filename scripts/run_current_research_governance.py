@@ -132,6 +132,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "fixture_bank_domain_inventory",
+            "command": [
+                python,
+                "scripts/summarize_fixture_bank_domains.py",
+                "--out-json",
+                str(report_root / "fixture_bank_domain_inventory.json"),
+                "--out-md",
+                str(report_root / "fixture_bank_domain_inventory.md"),
+                "--expect-md",
+                "docs/FIXTURE_BANK_DOMAIN_INVENTORY.md",
+            ],
+        },
+        {
             "id": "domain_predicate_proposal_status",
             "command": [
                 python,
@@ -142,6 +155,20 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(report_root / "domain_predicate_proposal_status.md"),
                 "--expect-md",
                 "docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md",
+            ],
+        },
+        {
+            "id": "pending_external_work_orders",
+            "command": [
+                python,
+                "scripts/audit_pending_external_work_orders.py",
+                "--include-tmp-zips",
+                "--out-json",
+                str(report_root / "pending_external_work_orders.json"),
+                "--out-md",
+                str(report_root / "pending_external_work_orders.md"),
+                "--expect-md",
+                "docs/PENDING_EXTERNAL_WORK_ORDERS.md",
             ],
         },
         {

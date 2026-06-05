@@ -841,3 +841,13 @@ def test_fda_conclusion_scope_contract_disambiguates_responsibility_recurrence()
     assert "scope_kind=recurrence_prevention and scope_value=responsibility_to_correct" in text
     assert "Use scope_value=prevent_recurrence only" in text
     assert "ownership_change_context only when the source explicitly mentions ownership" in text
+
+
+def test_state_ag_obligation_contract_prefers_source_anchored_ids_and_local_dates() -> None:
+    lines = carrier_contract_prompt_lines(["state_ag_obligation/7"])
+    text = "\n".join(lines)
+
+    assert "obligation_<paragraph_number>" in text
+    assert "descriptive aliases such as obl_change_control" in text
+    assert "Do not copy a document-wide effective date" in text
+    assert "individual obligation paragraph states no specific deadline" in text

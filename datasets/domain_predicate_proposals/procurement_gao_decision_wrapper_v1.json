@@ -1,0 +1,149 @@
+{
+  "schema": "domain_predicate_proposal_v1",
+  "proposal_id": "procurement_gao_decision_wrapper_v1",
+  "status": "draft",
+  "domain_profile": "procurement_gao_decision_v1",
+  "bounded_document_family": "U.S. Government Accountability Office bid-protest decisions that identify a protest docket, procurement or solicitation, decision date, and compact current disposition.",
+  "candidate_signature": "gao_bid_protest_decision/7",
+  "lens_owner": "wrapper",
+  "allowed_lenses": [
+    "wrapper"
+  ],
+  "recurring_anatomy": [
+    "GAO bid-protest decisions identify a GAO docket or B-number and a source-stated decision date.",
+    "GAO bid-protest decisions identify the protest forum, protested procurement or solicitation, and one or more protest parties.",
+    "GAO bid-protest decisions state a compact current disposition such as sustained, denied, dismissed, denied in part, sustained in part, or not stated."
+  ],
+  "answer_classes": [
+    "document_wrapper",
+    "bid_protest_docket",
+    "decision_status",
+    "procurement_decision"
+  ],
+  "argument_roles": [
+    {
+      "name": "decision_id",
+      "purpose": "Stable local id for one source-stated GAO bid-protest decision.",
+      "source_coordinate": false
+    },
+    {
+      "name": "forum_id",
+      "purpose": "Compact source-stated decision forum or deciding body atom.",
+      "source_coordinate": false
+    },
+    {
+      "name": "docket_id",
+      "purpose": "Source-stated GAO docket, B-number, or bid-protest file identifier atom.",
+      "source_coordinate": false
+    },
+    {
+      "name": "procurement_id",
+      "purpose": "Source-stated procurement, solicitation, RFQ, RFP, or contract identifier atom, or not_stated.",
+      "source_coordinate": false
+    },
+    {
+      "name": "decision_date",
+      "purpose": "Source-stated decision date as a date atom, or not_stated.",
+      "source_coordinate": false
+    },
+    {
+      "name": "decision_status",
+      "purpose": "Closed compact disposition of the protest decision wrapper.",
+      "source_coordinate": false
+    },
+    {
+      "name": "source_or_scope",
+      "purpose": "Source coordinate or governed scope atom.",
+      "source_coordinate": true
+    }
+  ],
+  "value_domains": {
+    "forum_id": [
+      "gao",
+      "not_stated"
+    ],
+    "decision_status": [
+      "sustained",
+      "denied",
+      "dismissed",
+      "denied_in_part",
+      "sustained_in_part",
+      "not_stated"
+    ]
+  },
+  "positive_examples": [
+    {
+      "fixture_id": "neutral_gao_decision_shape",
+      "fact": "gao_bid_protest_decision(DecisionId, gao, DocketId, ProcurementId, DecisionDate, denied, Src)."
+    },
+    {
+      "fixture_id": "neutral_gao_decision_shape",
+      "fact": "gao_bid_protest_decision(DecisionId, gao, DocketId, not_stated, DecisionDate, sustained_in_part, Src)."
+    }
+  ],
+  "forbidden_examples": [
+    {
+      "fixture_id": "neutral_gao_decision_shape",
+      "fact": "gao_bid_protest_decision(DecisionId, gao, DocketId, full_caption_or_decision_sentence_blob, DecisionDate, denied, Src)."
+    },
+    {
+      "fixture_id": "neutral_gao_decision_shape",
+      "fact": "gao_bid_protest_decision(DecisionId, gao, DocketId, ProcurementId, DecisionDate, protester_failed_to_demonstrate_unequal_treatment_full_phrase, Src)."
+    }
+  ],
+  "unlike_transfer_plan": {
+    "minimum_fixtures": 2,
+    "n": 3,
+    "support_threshold": 2,
+    "heldout_policy": "unlike GAO bid-protest decisions not used to shape the wrapper carrier or value domains"
+  },
+  "pending_external_work_orders": [
+    {
+      "kind": "source_only_expected_forbidden_oracle",
+      "path": "tmp/procurement_gao_decision_wrapper_oracle_work_order_20260605.zip",
+      "fixtures": [
+        "procurement_contract_ugly_002",
+        "procurement_contract_ugly_003"
+      ],
+      "purpose": "Independent source-only review decides expected and forbidden wrapper facts before this draft can become a candidate."
+    }
+  ],
+  "promotion_gates": [
+    "n_ge_3",
+    "support_ge_2",
+    "zero_forbidden",
+    "atom_shape",
+    "lens_scope",
+    "value_domain",
+    "unlike_transfer"
+  ],
+  "anti_leak_guards": [
+    "no_source_prose",
+    "no_query_text_routing",
+    "no_fixture_vocabulary",
+    "no_answer_key_influence",
+    "atom_shape_gate"
+  ],
+  "abstention_boundary": [
+    "Do not emit when the source lacks a GAO docket/B-number or decision date.",
+    "Do not use this carrier to preserve protest grounds, evaluation-factor merits, CPAR details, OCI analysis, recommendations, cost reimbursement, or legal reasoning; those require separate closed carriers.",
+    "Do not put the full caption, protest allegation, finding sentence, or recommendation text into any atom slot.",
+    "Do not infer the disposition from discussion snippets when the source states only procedural posture or background."
+  ],
+  "proposal_evidence": [
+    {
+      "artifact_root": "C:\\prethinker_tmp_archive\\procurement_domain_bootstrap_20260605\\procurement_contract_ugly_002_profile",
+      "result": "profile_bootstrap_parsed_with_warnings",
+      "candidate_predicates": 17,
+      "rough_score": 0.775,
+      "note": "Local Qwen MoE profile-only bootstrap found GAO decision wrapper/procurement/evaluation anatomy but drifted on protest-ground, offeror-profile, and GAO-finding surfaces."
+    },
+    {
+      "artifact_root": "C:\\prethinker_tmp_archive\\procurement_domain_bootstrap_20260605\\procurement_contract_ugly_003_profile",
+      "result": "profile_bootstrap_parsed_with_warnings",
+      "candidate_predicates": 12,
+      "rough_score": 1.0,
+      "note": "Local Qwen MoE profile-only bootstrap found the same GAO decision wrapper/procurement/protest anatomy with one timeliness-value warning."
+    }
+  ]
+}

@@ -7,7 +7,10 @@ derive predicates, inspect answers, or create facts. For each repeat cycle it:
 1. runs one source compile per selected registry lens;
 2. deterministically unions mapper-admitted lens outputs from the same cycle;
 3. scores the union against the typed micro-fixture oracle when requested;
-4. runs atom-shape/signature governance audits over lens and union artifacts.
+4. runs atom-shape/signature and carrier value-domain governance audits over
+   lens and union artifacts.
+5. optionally reconciles typed union facts across repeats as a source-only
+   stability diagnostic.
 
 The point is to make a lens-bundle result reproducible instead of assembled by
 hand from a worksheet.
@@ -97,6 +100,14 @@ def parse_args() -> argparse.Namespace:
         "--skip-audit",
         action="store_true",
         help="Do not run audit_kb_atom_inventory.py.",
+    )
+    parser.add_argument(
+        "--reconcile-unions",
+        action="store_true",
+        help=(
+            "Run reconcile_typed_micro_compiles.py over union artifacts as a "
+            "source-only typed stability diagnostic. This does not score an oracle."
+        ),
     )
     parser.add_argument(
         "--no-apply-domain-reducers",
@@ -200,6 +211,9 @@ def main() -> int:
     union_jsons = [Path(item["union_json"]) for item in run_reports]
     lens_audit_path = None
     union_audit_path = None
+    lens_value_audit_path = None
+    union_value_audit_path = None
+    reconcile_path = None
     score_path = None
     if not bool(args.skip_score):
         print("scoring lens bundle union", flush=True)
@@ -235,6 +249,34 @@ def main() -> int:
                 enforce_lens_scope=False,
             )
         )
+        lens_value_audit_path = report_root / "lens_carrier_value_domains.json"
+        _run(
+            _build_value_domain_audit_command(
+                compile_root=lens_root,
+                out_json=lens_value_audit_path,
+                out_md=report_root / "lens_carrier_value_domains.md",
+            )
+        )
+        union_value_audit_path = report_root / "union_carrier_value_domains.json"
+        _run(
+            _build_value_domain_audit_command(
+                compile_root=union_root,
+                out_json=union_value_audit_path,
+                out_md=report_root / "union_carrier_value_domains.md",
+            )
+        )
+    if bool(args.reconcile_unions):
+        print("reconciling typed union support", flush=True)
+        reconcile_path = report_root / f"typed_reconcile_support_ge{int(args.support_threshold)}_value.json"
+        _run(
+            _build_reconcile_command(
+                fixture=fixture,
+                union_jsons=union_jsons,
+                out_json=reconcile_path,
+                out_md=report_root / f"typed_reconcile_support_ge{int(args.support_threshold)}_value.md",
+                min_support=int(args.support_threshold),
+            )
+        )
 
     manifest = {
         "schema_version": "domain_lens_bundle_run_v1",
@@ -262,18 +304,23 @@ def main() -> int:
             "focused_pass_ops_schema": bool(args.focused_pass_ops_schema),
             "compile_plan_passes": bool(args.compile_plan_passes),
             "profile_registry_lens_plan": bool(args.profile_registry_lens_plan),
+            "reconcile_unions": bool(args.reconcile_unions),
         },
         "policy": [
             "The harness does not read source prose or oracle answers.",
             "Each lens compile is LLM-owned and restricted by profile-registry lens scope.",
             "The union step reads only mapper-admitted compile artifacts and infers no new facts.",
-            "Scoring and atom audits use existing governance scripts.",
+            "Scoring, atom audits, and carrier value-domain audits use existing governance scripts.",
+            "Typed union reconciliation is source-only when enabled and does not inspect oracle answers.",
         ],
         "runs": run_reports,
         "reports": {
             "score_json": str(score_path or ""),
             "lens_atom_audit_json": str(lens_audit_path or ""),
             "union_atom_audit_json": str(union_audit_path or ""),
+            "lens_carrier_value_domains_json": str(lens_value_audit_path or ""),
+            "union_carrier_value_domains_json": str(union_value_audit_path or ""),
+            "typed_reconcile_json": str(reconcile_path or ""),
         },
     }
     if score_path and score_path.exists():
@@ -282,6 +329,12 @@ def main() -> int:
         manifest["lens_atom_audit_summary"] = _load_summary(lens_audit_path)
     if union_audit_path and union_audit_path.exists():
         manifest["union_atom_audit_summary"] = _load_summary(union_audit_path)
+    if lens_value_audit_path and lens_value_audit_path.exists():
+        manifest["lens_carrier_value_domain_summary"] = _load_summary(lens_value_audit_path)
+    if union_value_audit_path and union_value_audit_path.exists():
+        manifest["union_carrier_value_domain_summary"] = _load_summary(union_value_audit_path)
+    if reconcile_path and reconcile_path.exists():
+        manifest["typed_reconcile_summary"] = _load_summary(reconcile_path)
     manifest_path = out_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(str(manifest_path))
@@ -495,6 +548,46 @@ def _build_atom_audit_command(
     return command
 
 
+def _build_value_domain_audit_command(*, compile_root: Path, out_json: Path, out_md: Path) -> list[str]:
+    return [
+        sys.executable,
+        str(REPO_ROOT / "scripts" / "audit_carrier_value_domains.py"),
+        "--compile-root",
+        str(compile_root),
+        "--out-json",
+        str(out_json),
+        "--out-md",
+        str(out_md),
+    ]
+
+
+def _build_reconcile_command(
+    *,
+    fixture: str,
+    union_jsons: list[Path],
+    out_json: Path,
+    out_md: Path,
+    min_support: int,
+) -> list[str]:
+    command = [
+        sys.executable,
+        str(REPO_ROOT / "scripts" / "reconcile_typed_micro_compiles.py"),
+        "--fixture-id",
+        fixture,
+        "--min-support",
+        str(min_support),
+        "--support-mode",
+        "value",
+        "--out-json",
+        str(out_json),
+        "--out-md",
+        str(out_md),
+    ]
+    for path in union_jsons:
+        command.extend(["--compile-json", str(path)])
+    return command
+
+
 def _run(command: list[str]) -> None:
     subprocess.run(command, cwd=REPO_ROOT, check=True)
 
@@ -524,7 +617,26 @@ def _load_summary(path: Path) -> dict[str, Any]:
     except Exception:
         return {}
     summary = data.get("summary")
-    return summary if isinstance(summary, dict) else {}
+    if isinstance(summary, dict):
+        return summary
+    source_compile = data.get("source_compile")
+    if isinstance(source_compile, dict):
+        reconciliation = source_compile.get("governed_reconciliation")
+        if isinstance(reconciliation, dict):
+            conflicts = reconciliation.get("conflicts")
+            fact_support = reconciliation.get("fact_support")
+            return {
+                "fixture_id": reconciliation.get("fixture_id"),
+                "input_count": reconciliation.get("input_count"),
+                "min_support": reconciliation.get("min_support"),
+                "support_mode": reconciliation.get("support_mode"),
+                "reconciled_fact_count": int(source_compile.get("unique_fact_count") or 0),
+                "singleton_fact_count": reconciliation.get("singleton_fact_count"),
+                "conflict_count": len(conflicts) if isinstance(conflicts, list) else 0,
+                "skipped_count": reconciliation.get("skipped_count"),
+                "fact_support_count": len(fact_support) if isinstance(fact_support, list) else 0,
+            }
+    return {}
 
 
 def _slug(value: str) -> str:

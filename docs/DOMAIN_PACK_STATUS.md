@@ -5,13 +5,13 @@ This report does not read source prose, QA questions, or judge outputs.
 
 ## Summary
 
-- Domains: `4`
-- Predicates: `51` (`47` domain-specific plus shared carriers)
-- Lenses: `24`
-- Associated fixtures: `23`
+- Domains: `5`
+- Predicates: `60` (`55` domain-specific plus shared carriers)
+- Lenses: `29`
+- Associated fixtures: `24`
 - Unassigned fixtures: `4`
-- Expected facts in associated fixtures: `493`
-- Forbidden facts in associated fixtures: `174`
+- Expected facts in associated fixtures: `520`
+- Forbidden facts in associated fixtures: `183`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Status: `pass`
 
@@ -21,6 +21,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 31 |
+| `state_ag_settlement_v1` | 9 | 8 | 5 | 1 | 27 | 9 |
 
 ## fda_warning_letter_v1
 
@@ -140,6 +141,30 @@ This report does not read source prose, QA questions, or judge outputs.
 | `sec_form_8k_skeleton_transfer_002` | `manifest_domain_profile` | 12 | 6 | `sec_exhibit/5`:1, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:6, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_transfer_003` | `fixture_id_prefix` | 13 | 10 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_filing_item_treatment/4`:1, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_v1` | `manifest_domain_profile` | 13 | 6 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:3, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
+
+## state_ag_settlement_v1
+
+- Registry: `datasets/domain_profiles/state_ag_settlement_v1/ontology_registry.json`
+- Predicates: `9`
+- Domain-specific predicates: `8`
+- Lenses: `5`
+- Accountability requirements: `0`
+
+### Lenses
+
+| Lens | Allowed signatures |
+| --- | --- |
+| `wrapper` | `state_ag_instrument/7`, `state_ag_party/5`, `state_ag_authority_citation/4`, `domain_omission/5` |
+| `chronology` | `state_ag_event/6`, `domain_omission/5` |
+| `obligations` | `state_ag_obligation/7`, `state_ag_monetary_payment/7`, `state_ag_authority_citation/4`, `domain_omission/5` |
+| `contacts` | `state_ag_contact_channel/7`, `domain_omission/5` |
+| `signature` | `state_ag_signature/6`, `domain_omission/5` |
+
+### Fixture Oracles
+
+| Fixture | Association | Expected | Forbidden | Expected signatures |
+| --- | --- | ---: | ---: | --- |
+| `state_ag_settlement_aod_v1` | `manifest_domain_profile` | 27 | 9 | `state_ag_authority_citation/4`:4, `state_ag_contact_channel/7`:3, `state_ag_event/6`:4, `state_ag_instrument/7`:1, `state_ag_monetary_payment/7`:1, `state_ag_obligation/7`:6, `state_ag_party/5`:4, `state_ag_signature/6`:4 |
 
 ## Unassigned Typed Micro-Fixtures
 

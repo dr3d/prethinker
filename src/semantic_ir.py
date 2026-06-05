@@ -3259,6 +3259,8 @@ def _contract_role_kind(role: str) -> str:
         return "interval"
     if "scope" in value and ("date" in value or "time" in value or "source" in value or "basis" in value):
         return ""
+    if value in {"due_or_effective_date"}:
+        return ""
     if "date" in value and ("kind" in value or "role" in value or "type" in value):
         return ""
     if value in {"date", "time", "date_filed", "decision_date", "filing_date"}:

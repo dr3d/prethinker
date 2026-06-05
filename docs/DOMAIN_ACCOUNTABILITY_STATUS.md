@@ -8,7 +8,7 @@ This page shows which omission contracts exist and which typed fixture oracles e
 
 ## Summary
 
-- Domains: `4`
+- Domains: `5`
 - Registry accountability requirements: `8`
 - Requirements covered by fixture omissions: `8`
 - Requirements not yet covered by fixture omissions: `0`
@@ -22,6 +22,7 @@ This page shows which omission contracts exist and which typed fixture oracles e
 | `ntsb_investigation_v1` | 2 | 2 | 2 | 0 |
 | `osha_incident_v1` | 2 | 2 | 2 | 0 |
 | `sec_form_8k_v1` | 1 | 1 | 1 | 0 |
+| `state_ag_settlement_v1` | 0 | 0 | 0 | 0 |
 
 ## fda_warning_letter_v1
 
@@ -98,6 +99,20 @@ All declared requirements have fixture coverage, and no fixture-only omission pa
 | Carrier | Kind | Reason | Count | Registry status | Fixtures |
 | --- | --- | --- | ---: | --- | --- |
 | `sec_signatory/5` | `role_missing` | `signature_block_not_stated` | 1 | `declared` | `sec_form_8k_signature_omission_v1` |
+
+### Accountability Read
+
+All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
+
+## state_ag_settlement_v1
+
+### Registry Requirements
+
+_No registry accountability requirements declared._
+
+### Fixture Omission Patterns
+
+_No expected `domain_omission/5` facts in associated fixtures._
 
 ### Accountability Read
 

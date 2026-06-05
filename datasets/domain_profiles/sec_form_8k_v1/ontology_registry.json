@@ -35,7 +35,7 @@
     },
     {
       "id": "items",
-      "purpose": "Form 8-K item headings and their structural roles.",
+      "purpose": "Form 8-K item headings, structural roles, and any source-stated item legal-treatment statements. Emit the structural sec_filing_item/5 row and, separately, sec_filing_item_treatment/4 when the item body states treatment such as furnished, filed, or not deemed filed.",
       "allowed_signatures": [
         "sec_filing_item/5",
         "sec_filing_item_treatment/4",
@@ -117,7 +117,7 @@
         "source_or_scope"
       ],
       "category": "sec_filing_item_treatment",
-      "notes": "Preserves source-stated legal treatment for a Form 8-K item or item information, such as furnished or not_deemed_filed. Attach treatment statements in Item 2.02 or Item 7.01 bodies to those substantive items, not to Item 9.01 merely because an exhibit table lists the same exhibit. Does not replace the structural sec_filing_item/5 row."
+      "notes": "Preserves source-stated legal treatment for a Form 8-K item body. Emit separately from the structural item row and attach to the item whose body states the treatment."
     },
     {
       "signature": "sec_exhibit/5",

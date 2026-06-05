@@ -9,8 +9,11 @@ from scripts.run_domain_lens_bundle import (
     LensSpec,
     _build_atom_audit_command,
     _build_lens_compile_command,
+    _build_reconcile_command,
     _build_score_command,
+    _build_value_domain_audit_command,
     _load_registry_lenses,
+    _load_summary,
     _parse_lens_domain_hints,
     _selected_lenses,
 )
@@ -139,3 +142,74 @@ def test_atom_audit_command_can_enforce_lens_scope() -> None:
     assert "--enforce-atom-shape" in command
     assert "--enforce-registered-signatures" in command
     assert "--enforce-lens-scope" in command
+
+
+def test_value_domain_audit_command_bites_by_default() -> None:
+    command = _build_value_domain_audit_command(
+        compile_root=Path("union-root"),
+        out_json=Path("value-domains.json"),
+        out_md=Path("value-domains.md"),
+    )
+
+    assert "audit_carrier_value_domains.py" in command[1]
+    assert "--compile-root" in command
+    assert command[command.index("--compile-root") + 1] == "union-root"
+    assert "--out-json" in command
+    assert "--out-md" in command
+    assert "--exit-zero" not in command
+
+
+def test_reconcile_command_uses_value_support_without_exit_zero() -> None:
+    command = _build_reconcile_command(
+        fixture="fixture_1",
+        union_jsons=[Path("run1.json"), Path("run2.json")],
+        out_json=Path("reconcile.json"),
+        out_md=Path("reconcile.md"),
+        min_support=2,
+    )
+
+    assert "reconcile_typed_micro_compiles.py" in command[1]
+    assert "--fixture-id" in command
+    assert command[command.index("--fixture-id") + 1] == "fixture_1"
+    assert "--min-support" in command
+    assert command[command.index("--min-support") + 1] == "2"
+    assert "--support-mode" in command
+    assert command[command.index("--support-mode") + 1] == "value"
+    assert command.count("--compile-json") == 2
+    assert "--exit-zero" not in command
+
+
+def test_load_summary_understands_reconcile_artifact_shape(tmp_path: Path) -> None:
+    artifact = tmp_path / "reconcile.json"
+    artifact.write_text(
+        json.dumps(
+            {
+                "source_compile": {
+                    "unique_fact_count": 2,
+                    "governed_reconciliation": {
+                        "fixture_id": "fixture_1",
+                        "input_count": 3,
+                        "min_support": 2,
+                        "support_mode": "value",
+                        "fact_support": [{"fact": "a."}, {"fact": "b."}],
+                        "singleton_fact_count": 0,
+                        "skipped_count": 1,
+                        "conflicts": [{"type": "conflict"}],
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert _load_summary(artifact) == {
+        "fixture_id": "fixture_1",
+        "input_count": 3,
+        "min_support": 2,
+        "support_mode": "value",
+        "reconciled_fact_count": 2,
+        "singleton_fact_count": 0,
+        "conflict_count": 1,
+        "skipped_count": 1,
+        "fact_support_count": 2,
+    }
