@@ -775,8 +775,10 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "contract": [
             "SEC filing wrapper: preserve one source-stated Form 8-K filing identity with typed event and filing dates.",
             "form_type is a compact controlled value such as form_8_k or form_8_k_a; report_kind is the document kind, such as current_report.",
+            "If the cover page explicitly states Form 8-K or Form 8-K/A and Current Report, emit exactly one sec_filing/6 wrapper row for that filing even when no separate SEC filing/submission date is stated.",
             "event_date is the cover-page Date of Report or Date of Earliest Event Reported when stated; do not substitute item-body event dates into the wrapper row.",
             "filing_date is only a source-stated filed/submitted/accession date when explicitly labeled; do not treat the signature date, report date, or earliest-event date as filing_date. Use not_stated when no separate filing date is stated.",
+            "Do not omit sec_filing/6 merely because companion sec_registrant/4 or sec_registrant_identifier/5 rows carry the same filing_id.",
             "Use companion SEC carriers for registrant identifiers, item headings, exhibits, signatories, and substantive disclosure events.",
             "Do not hide item descriptions, agreement terms, officer biographies, or exhibit text inside the wrapper row.",
         ],

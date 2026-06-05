@@ -90,7 +90,10 @@ SEC Form 8-K skeleton pack
     all support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone
     were absent from that stable support set. Later 2026-06-05 same-local-Qwen
     reruns recovered 13/13 at support>=2, but these are favorable points inside
-    the observed band, not a new fixed score.
+    the observed band, not a new fixed score. A focused transfer_001
+    `sec_filing/6` wrapper-emission contract probe emitted the wrapper in only
+    1/3 local-Qwen wrapper-lens compiles, so the row remains a compile-recall
+    boundary rather than a support lift.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
     status: pass

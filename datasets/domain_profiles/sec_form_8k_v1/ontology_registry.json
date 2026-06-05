@@ -71,7 +71,7 @@
         "source_or_scope"
       ],
       "category": "sec_filing_wrapper",
-      "notes": "Identifies one Form 8-K or Form 8-K/A current report. event_date is the cover-page Date of Report or Date of Earliest Event Reported when stated. filing_date is only an explicitly labeled filed/submitted/accession date; use not_stated when no separate filing date is stated. Use companion carriers for items, registrant identifiers, exhibits, and signature."
+      "notes": "Identifies one Form 8-K or 8-K/A Current Report. Emit one wrapper row from a cover page even when no separate filed/submitted/accession date is stated. event_date is Date of Report or Earliest Event; filing_date is only an explicit filed/submitted/accession date, else not_stated. Companion carriers handle identifiers, items, exhibits, and signature."
     },
     {
       "signature": "sec_registrant/4",

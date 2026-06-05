@@ -426,6 +426,8 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     ]
     filing_text = " ".join(filing["contract"] + filing["forbidden_uses"])
     assert "companion SEC carriers" in filing_text
+    assert "emit exactly one sec_filing/6 wrapper row" in filing_text
+    assert "Do not omit sec_filing/6" in filing_text
     assert "cover-page Date of Report" in filing_text
     assert "do not substitute item-body event dates" in filing_text
     assert "Use not_stated when no separate filing date is stated" in filing_text
