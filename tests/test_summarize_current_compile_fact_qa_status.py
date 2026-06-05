@@ -35,6 +35,7 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert "incorporated_by_reference" in md
     assert "`sec_form_8k_skeleton_seed`" in md
     assert "artifact atom pass/pass; value pass/pass" in md
+    assert "lens compiles `12`" in md
     assert "missing_bundle_manifest_recovered_from_compile_json" in md
 
 
@@ -216,6 +217,7 @@ def _source_cell(cell_id: str, *, warning: str = "") -> dict:
         "source_root": "C:\\prethinker_tmp_archive\\example",
         "bundle_manifest_status": "present",
         "run_count": 3,
+        "lens_compile_count": 12,
         "warnings": warnings,
         "artifact_gate_summaries": {
             "lens_atom_inventory": {"status": "pass"},

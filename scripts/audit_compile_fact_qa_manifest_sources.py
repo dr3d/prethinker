@@ -162,6 +162,8 @@ def _audit_cell(cell: dict[str, Any], *, index: int) -> dict[str, Any]:
         "bundle_manifest_status": result["bundle_manifest_status"],
         "run_count": result["run_count"],
         "run_jsons": result["run_jsons"],
+        "lens_compile_count": result.get("lens_compile_count", 0),
+        "lens_compile_settings": result.get("lens_compile_settings", {}),
         "effective_settings": settings,
         "setting_sources": result["setting_sources"],
         "gate_summaries": result.get("gate_summaries", {}),
@@ -187,11 +189,17 @@ def _audit_domain_lens_bundle(
 
     run_specs = _domain_lens_run_specs(bundle_root, blockers, cell_id)
     run_jsons = [Path(spec["compile_json"]) for spec in run_specs]
+    lens_compile_jsons = _source_compile_jsons(bundle_root / "lens_compiles")
     score_report = _load_optional_json(bundle_root / "reports" / "typed_micro_series_summary.json")
     bundle_manifest_path = bundle_root / "manifest.json"
     bundle_manifest = _load_optional_json(bundle_manifest_path)
 
     compile_settings = _settings_from_compile_jsons(run_jsons, blockers, cell_id)
+    lens_compile_settings = _settings_from_compile_jsons(
+        lens_compile_jsons,
+        blockers,
+        f"{cell_id}:lens_compiles",
+    ) if lens_compile_jsons else {}
     report_settings = _settings_from_score_report(score_report)
     gate_summaries: dict[str, Any] = {}
     artifact_gate_summaries = _check_bundle_artifact_gates(
@@ -238,6 +246,13 @@ def _audit_domain_lens_bundle(
             blockers.append(
                 f"{cell_id}:manifest_score_setting_mismatch:{key}:manifest={effective[key]}:score={value}"
             )
+    for key, value in lens_compile_settings.items():
+        if key in {"backend", "model", "temperature", "top_p", "num_ctx"} and not _is_missing(effective.get(key)):
+            if not _same_scalar(effective[key], value):
+                blockers.append(
+                    f"{cell_id}:lens_compile_setting_mismatch:{key}:"
+                    f"manifest_or_union={effective[key]}:lens={value}"
+                )
 
     if score_report is None:
         warnings.append(f"{cell_id}:missing_typed_micro_series_score_report")
@@ -250,6 +265,8 @@ def _audit_domain_lens_bundle(
         "run_jsons": [str(path) for path in run_jsons],
         "effective_settings": effective,
         "setting_sources": setting_sources,
+        "lens_compile_count": len(lens_compile_jsons),
+        "lens_compile_settings": lens_compile_settings,
         "gate_summaries": gate_summaries,
         "artifact_gate_summaries": artifact_gate_summaries,
     }
@@ -661,8 +678,8 @@ def report_md(report: dict[str, Any]) -> str:
         [
             "## Cells",
             "",
-            "| Cell | Runs | Manifest | Gates | Backend | Model | Temp | Top-p | Context | Support | Matcher | Warnings |",
-            "| --- | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
+            "| Cell | Runs | Lens Compiles | Manifest | Gates | Backend | Model | Temp | Top-p | Context | Support | Matcher | Warnings |",
+            "| --- | ---: | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
         ]
     )
     for cell in report["cells"]:
@@ -674,6 +691,7 @@ def report_md(report: dict[str, Any]) -> str:
             "| "
             f"`{cell['id']}` | "
             f"{cell.get('run_count', 0)} | "
+            f"{cell.get('lens_compile_count', 0)} | "
             f"`{cell.get('bundle_manifest_status', '')}` | "
             f"`{gate_status}` | "
             f"`{settings.get('backend', '')}` | "

@@ -211,6 +211,46 @@ def test_audit_compile_fact_manifest_sources_replays_artifact_value_domain_gate(
     )
 
 
+def test_audit_compile_fact_manifest_sources_blocks_mixed_lens_compile_settings(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    _write_bundle_compile_json(bundle, "run1", lens_model="other/model")
+    _write_bundle_compile_json(bundle, "run2")
+    _write_bundle_compile_json(bundle, "run3")
+    _write_score_report(bundle)
+    (bundle / "manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "domain_lens_bundle_run_v1",
+                "repeat": 3,
+                "runs": [{"cycle": 1}, {"cycle": 2}, {"cycle": 3}],
+                "lens_atom_audit_summary": _atom_gate_summary(),
+                "union_atom_audit_summary": _atom_gate_summary(),
+                "settings": {
+                    "backend": "lmstudio",
+                    "model": "qwen/qwen3.6-35b-a3b",
+                    "temperature": 0.0,
+                    "top_p": 1.0,
+                    "num_ctx": 65536,
+                    "max_tokens": 12000,
+                    "timeout": 420,
+                    "support_threshold": 2,
+                    "matcher": "constant_slot",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = _write_manifest(tmp_path, bundle)
+
+    report = audit_manifest(manifest)
+
+    assert report["summary"]["status"] == "fail"
+    assert any(
+        "lens_compiles:mixed_compile_setting:model" in reason
+        for reason in report["summary"]["blocking_reasons"]
+    )
+
+
 def test_audit_compile_fact_manifest_sources_blocks_repo_tmp_claim_roots(
     tmp_path: Path,
     monkeypatch,
@@ -258,6 +298,7 @@ def _write_bundle_compile_json(
     run_id: str,
     *,
     model: str = "qwen/qwen3.6-35b-a3b",
+    lens_model: str | None = None,
     facts: list[str] | None = None,
 ) -> None:
     run_dir = bundle / "unions" / run_id
@@ -266,7 +307,8 @@ def _write_bundle_compile_json(
     (run_dir / "compile.json").write_text(json.dumps(payload), encoding="utf-8")
     lens_dir = bundle / "lens_compiles" / run_id / "wrapper"
     lens_dir.mkdir(parents=True, exist_ok=True)
-    (lens_dir / "compile.json").write_text(json.dumps(payload), encoding="utf-8")
+    lens_payload = _compile_payload(model=lens_model or model, facts=facts or [])
+    (lens_dir / "compile.json").write_text(json.dumps(lens_payload), encoding="utf-8")
 
 
 def _write_flat_bundle_compile_json(bundle: Path, run_id: str) -> None:

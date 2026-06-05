@@ -158,6 +158,7 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
         "unregistered_plan_exact_rows": int(typed_plan.get("unregistered_plan_exact_rows") or 0),
         "source_root": str(source.get("source_root") or ""),
         "bundle_manifest_status": str(source.get("bundle_manifest_status") or ""),
+        "lens_compile_count": int(source.get("lens_compile_count") or 0),
         "artifact_gate_status": _artifact_gate_status(source.get("artifact_gate_summaries") or {}),
         "source_warning_count": len(source.get("warnings") or []),
         "source_warnings": list(source.get("warnings") or []),
@@ -353,7 +354,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         source = (
             f"`{cell['backend']}` `{cell['model']}`; temp `{cell['temperature']}`; "
             f"top_p `{cell['top_p']}`; ctx `{cell['num_ctx']}`; matcher `{cell['matcher']}`; "
-            f"manifest `{cell['bundle_manifest_status']}`"
+            f"lens compiles `{cell['lens_compile_count']}`; manifest `{cell['bundle_manifest_status']}`"
         )
         lines.append(
             "| `{}` | `{}` | {} / {} | {} / {} | {} | {} | {} |".format(

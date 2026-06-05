@@ -571,15 +571,16 @@ The repo should not currently claim:
 
 The compile-fact manifest source audit now replays retained bundle atom/lens
 and carrier value-domain gates from the archived compile artifacts as well as
-checking run provenance and model/settings metadata: a manifested claim cell
-fails if its retained lens or union artifacts contain nonzero atom-shape,
-unregistered-fact, lens-scope, or closed-slot value-domain blockers, even if
-the manifest summary claims clean.
+checking run provenance, union model/settings metadata, and lens-compile
+model/settings comparability: a manifested claim cell fails if its retained
+lens or union artifacts contain nonzero atom-shape, unregistered-fact,
+lens-scope, or closed-slot value-domain blockers, or if hidden lens compiles
+mix incompatible inference settings behind clean union metadata.
 
 Current full-suite result on 2026-06-05:
 
 ```text
-2528 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2529 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
