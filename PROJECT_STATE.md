@@ -410,23 +410,22 @@ Fixture-bank / next-domain inventory
   active external work-order packet audit:
     docs\PENDING_EXTERNAL_WORK_ORDERS.md
     status: pass
-    coverage: 4 standalone tmp work-order zip packets after accepted/returned
-      packets were retained and archived
-      (0 proposal-declared, 4 standalone)
+    tracked coverage: 0 proposal-declared pending work-order zips
+    local tmp preflight:
+      `python scripts\audit_pending_external_work_orders.py --include-tmp-zips`
+      currently reports 1 standalone tmp work order for
+      `sec_form_8k_skeleton_transfer_001`
     blocking errors: 0
-    warnings: 1
-    warning meaning:
-      OSHA FTA total-penalty is a focused candidate review rather than a fully
-      blind oracle packet.
+    warnings: 0
     answer-leak policy:
       queued pending packets fail if they include filled oracle files,
       judged-QA manifests, model outputs, compile/run artifacts, or literal
       fact examples inside oracle templates.
   retained candidate-oracle review audit:
     docs\CANDIDATE_ORACLE_REVIEW_STATUS.md
-    current retained reviews: 7
+    current retained reviews: 9
     blocking errors: 0
-    warnings: 17
+    warnings: 14
     scope: validates blind/source-only metadata and candidate
       expected/forbidden fact-file shape only, review folder identity, and
       repo-relative source-file references; it does not read source prose or
@@ -442,7 +441,7 @@ Fixture-bank / next-domain inventory
     current retained reviews: 2, covering 4 source-only expected/forbidden
       outputs for draft PUC and procurement wrapper proposals
     blocking errors: 0
-    warnings: 5
+    warnings: 12
 
 Atom-library query grounding
   strict path: source-record predicates/header inventories are filtered out,

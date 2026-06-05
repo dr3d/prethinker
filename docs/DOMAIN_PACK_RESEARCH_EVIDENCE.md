@@ -775,10 +775,12 @@ forbidden Exhibit 10.1 treatment row was removed by the 2026-06-05 exhibit/item
 axis contract rerun; the later current-mainline seed retest preserved 13/13 but
 surfaced singleton item-treatment precision noise. The FDA transfer_002 current
 full-lens retest now
-reports only 11/29 support>=2. The packet-shape audit itself is clean after
-returned packets were retained or archived: 0 standalone pending work-order zips, 0
-proposal-declared pending zips, 0 blocking errors, and 0 warnings. That audit
-now enforces an answer-leak
+reports only 11/29 support>=2. The tracked packet-shape audit itself is clean
+after returned packets were retained or archived: 0 proposal-declared pending
+zips, 0 blocking errors, and 0 warnings. Standalone local `tmp/*.zip` review
+packets are intentionally outside that tracked report; run
+`scripts\audit_pending_external_work_orders.py --include-tmp-zips` for local
+packet preflight. That audit now enforces an answer-leak
 packet policy: filled oracle files, judged-QA manifests, model outputs,
 compile/run artifacts, and literal fact examples inside oracle templates block
 a pending packet.
