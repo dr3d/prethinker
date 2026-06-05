@@ -158,6 +158,7 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
         "unregistered_plan_exact_rows": int(typed_plan.get("unregistered_plan_exact_rows") or 0),
         "source_root": str(source.get("source_root") or ""),
         "bundle_manifest_status": str(source.get("bundle_manifest_status") or ""),
+        "artifact_gate_status": _artifact_gate_status(source.get("artifact_gate_summaries") or {}),
         "source_warning_count": len(source.get("warnings") or []),
         "source_warnings": list(source.get("warnings") or []),
         "backend": str(settings.get("backend") or ""),
@@ -263,6 +264,31 @@ def _blocking_reasons(
     return blockers
 
 
+def _artifact_gate_status(gate_summaries: dict[str, Any]) -> str:
+    if not gate_summaries:
+        return "not_available"
+    atom_status = _paired_gate_status(
+        gate_summaries,
+        ("lens_atom_inventory", "union_atom_inventory"),
+    )
+    value_status = _paired_gate_status(
+        gate_summaries,
+        ("lens_value_domains", "union_value_domains"),
+    )
+    return f"artifact atom {atom_status}; value {value_status}"
+
+
+def _paired_gate_status(gate_summaries: dict[str, Any], summary_keys: tuple[str, str]) -> str:
+    statuses: list[str] = []
+    for summary_key in summary_keys:
+        summary = gate_summaries.get(summary_key)
+        if isinstance(summary, dict):
+            statuses.append(str(summary.get("status") or "unknown"))
+        else:
+            statuses.append("missing")
+    return "/".join(statuses)
+
+
 def render_markdown(report: dict[str, Any]) -> str:
     summary = report["summary"]
     lines = [
@@ -321,7 +347,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     for cell in report["cells"]:
         replay = (
             f"redaction `{cell['redaction_status']}` / prose `{cell['prose_dependent_exact']}`; "
-            f"typed-plan `{cell['typed_plan_status']}` / unregistered `{cell['unregistered_plan_exact_rows']}`"
+            f"typed-plan `{cell['typed_plan_status']}` / unregistered `{cell['unregistered_plan_exact_rows']}`; "
+            f"{cell['artifact_gate_status']}"
         )
         source = (
             f"`{cell['backend']}` `{cell['model']}`; temp `{cell['temperature']}`; "
