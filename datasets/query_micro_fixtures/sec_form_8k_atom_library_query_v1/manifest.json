@@ -15,6 +15,7 @@
   ],
   "optional_runner_flags": [
     "--atom-library-query-validation-retry",
+    "--atom-library-slot-label-normalization",
     "--classify-failure-surfaces"
   ],
   "cells": [

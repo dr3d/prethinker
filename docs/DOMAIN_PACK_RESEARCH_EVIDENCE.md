@@ -547,6 +547,27 @@ strings. Until the SEC pack represents exact display names as typed facts or
 the QA contract asks for canonical atoms, this run's claim-bearing thesis
 number is `23/25`, not `25/25`.
 
+Carrier-contract correction:
+
+```text
+artifact: C:\prethinker_tmp_archive\sec_atom_library_query_contract_correction_20260605\qwen_moe_temp0_r2_full
+change: registrant identity questions ask for sec_registrant/4 registrant_id
+  and jurisdiction atoms, not exact legal-name display strings
+product exact: 25/25
+typed-plan replay: 25/25, pass
+redacted rejudge thesis exact: 25/25, pass
+compatibility/runtime/write rows: 0/0/0
+status: thesis-clean query-planner packet over retained typed SEC atoms
+```
+
+This is a QA-contract correction, not a new compile-recall claim. The selected
+SEC run artifacts contain compact `sec_registrant/4` atoms such as
+`entity_servicenow_inc`, `blackstone_inc`, and `delaware`; they do not contain
+exact legal-name display strings. The corrected query packet therefore measures
+the query planner's ability to select and execute typed SEC carriers over the
+closed atom library. Exact source-display legal names remain out of scope until
+the SEC pack admits an explicit typed display-name carrier.
+
 Retained diagnostic artifact:
 
 ```text
@@ -555,6 +576,7 @@ C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_qu
 C:\prethinker_tmp_archive\sec_atom_library_query_20260605\qwen_moe_temp0_r1
 C:\prethinker_tmp_archive\sec_atom_library_query_slot_label_feedback_20260605
 C:\prethinker_tmp_archive\sec_atom_library_slot_label_normalization_20260605
+C:\prethinker_tmp_archive\sec_atom_library_query_contract_correction_20260605
 ```
 
 Retained governance artifact:
