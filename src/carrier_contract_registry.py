@@ -808,7 +808,9 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "contract": [
             "SEC registrant relation: link a filing to the source-stated registrant and jurisdiction of incorporation or organization.",
             "registrant_id is a compact normalized entity atom from the registrant name; jurisdiction is a compact state or not_stated.",
+            "Derive registrant_id from the full source-stated legal registrant name, not ticker symbols, exchange abbreviations, or ad-hoc shortened names.",
             "Use sec_registrant_identifier/5 for CIK, commission file number, IRS EIN, ticker, exchange, and telephone values.",
+            "Use the same registrant_id consistently across sec_registrant/4 and sec_registrant_identifier/5 rows for the same filing.",
             "Do not pack the whole cover-page table or address block into registrant_id or jurisdiction.",
         ],
         "value_domains": {},
@@ -824,6 +826,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "SEC registrant identifier relation: preserve one source-stated identifier for the registrant.",
+            "Use the same full-legal-name-derived registrant_id emitted by sec_registrant/4 for the same filing; do not substitute ticker symbols or abbreviated aliases as the registrant_id.",
             "identifier_kind is a compact controlled value such as cik, commission_file_number, irs_ein, ticker_symbol, exchange_name, or telephone.",
             "identifier_value is one compact atom for the value; use prefixes such as cik_, file_, ein_, ticker_, exchange_, or phone_ so numeric-leading values do not leak into the atom layer.",
             "Emit cik only when a CIK label and value are explicitly stated in the provided source; do not infer CIK from company knowledge, issuer identity, or SEC lookup.",

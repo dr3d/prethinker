@@ -82,7 +82,7 @@
         "source_or_scope"
       ],
       "category": "sec_registrant_identity",
-      "notes": "Links the filing to the source-stated registrant and jurisdiction. Does not carry address or identifier bundles."
+      "notes": "Links the filing to the source-stated registrant and jurisdiction. registrant_id is derived from the full source-stated legal registrant name, not ticker symbols or abbreviated aliases, and should be used consistently by companion identifier rows. Does not carry address or identifier bundles."
     },
     {
       "signature": "sec_registrant_identifier/5",
@@ -94,7 +94,7 @@
         "source_or_scope"
       ],
       "category": "sec_registrant_identifier",
-      "notes": "Preserves one source-stated registrant identifier at a time, such as CIK, commission file number, EIN, ticker, exchange, or telephone; CIK is emitted only when explicitly stated in source."
+      "notes": "Preserves one source-stated registrant identifier at a time, such as CIK, commission file number, EIN, ticker, exchange, or telephone. Use the same full-legal-name-derived registrant_id emitted by sec_registrant/4; CIK is emitted only when explicitly stated in source."
     },
     {
       "signature": "sec_filing_item/5",

@@ -93,7 +93,10 @@ SEC Form 8-K skeleton pack
     the observed band, not a new fixed score. Focused transfer_001 wrapper
     probes moved `sec_filing/6` from 1/3 to 2/3 local-Qwen wrapper-lens support
     after contract consistency cleanup, but telephone stayed 0/3 and registrant
-    atoms split across name variants. This remains focused mechanism evidence,
+    atoms split across name variants. A follow-up full-legal-name registrant-id
+    guidance probe recovered the wrapper, registrant, file number, EIN, ticker,
+    and exchange rows at support>=2 (6/13 overall because the probe was wrapper
+    lens only); telephone stayed 0/3. This remains focused mechanism evidence,
     not a standing full-bundle support lift.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md

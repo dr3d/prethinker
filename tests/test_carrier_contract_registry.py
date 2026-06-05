@@ -442,6 +442,9 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     registrant_text = " ".join(registrant["contract"] + registrant["forbidden_uses"])
     assert "sec_registrant_identifier/5" in registrant_text
     assert "telephone values" in registrant_text
+    assert "full source-stated legal registrant name" in registrant_text
+    assert "not ticker symbols" in registrant_text
+    assert "same registrant_id" in registrant_text
     assert "full_cover_table" in registrant_text
 
     assert identifier is not None
@@ -453,6 +456,8 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
         "source_or_scope",
     ]
     identifier_text = " ".join(identifier["contract"] + identifier["forbidden_uses"])
+    assert "same full-legal-name-derived registrant_id" in identifier_text
+    assert "do not substitute ticker symbols" in identifier_text
     assert "numeric-leading" in identifier_text
     assert "do not infer CIK" in identifier_text
     assert "unstated_cik" in identifier_text
@@ -540,6 +545,20 @@ def test_sec_material_event_probe_is_not_offered_by_promoted_sec_profile() -> No
     assert carrier_contract("sec_material_event/6") is not None
     assert "sec_material_event/6" not in predicate_signatures
     assert "sec_material_event/6" not in offered_signatures
+
+
+def test_sec_profile_registry_registrant_notes_keep_ids_legal_name_derived() -> None:
+    registry_path = REPO_ROOT / "datasets" / "domain_profiles" / "sec_form_8k_v1" / "ontology_registry.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    by_signature = {item["signature"]: item for item in registry["predicates"]}
+
+    registrant_notes = by_signature["sec_registrant/4"]["notes"]
+    identifier_notes = by_signature["sec_registrant_identifier/5"]["notes"]
+
+    assert "full source-stated legal registrant name" in registrant_notes
+    assert "not ticker symbols" in registrant_notes
+    assert "used consistently by companion identifier rows" in registrant_notes
+    assert "same full-legal-name-derived registrant_id" in identifier_notes
 
 
 def test_puc_and_gao_wrapper_contracts_keep_substance_out_of_slots() -> None:

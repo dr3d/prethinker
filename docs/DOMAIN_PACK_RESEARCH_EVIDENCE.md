@@ -426,8 +426,14 @@ telephone to the `sec_registrant/4` instruction that points cover-page
 identifiers into `sec_registrant_identifier/5`. That second wrapper-only probe
 recovered `sec_filing/6` at 2/3 support, but telephone stayed 0/3 and registrant
 atoms split across `servicenow_inc`, `service_now_inc`, and `svc_now_inc`.
+A follow-up profile/contract guidance pass then required registrant ids to be
+derived from the full source-stated legal registrant name, not ticker symbols or
+abbreviated aliases, and to stay consistent across companion identifier rows.
+That focused wrapper-lens probe recovered the wrapper, registrant, commission
+file number, EIN, ticker, and exchange rows at support>=2 (6/13 overall because
+the probe intentionally offered only the wrapper lens). Telephone remained 0/3.
 No deterministic projection was promoted because the remaining typed atoms do
-not independently carry a safe cover-page report-date wrapper; using source
+not independently carry a safe telephone row or non-wrapper rows; using source
 prose or a signature date would cross the governance boundary. These are
 focused mechanism probes, not a standing full-bundle support lift. Retained
 artifacts:
@@ -435,6 +441,7 @@ artifacts:
 ```text
 C:\prethinker_tmp_archive\sec_wrapper_contract_probe_20260605
 C:\prethinker_tmp_archive\sec_identifier_contract_probe_20260605
+C:\prethinker_tmp_archive\sec_registrant_guidance_probe_20260605
 ```
 
 The Gemma/Qwen run artifacts were generated before a local LM Studio metadata
