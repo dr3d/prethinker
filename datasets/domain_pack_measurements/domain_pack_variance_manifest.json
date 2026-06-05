@@ -1,0 +1,51 @@
+{
+  "schema_version": "prethinker.domain_pack_variance_manifest.v1",
+  "groups": [
+    {
+      "id": "sec_t003_qwen_moe_repaired_schema",
+      "title": "SEC transfer_003 repaired-schema local Qwen MoE band",
+      "fixture_id": "sec_form_8k_skeleton_transfer_003",
+      "claim_read": "Use as an 11-13/13 same-condition band. Do not promote a favorable 13/13 draw as a fixed score.",
+      "roots": [
+        {
+          "id": "stability_r1",
+          "role": "pre-registered stability rerun before later omission guard",
+          "path": "C:/prethinker_tmp_archive/sec_stability_20260604/sec-t003-axis-stability-r1"
+        },
+        {
+          "id": "item_treatment_filing_id_r2",
+          "role": "item-treatment filing-id seam check",
+          "path": "C:/prethinker_tmp_archive/sec_item_treatment_filing_id_20260604/sec8k-t003-item-treatment-filing-id-r2-20260604"
+        },
+        {
+          "id": "axis_clean_refresh_r1",
+          "role": "same-local-Qwen refresh",
+          "path": "C:/prethinker_tmp_archive/sec_t003_refresh_20260605/sec8k-t003-axis-clean-refresh-r1-20260605"
+        },
+        {
+          "id": "qwen_mainline_rerun_r1",
+          "role": "same-day Qwen MoE mainline rerun",
+          "path": "C:/prethinker_tmp_archive/sec_t003_qwen_mainline_rerun_20260605/sec8k-t003-qwen-mainline-rerun-r1-20260605"
+        }
+      ]
+    },
+    {
+      "id": "sec_t003_dense_compile_substitution_controls",
+      "title": "SEC transfer_003 dense compile-substitution controls",
+      "fixture_id": "sec_form_8k_skeleton_transfer_003",
+      "claim_read": "Use as model-path robustness evidence: closed-language governance held, but recall did not reproduce the Qwen MoE favorable cell.",
+      "roots": [
+        {
+          "id": "gemma4_q4_r1",
+          "role": "Gemma 4 12B Q4_K_M compile substitution",
+          "path": "C:/prethinker_tmp_archive/model_variance_prereg_20260604/sec_compile_substitution_20260604/compile_substitution_sec/sec8k-t003-gemma4-q4-temp0-r1"
+        },
+        {
+          "id": "qwen27b_q4_r1",
+          "role": "Qwen 3.6 27B Q4_K_M dense same-family compile substitution",
+          "path": "C:/prethinker_tmp_archive/model_variance_prereg_20260604/sec_compile_substitution_20260604/qwen27b_compile_substitution_sec/sec8k-t003-qwen27b-q4-temp0-r1"
+        }
+      ]
+    }
+  ]
+}

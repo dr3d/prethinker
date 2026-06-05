@@ -120,6 +120,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "domain_pack_variance_status",
+            "command": [
+                python,
+                "scripts/summarize_domain_pack_variance_status.py",
+                "--out-json",
+                str(report_root / "domain_pack_variance_status.json"),
+                "--out-md",
+                str(report_root / "domain_pack_variance_status.md"),
+                "--expect-md",
+                "docs/DOMAIN_PACK_VARIANCE_STATUS.md",
+            ],
+        },
+        {
             "id": "domain_accountability_status",
             "command": [
                 python,
