@@ -526,16 +526,20 @@ settings across repeat runs. The null-control report audit verifies that
 current judged-QA claim handles point at retained passing null-control reports
 with zero exact null verdicts. The current SEC repaired-breadth roots include
 bundle manifests, so the 2026-06-04 source/provenance warning count is `0`.
-The latest 2026-06-05 governance run passed 15 checks with 0 failures,
+The latest 2026-06-05 governance run passed 17 checks with 0 failures,
 including proposal-status traceability for pending external oracle work orders
 plus a package-shape audit over all 8 active proposal and standalone `tmp`
-work-order zips with 0 blocking errors and 0 warnings, and generated
-compile-fact QA precision detail for repeated unexpected same-signature facts.
+work-order zips. That audit now enforces an answer-leak entry policy: filled
+oracle files, judged-QA manifests, model outputs, and compile/run artifacts
+block a pending packet. The current queue has 0 blocking errors and 1 warning:
+the OSHA FTA total-penalty packet is a focused candidate review rather than a
+fully blind oracle packet. The governance run also generated compile-fact QA
+precision detail for repeated unexpected same-signature facts.
 
 Retained 2026-06-05 governance artifact:
 
 ```text
-C:\prethinker_tmp_archive\pending_external_work_order_status_20260605\current_research_governance
+C:\prethinker_tmp_archive\pending_external_work_order_gate_20260605\current_research_governance
 ```
 
 The generated bundles are still governed by the same two checks used for the

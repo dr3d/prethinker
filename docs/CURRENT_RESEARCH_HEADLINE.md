@@ -84,13 +84,17 @@ SEC Form 8-K skeleton pack
     recovered 13/13 at support>=2, but that is a favorable point inside the
     observed band, not a new fixed score.
   latest governance artifact:
-    C:\prethinker_tmp_archive\pending_external_work_order_status_20260605\current_research_governance
+    C:\prethinker_tmp_archive\pending_external_work_order_gate_20260605\current_research_governance
     17 research-governance checks passed, including sign-clean,
     `sec_value_axis_integrity`, `compile_fact_qa_exclusions`,
     fixture-bank inventory freshness, pending external work-order audit over
     the 8 active proposal and standalone `tmp` zip packets with 0 blocking
-    errors and 0 warnings, manifest-source audit, redaction replay,
-    typed-plan replay, and checked-in status freshness. The standing manifest
+    errors and 1 warning: the OSHA FTA total-penalty packet is a focused
+    candidate review, not a fully blind oracle packet. The audit now also
+    blocks queued packets that contain filled oracle files, judged-QA
+    manifests, model outputs, or compile/run artifacts. Manifest-source audit,
+    redaction replay, typed-plan replay, and checked-in status freshness also
+    pass. The standing manifest
     now prints
     same-signature unexpected support (`4` rows at support>=2 across all
     standing cells) as a precision diagnostic, and

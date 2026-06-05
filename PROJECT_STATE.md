@@ -391,12 +391,18 @@ Fixture-bank / next-domain inventory
       complaint anatomy, and the open bootstrap drifts into substance/detail
       predicates rather than a compact shared skeleton.
   active external work-order packet audit:
-    C:\prethinker_tmp_archive\pending_external_work_order_status_20260605
+    C:\prethinker_tmp_archive\pending_external_work_order_gate_20260605
     status: pass
     coverage: 8 active proposal and standalone tmp work-order zip packets
       (3 proposal-declared, 5 standalone)
     blocking errors: 0
-    warnings: 0
+    warnings: 1
+    warning meaning:
+      OSHA FTA total-penalty is a focused candidate review rather than a fully
+      blind oracle packet.
+    answer-leak policy:
+      queued pending packets fail if they include filled oracle files,
+      judged-QA manifests, model outputs, or compile/run artifacts.
   retained candidate-oracle review audit:
     docs\CANDIDATE_ORACLE_REVIEW_STATUS.md
     current retained reviews: 1
