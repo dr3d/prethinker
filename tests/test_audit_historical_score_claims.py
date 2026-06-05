@@ -1,6 +1,7 @@
+import subprocess
 from pathlib import Path
 
-from scripts.audit_historical_score_claims import audit_docs
+from scripts.audit_historical_score_claims import _default_docs, audit_docs
 
 
 def test_audit_historical_score_claims_allows_disclaimed_scores(tmp_path: Path) -> None:
@@ -71,3 +72,24 @@ def test_audit_historical_score_claims_fails_missing_docs(tmp_path: Path) -> Non
         "stale_status_occurrence_count": 0,
         "status": "fail",
     }
+
+
+def test_default_docs_scan_tracked_docs_not_untracked_drafts(tmp_path: Path) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+    (tmp_path / "docs" / "tracked.md").write_text("not current 90%+\n", encoding="utf-8")
+    (tmp_path / "docs" / "draft.md").write_text("90%+\n", encoding="utf-8")
+
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "add", "README.md", "docs/tracked.md"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+    docs = _default_docs(tmp_path)
+
+    assert Path("README.md") in docs
+    assert Path("docs/tracked.md") in docs
+    assert Path("docs/draft.md") not in docs

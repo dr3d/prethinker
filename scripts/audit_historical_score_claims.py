@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -136,6 +137,9 @@ def audit_docs(*, root: Path, docs: list[Path]) -> dict[str, Any]:
 
 
 def _default_docs(root: Path) -> list[Path]:
+    tracked = _tracked_default_docs(root)
+    if tracked:
+        return tracked
     docs: list[Path] = []
     for item in DEFAULT_ROOTS:
         path = root / item
@@ -148,6 +152,25 @@ def _default_docs(root: Path) -> list[Path]:
                 if not _skip_doc(path)
             )
     return docs
+
+
+def _tracked_default_docs(root: Path) -> list[Path]:
+    if not (root / ".git").exists():
+        return []
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--", "README.md", "PROJECT_STATE.md", "docs"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return []
+    docs = [
+        Path(line.strip())
+        for line in result.stdout.splitlines()
+        if line.strip().lower().endswith(".md")
+    ]
+    return [path for path in docs if not _skip_doc(path)]
 
 
 def _skip_doc(path: Path) -> bool:
