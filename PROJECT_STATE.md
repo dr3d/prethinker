@@ -435,7 +435,10 @@ Fixture-bank / next-domain inventory
       copies only manifest / candidate expected facts / candidate forbidden
       facts / README / adjudication notes, drops source and work-order payloads,
       audits the staged review, and refuses overwrites unless explicitly
-      requested.
+      requested. Manifestless standalone returns, such as the SEC transfer_001
+      source-review packet, can be imported with explicit `--review-id` and
+      `--fixture-id`; the importer splits filled expected/forbidden templates
+      by predicate into ordinary single-predicate candidate-review folders.
   retained source-oracle review audit:
     docs\SOURCE_ORACLE_REVIEW_STATUS.md
     current retained reviews: 2, covering 4 source-only expected/forbidden
