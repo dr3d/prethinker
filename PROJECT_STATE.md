@@ -123,6 +123,12 @@ SEC Form 8-K skeleton pack
       survive typed atom-shape governance when it appears. Fresh rerun after
       that seam fix: 11 / 13, 0 / 10 supported forbidden, clean gates.
       Read this as a real typed-slot seam fix, not a support lift.
+    R6 fresh same-condition Qwen MoE refresh:
+      13 / 13, 0 / 10 supported forbidden, per-run exact 37 / 39
+      clean atom/lens/value-domain/value-axis gates, with one unexpected
+      `sec_filing_item_treatment/4` row at support=1 only
+      Read this as the favorable end of the current repaired-schema band, not
+      as a new fixed SEC number.
     source-only typed reconciliation over the current transfer_003 root:
       artifact:
         C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604\sec8k-t003-item-treatment-filing-id-r2-20260604\reports\typed_reconcile_support_ge2_value.md
@@ -143,17 +149,21 @@ SEC Form 8-K skeleton pack
       reproduce at support>=2
   read: SEC remains useful evidence that small closed skeleton packs transfer,
     but the formal SEC methods-anchor claim is no longer the old 12/12 cell.
-    The current honest boundary is exhibit legal-treatment ambiguity, wrapper
-    filing/telephone recall, one duplicate commission-file value, unstable
-    item-treatment recall, and ordinary MoE jitter. Bad SEC omission-accounting
-    rows are now blocked/dropped by typed guards; do not inflate the cell with
-    prompt polishing or a favorable same-condition draw.
+    Recent repaired transfer_003 roots now span 11-13 / 13 under the same local
+    Qwen MoE lane. The current honest boundary is favorable-draw risk,
+    exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
+    duplicate commission-file value, unstable item-treatment recall, and
+    ordinary MoE jitter. Bad SEC omission-accounting rows are now
+    blocked/dropped by typed guards; do not inflate the cell with prompt
+    polishing or a favorable same-condition draw.
   latest SEC governance artifact:
     C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
     C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604
+    C:\prethinker_tmp_archive\sec_t003_refresh_20260605
     These guard/seam cleanups did not raise SEC support; they tightened the
       axis cage and stopped valid companion rows from being lost to typed
-      filing-id normalization when emitted.
+      filing-id normalization when emitted. The 2026-06-05 refresh is a
+      favorable same-condition point inside the observed SEC band.
   current compile-fact QA precision detail:
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
     unexpected same-signature facts at support>=2. The current rows are
@@ -439,7 +449,7 @@ Atom-library query grounding
     Qwen reference for the same cell:
       12 / 12 support>=2; 0 / 10 supported forbidden; 1 unexpected fact
       (historical pre-axis-repair reference; current repaired transfer_003
-      reruns are 12 / 13 and 11 / 13)
+      reruns span 11-13 / 13)
     read: dense controls can stay inside the closed SEC language, but they did
       not reproduce the SEC compile cell cleanly. The model-swap robustness
       claim is therefore not established; dirty rows are SEC role/key semantics

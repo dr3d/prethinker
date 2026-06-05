@@ -58,22 +58,31 @@ SEC Form 8-K skeleton pack
       The fix lets admitted `sec_filing_item_treatment/4` rows share SEC
       filing-id normalization and survive atom-shape governance. It is a real
       typed-slot cleanup, not a support-threshold lift.
+    R6 fresh Qwen MoE refresh, same local settings:
+      13 / 13, 0 / 10 supported forbidden; per-run exact 37 / 39
+      atom/lens/value-domain/value-axis gates clean; one unexpected
+      `sec_filing_item_treatment/4` row appeared in only one run and did not
+      survive support>=2
     axis/value/atom/lens gates clean in the repaired cells
   repaired breadth check over retained seed / transfer_001 / transfer_002:
     12 / 13; 11 / 13; 11 / 12
     0 supported forbidden and clean atom/lens gates in each cell
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
-    methods anchor yet. The current boundary is exhibit legal-treatment
-    ambiguity, wrapper/telephone recall, duplicate commission-file value, and
-    MoE jitter plus unstable item-treatment recall, not prose leakage. Bad
+    methods anchor yet. Recent repaired transfer_003 roots now span
+    11-13 / 13 under the same local Qwen MoE lane, so the current boundary is
+    same-condition MoE jitter, exhibit legal-treatment ambiguity,
+    wrapper/telephone recall, duplicate commission-file value, and unstable
+    item-treatment recall, not prose leakage. Bad
     SEC omission-accounting rows are now guarded as governance noise rather
     than counted as an open support boundary. The fenced
     `sec_material_event/6` seed probe kept skeleton support at 12 / 13 but
     produced no event row at support>=2, so the promoted skeleton profile
     remains event-substance-free. Source-only typed reconciliation over the
-    current transfer_003 root shows 11 value-mode facts at support>=2, all
-    support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone
-    remain absent from stable support.
+    earlier current transfer_003 root shows 11 value-mode facts at support>=2,
+    all support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone
+    were absent from that stable support set. A later 2026-06-05 fresh refresh
+    recovered 13/13 at support>=2, but that is a favorable point inside the
+    observed band, not a new fixed score.
   latest governance artifact:
     C:\prethinker_tmp_archive\pending_external_work_order_status_20260605\current_research_governance
     16 research-governance checks passed, including sign-clean,
