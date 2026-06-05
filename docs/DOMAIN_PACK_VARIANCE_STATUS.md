@@ -6,15 +6,16 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `2`
-- Roots: `6`
-- Warnings: `4`
+- Groups: `3`
+- Roots: `8`
+- Warnings: `5`
 
 Warnings:
 - `stability_r1:value_domain_report_not_recorded`
 - `item_treatment_filing_id_r2:value_domain_report_not_recorded`
 - `gemma4_q4_r1:value_domain_report_not_recorded`
 - `qwen27b_q4_r1:value_domain_report_not_recorded`
+- `related_activity_blank_flag_r1:value_domain_report_not_recorded`
 
 ## Groups
 
@@ -22,6 +23,7 @@ Warnings:
 | --- | --- | ---: | --- | ---: | --- | --- |
 | `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 4 | `11-13/13` | 0 | `0-2` | `pass` |
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
+| `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
 
 ## SEC transfer_003 repaired-schema local Qwen MoE band
 
@@ -64,3 +66,22 @@ Roots:
 Roots:
 - `gemma4_q4_r1`: `C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\compile_substitution_sec\sec8k-t003-gemma4-q4-temp0-r1`
 - `qwen27b_q4_r1`: `C:\prethinker_tmp_archive\model_variance_prereg_20260604\sec_compile_substitution_20260604\qwen27b_compile_substitution_sec\sec8k-t003-qwen27b-q4-temp0-r1`
+
+## OSHA transfer_001 local Qwen MoE same-condition band
+
+- Group: `osha_transfer001_qwen_moe_same_condition`
+- Fixture: `osha_incident_transfer_001`
+- Read: Use as a 15/15 same-condition OSHA transfer band with visible per-run jitter; do not infer long-table or mixed-section transfer from this bounded cell.
+- Support band: `15/15`
+- Supported forbidden total: `0`
+- Unexpected band: `3`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `related_activity_blank_flag_r1` | standing transfer_001 current-pack root after blank related-activity flag contract | `15/15` | `36/45` | 0 | 3 | atom `0`; lens `0`; value `not_recorded` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `qwen_mainline_rerun_r1` | same-local-Qwen transfer_001 variance rerun | `15/15` | `36/45` | 0 | 3 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `11` value-mode facts |
+
+Roots:
+- `related_activity_blank_flag_r1`: `C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1`
+- `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\osha_transfer001_variance_probe_20260605\osha-transfer-001-variance-r1`

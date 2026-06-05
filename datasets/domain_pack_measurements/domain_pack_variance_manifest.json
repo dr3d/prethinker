@@ -46,6 +46,24 @@
           "path": "C:/prethinker_tmp_archive/model_variance_prereg_20260604/sec_compile_substitution_20260604/qwen27b_compile_substitution_sec/sec8k-t003-qwen27b-q4-temp0-r1"
         }
       ]
+    },
+    {
+      "id": "osha_transfer001_qwen_moe_same_condition",
+      "title": "OSHA transfer_001 local Qwen MoE same-condition band",
+      "fixture_id": "osha_incident_transfer_001",
+      "claim_read": "Use as a 15/15 same-condition OSHA transfer band with visible per-run jitter; do not infer long-table or mixed-section transfer from this bounded cell.",
+      "roots": [
+        {
+          "id": "related_activity_blank_flag_r1",
+          "role": "standing transfer_001 current-pack root after blank related-activity flag contract",
+          "path": "C:/prethinker_tmp_archive/osha_related_activity_flag_contract_20260604/osha-transfer-001-related-activity-blank-flag-r1"
+        },
+        {
+          "id": "qwen_mainline_rerun_r1",
+          "role": "same-local-Qwen transfer_001 variance rerun",
+          "path": "C:/prethinker_tmp_archive/osha_transfer001_variance_probe_20260605/osha-transfer-001-variance-r1"
+        }
+      ]
     }
   ]
 }
