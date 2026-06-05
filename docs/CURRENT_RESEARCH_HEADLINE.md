@@ -360,6 +360,7 @@ The next work should strengthen the research claim rather than lift one fixture:
 
 - [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 - [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+- [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Fixture Bank Domain Inventory](https://github.com/dr3d/prethinker/blob/main/docs/FIXTURE_BANK_DOMAIN_INVENTORY.md)
