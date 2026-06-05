@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from scripts.audit_sec_value_axis_integrity import build_report
+from scripts.audit_sec_value_axis_integrity import build_report, main
 
 
 def test_sec_value_axis_audit_flags_mixed_role_axes(tmp_path: Path) -> None:
@@ -49,3 +49,36 @@ def test_sec_value_axis_audit_accepts_axis_clean_roles(tmp_path: Path) -> None:
 
     assert report["summary"]["status"] == "pass"
     assert report["issues"] == []
+
+
+def test_sec_value_axis_audit_expect_md_marks_stale_report(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    fact_file = tmp_path / "expected_facts.pl"
+    fact_file.write_text(
+        "sec_filing_item(Filing, item_5_02, officer_departure_appointment, substantive, SrcItem502).\n",
+        encoding="utf-8",
+    )
+    expected = tmp_path / "status.md"
+    expected.write_text("# stale\n", encoding="utf-8")
+    monkeypatch.chdir(Path(__file__).resolve().parents[1])
+
+    import sys
+
+    old_argv = sys.argv
+    sys.argv = [
+        "audit_sec_value_axis_integrity.py",
+        "--fact-file",
+        str(fact_file),
+        "--expect-md",
+        str(expected),
+        "--out-md",
+        str(tmp_path / "fresh.md"),
+    ]
+    try:
+        result = main()
+    finally:
+        sys.argv = old_argv
+
+    assert result == 1

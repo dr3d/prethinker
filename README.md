@@ -40,6 +40,7 @@ propagation = visible recomputation, not hidden belief
 - [Current compile-fact QA status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with source/settings provenance and replay gates.
 - [Domain pack status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for the active closed predicate packs.
 - [Domain accountability status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
+- [SEC value-axis integrity status](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated audit for the SEC item/exhibit/treatment axis split.
 - [Domain predicate proposal status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated review queue for candidate predicate surfaces before they become claims.
 - [Pending external work orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
 - [Candidate oracle review status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
@@ -136,6 +137,7 @@ The short version:
 - [docs/CURRENT_COMPILE_FACT_QA_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with replay gates and provenance.
 - [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
 - [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission/accountability coverage for active closed predicate packs.
+- [docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated SEC item/exhibit/treatment axis audit.
 - [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
 - [docs/PENDING_EXTERNAL_WORK_ORDERS.md](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
 - [docs/CANDIDATE_ORACLE_REVIEW_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.

@@ -198,6 +198,8 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(report_root / "sec_value_axis_integrity.json"),
                 "--out-md",
                 str(report_root / "sec_value_axis_integrity.md"),
+                "--expect-md",
+                "docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md",
             ],
         },
         {

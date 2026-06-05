@@ -16,6 +16,13 @@ from pathlib import Path
 from typing import Any
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.report_freshness import apply_markdown_freshness_check  # noqa: E402
+
+
 FACT_RE = re.compile(r"^\s*([a-z][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 
 ITEM_STRUCTURAL_ROLES = {
@@ -52,6 +59,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fact-file", action="append", default=[], type=Path)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
+    parser.add_argument("--expect-md", type=Path, default=None)
     parser.add_argument("--exit-zero", action="store_true")
     return parser.parse_args()
 
@@ -63,15 +71,24 @@ def main() -> int:
         compile_jsons=args.compile_json,
         fact_files=args.fact_file,
     )
+    rendered_md = render_markdown(report)
+    if args.expect_md:
+        apply_markdown_freshness_check(
+            report=report,
+            expected_path=args.expect_md,
+            rendered_md=rendered_md,
+        )
+        rendered_md = render_markdown(report)
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.out_md:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
-        args.out_md.write_text(render_markdown(report), encoding="utf-8")
+        args.out_md.write_text(rendered_md, encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if args.exit_zero or not report["summary"]["issue_count"] else 1
+    blocked = report["summary"].get("status") != "pass"
+    return 0 if args.exit_zero or not blocked else 1
 
 
 def build_report(
@@ -125,6 +142,9 @@ def render_markdown(report: dict[str, Any]) -> str:
     summary = report["summary"]
     lines = [
         "# SEC Value-Axis Integrity Audit",
+        "",
+        "This report checks SEC item/exhibit/treatment typed facts for axis mixing.",
+        "It does not read source prose, questions, answers, or model outputs beyond typed fact strings.",
         "",
         f"- Sources: `{summary['sources']}`",
         f"- Facts: `{summary['fact_count']}`",
