@@ -19,6 +19,11 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.audit_kb_atom_inventory import build_report as build_atom_inventory_report  # noqa: E402
+
 DEFAULT_MANIFEST = Path("datasets/domain_pack_measurements/current_compile_fact_qa_manifest.json")
 MIN_RUN_COUNT = 3
 
@@ -159,6 +164,7 @@ def _audit_cell(cell: dict[str, Any], *, index: int) -> dict[str, Any]:
         "effective_settings": settings,
         "setting_sources": result["setting_sources"],
         "gate_summaries": result.get("gate_summaries", {}),
+        "artifact_gate_summaries": result.get("artifact_gate_summaries", {}),
         "blocking_reasons": blockers,
         "warnings": warnings,
     }
@@ -187,6 +193,12 @@ def _audit_domain_lens_bundle(
     compile_settings = _settings_from_compile_jsons(run_jsons, blockers, cell_id)
     report_settings = _settings_from_score_report(score_report)
     gate_summaries: dict[str, Any] = {}
+    artifact_gate_summaries = _check_bundle_artifact_gates(
+        cell_id=cell_id,
+        bundle_root=bundle_root,
+        blockers=blockers,
+        require_lens=bool(bundle_manifest),
+    )
     manifest_settings: dict[str, Any] = {}
     setting_sources: dict[str, str] = {}
     bundle_manifest_status = "present"
@@ -238,6 +250,7 @@ def _audit_domain_lens_bundle(
         "effective_settings": effective,
         "setting_sources": setting_sources,
         "gate_summaries": gate_summaries,
+        "artifact_gate_summaries": artifact_gate_summaries,
     }
 
 
@@ -273,7 +286,81 @@ def _audit_fixture_runs(
         "effective_settings": settings,
         "setting_sources": {key: "compile_json" for key in settings},
         "gate_summaries": {},
+        "artifact_gate_summaries": {},
     }
+
+
+def _check_bundle_artifact_gates(
+    *,
+    cell_id: str,
+    bundle_root: Path,
+    blockers: list[str],
+    require_lens: bool,
+) -> dict[str, Any]:
+    """Replay atom/lens gates from retained compile artifacts, not prose notes."""
+
+    out: dict[str, Any] = {}
+    lens_root = bundle_root / "lens_compiles"
+    if lens_root.is_dir():
+        out["lens_atom_inventory"] = _check_atom_inventory_root(
+            cell_id=cell_id,
+            summary_key="lens_atom_inventory",
+            compile_root=lens_root,
+            blockers=blockers,
+        )
+    elif require_lens:
+        blockers.append(f"{cell_id}:missing_lens_compiles_for_gate_replay:{lens_root}")
+        out["lens_atom_inventory"] = {"status": "missing"}
+
+    union_root = bundle_root / "unions"
+    if union_root.is_dir():
+        out["union_atom_inventory"] = _check_atom_inventory_root(
+            cell_id=cell_id,
+            summary_key="union_atom_inventory",
+            compile_root=union_root,
+            blockers=blockers,
+        )
+    else:
+        blockers.append(f"{cell_id}:missing_unions_for_gate_replay:{union_root}")
+        out["union_atom_inventory"] = {"status": "missing"}
+    return out
+
+
+def _check_atom_inventory_root(
+    *,
+    cell_id: str,
+    summary_key: str,
+    compile_root: Path,
+    blockers: list[str],
+) -> dict[str, Any]:
+    try:
+        report = build_atom_inventory_report(compile_root=compile_root)
+    except Exception as exc:  # pragma: no cover - defensive around archived artifacts.
+        blockers.append(f"{cell_id}:{summary_key}:replay_failed:{type(exc).__name__}:{exc}")
+        return {"status": "error", "error": str(exc)}
+
+    summary = report.get("summary") if isinstance(report, dict) else {}
+    if not isinstance(summary, dict):
+        blockers.append(f"{cell_id}:{summary_key}:missing_summary")
+        return {"status": "fail"}
+    checked = _check_zero_summary_counts(
+        cell_id=cell_id,
+        summary_key=summary_key,
+        summary=summary,
+        blockers=blockers,
+        count_keys=(
+            "atom_shape_blocker_count",
+            "unregistered_fact_count",
+            "lens_scope_blocker_count",
+        ),
+    )
+    fixture_count = _summary_int(summary.get("fixture_count"))
+    checked["fixture_count"] = fixture_count
+    checked["typed_fact_count"] = _summary_int(summary.get("typed_fact_count"))
+    if fixture_count is None or fixture_count == 0:
+        blockers.append(f"{cell_id}:{summary_key}:fixture_count_zero")
+        checked["status"] = "fail"
+    return checked
 
 
 def _check_bundle_audit_summaries(
@@ -526,7 +613,9 @@ def report_md(report: dict[str, Any]) -> str:
     )
     for cell in report["cells"]:
         settings = cell.get("effective_settings") or {}
-        gate_status = _gate_status_display(cell.get("gate_summaries") or {})
+        gate_status = _gate_status_display(
+            cell.get("artifact_gate_summaries") or cell.get("gate_summaries") or {}
+        )
         lines.append(
             "| "
             f"`{cell['id']}` | "
@@ -550,7 +639,11 @@ def _gate_status_display(gate_summaries: dict[str, Any]) -> str:
     if not gate_summaries:
         return "not_available"
     statuses: list[str] = []
-    for summary_key in ("lens_atom_audit_summary", "union_atom_audit_summary"):
+    if "lens_atom_inventory" in gate_summaries or "union_atom_inventory" in gate_summaries:
+        summary_keys = ("lens_atom_inventory", "union_atom_inventory")
+    else:
+        summary_keys = ("lens_atom_audit_summary", "union_atom_audit_summary")
+    for summary_key in summary_keys:
         summary = gate_summaries.get(summary_key)
         if isinstance(summary, dict):
             statuses.append(str(summary.get("status") or "unknown"))

@@ -569,15 +569,16 @@ The repo should not currently claim:
 
 ## Verification Commands
 
-The compile-fact manifest source audit now verifies retained bundle atom/lens
-gate summaries as well as run provenance and model/settings metadata: a
-manifested claim cell fails if its retained lens or union atom audit reports
-nonzero atom-shape, unregistered-fact, or lens-scope blockers.
+The compile-fact manifest source audit now replays retained bundle atom/lens
+gates from the archived compile artifacts as well as checking run provenance
+and model/settings metadata: a manifested claim cell fails if its retained
+lens or union artifacts contain nonzero atom-shape, unregistered-fact, or
+lens-scope blockers, even if the manifest summary claims clean.
 
 Current full-suite result on 2026-06-05:
 
 ```text
-2526 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2527 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
