@@ -749,9 +749,13 @@ def test_fda_adulteration_basis_contract_includes_insanitary_conditions() -> Non
     text = "\n".join(lines)
 
     assert "adulteration_insanitary_conditions" in text
+    assert "each distinct explicit adulteration-authority statement" in text
     assert "authority_or_scope" in text
     assert "fdca_501_a_2_a" in text
     assert "fdca_501_a_2_b" in text
+    assert "explicitly states adulteration under section 501(a)(2)(A)" in text
+    assert "Do not infer it from sterile-drug observations" in text
+    assert "FDCA 801(a)(3)" in text
 
 
 def test_fda_facility_identity_contract_blocks_document_ids_as_facility_ids() -> None:

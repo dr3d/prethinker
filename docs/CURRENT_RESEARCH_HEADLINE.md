@@ -89,12 +89,10 @@ SEC Form 8-K skeleton pack
     observed band, not a new fixed score.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
-    status: fail, because FDA transfer_002 still emits one source-rejected
-      adulteration-basis forbidden row at support=2
-    126/141 expected facts at support>=2 and 350/423 deterministic per-run
+    status: pass
+    125/141 expected facts at support>=2 and 348/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
-    plans, 0 SEC supported forbidden emissions, and 1 FDA supported forbidden
-    emission.
+    plans, and 0 supported forbidden emissions across the standing cells.
 
 FDA warning-letter pack
   older deterministic judged-QA v2 across transfer_001 and transfer_002:
@@ -106,11 +104,10 @@ FDA warning-letter pack
     status: historical/pre-review compile-fact evidence, not the current
       transfer_002 claim-bearing status
   current standing transfer_002 current-pack cell:
-    22 / 29 support>=2, 1 / 8 forbidden emitted at support=2
-    forbidden row: fda_adulteration_basis(_, adulteration_insanitary_conditions,
-      fdca_501_a_2_a, _, _).
-    status: claim-blocking precision failure; do not call transfer_002 a clean
-      boundary cell until a general, typed-only fix removes the false basis
+    21 / 29 support>=2, 0 / 8 supported forbidden
+    status: clean but incomplete boundary cell after explicit adulteration-basis
+      contract tightening removed the false 501(a)(2)(A) insanitary-basis row
+      and lowered support from the previous claim-blocked 22/29 cell
   transfer_003 fresh current-pack local rerun:
     19 / 26 support>=2, 0 / 10 forbidden
     atom-shape / registered-signature / lens-scope blockers: 0

@@ -267,7 +267,7 @@
       "signature": "fda_adulteration_basis/5",
       "args": ["letter_id", "basis_kind", "authority_or_scope", "product_scope", "source_or_scope"],
       "category": "fda_legal_basis",
-      "notes": "States a compact source-stated adulteration basis and authority without explanatory prose. authority_or_scope is closed to FDCA adulteration authority atoms such as fdca_501_a_2_a or fdca_501_a_2_b."
+      "notes": "States one compact source-stated adulteration basis and authority without explanatory prose. Emit a separate row for each explicit FDCA 501(a)(2)(A) or 501(a)(2)(B) adulteration-basis statement. Import-refusal authority and condition observations alone are not adulteration-basis rows."
     },
     {
       "signature": "fda_response_requirement/6",

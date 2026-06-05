@@ -660,8 +660,12 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "Adulteration-basis relation: the row states a source-stated FDA adulteration basis for the warning letter.",
+            "Emit one fda_adulteration_basis/5 row for each distinct explicit adulteration-authority statement; a letter can legitimately have separate 501(a)(2)(A) and 501(a)(2)(B) basis rows.",
             "basis_kind is from a controlled basis palette such as adulteration_cgmp, adulteration_insanitary_conditions, usp_enforceability, repeated_failure, or management_oversight.",
             "authority_or_scope is a compact controlled authority atom such as fdca_501_a_2_a or fdca_501_a_2_b; product_scope is a compact source-stated scope such as drug_products.",
+            "Emit fdca_501_a_2_a only when the source explicitly states adulteration under section 501(a)(2)(A) or 21 U.S.C. 351(a)(2)(A). Do not infer it from sterile-drug observations, CGMP violations, or fda_insanitary_condition/5 rows alone.",
+            "Emit fdca_501_a_2_b only when the source explicitly states adulteration under section 501(a)(2)(B) or 21 U.S.C. 351(a)(2)(B).",
+            "Do not turn an import-refusal statement under FDCA 801(a)(3) into an fda_adulteration_basis/5 row.",
             "Do not pack the source's explanatory sentence into basis_kind, authority_or_scope, or product_scope.",
         ],
         "value_domains": {

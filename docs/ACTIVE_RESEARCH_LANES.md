@@ -122,12 +122,13 @@ fda_transfer_judged_qa_v2 deterministic compile-fact QA:
 
 transfer_002 fresh current-pack lens-scoped bundle:
   artifact root:
-    C:\prethinker_tmp_archive\cb_lens_20260604\fda-t002-current-pack-fresh-local-20260603-r5-lens-plan-ops-chronology-id-canon
-  22 / 29 expected, 1 / 8 forbidden emitted at support=2
+    C:\prethinker_tmp_archive\fda_adulteration_basis_contract_only_20260605\domain_lens_bundle\fda-t002-contract-only-full-r1-20260605
+  21 / 29 expected, 0 / 8 supported forbidden
   atom-shape / registered-signature / lens-scope blockers: 0
-  current blocker:
-    fda_adulteration_basis(_, adulteration_insanitary_conditions,
-    fdca_501_a_2_a, _, _).
+  integrity note:
+    explicit adulteration-basis contract tightening removed the previous false
+    501(a)(2)(A) insanitary-basis row and lowered support from the old
+    claim-blocked 22/29 cell
   boundary residue:
     wrapper role semantics
     context-dependent violation-3 category/substance
@@ -152,10 +153,9 @@ messy human QA. The package is now reproducible locally with
 against compile JSON typed facts and prints support>=2 summaries by fixture.
 The `transfer_001` replay is the clean FDA transfer cell.
 `transfer_003` is a clean boundary cell: current gates hold, but the richer
-rows do not all transfer. `transfer_002` is no longer clean after the
-source-only focused review added two expected detail rows and one forbidden
-adulteration-basis sentinel; the current standing cell is 22/29 with one
-supported forbidden 501(a)(2)(A) insanitary-basis emission. A blind candidate
+rows do not all transfer. `transfer_002` is now a clean-but-incomplete boundary
+cell after the source-only focused review and explicit adulteration-basis
+contract tightening: 21/29 with 0/8 supported forbidden. A blind candidate
 review of `fda_response_documentation_gap/5` on `transfer_002` found 0
 expected facts and 13 forbidden boundaries, so retained stable
 documentation-gap emissions for violations 1, 2, and 3 are false positives.
