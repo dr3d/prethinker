@@ -179,6 +179,11 @@ FDA warning-letter pack
   proposal review: `fda_response_documentation_gap/5` blind review on
     transfer_002 found 0 expected / 13 forbidden; stable candidate emissions
     for violations 1, 2, and 3 are false positives
+  pending candidate review: `fda_response_assessment_item/6` remains
+    unreviewed and is now explicitly queued in the proposal table via
+    `tmp\fda_response_assessment_item_blind_review_work_order_20260604.zip`;
+    do not cite assessment-item support as a promoted claim until that
+    source-only review returns and the proposal status changes.
   scope note: v2 is oracle-shaped compile-fact QA, not evidence that messy
     human query planning is solved
   reproducibility note: `scripts/build_compile_fact_judged_qa.py` now
@@ -376,6 +381,7 @@ Fixture-bank / next-domain inventory
     C:\prethinker_tmp_archive\pending_external_work_order_status_20260605
     status: pass
     coverage: 8 active proposal and standalone tmp work-order zip packets
+      (3 proposal-declared, 5 standalone)
     blocking errors: 0
     warnings: 0
   retained candidate-oracle review audit:
@@ -384,7 +390,8 @@ Fixture-bank / next-domain inventory
     blocking errors: 0
     warnings: 0
     scope: validates blind/source-only metadata and candidate
-      expected/forbidden fact-file shape only; it does not read source prose or
+      expected/forbidden fact-file shape only, review folder identity, and
+      repo-relative source-file references; it does not read source prose or
       decide whether the review facts are true.
     importer:
       scripts\import_candidate_oracle_review.py stages returned review zips,
@@ -548,7 +555,7 @@ The repo should not currently claim:
 Current full-suite result on 2026-06-05:
 
 ```text
-2463 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2487 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
 The strict xfails are legacy MCP/QA selector expectations from before the
