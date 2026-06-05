@@ -572,13 +572,16 @@ Cross-domain atom-library query packet:
 
 ```text
 packet: datasets/query_micro_fixtures/current_domain_atom_library_query_v1
-artifact:
+artifacts:
   C:\prethinker_tmp_archive\current_domain_atom_library_query_20260605\qwen_moe_temp0_r5
+  C:\prethinker_tmp_archive\current_domain_atom_library_query_20260605\qwen_moe_temp0_r6
 scope: retained single-run typed artifacts from FDA transfer_002,
   NTSB transfer_001, OSHA seed, and OSHA transfer_001
-product exact: 25/25
-typed-plan replay: 25/25, pass
-redacted rejudge thesis exact: 25/25, pass
+r5 product exact: 25/25
+r5 typed-plan replay: 25/25, pass
+r5 redacted rejudge thesis exact: 25/25, pass
+r6 same-condition repeat: 25/25 product exact, 25/25 typed-plan replay,
+  25/25 redacted rejudge thesis exact
 compatibility/runtime/write rows: 0/0/0
 status: thesis-clean query-planner diagnostic across four non-SEC cells
 ```
@@ -599,7 +602,11 @@ repair also landed during this run: blocked constants that match a registered
 argument name after removing an `_id` suffix, such as `occurrence` for
 `occurrence_id`, are treated as slot-label placeholders and rewritten to fresh
 variables. That closed the NTSB timeline row without reading source prose,
-source records, question tokens, or answer keys.
+source records, question tokens, or answer keys. A same-local-Qwen repeat
+(`r6`) reproduced the full `25/25` result under the same gates, so this packet
+is no longer just a single favorable draw. It remains a small retained
+query-planner packet over selected typed artifacts, not a compile-transfer
+metric.
 
 Retained diagnostic artifact:
 
