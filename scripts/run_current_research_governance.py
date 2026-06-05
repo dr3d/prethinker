@@ -173,6 +173,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "query_micro_fixture_contracts",
+            "command": [
+                python,
+                "scripts/audit_query_micro_fixture_contracts.py",
+                "--out-json",
+                str(report_root / "query_micro_fixture_contracts.json"),
+                "--out-md",
+                str(report_root / "query_micro_fixture_contracts.md"),
+                "--expect-md",
+                "docs/QUERY_MICRO_FIXTURE_CONTRACT_STATUS.md",
+            ],
+        },
+        {
             "id": "candidate_oracle_reviews",
             "command": [
                 python,
