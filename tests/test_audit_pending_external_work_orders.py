@@ -114,6 +114,24 @@ def test_pending_external_work_order_audit_can_inventory_standalone_tmp_zips(tmp
     assert "Standalone tmp packets are included in this run" in md
 
 
+def test_pending_external_work_order_audit_reads_standalone_fixture_header(tmp_path: Path) -> None:
+    _write_zip_map(
+        tmp_path / "standalone.zip",
+        {
+            "WORK_ORDER.md": "# Review\n\nFixture: `sec_form_8k_skeleton_transfer_001`\n",
+            "expected_facts_TEMPLATE.pl": "% sec_exhibit(Filing, ExhibitId, ExhibitKind, ExhibitRole, SourceOrScope).\n",
+            "forbidden_facts_TEMPLATE.pl": "% sec_exhibit(Filing, ExhibitId, ExhibitKind, ExhibitRole, SourceOrScope).\n",
+            "ontology_registry.json": "{}\n",
+            "source.md": "source placeholder\n",
+        },
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "pass"
+    assert report["work_orders"][0]["fixtures"] == ["sec_form_8k_skeleton_transfer_001"]
+
+
 def test_pending_external_work_order_audit_accepts_candidate_review_packet_shape(tmp_path: Path) -> None:
     proposal = _write_proposal(
         tmp_path,

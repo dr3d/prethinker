@@ -249,6 +249,7 @@ def _audit_standalone_zip(*, zip_path: Path) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
     entries: list[str] = []
+    fixtures: list[str] = []
     if not zipfile.is_zipfile(zip_path):
         errors.append(f"not_zip:{zip_path}")
     else:
@@ -260,10 +261,15 @@ def _audit_standalone_zip(*, zip_path: Path) -> dict[str, Any]:
                 archive_entries=archive_entries,
                 errors=errors,
             )
-        errors.extend(_zip_entry_name_errors(raw_entries))
-        entries = sorted(_normalize_entry(name) for name in raw_entries)
-        _validate_no_answer_leakage(entries=entries, errors=errors, warnings=warnings)
-        _validate_standalone_entries(entries=entries, errors=errors, warnings=warnings)
+            errors.extend(_zip_entry_name_errors(raw_entries))
+            entries = sorted(_normalize_entry(name) for name in raw_entries)
+            fixtures = _standalone_fixture_labels(
+                archive=archive,
+                archive_entries=archive_entries,
+                entries=entries,
+            )
+            _validate_no_answer_leakage(entries=entries, errors=errors, warnings=warnings)
+            _validate_standalone_entries(entries=entries, errors=errors, warnings=warnings)
     return {
         "proposal_path": "",
         "source": "tmp_zip",
@@ -271,7 +277,7 @@ def _audit_standalone_zip(*, zip_path: Path) -> dict[str, Any]:
         "kind": "standalone_external_work_order",
         "path": _display_path(zip_path),
         "resolved_path": str(zip_path.resolve()),
-        "fixtures": _fixture_dirs(entries),
+        "fixtures": fixtures or _fixture_dirs(entries),
         "entry_count": len(entries),
         "errors": errors,
         "warnings": warnings,
@@ -481,6 +487,34 @@ def _fixture_dirs(entries: list[str]) -> list[str]:
     if dirs:
         return dirs
     return ["."] 
+
+
+def _standalone_fixture_labels(
+    *,
+    archive: zipfile.ZipFile,
+    archive_entries: list[zipfile.ZipInfo],
+    entries: list[str],
+) -> list[str]:
+    fixture_dirs = _fixture_dirs(entries)
+    if fixture_dirs != ["."]:
+        return fixture_dirs
+
+    for archive_entry in archive_entries:
+        name = Path(_normalize_entry(archive_entry.filename)).name.lower()
+        if name not in {"work_order.md", "readme.md"}:
+            continue
+        try:
+            text = archive.read(archive_entry).decode("utf-8")
+        except (KeyError, UnicodeDecodeError, zipfile.BadZipFile):
+            continue
+        for pattern in (
+            r"(?im)^\s*Fixture\s*:\s*`?([A-Za-z0-9_.-]+)`?\s*$",
+            r"(?im)^\s*Fixture ID\s*:\s*`?([A-Za-z0-9_.-]+)`?\s*$",
+        ):
+            match = re.search(pattern, text)
+            if match:
+                return [match.group(1)]
+    return fixture_dirs
 
 
 def _fixture_entries(entry_set: set[str], fixture: str) -> set[str]:
