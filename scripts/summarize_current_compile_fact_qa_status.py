@@ -82,7 +82,11 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
         if isinstance(cell, dict)
     }
     cells = [
-        _cell_row(cell=cell, source=source_by_id.get(str(cell.get("id") or ""), {}))
+        _cell_row(
+            cell=cell,
+            source=source_by_id.get(str(cell.get("id") or ""), {}),
+            manifest_root=manifest_run_path.parent,
+        )
         for cell in manifest_run.get("cells", [])
         if isinstance(cell, dict)
     ]
@@ -116,13 +120,16 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
                 int(cell["unregistered_plan_exact_rows"]) for cell in cells
             ),
             "source_warning_count": sum(int(cell["source_warning_count"]) for cell in cells),
+            "unsupported_expected_fact_count": sum(
+                len(cell.get("unsupported_expected_facts") or []) for cell in cells
+            ),
         },
         "families": families,
         "cells": cells,
     }
 
 
-def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]:
+def _cell_row(*, cell: dict[str, Any], source: dict[str, Any], manifest_root: Path) -> dict[str, Any]:
     cell_id = str(cell.get("id") or "")
     fixture_id = str(cell.get("fixture_id") or "")
     support = dict((cell.get("support_summary_by_fixture") or {}).get(fixture_id) or {})
@@ -179,6 +186,10 @@ def _cell_row(*, cell: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]
         "support_threshold": settings.get("support_threshold", ""),
         "matcher": str(settings.get("matcher") or ""),
         "quantization": str(settings.get("quantization") or ""),
+        "unsupported_expected_facts": _unsupported_expected_facts(
+            manifest_root=manifest_root,
+            cell_id=cell_id,
+        ),
     }
 
 
@@ -249,6 +260,59 @@ def _forbidden_emission_support(value: Any) -> list[dict[str, Any]]:
         }
         for forbidden_fact, support in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
     ]
+
+
+def _unsupported_expected_facts(*, manifest_root: Path, cell_id: str) -> list[dict[str, Any]]:
+    judged_dir = manifest_root / cell_id / "judged_qa"
+    if not judged_dir.exists():
+        return []
+    by_reference: dict[str, dict[str, Any]] = {}
+    for path in sorted(judged_dir.glob("*__run*__judged_qa.json")):
+        payload = _load_json(path)
+        run_id = str(payload.get("run_id") or path.stem)
+        for row in payload.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            reference = str(row.get("reference_answer") or "").strip()
+            if not reference:
+                continue
+            item = by_reference.setdefault(
+                reference,
+                {
+                    "reference_answer": reference,
+                    "carrier": str(row.get("reference_answer_carrier") or ""),
+                    "exact_support": 0,
+                    "verdicts": [],
+                    "non_exact_answers": [],
+                },
+            )
+            verdict = str((row.get("reference_judge") or {}).get("verdict") or "")
+            item["verdicts"].append({"run": run_id, "verdict": verdict})
+            if verdict == "exact":
+                item["exact_support"] += 1
+            else:
+                answer = str(row.get("answer") or "").strip()
+                if answer:
+                    item["non_exact_answers"].append(answer)
+    unsupported = [
+        {
+            "reference_answer": item["reference_answer"],
+            "carrier": item["carrier"],
+            "exact_support": item["exact_support"],
+            "verdicts": item["verdicts"],
+            "non_exact_answers": sorted(set(item["non_exact_answers"]))[:3],
+        }
+        for item in by_reference.values()
+        if int(item["exact_support"]) < 2
+    ]
+    return sorted(
+        unsupported,
+        key=lambda item: (
+            int(item["exact_support"]),
+            str(item.get("carrier") or ""),
+            str(item.get("reference_answer") or ""),
+        ),
+    )
 
 
 def _family_rows(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -356,6 +420,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Prose-dependent exact rows: `{summary['prose_dependent_exact']}`",
         f"- Unregistered exact typed plans: `{summary['unregistered_plan_exact_rows']}`",
         f"- Source/provenance warnings: `{summary['source_warning_count']}`",
+        f"- Unsupported expected facts support<2: `{summary['unsupported_expected_fact_count']}`",
         "",
     ]
     if summary["blocking_reasons"]:
@@ -420,6 +485,44 @@ def render_markdown(report: dict[str, Any]) -> str:
                 source,
             )
         )
+    unsupported_rows = [
+        (cell, row)
+        for cell in report["cells"]
+        for row in cell.get("unsupported_expected_facts") or []
+    ]
+    if unsupported_rows:
+        lines.extend(
+            [
+                "",
+                "## Unsupported Expected Facts",
+                "",
+                "These rows are the current coverage boundary: expected typed facts",
+                "with exact support below the claim threshold of 2. They are",
+                "diagnostic planning data, not permission to repair rows one by one.",
+                "",
+                "| Cell | Fixture | Carrier | Support | Verdicts | Expected Fact | Non-Exact Emissions |",
+                "| --- | --- | --- | ---: | --- | --- | --- |",
+            ]
+        )
+        for cell, row in unsupported_rows:
+            verdicts = ", ".join(
+                f"{item.get('run')}: {item.get('verdict')}"
+                for item in row.get("verdicts") or []
+            ).replace("|", "\\|")
+            expected = str(row.get("reference_answer") or "").replace("|", "\\|")
+            answers = "; ".join(str(item) for item in row.get("non_exact_answers") or [])
+            answers = answers.replace("|", "\\|")
+            lines.append(
+                "| `{}` | `{}` | `{}` | {} | {} | `{}` | `{}` |".format(
+                    cell["id"],
+                    cell["fixture_id"],
+                    row.get("carrier") or "",
+                    row.get("exact_support", 0),
+                    verdicts,
+                    expected,
+                    answers,
+                )
+            )
     forbidden_rows = [
         (cell, row)
         for cell in report["cells"]

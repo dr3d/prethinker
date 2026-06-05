@@ -42,6 +42,44 @@ def test_summarize_current_compile_fact_qa_status_aggregates_manifest_run(tmp_pa
     assert "missing_bundle_manifest_recovered_from_compile_json" in md
 
 
+def test_summarize_current_compile_fact_qa_status_lists_unsupported_expected_facts(
+    tmp_path: Path,
+) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+    _write_judged_qa_rows(
+        tmp_path,
+        cell_id="osha_incident_transfer_001",
+        fixture_id="osha_incident_transfer_001",
+        rows_by_run={
+            "run1": [
+                _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
+                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "miss"),
+            ],
+            "run2": [
+                _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
+                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "partial"),
+            ],
+            "run3": [
+                _judged_row("osha_accident(accident_1, inspection_1, fatality, Src).", "exact"),
+                _judged_row("osha_penalty_amount(inspection_1, total, usd_1000, Src).", "exact"),
+            ],
+        },
+    )
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+    md = render_markdown(report)
+
+    assert report["summary"]["unsupported_expected_fact_count"] == 1
+    unsupported = report["cells"][1]["unsupported_expected_facts"]
+    assert unsupported[0]["reference_answer"] == (
+        "osha_penalty_amount(inspection_1, total, usd_1000, Src)."
+    )
+    assert unsupported[0]["exact_support"] == 1
+    assert "Unsupported Expected Facts" in md
+    assert "osha_penalty_amount" in md
+
+
 def test_summarize_current_compile_fact_qa_status_blocks_failed_source_audit(tmp_path: Path) -> None:
     manifest_run = _write_manifest_run(tmp_path)
     source_audit = _write_source_audit(tmp_path, source_status="fail")
@@ -294,4 +332,37 @@ def _source_cell(cell_id: str, *, warning: str = "") -> dict:
             "matcher": "constant_slot",
             "quantization": "Q4_K_M",
         },
+    }
+
+
+def _write_judged_qa_rows(
+    tmp_path: Path,
+    *,
+    cell_id: str,
+    fixture_id: str,
+    rows_by_run: dict[str, list[dict]],
+) -> None:
+    judged_dir = tmp_path / cell_id / "judged_qa"
+    judged_dir.mkdir(parents=True)
+    for run_id, rows in rows_by_run.items():
+        (judged_dir / f"{fixture_id}__{run_id}__judged_qa.json").write_text(
+            json.dumps(
+                {
+                    "fixture": fixture_id,
+                    "fixture_name": fixture_id,
+                    "run_id": run_id,
+                    "rows": rows,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+
+def _judged_row(reference_answer: str, verdict: str) -> dict:
+    answer = reference_answer if verdict == "exact" else ""
+    return {
+        "answer": answer,
+        "reference_answer": reference_answer,
+        "reference_answer_carrier": reference_answer.split("(", 1)[0] + "/4",
+        "reference_judge": {"verdict": verdict},
     }
