@@ -152,6 +152,7 @@ historical unless they are re-gated here or in a newer note.
 | SEC | `sec_form_8k_skeleton_transfer_002` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t002-r3-date`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t002_r3` | Historical pre-axis-repair unlike transfer evidence, 12/12 |
 | SEC | `sec_form_8k_skeleton_transfer_003` | `C:\prethinker_tmp_archive\cb_lens_20260604\sec8k-t003-r1`; gate `C:\prethinker_tmp_archive\cb_gate_20260604\research_integrity_gate_sec8k_t003_r1`; repaired stability rerun `C:\prethinker_tmp_archive\sec_stability_20260604\sec-t003-axis-stability-r1`; item-treatment seam root `C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604\sec8k-t003-item-treatment-filing-id-r2-20260604`; fresh refresh root `C:\prethinker_tmp_archive\sec_t003_refresh_20260605\sec8k-t003-axis-clean-refresh-r1-20260605` | Historical pre-axis-repair unlike transfer evidence, 12/12; current repaired reruns show an 11-13/13 band. The fresh 2026-06-05 root is 13/13, 37/39 per-run exact, 0/10 supported forbidden, clean gates, and one support=1 unexpected treatment row |
 | SEC | repaired seed / transfer_001 / transfer_002 breadth | `C:\prethinker_tmp_archive\sec_axis_breadth_20260604` | Current repaired breadth evidence: 12/13, 11/13, 11/12; 0 supported forbidden; clean atom/lens gates |
+| SEC | current standing-manifest residue classification | `C:\prethinker_tmp_archive\sec_residue_classification_20260605\sec_current_manifest_inspect_20260605` | Diagnostic boundary classification only: transfer_001 wrapper zero-yield plus telephone substitution; transfer_002 event-date jitter, telephone substitution, and duplicate commission-file value-axis/oracle boundary; transfer_003 telephone substitution plus unstable item-treatment zero-yield. No support lift claimed |
 | FDA | `fda_warning_letter_domain_transfer_001` | `C:\prethinker_tmp_archive\cb_gate_20260604\domain_transfer_gate_fda_t001_current_rescore_fixed3_20260603` | Clean richer-domain transfer cell, 26/26 |
 | FDA | `fda_warning_letter_domain_transfer_002` | `C:\prethinker_tmp_archive\fda_adulteration_basis_contract_only_20260605\domain_lens_bundle\fda-t002-contract-only-full-r1-20260605` | Current standing cell after source-only focused review and explicit adulteration-basis contract tightening: 21/29 with 0/8 supported forbidden; the false 501(a)(2)(A) insanitary-basis row is removed, with support lower than the previous claim-blocked cell |
 | FDA | `fda_warning_letter_domain_transfer_003` | `C:\prethinker_tmp_archive\fda_t003_current_pack_20260604\fda-t003-r1` | Clean boundary transfer cell, 19/26; 0/10 supported forbidden; all seven unsupported rows are value/detail flesh |
@@ -391,6 +392,23 @@ unsupported rows are not prose leakage: seed Exhibit 10.1 has dual
 filed/incorporated semantics, transfer_001 misses the filing wrapper and
 telephone value, and transfer_002 only supports one of two commission-file
 values at threshold.
+
+A fresh 2026-06-05 standing-manifest residue inspection over the current SEC
+seed and three transfer cells classifies the live non-exact rows as follows:
+transfer_001 has a true `sec_filing/6` zero-yield wrapper recall miss and
+telephone rows where the typed identifier lane substitutes a neighboring
+commission-file identifier; transfer_002 has one event-date jitter row, one
+telephone substitution row, and a `file_139898` versus `file_001_39898`
+commission-file value-axis/oracle boundary; transfer_003 has telephone
+substitution plus unstable `sec_filing_item_treatment/4` zero-yield recall.
+This is a boundary classification, not a support lift. The safe next SEC
+research is a pre-registered compile-model/contract experiment or independent
+source-only review for the duplicate file-number row, not deterministic
+row rescue. Retained artifact:
+
+```text
+C:\prethinker_tmp_archive\sec_residue_classification_20260605\sec_current_manifest_inspect_20260605
+```
 
 The Gemma/Qwen run artifacts were generated before a local LM Studio metadata
 URL-normalization fix, so the artifacts recorded model id and decoding settings
