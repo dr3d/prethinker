@@ -280,6 +280,8 @@ def _validate_proposal(
     )
     if _has_blocked_review(review_results) and status != "rejected":
         errors.append("blocked_review_requires_rejected_status")
+    if _has_blocked_review(source_oracle_review_results) and status != "rejected":
+        errors.append("blocked_source_oracle_review_requires_rejected_status")
     if status == "candidate" and not review_results:
         warnings.append("candidate_has_no_review_results")
     if status == "promoted" and not review_results:
@@ -546,12 +548,16 @@ def _validate_source_oracle_links(
             manifest_review_id = str(manifest.get("review_id") or "").strip()
             manifest_proposal_id = str(manifest.get("proposal_id") or "").strip()
             manifest_predicate = str(manifest.get("predicate") or "").strip()
+            manifest_status = str(manifest.get("status") or "").strip()
+            result = str(item.get("result") or "").strip()
             if review_id and manifest_review_id and review_id != manifest_review_id:
                 errors.append(f"source_oracle_review_result_{index + 1}:review_id_mismatch")
             if proposal_id and manifest_proposal_id and proposal_id != manifest_proposal_id:
                 errors.append(f"source_oracle_review_result_{index + 1}:proposal_id_mismatch")
             if candidate_signature and manifest_predicate and candidate_signature != manifest_predicate:
                 errors.append(f"source_oracle_review_result_{index + 1}:predicate_mismatch")
+            if manifest_status == "blocked" and not result.startswith("blocked"):
+                errors.append(f"source_oracle_review_result_{index + 1}:blocked_status_requires_blocked_result")
         elif review_id:
             retained = [review for review in retained_reviews if review["review_id"] == review_id]
             if retained:

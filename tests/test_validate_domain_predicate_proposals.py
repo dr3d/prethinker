@@ -291,6 +291,77 @@ def test_linked_source_oracle_review_passes_when_metadata_matches(tmp_path: Path
     assert report["proposals"][0]["errors"] == []
 
 
+def test_blocked_source_oracle_review_requires_rejected_status(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["source_oracle_review_results"] = [
+        {
+            "review_id": "demo_source_review",
+            "result": "blocked_source_packet",
+        }
+    ]
+    path = _write(tmp_path / "proposal.json", payload)
+
+    report = build_report([path])
+
+    assert report["summary"]["status"] == "fail"
+    assert "blocked_source_oracle_review_requires_rejected_status" in report["proposals"][0]["errors"]
+
+
+def test_linked_blocked_source_oracle_manifest_requires_blocked_result(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    review_path = tmp_path / "source_reviews" / "demo_source_review" / "manifest.json"
+    payload["source_oracle_review_results"] = [
+        {
+            "review_id": "demo_source_review",
+            "review_path": str(review_path),
+            "result": "source_oracle_complete",
+        }
+    ]
+    proposal = _write(tmp_path / "proposal.json", payload)
+    _write(
+        review_path,
+        {
+            "review_id": "demo_source_review",
+            "proposal_id": payload["proposal_id"],
+            "predicate": payload["candidate_signature"],
+            "status": "blocked",
+        },
+    )
+
+    report = build_report([proposal], source_oracle_review_root=tmp_path / "source_reviews")
+
+    errors = report["proposals"][0]["errors"]
+    assert "source_oracle_review_result_1:blocked_status_requires_blocked_result" in errors
+
+
+def test_rejected_blocked_source_oracle_review_passes_when_linked(tmp_path: Path) -> None:
+    payload = _valid_payload()
+    payload["status"] = "rejected"
+    review_path = tmp_path / "source_reviews" / "demo_source_review" / "manifest.json"
+    payload["source_oracle_review_results"] = [
+        {
+            "review_id": "demo_source_review",
+            "review_path": str(review_path),
+            "result": "blocked_source_packet",
+        }
+    ]
+    proposal = _write(tmp_path / "proposal.json", payload)
+    _write(
+        review_path,
+        {
+            "review_id": "demo_source_review",
+            "proposal_id": payload["proposal_id"],
+            "predicate": payload["candidate_signature"],
+            "status": "blocked",
+        },
+    )
+
+    report = build_report([proposal], source_oracle_review_root=tmp_path / "source_reviews")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["proposals"][0]["errors"] == []
+
+
 def test_domain_predicate_proposal_status_report_disclaims_promotion(tmp_path: Path) -> None:
     path = _write(tmp_path / "proposal.json", _valid_payload())
     report = build_report([path])
