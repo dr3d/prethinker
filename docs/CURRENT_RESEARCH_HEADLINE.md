@@ -117,7 +117,11 @@ FDA warning-letter pack
     transfer_002; stable candidate emissions for violations 1, 2, and 3 are
     false positives
   response-assessment item proposal:
-    still a candidate with no independent review results; no promoted claim
+    retained source-only candidate reviews now cover transfer_001,
+    transfer_002, and transfer_003. They support candidate evidence only:
+    transfer_001 has 0 expected / 9 forbidden, transfer_002 has 3 expected /
+    8 forbidden, and transfer_003 has 1 expected / 8 forbidden. No promoted
+    claim or transfer-score lift follows without a fresh gated compile run.
   claim: primary richer case study; skeleton and recurring regulatory anatomy
     transfer better than wrapper role semantics, context-dependent categories,
     response/detail value flesh, and other substance lanes

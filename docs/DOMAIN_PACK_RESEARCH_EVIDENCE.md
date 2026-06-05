@@ -748,8 +748,11 @@ FDA open blockers:
   violations 1, 2, and 3 are false positives, so this proposal is blocked for
   that fixture and should not be promoted from transfer_002;
 - `fda_response_assessment_item/6` is still a candidate, not a promoted
-  surface: it has no independent oracle review in the retained proposal-status
-  record, and the current validator reports `candidate_has_no_review_results`;
+  surface: retained source-only candidate reviews now cover transfer_001,
+  transfer_002, and transfer_003, and the proposal-status validator records
+  those reviews as complete. The reviews are mixed candidate evidence
+  (`0/9`, `3/8`, and `1/8` expected/forbidden by fixture), not a fresh compile
+  result and not a support lift;
 - leave transfer_002 as boundary evidence unless a new FDA transfer fixture
   shows the same failure class and makes a general mechanism worth testing;
 - transfer_003 has now been remeasured as the second FDA boundary point:
