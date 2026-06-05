@@ -44,6 +44,7 @@ def test_audit_compile_fact_manifest_sources_accepts_manifested_bundle(tmp_path:
     assert report["cells"][0]["effective_settings"]["model"] == "qwen/qwen3.6-35b-a3b"
     assert report["cells"][0]["gate_summaries"]["lens_atom_audit_summary"]["status"] == "pass"
     assert report["cells"][0]["artifact_gate_summaries"]["lens_atom_inventory"]["status"] == "pass"
+    assert report["cells"][0]["artifact_gate_summaries"]["lens_value_domains"]["status"] == "pass"
 
 
 def test_audit_compile_fact_manifest_sources_recovers_legacy_bundle_metadata(tmp_path: Path) -> None:
@@ -162,6 +163,50 @@ def test_audit_compile_fact_manifest_sources_replays_artifact_atom_gate(tmp_path
     assert report["summary"]["status"] == "fail"
     assert any(
         "lens_atom_inventory:unregistered_fact_count_nonzero" in reason
+        for reason in report["summary"]["blocking_reasons"]
+    )
+
+
+def test_audit_compile_fact_manifest_sources_replays_artifact_value_domain_gate(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    _write_bundle_compile_json(
+        bundle,
+        "run1",
+        facts=["sec_filing_item_treatment(filing, item_2_02, made_up_treatment, source_utterance)."],
+    )
+    _write_bundle_compile_json(bundle, "run2")
+    _write_bundle_compile_json(bundle, "run3")
+    _write_score_report(bundle)
+    (bundle / "manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "domain_lens_bundle_run_v1",
+                "repeat": 3,
+                "runs": [{"cycle": 1}, {"cycle": 2}, {"cycle": 3}],
+                "lens_atom_audit_summary": _atom_gate_summary(),
+                "union_atom_audit_summary": _atom_gate_summary(),
+                "settings": {
+                    "backend": "lmstudio",
+                    "model": "qwen/qwen3.6-35b-a3b",
+                    "temperature": 0.0,
+                    "top_p": 1.0,
+                    "num_ctx": 65536,
+                    "max_tokens": 12000,
+                    "timeout": 420,
+                    "support_threshold": 2,
+                    "matcher": "constant_slot",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = _write_manifest(tmp_path, bundle)
+
+    report = audit_manifest(manifest)
+
+    assert report["summary"]["status"] == "fail"
+    assert any(
+        "lens_value_domains:violation_count_nonzero" in reason
         for reason in report["summary"]["blocking_reasons"]
     )
 

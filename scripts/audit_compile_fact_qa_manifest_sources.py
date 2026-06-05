@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.audit_kb_atom_inventory import build_report as build_atom_inventory_report  # noqa: E402
+from scripts.audit_carrier_value_domains import build_report as build_value_domain_report  # noqa: E402
 
 DEFAULT_MANIFEST = Path("datasets/domain_pack_measurements/current_compile_fact_qa_manifest.json")
 MIN_RUN_COUNT = 3
@@ -308,9 +309,16 @@ def _check_bundle_artifact_gates(
             compile_root=lens_root,
             blockers=blockers,
         )
+        out["lens_value_domains"] = _check_value_domain_artifacts(
+            cell_id=cell_id,
+            summary_key="lens_value_domains",
+            compile_paths=_source_compile_jsons(lens_root),
+            blockers=blockers,
+        )
     elif require_lens:
         blockers.append(f"{cell_id}:missing_lens_compiles_for_gate_replay:{lens_root}")
         out["lens_atom_inventory"] = {"status": "missing"}
+        out["lens_value_domains"] = {"status": "missing"}
 
     union_root = bundle_root / "unions"
     if union_root.is_dir():
@@ -320,9 +328,16 @@ def _check_bundle_artifact_gates(
             compile_root=union_root,
             blockers=blockers,
         )
+        out["union_value_domains"] = _check_value_domain_artifacts(
+            cell_id=cell_id,
+            summary_key="union_value_domains",
+            compile_paths=_source_compile_jsons(union_root),
+            blockers=blockers,
+        )
     else:
         blockers.append(f"{cell_id}:missing_unions_for_gate_replay:{union_root}")
         out["union_atom_inventory"] = {"status": "missing"}
+        out["union_value_domains"] = {"status": "missing"}
     return out
 
 
@@ -361,6 +376,41 @@ def _check_atom_inventory_root(
         blockers.append(f"{cell_id}:{summary_key}:fixture_count_zero")
         checked["status"] = "fail"
     return checked
+
+
+def _check_value_domain_artifacts(
+    *,
+    cell_id: str,
+    summary_key: str,
+    compile_paths: list[Path],
+    blockers: list[str],
+) -> dict[str, Any]:
+    if not compile_paths:
+        blockers.append(f"{cell_id}:{summary_key}:compile_artifact_count_zero")
+        return {"status": "fail", "compile_artifacts": 0, "violation_count": None}
+    try:
+        report = build_value_domain_report(compile_paths)
+    except Exception as exc:  # pragma: no cover - defensive around archived artifacts.
+        blockers.append(f"{cell_id}:{summary_key}:replay_failed:{type(exc).__name__}:{exc}")
+        return {"status": "error", "error": str(exc)}
+    summary = report.get("summary") if isinstance(report, dict) else {}
+    if not isinstance(summary, dict):
+        blockers.append(f"{cell_id}:{summary_key}:missing_summary")
+        return {"status": "fail"}
+    status = str(summary.get("status") or "").strip() or "unknown"
+    violation_count = _summary_int(summary.get("violation_count"))
+    compile_artifacts = _summary_int(summary.get("compile_artifacts"))
+    if status != "pass":
+        blockers.append(f"{cell_id}:{summary_key}:status:{status}")
+    if violation_count is None:
+        blockers.append(f"{cell_id}:{summary_key}:missing_violation_count")
+    elif violation_count != 0:
+        blockers.append(f"{cell_id}:{summary_key}:violation_count_nonzero:{violation_count}")
+    return {
+        "status": status,
+        "compile_artifacts": compile_artifacts,
+        "violation_count": violation_count,
+    }
 
 
 def _check_bundle_audit_summaries(
@@ -472,6 +522,10 @@ def _domain_lens_run_specs(bundle_root: Path, blockers: list[str], cell_id: str)
         seen_run_ids.add(run_id)
         out.append({"run_id": run_id, "compile_json": str(json_file)})
     return out
+
+
+def _source_compile_jsons(root: Path) -> list[Path]:
+    return sorted(path for path in root.rglob("*.json") if _json_has_source_compile(path))
 
 
 def _settings_from_bundle_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -638,11 +692,24 @@ def report_md(report: dict[str, Any]) -> str:
 def _gate_status_display(gate_summaries: dict[str, Any]) -> str:
     if not gate_summaries:
         return "not_available"
-    statuses: list[str] = []
     if "lens_atom_inventory" in gate_summaries or "union_atom_inventory" in gate_summaries:
-        summary_keys = ("lens_atom_inventory", "union_atom_inventory")
-    else:
-        summary_keys = ("lens_atom_audit_summary", "union_atom_audit_summary")
+        atom_status = _paired_gate_status(
+            gate_summaries,
+            ("lens_atom_inventory", "union_atom_inventory"),
+        )
+        value_status = _paired_gate_status(
+            gate_summaries,
+            ("lens_value_domains", "union_value_domains"),
+        )
+        return f"atom {atom_status}; value {value_status}"
+    return _paired_gate_status(
+        gate_summaries,
+        ("lens_atom_audit_summary", "union_atom_audit_summary"),
+    )
+
+
+def _paired_gate_status(gate_summaries: dict[str, Any], summary_keys: tuple[str, str]) -> str:
+    statuses: list[str] = []
     for summary_key in summary_keys:
         summary = gate_summaries.get(summary_key)
         if isinstance(summary, dict):
@@ -695,6 +762,11 @@ def _load_optional_json(path: Path) -> dict[str, Any] | None:
     except (OSError, json.JSONDecodeError):
         return None
     return payload if isinstance(payload, dict) else None
+
+
+def _json_has_source_compile(path: Path) -> bool:
+    payload = _load_optional_json(path)
+    return isinstance(payload, dict) and isinstance(payload.get("source_compile"), dict)
 
 
 def _run_id_from_union_file(path: Path) -> str:
