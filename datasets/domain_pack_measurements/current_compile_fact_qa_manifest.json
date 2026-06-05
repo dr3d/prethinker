@@ -17,11 +17,11 @@
     {
       "id": "sec_form_8k_skeleton_transfer_001",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "description": "SEC Form 8-K skeleton transfer 001, current repaired breadth bundle against the axis-clean oracle.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_axis_breadth_20260604\\sec-t001-axis-r1",
+      "description": "SEC Form 8-K skeleton transfer 001 current-mainline negative retest; wrapper date recovered but registrant/exhibit axes destabilized.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_current_pack_rerun_negative_20260605\\sec-t001-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 13,
-        "support.exact_support_ge_2": 11,
+        "support.exact_support_ge_2": 5,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }

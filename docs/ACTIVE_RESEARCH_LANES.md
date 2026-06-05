@@ -278,14 +278,18 @@ identifiers excluding telephone, both filing items, both exhibits, and the
 signatory. The missing reconciled rows in that root were item 2.02 treatment
 and telephone.
 A repaired breadth check over the retained seed, transfer_001, and
-transfer_002 cells now lands at `13/13`, `11/13`, and `11/12`, all with `0`
-supported forbidden and clean atom/lens gates. The seed lift came from a fresh
+transfer_002 cells previously landed at `13/13`, `11/13`, and `11/12`, but the
+standing manifest now demotes transfer_001 to the current-mainline negative
+retest at `5/13`, `0/8` supported forbidden, and clean atom/lens/value gates.
+The older transfer_001 `11/13` root is historical mechanism evidence, not the
+current standing cell. The seed lift came from a fresh
 2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
 axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
 source-rejected `incorporated_by_reference` exhibit-role row is absent. The
-remaining boundary is wrapper filing/telephone recall, one
-duplicate commission-file value, unstable item-treatment recall, and MoE
-jitter rather than prose leakage. Dense compile substitutions on transfer_003
+remaining boundary is transfer_001 registrant/exhibit destabilization, wrapper
+filing/telephone recall, one duplicate commission-file value, unstable
+item-treatment recall, and MoE jitter rather than prose leakage. Dense compile
+substitutions on transfer_003
 with Gemma 4 12B Q4 and Qwen 27B Q4 both landed at `10/12`, `0` forbidden,
 with clean gates, missing the same role-semantics rows. SEC therefore supports
 closed-language governance across model paths more strongly than it supports

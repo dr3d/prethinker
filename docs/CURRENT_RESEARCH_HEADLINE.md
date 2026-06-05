@@ -72,9 +72,11 @@ SEC Form 8-K skeleton pack
       the source-rejected Exhibit 10.1 `incorporated_by_reference`
       exhibit-role row no longer appears
     axis/value-domain/atom/lens gates clean in the repaired cells
-  standing breadth check over retained seed / transfer_001 / transfer_002:
-    13 / 13; 11 / 13; 11 / 12
-    0 supported forbidden and clean atom/lens gates in each cell
+  standing manifest over retained seed / transfer_001 / transfer_002:
+    13 / 13; 5 / 13; 11 / 12
+    0 supported forbidden and clean atom/lens/value gates in each cell
+    the older transfer_001 11/13 repaired-breadth root is historical
+      mechanism evidence, not the current standing cell
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
     methods anchor yet. Recent repaired transfer_003 roots now span
     11-13 / 13 under the same local Qwen MoE lane, so the current boundary is
@@ -105,7 +107,7 @@ SEC Form 8-K skeleton pack
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
     status: pass
-    115/141 expected facts at support>=2 and 320/423 deterministic per-run
+    109/141 expected facts at support>=2 and 310/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
     plans, and 0 supported forbidden emissions across the standing cells.
 
