@@ -352,7 +352,7 @@ Current OSHA seed status:
 
 ```text
 fixture: osha_incident_domain_v1
-artifact root: C:\prethinker_tmp_archive\osha_seed_current_contract_rerun_20260604\osha-seed-current-contract-r1
+artifact root: C:\prethinker_tmp_archive\osha_seed_current_pack_rerun_20260605\osha-seed-current-pack-r1-20260605
 local-Qwen lens bundle: N=3, support>=2
 supported expected facts: 21 / 21 in the standing manifest after FTA
   total-penalty source-only adjudication
@@ -360,7 +360,8 @@ supported forbidden facts: 0 / 8
 atom-shape/signature/lens-scope blockers: 0
 standing manifest note: after source-only adjudication, the FTA total-penalty
   row is expected; current manifest support is 21 / 21 with 0 unexpected
-  same-signature support>=2
+  same-signature support>=2. The 2026-06-05 retest preserved support but run1
+  emitted only 15 facts and missed accident-lane rows recovered by runs2/3.
 ```
 
 The FTA total-penalty correction was source-backed project adjudication and is

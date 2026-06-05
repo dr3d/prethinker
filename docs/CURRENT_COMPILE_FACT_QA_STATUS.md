@@ -15,7 +15,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
-- Registered variance groups on current cells: `7`
+- Registered variance groups on current cells: `8`
 - Unsupported expected facts support<2: `32`
 - Unsupported split support 0 / support 1: `21 / 11`
 - Unsupported repair postures: `compile_recall_boundary` x16, `primary_constant_boundary` x7, `compile_stability_boundary` x3, `source_choice_boundary` x3, `value_choice_variance_boundary` x3
@@ -84,7 +84,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 35 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t003_qwen_moe_repaired_schema` `11-13/13`, `sec_t003_dense_compile_substitution_controls` `10/12` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | 22 / 25 | 60 / 75 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `18`; manifest `present`; variance `ntsb_transfer001_qwen_moe_same_condition` `22/25` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 11 / 29 | 33 / 87 | 2 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `30`; manifest `present`; variance `fda_transfer002_qwen_moe_same_condition_negative` `11/29` |
-| `osha_incident_seed` | `osha_incident_domain_v1` | 21 / 21 | 57 / 63 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present` |
+| `osha_incident_seed` | `osha_incident_domain_v1` | 21 / 21 | 57 / 63 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `osha_seed_qwen_moe_same_condition` `21/21` |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | 15 / 15 | 36 / 45 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `osha_transfer001_qwen_moe_same_condition` `15/15` |
 
 ## Registered Variance Evidence
@@ -100,6 +100,7 @@ They are attached to current cells so a favorable retained root is not promoted 
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_dense_compile_substitution_controls` | 2 | `10/12` | 0 | `3-6` | Use as model-path robustness evidence: closed-language governance held, but recall did not reproduce the Qwen MoE favorable cell. |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_transfer001_qwen_moe_same_condition` | 2 | `22/25` | 0 | `16` | Use as a 22/25 same-condition NTSB transfer band with clean governance and 0 supported forbidden rows; precision remains noisy because the fresh rerun produced 16 singleton unexpected same-signature facts. |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_transfer002_qwen_moe_same_condition_negative` | 1 | `11/29` | 0 | `33` | Use as a current-pack negative retest: governance stayed clean, but the same-condition N=3 rerun supported only 11/29 expected facts at support>=2. Do not retain earlier higher transfer_002 numbers as current-pack recall claims. |
+| `osha_incident_seed` | `osha_incident_domain_v1` | `osha_seed_qwen_moe_same_condition` | 1 | `21/21` | 0 | `0` | Use as the current standing OSHA seed cell: the fresh current-mainline retest preserves 21/21 support with clean governance, while run1 still shows accident-lane zero-yield jitter before support>=2 reconciliation. |
 | `osha_incident_transfer_001` | `osha_incident_transfer_001` | `osha_transfer001_qwen_moe_same_condition` | 2 | `15/15` | 0 | `3` | Use as a 15/15 same-condition OSHA transfer band with visible per-run jitter; do not infer long-table or mixed-section transfer from this bounded cell. |
 
 ## Unsupported Expected Facts
@@ -189,6 +190,6 @@ adds them to the fixture.
 | `sec_form_8k_skeleton_transfer_003` | SEC Form 8-K/A skeleton transfer 003, current axis-clean item/exhibit/treatment repair rerun. |
 | `ntsb_transfer_surface_001` | NTSB first unlike transfer, rerun with scoped injury-count partition contract. |
 | `fda_warning_letter_transfer_002_current_pack` | FDA warning-letter transfer 002 current-pack negative retest; governance stays clean but current full-lens recall falls to 11/29. |
-| `osha_incident_seed` | OSHA accident/inspection seed skeleton/table probe, rerun with current related-activity blank-flag contract. |
+| `osha_incident_seed` | OSHA accident/inspection seed skeleton/table probe, current-mainline retest with support preserved and per-run accident-lane wobble visible. |
 | `osha_incident_transfer_001` | OSHA accident/inspection first unlike skeleton/table transfer, with blank Safety/Health related-activity flags constrained to not_stated. |
 

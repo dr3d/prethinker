@@ -6,8 +6,8 @@ This report does not read source prose, QA questions, judge output, or oracle an
 ## Summary
 
 - Status: `pass`
-- Groups: `7`
-- Roots: `13`
+- Groups: `8`
+- Roots: `14`
 - Warnings: `6`
 
 Warnings:
@@ -25,6 +25,7 @@ Warnings:
 | `sec_t003_qwen_moe_repaired_schema` | `sec_form_8k_skeleton_transfer_003` | 4 | `11-13/13` | 0 | `0-2` | `pass` |
 | `sec_t003_dense_compile_substitution_controls` | `sec_form_8k_skeleton_transfer_003` | 2 | `10/12` | 0 | `3-6` | `pass` |
 | `osha_transfer001_qwen_moe_same_condition` | `osha_incident_transfer_001` | 2 | `15/15` | 0 | `3` | `pass` |
+| `osha_seed_qwen_moe_same_condition` | `osha_incident_domain_v1` | 1 | `21/21` | 0 | `0` | `pass` |
 | `fda_transfer002_qwen_moe_same_condition_negative` | `fda_warning_letter_domain_transfer_002` | 1 | `11/29` | 0 | `33` | `pass` |
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
 | `sec_t002_current_mainline_retest` | `sec_form_8k_skeleton_transfer_002` | 1 | `11/12` | 0 | `2` | `pass` |
@@ -90,6 +91,23 @@ Roots:
 Roots:
 - `related_activity_blank_flag_r1`: `C:\prethinker_tmp_archive\osha_related_activity_flag_contract_20260604\osha-transfer-001-related-activity-blank-flag-r1`
 - `qwen_mainline_rerun_r1`: `C:\prethinker_tmp_archive\osha_transfer001_variance_probe_20260605\osha-transfer-001-variance-r1`
+
+## OSHA seed local Qwen MoE same-condition retest
+
+- Group: `osha_seed_qwen_moe_same_condition`
+- Fixture: `osha_incident_domain_v1`
+- Read: Use as the current standing OSHA seed cell: the fresh current-mainline retest preserves 21/21 support with clean governance, while run1 still shows accident-lane zero-yield jitter before support>=2 reconciliation.
+- Support band: `21/21`
+- Supported forbidden total: `0`
+- Unexpected band: `0`
+- Status: `pass`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `current_mainline_r1` | same-local-Qwen OSHA seed current-pack variance rerun | `21/21` | `57/63` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `15` value-mode facts |
+
+Roots:
+- `current_mainline_r1`: `C:\prethinker_tmp_archive\osha_seed_current_pack_rerun_20260605\osha-seed-current-pack-r1-20260605`
 
 ## FDA transfer_002 current-pack local Qwen MoE retest negative
 

@@ -171,6 +171,9 @@ NTSB investigation pack
 OSHA accident/inspection pack
   seed micro: 21 / 21 support>=2 after the high-arity registry intake fix
     and current related-activity blank-flag contract
+    2026-06-05 current-mainline seed retest preserves 21 / 21 with 0 / 8
+      supported forbidden and clean gates; run1 still shows accident-lane
+      zero-yield jitter before support>=2 reconciliation
   first unlike transfer: 15 / 15 support>=2
   forbidden support: 0 in both measured cells
   governance: registered signatures, atom-shape, and lens-scope clean

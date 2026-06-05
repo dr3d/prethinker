@@ -66,6 +66,19 @@
       ]
     },
     {
+      "id": "osha_seed_qwen_moe_same_condition",
+      "title": "OSHA seed local Qwen MoE same-condition retest",
+      "fixture_id": "osha_incident_domain_v1",
+      "claim_read": "Use as the current standing OSHA seed cell: the fresh current-mainline retest preserves 21/21 support with clean governance, while run1 still shows accident-lane zero-yield jitter before support>=2 reconciliation.",
+      "roots": [
+        {
+          "id": "current_mainline_r1",
+          "role": "same-local-Qwen OSHA seed current-pack variance rerun",
+          "path": "C:/prethinker_tmp_archive/osha_seed_current_pack_rerun_20260605/osha-seed-current-pack-r1-20260605"
+        }
+      ]
+    },
+    {
       "id": "fda_transfer002_qwen_moe_same_condition_negative",
       "title": "FDA transfer_002 current-pack local Qwen MoE retest negative",
       "fixture_id": "fda_warning_letter_domain_transfer_002",
