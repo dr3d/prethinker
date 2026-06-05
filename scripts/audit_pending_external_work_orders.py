@@ -13,7 +13,7 @@ import json
 import re
 import sys
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -176,7 +176,9 @@ def _audit_work_order(
         errors.append(f"not_zip:{path_text}")
     else:
         with zipfile.ZipFile(resolved) as archive:
-            entries = sorted(_normalize_entry(name) for name in archive.namelist() if name.strip())
+            raw_entries = [name for name in archive.namelist() if name.strip()]
+        errors.extend(_zip_entry_name_errors(raw_entries))
+        entries = sorted(_normalize_entry(name) for name in raw_entries)
         _validate_entries(
             entries=entries,
             proposal_id=proposal_id,
@@ -208,7 +210,9 @@ def _audit_standalone_zip(*, zip_path: Path) -> dict[str, Any]:
         errors.append(f"not_zip:{zip_path}")
     else:
         with zipfile.ZipFile(zip_path) as archive:
-            entries = sorted(_normalize_entry(name) for name in archive.namelist() if name.strip())
+            raw_entries = [name for name in archive.namelist() if name.strip()]
+        errors.extend(_zip_entry_name_errors(raw_entries))
+        entries = sorted(_normalize_entry(name) for name in raw_entries)
         _validate_standalone_entries(entries=entries, errors=errors, warnings=warnings)
     return {
         "proposal_path": "",
@@ -349,6 +353,19 @@ def _fixture_dirs(entries: list[str]) -> list[str]:
 
 def _normalize_entry(value: str) -> str:
     return value.replace("\\", "/").strip("/")
+
+
+def _zip_entry_name_errors(entries: list[str]) -> list[str]:
+    errors: list[str] = []
+    for value in entries:
+        normalized = value.replace("\\", "/").strip()
+        if normalized.startswith("/") or re.match(r"^[A-Za-z]:/", normalized):
+            errors.append(f"unsafe_zip_entry_absolute:{normalized}")
+            continue
+        parts = PurePosixPath(normalized).parts
+        if any(part == ".." for part in parts):
+            errors.append(f"unsafe_zip_entry_traversal:{normalized}")
+    return errors
 
 
 def _string_list(value: Any) -> list[str]:

@@ -53,6 +53,29 @@ def test_pending_external_work_order_audit_blocks_missing_fixture_package(tmp_pa
     assert "fixture_a:missing_provenance.md" in errors
 
 
+def test_pending_external_work_order_audit_blocks_zip_traversal_entries(tmp_path: Path) -> None:
+    proposal = _write_proposal(tmp_path, zip_path=tmp_path / "work_order.zip")
+    _write_zip(
+        tmp_path / "work_order.zip",
+        [
+            "WORK_ORDER.md",
+            "expected_facts_TEMPLATE.pl",
+            "forbidden_facts_TEMPLATE.pl",
+            "manifest_TEMPLATE.json",
+            "example_wrapper_v1.json",
+            "fixture_a/source.md",
+            "fixture_a/metadata.json",
+            "fixture_a/provenance.md",
+            "../outside.txt",
+        ],
+    )
+
+    report = build_report([proposal])
+
+    assert report["summary"]["status"] == "fail"
+    assert "unsafe_zip_entry_traversal:../outside.txt" in report["work_orders"][0]["errors"]
+
+
 def test_pending_external_work_order_audit_can_inventory_standalone_tmp_zips(tmp_path: Path) -> None:
     proposal = _write_proposal(tmp_path, zip_path=tmp_path / "declared.zip")
     _write_zip(
@@ -87,6 +110,25 @@ def test_pending_external_work_order_audit_can_inventory_standalone_tmp_zips(tmp
     assert report["summary"]["standalone_work_order_count"] == 1
     assert any(row["source"] == "tmp_zip" for row in report["work_orders"])
     assert "standalone_external_work_order" in md
+
+
+def test_pending_external_work_order_audit_blocks_absolute_standalone_entries(tmp_path: Path) -> None:
+    _write_zip(
+        tmp_path / "standalone.zip",
+        [
+            "README.md",
+            "expected_facts.pl",
+            "forbidden_facts.pl",
+            "source.md",
+            "manifest.json",
+            "/absolute.txt",
+        ],
+    )
+
+    report = build_report([], tmp_root=tmp_path, include_tmp_zips=True)
+
+    assert report["summary"]["status"] == "fail"
+    assert "unsafe_zip_entry_absolute:/absolute.txt" in report["work_orders"][0]["errors"]
 
 
 def test_pending_external_work_order_audit_accepts_manifest_as_standalone_metadata(tmp_path: Path) -> None:
