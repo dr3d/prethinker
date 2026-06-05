@@ -253,9 +253,11 @@ treatment row as a valid typed fact, but support remains below threshold; this
 is a seam fix, not a score lift. A 2026-06-05 same-local-Qwen refresh then
 landed at `13/13`, `0/10` supported forbidden, and `37/39` per-run exact with
 clean atom/lens/value-domain/value-axis gates and one support=1 unexpected
-item-treatment row. Treat the current repaired-schema SEC picture as an
-`11-13/13` same-condition band, not a fixed single score. Do not use the
-favorable draw to claim item-treatment recall is solved. A
+item-treatment row. A same-day Qwen mainline rerun then landed at `13/13`,
+`0/10` supported forbidden, `0` unexpected, clean atom/lens/value gates, and 13
+value-mode reconciled facts at support>=2. Treat the current repaired-schema
+SEC picture as an `11-13/13` same-condition band, not a fixed single score. Do
+not use the favorable draws to claim item-treatment recall is solved. A
 source-only typed reconciliation report over the earlier 11/13 transfer_003
 root shows 11 value-mode facts at support>=2, all with support=3, and 0
 skipped/conflicts. The reconciled facts cover filing wrapper, registrant, four

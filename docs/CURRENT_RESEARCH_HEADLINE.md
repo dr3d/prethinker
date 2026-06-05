@@ -63,6 +63,10 @@ SEC Form 8-K skeleton pack
       atom/lens/value-domain/value-axis gates clean; one unexpected
       `sec_filing_item_treatment/4` row appeared in only one run and did not
       survive support>=2
+    R7 same-day Qwen MoE mainline rerun:
+      13 / 13, 0 / 10 supported forbidden; 0 unexpected
+      atom/lens/value-domain gates clean; 13 value-mode reconciled facts at
+      support>=2
     seed rerun after exhibit/item axis contract clarification:
       13 / 13, 0 / 7 supported forbidden; per-run exact 39 / 39
       the source-rejected Exhibit 10.1 `incorporated_by_reference`
@@ -84,9 +88,9 @@ SEC Form 8-K skeleton pack
     remains event-substance-free. Source-only typed reconciliation over the
     earlier current transfer_003 root shows 11 value-mode facts at support>=2,
     all support=3, with 0 skipped/conflicts; item 2.02 treatment and telephone
-    were absent from that stable support set. A later 2026-06-05 fresh refresh
-    recovered 13/13 at support>=2, but that is a favorable point inside the
-    observed band, not a new fixed score.
+    were absent from that stable support set. Later 2026-06-05 same-local-Qwen
+    reruns recovered 13/13 at support>=2, but these are favorable points inside
+    the observed band, not a new fixed score.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
     status: pass
