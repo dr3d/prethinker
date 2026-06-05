@@ -352,6 +352,22 @@ Prethinker operator roles. In self-serve onboarding it must be explicit:
 schema closer and validation-oracle author are separate roles, or a blind
 reviewer must approve the oracle before the result becomes claim-bearing.
 
+Returned source-only expected/forbidden oracle packets are retained separately
+from candidate-row review packets. Import them through the source-oracle lane:
+
+```text
+python scripts\import_source_oracle_review.py --zip PATH_TO_RETURNED_ZIP --proposal datasets\domain_predicate_proposals\PROPOSAL.json --review-id REVIEW_ID
+python scripts\audit_source_oracle_reviews.py --out-json tmp\source_oracle_reviews.json --out-md docs\SOURCE_ORACLE_REVIEW_STATUS.md --expect-md docs\SOURCE_ORACLE_REVIEW_STATUS.md
+```
+
+The importer keeps only `manifest.json`, per-fixture `expected_facts.pl`,
+per-fixture `forbidden_facts.pl`, and optional review notes. It drops source
+files, templates, and work-order scaffolding. It also refuses returned
+manifests that explicitly declare model-output exposure or non-source-only
+review. Once retained, the proposal validator requires the proposal to link the
+source-oracle review under `source_oracle_review_results`; otherwise the
+proposal and retained oracle evidence have drifted apart.
+
 10. Require omission/accountability.
 
 When a carrier is common for the domain but absent or uncertain in the source,
