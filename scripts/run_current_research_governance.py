@@ -24,6 +24,7 @@ SEC_VALUE_AXIS_FACT_FILES = [
     "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_002/forbidden_facts.pl",
     "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_003/forbidden_facts.pl",
 ]
+COMPILE_FACT_QA_MANIFEST = Path("datasets/domain_pack_measurements/current_compile_fact_qa_manifest.json")
 
 
 def parse_args() -> argparse.Namespace:
@@ -202,11 +203,7 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             "command": [
                 python,
                 "scripts/audit_sec_value_axis_integrity.py",
-                *[
-                    item
-                    for fact_file in SEC_VALUE_AXIS_FACT_FILES
-                    for item in ("--fact-file", fact_file)
-                ],
+                *_sec_value_axis_audit_inputs(),
                 "--out-json",
                 str(report_root / "sec_value_axis_integrity.json"),
                 "--out-md",
@@ -283,6 +280,46 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             }
         )
     return commands
+
+
+def _sec_value_axis_audit_inputs() -> list[str]:
+    args: list[str] = []
+    for fact_file in SEC_VALUE_AXIS_FACT_FILES:
+        args.extend(["--fact-file", fact_file])
+    for compile_json in _sec_value_axis_compile_jsons_from_manifest():
+        args.extend(["--compile-json", str(compile_json)])
+    return args
+
+
+def _sec_value_axis_compile_jsons_from_manifest() -> list[Path]:
+    manifest_path = REPO_ROOT / COMPILE_FACT_QA_MANIFEST
+    if not manifest_path.exists():
+        return []
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    cells = manifest.get("cells")
+    if not isinstance(cells, list):
+        return []
+    compile_jsons: list[Path] = []
+    for cell in cells:
+        if not isinstance(cell, dict):
+            continue
+        cell_id = str(cell.get("id", ""))
+        if not cell_id.startswith("sec_form_8k"):
+            continue
+        bundle = str(cell.get("domain_lens_bundle", "")).strip()
+        if not bundle:
+            continue
+        bundle_root = Path(bundle)
+        if not bundle_root.is_absolute():
+            bundle_root = REPO_ROOT / bundle_root
+        union_root = bundle_root / "unions"
+        if not union_root.exists():
+            continue
+        compile_jsons.extend(sorted(union_root.rglob("domain_bootstrap_file_*.json")))
+    return compile_jsons
 
 
 def run_command(spec: dict[str, Any]) -> dict[str, Any]:

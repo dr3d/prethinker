@@ -490,6 +490,8 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "policy/plan exhibits use exhibit_kind=other_exhibit" in exhibit_text
     assert "Item-body language" in exhibit_text
     assert "sec_filing_item_treatment/4" in exhibit_text
+    assert "filed as Exhibit N and incorporated by reference" in exhibit_text
+    assert "exhibit_role=filed" in exhibit_text
     assert "never infer legal treatment from cover_page_ixbrl format alone" in exhibit_text
     assert "cover_page_ixbrl" in exhibit["value_domains"]["exhibit_kind"]
 

@@ -82,7 +82,8 @@ SEC Form 8-K skeleton pack:
     item structure, item legal treatment, and exhibit legal treatment are split
     transfer_003 repaired reruns now span 11-13 / 13 under the
       same local Qwen MoE lane
-    repaired breadth check: seed 12 / 13; transfer_001 11 / 13;
+    standing breadth check: seed 13 / 13 after exhibit/item axis contract
+      rerun; transfer_001 11 / 13;
       transfer_002 11 / 12
     forbidden support: 0 in repaired cells
   boundary: exhibit legal-treatment ambiguity, wrapper/telephone recall,
@@ -218,8 +219,8 @@ Current high-signal evidence:
 - SEC Form 8-K skeleton domain pack: historical pre-axis-repair retained cells
   were seed `13 / 13` and three transfers `13 / 13`, `12 / 12`, and `12 / 12`.
   A later value-axis audit split item structure, item legal treatment, and
-  exhibit legal treatment. The current repaired breadth cells land at
-  `12 / 13`, `11 / 13`, `11 / 12`, and transfer_003 now spans
+  exhibit legal treatment. The current standing breadth cells land at
+  `13 / 13`, `11 / 13`, `11 / 12`, and transfer_003 now spans
   `11-13 / 13` under the same local Qwen MoE lane, all with `0` supported
   forbidden and clean governance. Dense compile substitutions on
   transfer_003 landed lower on the same role-semantics rows, so this is

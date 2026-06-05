@@ -44,7 +44,7 @@
     },
     {
       "id": "exhibits",
-      "purpose": "Exhibit table rows and attachment roles.",
+      "purpose": "Exhibit table rows and exhibit-row legal roles. Keep item-body incorporation statements on sec_filing_item_treatment/4; do not let them override an exhibit row or item-body statement that says an exhibit is filed or furnished.",
       "allowed_signatures": [
         "sec_exhibit/5",
         "domain_omission/5"
@@ -129,7 +129,7 @@
         "source_or_scope"
       ],
       "category": "sec_exhibit",
-      "notes": "Preserves one exhibit table row with compact number, kind, and legal-treatment role. Cover-page Inline XBRL is carried by exhibit_kind=cover_page_ixbrl; exhibit_role uses not_stated unless the source states filed, furnished, or incorporated_by_reference."
+      "notes": "Preserves one exhibit table row with compact number, kind, and exhibit-row legal-treatment role. Use filed or furnished when the source says the exhibit is filed or furnished; use not_stated when no exhibit-row legal treatment is stated. Item-body incorporation language belongs to the item-treatment carrier and must not override the filed exhibit role."
     },
     {
       "signature": "sec_signatory/5",

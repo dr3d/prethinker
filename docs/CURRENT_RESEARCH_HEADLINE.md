@@ -63,9 +63,13 @@ SEC Form 8-K skeleton pack
       atom/lens/value-domain/value-axis gates clean; one unexpected
       `sec_filing_item_treatment/4` row appeared in only one run and did not
       survive support>=2
-    axis/value/atom/lens gates clean in the repaired cells
-  repaired breadth check over retained seed / transfer_001 / transfer_002:
-    12 / 13; 11 / 13; 11 / 12
+    seed rerun after exhibit/item axis contract clarification:
+      13 / 13, 0 / 7 supported forbidden; per-run exact 39 / 39
+      the source-rejected Exhibit 10.1 `incorporated_by_reference`
+      exhibit-role row no longer appears
+    axis/value-domain/atom/lens gates clean in the repaired cells
+  standing breadth check over retained seed / transfer_001 / transfer_002:
+    13 / 13; 11 / 13; 11 / 12
     0 supported forbidden and clean atom/lens gates in each cell
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
     methods anchor yet. Recent repaired transfer_003 roots now span
@@ -83,24 +87,14 @@ SEC Form 8-K skeleton pack
     were absent from that stable support set. A later 2026-06-05 fresh refresh
     recovered 13/13 at support>=2, but that is a favorable point inside the
     observed band, not a new fixed score.
-  latest governance artifact:
-    C:\prethinker_tmp_archive\current_research_governance_final_20260605
-    15 of 17 research-governance checks pass, including sign-clean,
-    artifact-path freshness, historical-score disclaimers,
-    `sec_value_axis_integrity`, `compile_fact_qa_exclusions`,
-    retained candidate/source oracle reviews, fixture-bank inventory freshness,
-    and pending external work-order packet hygiene. The pending packet audit is
-    now green with 0 pending standalone `tmp` work-order zips after the restored
-    returned packets were retained or archived. Manifest-source audit,
-    redaction replay, and typed-plan replay still pass at the artifact level.
-    The two red checks are `compile_fact_qa_manifest` and
-    `current_compile_fact_qa_status`, both because current cells still propagate
-    supported forbidden emissions:
-    125/141 expected facts at support>=2 and 347/423 deterministic per-run
+  latest standing compile-fact manifest:
+    docs/CURRENT_COMPILE_FACT_QA_STATUS.md
+    status: fail, because FDA transfer_002 still emits one source-rejected
+      adulteration-basis forbidden row at support=2
+    126/141 expected facts at support>=2 and 350/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
-    plans, one source-rejected SEC seed forbidden fact emitted at support=3,
-    and one source-rejected FDA transfer_002 forbidden fact emitted at
-    support=2.
+    plans, 0 SEC supported forbidden emissions, and 1 FDA supported forbidden
+    emission.
 
 FDA warning-letter pack
   older deterministic judged-QA v2 across transfer_001 and transfer_002:

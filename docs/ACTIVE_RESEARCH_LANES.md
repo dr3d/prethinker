@@ -259,9 +259,12 @@ identifiers excluding telephone, both filing items, both exhibits, and the
 signatory. The missing reconciled rows in that root were item 2.02 treatment
 and telephone.
 A repaired breadth check over the retained seed, transfer_001, and
-transfer_002 cells landed at `12/13`, `11/13`, and `11/12`, all with `0`
-supported forbidden and clean atom/lens gates. The remaining boundary is
-exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
+transfer_002 cells now lands at `13/13`, `11/13`, and `11/12`, all with `0`
+supported forbidden and clean atom/lens gates. The seed lift came from a fresh
+2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
+axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
+source-rejected `incorporated_by_reference` exhibit-role row is absent. The
+remaining boundary is wrapper filing/telephone recall, one
 duplicate commission-file value, unstable item-treatment recall, and MoE
 jitter rather than prose leakage. Dense compile substitutions on transfer_003
 with Gemma 4 12B Q4 and Qwen 27B Q4 both landed at `10/12`, `0` forbidden,
@@ -275,12 +278,12 @@ same-signature facts dropped from 2 to 0.
 The latest guard and manifest artifacts are
 `C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604` and
 `C:\prethinker_tmp_archive\compile_fact_unexpected_precision_20260604`; the
-fresh SEC refresh is archived at
-`C:\prethinker_tmp_archive\sec_t003_refresh_20260605`; the latest full
-governance run passed 17 checks and prints repeated unexpected same-signature
-rows as a standing precision diagnostic. This is governance cleanup, colder
-provenance refresh, precision visibility, and band measurement, not a fixed
-support lift.
+fresh SEC transfer_003 refresh is archived at
+`C:\prethinker_tmp_archive\sec_t003_refresh_20260605`; the fresh SEC seed
+contract rerun is archived at
+`C:\prethinker_tmp_archive\sec_seed_value_axis_contract_repair_r2_20260605`.
+This is governance cleanup, colder provenance refresh, precision visibility,
+and band measurement, not a broad SEC event-substance lift.
 
 A fenced SEC event-substance probe then registered `sec_material_event/6` in
 the global carrier contract registry but did not offer it in the promoted SEC

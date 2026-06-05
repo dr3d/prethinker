@@ -3,9 +3,9 @@
 This report checks SEC item/exhibit/treatment typed facts for axis mixing.
 It does not read source prose, questions, answers, or model outputs beyond typed fact strings.
 
-- Sources: `8`
-- Facts: `82`
-- Checked SEC item/exhibit/treatment facts: `30`
+- Sources: `20`
+- Facts: `232`
+- Checked SEC item/exhibit/treatment facts: `88`
 - Issues: `0`
 - Status: `pass`
 
