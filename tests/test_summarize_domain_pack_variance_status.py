@@ -45,6 +45,29 @@ def test_domain_pack_variance_status_reports_support_band(tmp_path: Path) -> Non
     assert "value_domain_report_not_recorded" in md
 
 
+def test_domain_pack_variance_status_uses_archived_value_domain_report(tmp_path: Path) -> None:
+    root = _write_bundle_root(
+        tmp_path / "root",
+        label="legacy",
+        supported=12,
+        expected=13,
+        value_report_status="pass",
+        value_report_violations=0,
+    )
+    manifest = _write_variance_manifest(tmp_path, [root])
+
+    report = build_report(manifest_path=manifest)
+    md = render_markdown(report)
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["warnings"] == []
+    root_row = report["groups"][0]["roots"][0]
+    assert root_row["value_domain_status"] == "pass"
+    assert root_row["value_domain_violation_count"] == 0
+    assert "value `pass`" in md
+    assert "value_domain_report_not_recorded" not in md
+
+
 def test_domain_pack_variance_status_blocks_claim_breaking_gates(tmp_path: Path) -> None:
     root = _write_bundle_root(
         tmp_path / "root",
@@ -108,6 +131,8 @@ def _write_bundle_root(
     per_run_exact: list[int] | None = None,
     value_status: str | None = None,
     value_violations: int | None = None,
+    value_report_status: str | None = None,
+    value_report_violations: int | None = None,
     reconcile_count: int | None = None,
 ) -> Path:
     (root / "reports").mkdir(parents=True)
@@ -145,6 +170,21 @@ def _write_bundle_root(
             "status": value_status,
             "violation_count": value_violations or 0,
         }
+    if value_report_status is not None:
+        (root / "reports" / "union_carrier_value_domains.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "carrier_value_domain_audit_v1",
+                    "summary": {
+                        "status": value_report_status,
+                        "violation_count": value_report_violations or 0,
+                    },
+                    "violations": [],
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
     if reconcile_count is not None:
         manifest["typed_reconcile_summary"] = {
             "reconciled_fact_count": reconcile_count,

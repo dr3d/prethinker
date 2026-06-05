@@ -172,6 +172,8 @@ def _root_row(*, root_spec: dict[str, Any], fixture_id: str) -> dict[str, Any]:
     settings = dict(manifest.get("settings") or {})
     union_atom = dict(manifest.get("union_atom_audit_summary") or {})
     value_domain = manifest.get("union_carrier_value_domain_summary")
+    if not isinstance(value_domain, dict):
+        value_domain = _load_optional_summary(root / "reports" / "union_carrier_value_domains.json")
     typed_reconcile = manifest.get("typed_reconcile_summary")
     series = _load_optional_json(root / "reports" / "typed_micro_series_summary.json")
     per_run_exact, per_run_rows = _per_run_counts(series=series, score=score)
@@ -403,6 +405,14 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected JSON object: {path}")
     return value
+
+
+def _load_optional_summary(path: Path) -> dict[str, Any] | None:
+    report = _load_optional_json(path)
+    if not isinstance(report, dict):
+        return None
+    summary = report.get("summary")
+    return summary if isinstance(summary, dict) else None
 
 
 def _load_optional_json(path: Path) -> dict[str, Any] | None:
