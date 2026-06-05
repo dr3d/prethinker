@@ -124,6 +124,18 @@ def build_report(*, manifest_run_path: Path, source_audit_path: Path) -> dict[st
             "unsupported_expected_fact_count": sum(
                 len(cell.get("unsupported_expected_facts") or []) for cell in cells
             ),
+            "unsupported_support_0_count": sum(
+                1
+                for cell in cells
+                for row in cell.get("unsupported_expected_facts") or []
+                if int(row.get("exact_support") or 0) <= 0
+            ),
+            "unsupported_support_1_count": sum(
+                1
+                for cell in cells
+                for row in cell.get("unsupported_expected_facts") or []
+                if int(row.get("exact_support") or 0) == 1
+            ),
         },
         "families": families,
         "unsupported_by_carrier": unsupported_by_carrier,
@@ -471,6 +483,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Unregistered exact typed plans: `{summary['unregistered_plan_exact_rows']}`",
         f"- Source/provenance warnings: `{summary['source_warning_count']}`",
         f"- Unsupported expected facts support<2: `{summary['unsupported_expected_fact_count']}`",
+        f"- Unsupported split support 0 / support 1: `{summary['unsupported_support_0_count']} / {summary['unsupported_support_1_count']}`",
         "",
     ]
     if summary["blocking_reasons"]:

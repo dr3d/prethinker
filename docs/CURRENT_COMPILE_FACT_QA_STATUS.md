@@ -15,6 +15,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
 - Unsupported expected facts support<2: `16`
+- Unsupported split support 0 / support 1: `10 / 6`
 
 ## By Family
 
