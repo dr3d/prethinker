@@ -1109,6 +1109,39 @@ def test_typed_support_companions_are_cli_opt_in(monkeypatch: pytest.MonkeyPatch
     assert args.typed_support_companions is True
 
 
+def test_atom_library_slot_label_normalization_is_cli_opt_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_domain_bootstrap_qa.py",
+            "--run-json",
+            "run.json",
+            "--qa-file",
+            "qa.md",
+        ],
+    )
+    args = qa_module.parse_args()
+
+    assert args.atom_library_slot_label_normalization is False
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_domain_bootstrap_qa.py",
+            "--run-json",
+            "run.json",
+            "--qa-file",
+            "qa.md",
+            "--atom-library-slot-label-normalization",
+        ],
+    )
+    args = qa_module.parse_args()
+
+    assert args.atom_library_slot_label_normalization is True
+
+
 def test_typed_support_companions_do_not_run_by_default() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -11889,6 +11922,74 @@ def test_run_query_plan_blocks_constants_absent_from_atom_inventory_slots() -> N
                 },
             },
             "derived_from_queries": [],
+        }
+    ]
+
+
+def test_run_query_plan_optionally_normalizes_atom_library_slot_label_constants() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    facts = ["sec_filing(filing_a, form_8_k, current_report, v_2026_01_02, not_stated, src_filing)."]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    inventory = compiled_kb_inventory(facts=facts, rules=[])
+    inventory["arg_names"] = {
+        "sec_filing/6": [
+            "filing_id",
+            "form_type",
+            "report_kind",
+            "event_date",
+            "filing_date",
+            "source_or_scope",
+        ],
+    }
+    original = "sec_filing(Filing, FormType, reportkind, EventDate, FilingDate, Source)."
+
+    blocked = _run_query_plan(
+        runtime,
+        [original],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        allow_relaxed_constant_fallback=False,
+        atom_library_kb_inventory=inventory,
+    )
+    assert blocked[0]["result"]["status"] == "blocked_by_atom_inventory"
+
+    normalized = _run_query_plan(
+        runtime,
+        [original],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        allow_relaxed_constant_fallback=False,
+        atom_library_kb_inventory=inventory,
+        atom_library_slot_label_normalization=True,
+    )
+
+    assert normalized[0]["query"] == "sec_filing(Filing, FormType, ReportKind, EventDate, FilingDate, Source)."
+    assert normalized[0]["derived_from_queries"] == [original]
+    assert normalized[0]["result"]["status"] == "success"
+    assert normalized[0]["result"]["rows"] == [
+        {
+            "Filing": "filing_a",
+            "FormType": "form_8_k",
+            "ReportKind": "current_report",
+            "EventDate": "v_2026_01_02",
+            "FilingDate": "not_stated",
+            "Source": "src_filing",
+        }
+    ]
+    basis = normalized[0]["result"]["reasoning_basis"]
+    assert basis["kind"] == "atom-library-slot-label-normalization"
+    assert basis["validation"] == "slot_label_constants_replaced_with_fresh_variables"
+    assert basis["repairs"] == [
+        {
+            "kind": "atom_library_slot_label_to_variable",
+            "predicate": "sec_filing",
+            "signature": "sec_filing/6",
+            "arg_index": 3,
+            "value": "reportkind",
+            "arg_name": "report_kind",
+            "variable": "ReportKind",
         }
     ]
 

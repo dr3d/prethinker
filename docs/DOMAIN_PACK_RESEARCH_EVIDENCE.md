@@ -522,6 +522,31 @@ whether a deterministic slot-label-to-variable normalization policy can be made
 claim-safe. Until that policy is specified, tested, and disclosed, these
 normalized rows do not count toward product or thesis exact rates.
 
+Opt-in syntax-policy run:
+
+```text
+artifact: C:\prethinker_tmp_archive\sec_atom_library_slot_label_normalization_20260605\qwen_moe_temp0_r2_serialized
+policy: --atom-library-slot-label-normalization
+product exact: 25/25
+slot-label normalized rows: 8
+typed-plan replay: 25/25, pass
+redacted rejudge thesis exact: 23/25, blocked
+compatibility/runtime/write rows: 0/0/0
+status: typed-plan clean, not redaction-clean
+```
+
+The syntax policy is intentionally narrow: it rewrites only blocked constants
+that exactly normalize to registered predicate argument names, and it rewrites
+them to fresh variables in the same slots. It does not use source prose,
+source-record rows, question-token routing, answer keys, or relaxed fallback
+execution. The remaining two redacted-rejudge failures are exact-name display
+boundaries: `entity_servicenow_inc` versus `ServiceNow Inc.` and
+`blackstone_inc` versus `Blackstone Inc.`. The typed facts carry canonical
+registrant atoms and jurisdiction atoms, but not exact legal-name display
+strings. Until the SEC pack represents exact display names as typed facts or
+the QA contract asks for canonical atoms, this run's claim-bearing thesis
+number is `23/25`, not `25/25`.
+
 Retained diagnostic artifact:
 
 ```text
@@ -529,6 +554,7 @@ C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_qu
 C:\prethinker_tmp_archive\atom_library_query_grounding_20260604\sec_t003_atom_query_variable_fix_smoke_20260604_r2
 C:\prethinker_tmp_archive\sec_atom_library_query_20260605\qwen_moe_temp0_r1
 C:\prethinker_tmp_archive\sec_atom_library_query_slot_label_feedback_20260605
+C:\prethinker_tmp_archive\sec_atom_library_slot_label_normalization_20260605
 ```
 
 Retained governance artifact:

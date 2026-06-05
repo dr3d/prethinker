@@ -683,6 +683,15 @@ def parse_args() -> argparse.Namespace:
             "inventory. Python still cannot rewrite bad constants."
         ),
     )
+    parser.add_argument(
+        "--atom-library-slot-label-normalization",
+        action="store_true",
+        help=(
+            "Experimental atom-library syntax policy: before execution, replace only constants that "
+            "deterministic validation classifies as predicate-contract argument labels with fresh "
+            "uppercase variables. This reads no source prose and does not relax absent-constant validation."
+        ),
+    )
     parser.set_defaults(sign_clean_strict=True)
     parser.add_argument(
         "--judge-reference-answers",
@@ -863,6 +872,7 @@ def main() -> int:
         typed_support_companions=bool(args.typed_support_companions),
         atom_library_query_grounding=bool(args.atom_library_query_grounding),
         atom_library_query_validation_retry=bool(args.atom_library_query_validation_retry),
+        atom_library_slot_label_normalization=bool(args.atom_library_slot_label_normalization),
     )
     for item in questions:
         question_oracle = oracle.get(item["id"], {})
@@ -900,6 +910,7 @@ def main() -> int:
                 typed_support_companions=bool(args.typed_support_companions),
                 atom_library_query_grounding=bool(args.atom_library_query_grounding),
                 atom_library_query_validation_retry=bool(args.atom_library_query_validation_retry),
+                atom_library_slot_label_normalization=bool(args.atom_library_slot_label_normalization),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
@@ -942,6 +953,7 @@ def main() -> int:
         "sign_clean_strict": bool(args.sign_clean_strict),
         "atom_library_query_grounding": bool(args.atom_library_query_grounding),
         "atom_library_query_validation_retry": bool(args.atom_library_query_validation_retry),
+        "atom_library_slot_label_normalization": bool(args.atom_library_slot_label_normalization),
         "model_serving_path": model_serving_path_metadata(
             backend=str(args.backend),
             base_url=str(args.base_url),
@@ -1025,6 +1037,7 @@ def build_cache_context(
     typed_support_companions: bool = False,
     atom_library_query_grounding: bool = False,
     atom_library_query_validation_retry: bool = False,
+    atom_library_slot_label_normalization: bool = False,
 ) -> dict[str, Any]:
     return {
         "schema_version": CACHE_SCHEMA_VERSION,
@@ -1082,6 +1095,7 @@ def build_cache_context(
         "typed_support_companions": bool(typed_support_companions),
         "atom_library_query_grounding": bool(atom_library_query_grounding),
         "atom_library_query_validation_retry": bool(atom_library_query_validation_retry),
+        "atom_library_slot_label_normalization": bool(atom_library_slot_label_normalization),
     }
 
 
@@ -3084,6 +3098,7 @@ def run_one_question(
     typed_support_companions: bool = False,
     atom_library_query_grounding: bool = False,
     atom_library_query_validation_retry: bool = False,
+    atom_library_slot_label_normalization: bool = False,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     strict_query_execution = bool(sign_clean_strict or atom_library_query_grounding)
@@ -3277,6 +3292,9 @@ def run_one_question(
         typed_support_companions=typed_support_companions,
         allow_relaxed_constant_fallback=(not bool(atom_library_query_grounding)),
         atom_library_kb_inventory=(query_kb_inventory if bool(atom_library_query_grounding) else None),
+        atom_library_slot_label_normalization=bool(
+            atom_library_query_grounding and atom_library_slot_label_normalization
+        ),
     )
     evidence_plan_query_results: list[dict[str, Any]] = []
     if evidence_plan is not None and bool(execute_evidence_bundle_plan):
@@ -3290,6 +3308,9 @@ def run_one_question(
             typed_support_companions=typed_support_companions,
             allow_relaxed_constant_fallback=(not bool(atom_library_query_grounding)),
             atom_library_kb_inventory=(query_kb_inventory if bool(atom_library_query_grounding) else None),
+            atom_library_slot_label_normalization=bool(
+                atom_library_query_grounding and atom_library_slot_label_normalization
+            ),
         )
         if evidence_plan_query_results:
             query_results = list(evidence_plan_query_results)
@@ -3409,6 +3430,7 @@ def run_one_question(
                     typed_support_companions=typed_support_companions,
                     allow_relaxed_constant_fallback=False,
                     atom_library_kb_inventory=query_kb_inventory,
+                    atom_library_slot_label_normalization=bool(atom_library_slot_label_normalization),
                 )
                 retry_record.update(
                     {
@@ -3476,6 +3498,17 @@ def run_one_question(
                     if isinstance(item, dict) and str(item.get("query", "")).strip()
                 ]
             )
+    if bool(atom_library_slot_label_normalization):
+        executed_queries = _ordered_query_unique(
+            [
+                str(item.get("query", "")).strip()
+                for item in query_results
+                if isinstance(item, dict) and str(item.get("query", "")).strip()
+            ]
+        )
+        if executed_queries and executed_queries != queries:
+            row["model_queries"] = list(queries)
+            queries = executed_queries
     row.update(
         {
             "projected_decision": diagnostics.get("projected_decision", ""),
@@ -4849,6 +4882,7 @@ def run_query_plan(
     typed_support_companions: bool = False,
     allow_relaxed_constant_fallback: bool = True,
     atom_library_kb_inventory: dict[str, Any] | None = None,
+    atom_library_slot_label_normalization: bool = False,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
@@ -4864,14 +4898,35 @@ def run_query_plan(
     for query in queries:
         effective_query = query
         used_relaxed_fallback = False
+        slot_label_normalization = None
         if sign_clean_strict:
             blocked = _sign_clean_strict_blocked_query(query)
             if blocked:
                 results.append(blocked)
                 previous_queries.append(query)
                 continue
-        atom_blocked = _atom_inventory_blocked_query(query, kb_inventory=atom_library_kb_inventory)
+        if atom_library_slot_label_normalization:
+            slot_label_normalization = _atom_library_slot_label_normalized_query(
+                query,
+                kb_inventory=atom_library_kb_inventory,
+            )
+            if slot_label_normalization:
+                effective_query = str(slot_label_normalization.get("query", "") or query).strip()
+        atom_blocked = _atom_inventory_blocked_query(effective_query, kb_inventory=atom_library_kb_inventory)
         if atom_blocked:
+            if slot_label_normalization:
+                atom_blocked = dict(atom_blocked)
+                atom_blocked["query"] = effective_query
+                atom_blocked["derived_from_queries"] = [query]
+                result = dict(atom_blocked.get("result", {}))
+                result["reasoning_basis"] = {
+                    "kind": "atom-library-slot-label-normalization",
+                    "validation": "normalized_then_blocked_by_atom_inventory",
+                    "original_query": query,
+                    "repairs": slot_label_normalization.get("repairs", []),
+                    "inner_basis": result.get("reasoning_basis", {}),
+                }
+                atom_blocked["result"] = result
             results.append(atom_blocked)
             previous_queries.append(query)
             continue
@@ -4903,7 +4958,7 @@ def run_query_plan(
             if source_clock_duration:
                 append_companion(source_clock_duration)
             continue
-        post_filter = _single_goal_post_filter_repair(query)
+        post_filter = None if slot_label_normalization else _single_goal_post_filter_repair(query)
         if post_filter:
             results.append(
                 _run_single_goal_post_filter(
@@ -4942,10 +4997,22 @@ def run_query_plan(
                     }
                 )
             else:
-                result = runtime.query_rows(query)
-                results.append({"query": query, "result": result})
+                result = runtime.query_rows(effective_query)
+                item = {"query": effective_query, "result": result}
+                if slot_label_normalization:
+                    item["derived_from_queries"] = [query]
+                    item["result"] = {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "atom-library-slot-label-normalization",
+                            "validation": "slot_label_constants_replaced_with_fresh_variables",
+                            "original_query": query,
+                            "repairs": slot_label_normalization.get("repairs", []),
+                        },
+                    }
+                results.append(item)
         else:
-            placeholder_repair = _placeholder_repaired_query(query)
+            placeholder_repair = None if slot_label_normalization else _placeholder_repaired_query(query)
             if placeholder_repair:
                 result = runtime.query_rows(query)
                 repaired_query = str(placeholder_repair.get("query", "")).strip()
@@ -4973,8 +5040,20 @@ def run_query_plan(
                     else:
                         results.append({"query": query, "result": result})
             else:
-                result = runtime.query_rows(query)
-                results.append({"query": query, "result": result})
+                result = runtime.query_rows(effective_query)
+                item = {"query": effective_query, "result": result}
+                if slot_label_normalization:
+                    item["derived_from_queries"] = [query]
+                    item["result"] = {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "atom-library-slot-label-normalization",
+                            "validation": "slot_label_constants_replaced_with_fresh_variables",
+                            "original_query": query,
+                            "repairs": slot_label_normalization.get("repairs", []),
+                        },
+                    }
+                results.append(item)
 
         if results:
             last_item = results[-1]
@@ -33231,6 +33310,75 @@ def _compiled_inventory_slot_label_misuse(
     return None
 
 
+def _atom_library_slot_label_normalized_query(
+    query: str,
+    *,
+    kb_inventory: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not isinstance(kb_inventory, dict):
+        return None
+    parsed_goals = parse_prolog_query_goals(str(query or "").strip())
+    if parsed_goals is None:
+        return None
+    used_variables = {
+        str(arg or "").strip()
+        for _predicate, args in parsed_goals
+        for arg in args
+        if _is_prolog_variable(str(arg or "").strip())
+    }
+    normalized_goals: list[str] = []
+    repairs: list[dict[str, Any]] = []
+    changed = False
+    for predicate, args in parsed_goals:
+        signature = f"{predicate}/{len(args)}"
+        normalized_args: list[str] = []
+        for index, arg in enumerate(args, start=1):
+            original_arg = str(arg or "").strip()
+            item = _compiled_atom_arg_value(original_arg)
+            replacement = ""
+            slot_label_misuse: dict[str, Any] | None = None
+            if item and not _is_prolog_variable(item) and not _is_numeric_atom(item):
+                allowed = _compiled_inventory_arg_values(kb_inventory, signature, index)
+                if allowed and item not in allowed:
+                    slot_label_misuse = _compiled_inventory_slot_label_misuse(
+                        kb_inventory,
+                        signature,
+                        index,
+                        item,
+                    )
+            if slot_label_misuse:
+                suggested = str(slot_label_misuse.get("suggested_variable", "")).strip() or "Value"
+                replacement = _fresh_variable(suggested, used_variables)
+                used_variables.add(replacement)
+                normalized_args.append(replacement)
+                repairs.append(
+                    {
+                        "kind": "atom_library_slot_label_to_variable",
+                        "predicate": predicate,
+                        "signature": signature,
+                        "arg_index": index,
+                        "value": item,
+                        "arg_name": str(slot_label_misuse.get("arg_name", "")).strip(),
+                        "variable": replacement,
+                    }
+                )
+                changed = True
+            else:
+                normalized_args.append(original_arg)
+        normalized_goals.append(format_prolog_query(predicate, normalized_args).rstrip("."))
+    if not changed:
+        return None
+    normalized_query = ", ".join(normalized_goals) + "."
+    original_query = str(query or "").strip()
+    if normalized_query == original_query:
+        return None
+    return {
+        "query": normalized_query,
+        "repairs": repairs,
+        "original_query": original_query,
+    }
+
+
 def _atom_inventory_blocked_query(query: str, *, kb_inventory: dict[str, Any] | None) -> dict[str, Any] | None:
     if not isinstance(kb_inventory, dict):
         return None
@@ -33413,6 +33561,7 @@ def run_evidence_bundle_plan_queries(
     typed_support_companions: bool = False,
     allow_relaxed_constant_fallback: bool = True,
     atom_library_kb_inventory: dict[str, Any] | None = None,
+    atom_library_slot_label_normalization: bool = False,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
     signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
@@ -33710,6 +33859,7 @@ def run_evidence_bundle_plan_queries(
         typed_support_companions=typed_support_companions,
         allow_relaxed_constant_fallback=allow_relaxed_constant_fallback,
         atom_library_kb_inventory=atom_library_kb_inventory,
+        atom_library_slot_label_normalization=bool(atom_library_slot_label_normalization),
     ):
         item = dict(item)
         result = item.get("result", {})

@@ -63,6 +63,16 @@ select predicates from question wording, or inspect source prose; the second
 plan must pass the same typed execution and atom-slot validation or remain a
 query-surface gap.
 
+The optional `--atom-library-slot-label-normalization` lane is narrower than
+the old relaxed-constant fallback. It may rewrite only a concrete query
+constant that deterministic validation has already shown would be blocked and
+whose normalized spelling exactly matches the registered argument name for
+that same predicate slot. The replacement is a fresh uppercase Prolog variable
+in the same slot. The policy reads no source prose, no source-record rows, no
+question tokens, and no answer key; it is a syntax normalization over the
+closed predicate contract. If any other absent constant remains, atom-inventory
+validation still blocks the query.
+
 ## The Shape
 
 ```text

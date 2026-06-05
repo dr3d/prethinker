@@ -107,10 +107,12 @@ def test_qa_batch_command_forwards_atom_library_query_grounding(tmp_path: Path) 
         cache=False,
         atom_library_query_grounding=True,
         atom_library_query_validation_retry=True,
+        atom_library_slot_label_normalization=True,
     )
 
     assert "--atom-library-query-grounding" in command
     assert "--atom-library-query-validation-retry" in command
+    assert "--atom-library-slot-label-normalization" in command
 
 
 def test_qa_batch_command_forwards_openrouter_provider_controls(tmp_path: Path) -> None:

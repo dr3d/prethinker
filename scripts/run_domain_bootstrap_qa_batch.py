@@ -133,6 +133,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Pass through one-shot atom-inventory validation feedback retry for the shared-atom query lane.",
     )
+    parser.add_argument(
+        "--atom-library-slot-label-normalization",
+        action="store_true",
+        help="Pass through opt-in atom-library syntax normalization for constants that are predicate-contract slot labels.",
+    )
     parser.set_defaults(sign_clean_strict=True)
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
@@ -179,6 +184,7 @@ def main() -> int:
             typed_support_companions=bool(args.typed_support_companions),
             atom_library_query_grounding=bool(args.atom_library_query_grounding),
             atom_library_query_validation_retry=bool(args.atom_library_query_validation_retry),
+            atom_library_slot_label_normalization=bool(args.atom_library_slot_label_normalization),
             openrouter_provider_order=str(args.openrouter_provider_order or ""),
             openrouter_provider_only=str(args.openrouter_provider_only or ""),
             openrouter_provider_ignore=str(args.openrouter_provider_ignore or ""),
@@ -282,6 +288,7 @@ def _build_command(
     typed_support_companions: bool = False,
     atom_library_query_grounding: bool = False,
     atom_library_query_validation_retry: bool = False,
+    atom_library_slot_label_normalization: bool = False,
     openrouter_provider_order: str = "",
     openrouter_provider_only: str = "",
     openrouter_provider_ignore: str = "",
@@ -342,6 +349,8 @@ def _build_command(
         command.append("--atom-library-query-grounding")
     if atom_library_query_validation_retry:
         command.append("--atom-library-query-validation-retry")
+    if atom_library_slot_label_normalization:
+        command.append("--atom-library-slot-label-normalization")
     if evidence_bundle:
         command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan"])
         if evidence_bundle_context_filter:
