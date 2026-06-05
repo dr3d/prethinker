@@ -158,6 +158,7 @@ def _audit_cell(cell: dict[str, Any], *, index: int) -> dict[str, Any]:
         "run_jsons": result["run_jsons"],
         "effective_settings": settings,
         "setting_sources": result["setting_sources"],
+        "gate_summaries": result.get("gate_summaries", {}),
         "blocking_reasons": blockers,
         "warnings": warnings,
     }
@@ -185,12 +186,18 @@ def _audit_domain_lens_bundle(
 
     compile_settings = _settings_from_compile_jsons(run_jsons, blockers, cell_id)
     report_settings = _settings_from_score_report(score_report)
+    gate_summaries: dict[str, Any] = {}
     manifest_settings: dict[str, Any] = {}
     setting_sources: dict[str, str] = {}
     bundle_manifest_status = "present"
     if bundle_manifest is not None:
         manifest_settings = _settings_from_bundle_manifest(bundle_manifest)
         setting_sources.update({key: "bundle_manifest" for key in manifest_settings})
+        gate_summaries = _check_bundle_audit_summaries(
+            cell_id=cell_id,
+            manifest=bundle_manifest,
+            blockers=blockers,
+        )
         _check_manifest_run_shape(
             cell_id=cell_id,
             manifest=bundle_manifest,
@@ -230,6 +237,7 @@ def _audit_domain_lens_bundle(
         "run_jsons": [str(path) for path in run_jsons],
         "effective_settings": effective,
         "setting_sources": setting_sources,
+        "gate_summaries": gate_summaries,
     }
 
 
@@ -264,7 +272,91 @@ def _audit_fixture_runs(
         "run_jsons": [str(path) for path in run_jsons],
         "effective_settings": settings,
         "setting_sources": {key: "compile_json" for key in settings},
+        "gate_summaries": {},
     }
+
+
+def _check_bundle_audit_summaries(
+    *,
+    cell_id: str,
+    manifest: dict[str, Any],
+    blockers: list[str],
+) -> dict[str, Any]:
+    """Verify retained bundle manifests carry the atom/lens gates they claim."""
+
+    out: dict[str, Any] = {}
+    for summary_key in ("lens_atom_audit_summary", "union_atom_audit_summary"):
+        summary = manifest.get(summary_key)
+        if not isinstance(summary, dict):
+            blockers.append(f"{cell_id}:missing_{summary_key}")
+            out[summary_key] = {"status": "missing"}
+            continue
+        checked = _check_zero_summary_counts(
+            cell_id=cell_id,
+            summary_key=summary_key,
+            summary=summary,
+            blockers=blockers,
+            count_keys=(
+                "atom_shape_blocker_count",
+                "unregistered_fact_count",
+                "lens_scope_blocker_count",
+            ),
+        )
+        out[summary_key] = checked
+
+    for summary_key in ("lens_carrier_value_domain_summary", "union_carrier_value_domain_summary"):
+        summary = manifest.get(summary_key)
+        if not isinstance(summary, dict):
+            continue
+        checked = _check_value_domain_summary(
+            cell_id=cell_id,
+            summary_key=summary_key,
+            summary=summary,
+            blockers=blockers,
+        )
+        out[summary_key] = checked
+    return out
+
+
+def _check_zero_summary_counts(
+    *,
+    cell_id: str,
+    summary_key: str,
+    summary: dict[str, Any],
+    blockers: list[str],
+    count_keys: tuple[str, ...],
+) -> dict[str, Any]:
+    checked: dict[str, Any] = {}
+    status = "pass"
+    for count_key in count_keys:
+        value = _summary_int(summary.get(count_key))
+        checked[count_key] = value
+        if value is None:
+            blockers.append(f"{cell_id}:{summary_key}:missing_{count_key}")
+            status = "fail"
+        elif value != 0:
+            blockers.append(f"{cell_id}:{summary_key}:{count_key}_nonzero:{value}")
+            status = "fail"
+    checked["status"] = status
+    return checked
+
+
+def _check_value_domain_summary(
+    *,
+    cell_id: str,
+    summary_key: str,
+    summary: dict[str, Any],
+    blockers: list[str],
+) -> dict[str, Any]:
+    status = str(summary.get("status") or "").strip() or "unknown"
+    violation_count = _summary_int(summary.get("violation_count"))
+    if status != "pass":
+        blockers.append(f"{cell_id}:{summary_key}:status:{status}")
+    if violation_count is None:
+        blockers.append(f"{cell_id}:{summary_key}:missing_violation_count")
+    elif violation_count != 0:
+        blockers.append(f"{cell_id}:{summary_key}:violation_count_nonzero:{violation_count}")
+    return {"status": status, "violation_count": violation_count}
 
 
 def _domain_lens_run_specs(bundle_root: Path, blockers: list[str], cell_id: str) -> list[dict[str, str]]:
@@ -397,6 +489,18 @@ def _check_manifest_run_shape(
         blockers.append(f"{cell_id}:bundle_manifest_runs_mismatch:manifest_runs={len(runs)}:runs={run_count}")
 
 
+def _summary_int(value: Any) -> int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, str) and value.strip().lstrip("-").isdigit():
+        return int(value.strip())
+    return None
+
+
 def report_md(report: dict[str, Any]) -> str:
     lines = [
         "# Compile-Fact QA Manifest Source Audit",
@@ -416,17 +520,19 @@ def report_md(report: dict[str, Any]) -> str:
         [
             "## Cells",
             "",
-            "| Cell | Runs | Manifest | Backend | Model | Temp | Top-p | Context | Support | Matcher | Warnings |",
-            "| --- | ---: | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
+            "| Cell | Runs | Manifest | Gates | Backend | Model | Temp | Top-p | Context | Support | Matcher | Warnings |",
+            "| --- | ---: | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
         ]
     )
     for cell in report["cells"]:
         settings = cell.get("effective_settings") or {}
+        gate_status = _gate_status_display(cell.get("gate_summaries") or {})
         lines.append(
             "| "
             f"`{cell['id']}` | "
             f"{cell.get('run_count', 0)} | "
             f"`{cell.get('bundle_manifest_status', '')}` | "
+            f"`{gate_status}` | "
             f"`{settings.get('backend', '')}` | "
             f"`{settings.get('model', '')}` | "
             f"{settings.get('temperature', '')} | "
@@ -438,6 +544,19 @@ def report_md(report: dict[str, Any]) -> str:
         )
     lines.append("")
     return "\n".join(lines)
+
+
+def _gate_status_display(gate_summaries: dict[str, Any]) -> str:
+    if not gate_summaries:
+        return "not_available"
+    statuses: list[str] = []
+    for summary_key in ("lens_atom_audit_summary", "union_atom_audit_summary"):
+        summary = gate_summaries.get(summary_key)
+        if isinstance(summary, dict):
+            statuses.append(str(summary.get("status") or "unknown"))
+        else:
+            statuses.append("missing")
+    return "/".join(statuses)
 
 
 def _empty_source_result(source_kind: str, source_root: Path) -> dict[str, Any]:
