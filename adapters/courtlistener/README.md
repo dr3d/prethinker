@@ -36,7 +36,10 @@ unless it has been reviewed and intentionally turned into a small durable
 fixture. Cached raw responses can be replayed without a token; cache misses are
 live API calls and remain token-gated. Claim-bearing legal verification runs
 should retain the cache/provider manifest needed to reproduce the resolver
-inputs offline.
+inputs offline. Cache payloads that become retained research evidence must have
+matching `prethinker.courtlistener_cache_metadata.v1` sidecars; governance runs
+`scripts/audit_courtlistener_cache_provenance.py` to block orphan payloads or
+untracked provider metadata.
 
 ## Boundary
 

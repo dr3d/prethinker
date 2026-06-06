@@ -198,6 +198,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "courtlistener_cache_provenance",
+            "command": [
+                python,
+                "scripts/audit_courtlistener_cache_provenance.py",
+                "--out-json",
+                str(report_root / "courtlistener_cache_provenance.json"),
+                "--out-md",
+                str(report_root / "courtlistener_cache_provenance.md"),
+                "--expect-md",
+                "docs/COURTLISTENER_CACHE_PROVENANCE_STATUS.md",
+            ],
+        },
+        {
             "id": "query_micro_fixture_contracts",
             "command": [
                 python,
