@@ -353,6 +353,17 @@ def _normalized_reporter_text(reporter: str) -> str:
     compact = re.sub(r"\s+", "", reporter)
     if compact in {"U.S.", "US"}:
         return "U.S."
+    mapping = {
+        "F.2d": "F.2d",
+        "F.3d": "F.3d",
+        "F.4th": "F.4th",
+        "F.Supp.": "F. Supp.",
+        "F.Supp.2d": "F. Supp. 2d",
+        "F.Supp.3d": "F. Supp. 3d",
+        "S.Ct.": "S. Ct.",
+    }
+    if compact in mapping:
+        return mapping[compact]
     return re.sub(r"\s+", " ", reporter).strip()
 
 

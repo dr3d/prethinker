@@ -389,6 +389,51 @@ def test_legal_authority_micro_fixture_v3_catches_unsupported_reporter() -> None
     }
 
 
+def test_legal_authority_resolves_declared_federal_reporter_inventory(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text("Smith v. Jones, 12 F.3d 34 (1995).", encoding="utf-8")
+    inventory = tmp_path / "authority_inventory.json"
+    inventory.write_text(
+        json.dumps(
+            {
+                "schema_version": "legal_authority_inventory_v1",
+                "authorities": [
+                    {
+                        "authority_id": "auth_smith_12_f_3d_34",
+                        "canonical_citation": "12 F.3d 34",
+                        "case_name": "Smith v. Jones",
+                        "court": "United States Court of Appeals",
+                        "year": "1995",
+                        "reporter": "F.3d",
+                        "volume": "12",
+                        "page": "34",
+                        "pages": {},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=inventory,
+        document_id="legal_authority_federal_reporter",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["resolved"] == 1
+    assert report["summary"]["invalid_reporter"] == 0
+    assert report["summary"]["verified_mentions"] == 1
+    assert report["mentions"][0]["metadata_checks"] == [
+        {"field": "case_name", "extracted": "Smith v. Jones", "authority_value": "Smith v. Jones", "status": "match"},
+        {"field": "volume", "extracted": "12", "authority_value": "12", "status": "match"},
+        {"field": "reporter", "extracted": "F.3d", "authority_value": "F.3d", "status": "match"},
+        {"field": "page", "extracted": "34", "authority_value": "34", "status": "match"},
+        {"field": "year", "extracted": "1995", "authority_value": "1995", "status": "match"},
+    ]
+
+
 def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_scoped() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE_V4 / "source.md",

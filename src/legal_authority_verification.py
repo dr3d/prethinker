@@ -32,6 +32,11 @@ CITATION_RE = re.compile(
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
     r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
 )
+GENERIC_CITATION_RE = re.compile(
+    rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
+    r"(?P<volume>\d+)\s+(?P<reporter>[A-Z][A-Za-z. ]{1,24})\s+(?P<page>\d+)"
+    r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
+)
 BARE_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
@@ -696,6 +701,32 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
         for match in CITATION_RE.finditer(text)
     ]
     occupied = [(row.start, row.end) for row in full_matches]
+    unsupported_matches: list[CitationExtract] = []
+    for match in GENERIC_CITATION_RE.finditer(text):
+        if any(_spans_overlap(match.span(), span) for span in occupied):
+            continue
+        if _supported_reporter(match.group("reporter")):
+            continue
+        unsupported_matches.append(
+            CitationExtract(
+                case_name=_clean_space(match.group("case")),
+                citation=_citation_text(
+                    volume=match.group("volume"),
+                    reporter=match.group("reporter"),
+                    page=match.group("page"),
+                ),
+                volume=match.group("volume"),
+                reporter=match.group("reporter"),
+                page=match.group("page"),
+                pin=match.group("pin") or "",
+                year=match.group("year") or "",
+                start=match.start(),
+                end=match.end(),
+                lookup_start=match.start("volume"),
+                lookup_end=match.end("page"),
+            )
+        )
+    occupied.extend((row.start, row.end) for row in unsupported_matches)
     bare_matches: list[CitationExtract] = []
     for match in BARE_CITATION_RE.finditer(text):
         if any(_spans_overlap(match.span(), span) for span in occupied):
@@ -719,7 +750,7 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                 lookup_end=match.end("page"),
             )
         )
-    return sorted([*full_matches, *bare_matches], key=lambda row: (row.start, row.end))
+    return sorted([*full_matches, *unsupported_matches, *bare_matches], key=lambda row: (row.start, row.end))
 
 
 def _spans_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
@@ -814,13 +845,33 @@ def _resolution_reason(status: str) -> str:
 
 
 def _supported_reporter(reporter: str) -> bool:
-    return _normalized_reporter_text(reporter) == "U.S."
+    return _normalized_reporter_text(reporter) in {
+        "U.S.",
+        "F.2d",
+        "F.3d",
+        "F.4th",
+        "F. Supp.",
+        "F. Supp. 2d",
+        "F. Supp. 3d",
+        "S. Ct.",
+    }
 
 
 def _normalized_reporter_text(reporter: str) -> str:
     compact = re.sub(r"\s+", "", reporter)
     if compact == "U.S.":
         return "U.S."
+    mapping = {
+        "F.2d": "F.2d",
+        "F.3d": "F.3d",
+        "F.4th": "F.4th",
+        "F.Supp.": "F. Supp.",
+        "F.Supp.2d": "F. Supp. 2d",
+        "F.Supp.3d": "F. Supp. 3d",
+        "S.Ct.": "S. Ct.",
+    }
+    if compact in mapping:
+        return mapping[compact]
     return _clean_space(reporter)
 
 

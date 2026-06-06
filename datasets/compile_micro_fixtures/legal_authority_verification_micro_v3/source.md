@@ -2,4 +2,4 @@
 
 ## Unsupported Reporter
 
-Smith v. Jones, 12 F.3d 34 (1995), is cited in a source excerpt even though this prototype only verifies U.S. reporter citations.
+Smith v. Jones, 12 Umbrella 34 (1995), is cited in a source excerpt with an unsupported reporter string.
