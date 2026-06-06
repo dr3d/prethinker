@@ -202,7 +202,8 @@ Status values follow the same broad shape:
 - `400`: parsed but invalid shape or unsupported reporter;
 - `404`: citation-like value did not resolve;
 - transient external lookup failures such as `408`, `425`, `429`, `500`,
-  `502`, `503`, and `504`: unavailable lookup, not a bad citation.
+  `502`, `503`, and `504`, plus network/transport failures surfaced as
+  `503`: unavailable lookup, not a bad citation.
 
 The current implementation has two layers:
 

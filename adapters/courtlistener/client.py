@@ -103,6 +103,11 @@ class CourtListenerClient:
                 status=int(exc.code),
                 message=_http_error_message(exc=exc, method=method, url=url),
             ) from exc
+        except urllib.error.URLError as exc:
+            raise CourtListenerRequestError(
+                status=503,
+                message=_url_error_message(exc=exc, method=method, url=url),
+            ) from exc
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         self._write_cache_metadata(cached=cached, method=method, url=url, body=body)
@@ -145,4 +150,12 @@ def _http_error_message(*, exc: urllib.error.HTTPError, method: str, url: str) -
         body = ""
     if body:
         return f"{prefix}: {body}"
+    return prefix
+
+
+def _url_error_message(*, exc: urllib.error.URLError, method: str, url: str) -> str:
+    reason = str(getattr(exc, "reason", "") or exc).strip()
+    prefix = f"CourtListener network unavailable for {method.upper()} {url}"
+    if reason:
+        return f"{prefix}: {reason}"
     return prefix

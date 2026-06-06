@@ -159,6 +159,23 @@ def test_courtlistener_client_surfaces_http_error_status_for_live_citation_looku
     assert "throttled" in str(exc_info.value)
 
 
+def test_courtlistener_client_surfaces_network_error_as_unavailable_status(tmp_path, monkeypatch):
+    monkeypatch.setenv("COURTLISTENER_API_TOKEN", "test-token")
+
+    def fake_urlopen(request, timeout):
+        raise urllib.error.URLError("temporary name resolution failure")
+
+    monkeypatch.setattr("adapters.courtlistener.client.urllib.request.urlopen", fake_urlopen)
+    client = CourtListenerClient(cache_dir=tmp_path)
+
+    with pytest.raises(CourtListenerRequestError) as exc_info:
+        client.citation_lookup(text="Brown v. Board of Education, 347 U.S. 483 (1954)")
+
+    assert exc_info.value.status == 503
+    assert "CourtListener network unavailable" in str(exc_info.value)
+    assert "temporary name resolution failure" in str(exc_info.value)
+
+
 def test_normalize_opinion_record_tolerates_search_result_shape():
     raw = {
         "id": 123,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import urllib.error
 import urllib.parse
 from pathlib import Path
 
@@ -360,6 +361,39 @@ def test_courtlistener_lookup_resolver_maps_throttling_exception_to_abstention(t
     ) in report["facts"]
     assert report["summary"]["false_verified"] == 0
     assert len(report["ledger_queries"]["which_citation_lookups_are_unavailable"]) == 1
+
+
+def test_live_courtlistener_network_failure_becomes_lookup_unavailable(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("COURTLISTENER_API_TOKEN", "test-token")
+
+    def fake_urlopen(request, timeout):
+        raise urllib.error.URLError("temporary name resolution failure")
+
+    monkeypatch.setattr("adapters.courtlistener.client.urllib.request.urlopen", fake_urlopen)
+    source = tmp_path / "source.md"
+    source.write_text("Brown v. Board of Education, 347 U.S. 483 (1954).", encoding="utf-8")
+    client = CourtListenerClient(cache_dir=tmp_path / "cache")
+    resolver = CourtListenerCitationLookupResolver(client=client)
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=tmp_path / "missing_inventory.json",
+        document_id="legal_authority_network_unavailable",
+        resolver=resolver,
+    )
+
+    assert report["mentions"][0]["resolution_status"] == "unavailable"
+    assert report["summary"]["unavailable"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert report["ledger_queries"]["which_citation_lookups_are_unavailable"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "347 U.S. 483",
+            "line": 1,
+            "resolution_status": "unavailable",
+            "authority_id": "authority_lookup_unavailable",
+        }
+    ]
 
 
 def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavailable_text() -> None:
