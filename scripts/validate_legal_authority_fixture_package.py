@@ -146,6 +146,8 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
     errors.extend(_inventory_errors(inventory))
     errors.extend(_fact_errors(expected_facts, label="expected_facts.pl"))
     errors.extend(_fact_errors(forbidden_facts, label="forbidden_facts.pl"))
+    if fixture_class == "clean_public_filings":
+        errors.extend(_clean_public_expected_fact_policy_errors(expected_facts))
 
     verifier_summary: dict[str, Any] = {}
     ledger_query_summary: dict[str, Any] = {}
@@ -278,6 +280,47 @@ def _fact_errors(facts: list[str], *, label: str) -> list[str]:
         signature = f"{parsed['predicate']}/{len(parsed['args'])}"
         if carrier_contract(signature) is None:
             errors.append(f"{label}:line_{line_number}:unregistered_signature:{signature}")
+    return errors
+
+
+def _clean_public_expected_fact_policy_errors(facts: list[str]) -> list[str]:
+    errors: list[str] = []
+    allowed_proposition_claim_status = {"detected_unreviewed", "human_review_required"}
+    allowed_source_span_status = {
+        "authority_unavailable",
+        "human_review_required",
+        "no_deterministic_span",
+        "not_applicable",
+    }
+    for line_number, fact in enumerate(facts, start=1):
+        parsed = _parse_fact(fact)
+        if parsed is None:
+            continue
+        signature = f"{parsed['predicate']}/{len(parsed['args'])}"
+        args = [str(arg).strip() for arg in parsed["args"]]
+        if signature == "legal_support_assessment/5":
+            errors.append(
+                f"expected_facts.pl:line_{line_number}:tier2_support_assessment_not_allowed_clean_public"
+            )
+        elif signature == "legal_proposition_claim/5":
+            review_status = args[4] if len(args) > 4 else ""
+            if review_status not in allowed_proposition_claim_status:
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:proposition_claim_must_be_review_required_clean_public"
+                )
+        elif signature == "legal_proposition_source_span/5":
+            span_status = args[3] if len(args) > 3 else ""
+            if span_status not in allowed_source_span_status:
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:proposition_span_must_be_review_only_clean_public"
+                )
+        elif signature == "legal_proposition_support_boundary/5":
+            boundary_status = args[2] if len(args) > 2 else ""
+            review_requirement = args[3] if len(args) > 3 else ""
+            if boundary_status != "deterministic_abstain" or review_requirement != "human_review_required":
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:proposition_boundary_must_abstain_clean_public"
+                )
     return errors
 
 

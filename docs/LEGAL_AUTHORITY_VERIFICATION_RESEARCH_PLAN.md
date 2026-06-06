@@ -257,8 +257,10 @@ datasets/legal_authority_verification/fixture_corpus_manifest.json
    The validator is offline and deterministic. It checks fixture shape,
    source-only oracle metadata, authority inventory hygiene, registered fact
    signatures, expected/forbidden replay, false_verified=0, quote/pin coverage,
-   and the clean-public boundary that invalid reporters should not appear in
-   this fixture class.
+   authority-text provenance receipts, and the clean-public boundary that
+   invalid reporters should not appear in this fixture class. It also blocks
+   claim-bearing proposition-support rows in clean-public expected facts:
+   proposition rows may only mark deterministic abstention or human review.
 3. Add controlled adversarial mutations of that filing.
 4. Add known public hallucination/sanction examples only after the resolver and
    report contract are stable.

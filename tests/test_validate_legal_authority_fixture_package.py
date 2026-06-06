@@ -48,6 +48,27 @@ def test_validate_legal_authority_fixture_package_rejects_expected_fact_miss(tmp
     assert "missing_expected_facts:1" in report["fixtures"][2]["errors"]
 
 
+def test_validate_legal_authority_fixture_package_rejects_claim_bearing_support_rows(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    expected_path = package / "clean_legal_filing_001" / "expected_facts.pl"
+    with expected_path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            "legal_support_assessment(prop_001, auth_obergefell_576_us_644, reviewed_support, "
+            "independent_review_recorded, source_line_5).\n"
+        )
+        handle.write(
+            "legal_proposition_support_boundary(mention_001, prop_001, reviewed_support, "
+            "no_review_required, source_line_5).\n"
+        )
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    errors = report["fixtures"][0]["errors"]
+    assert "expected_facts.pl:line_22:tier2_support_assessment_not_allowed_clean_public" in errors
+    assert "expected_facts.pl:line_23:proposition_boundary_must_abstain_clean_public" in errors
+
+
 def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     zip_path = tmp_path / "legal_authority_clean_public_filings_20260606_01.zip"
