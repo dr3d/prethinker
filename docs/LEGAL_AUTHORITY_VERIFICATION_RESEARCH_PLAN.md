@@ -242,7 +242,10 @@ Authority text used for quote/pin verification is also emitted as a compact
 provenance ledger: available page/paragraph scopes get a digest, while missing
 authority text emits `authority_unavailable` and forces abstention. This keeps
 the verifier from silently depending on authority prose that is not visible in
-the typed report.
+the typed report. When an authority inventory includes a retained authority-text
+URL, the report and ledger-query row carry that URL as provenance metadata; the
+typed fact remains the compact five-slot `legal_authority_text_source/5`
+receipt.
 
 ## Ledger Query Surface
 

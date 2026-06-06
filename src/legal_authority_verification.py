@@ -789,25 +789,36 @@ def _quote_digest(quote: str) -> str:
 
 def _authority_text_sources(authority: dict[str, Any]) -> list[dict[str, str]]:
     pages = authority.get("pages") if isinstance(authority.get("pages"), dict) else {}
+    source_url = _authority_text_source_url(authority)
     if not pages:
-        return [
-            {
-                "text_scope": "authority_text",
-                "text_status": "authority_unavailable",
-                "text_digest": "no_digest",
-            }
-        ]
+        row = {
+            "text_scope": "authority_text",
+            "text_status": "authority_unavailable",
+            "text_digest": "no_digest",
+        }
+        if source_url:
+            row["source_url"] = source_url
+        return [row]
     rows: list[dict[str, str]] = []
     for page, text in sorted(pages.items(), key=lambda item: str(item[0])):
         page_atom = _page_atom(str(page))
-        rows.append(
-            {
-                "text_scope": page_atom,
-                "text_status": "available",
-                "text_digest": _authority_text_digest(str(text)),
-            }
-        )
+        row = {
+            "text_scope": page_atom,
+            "text_status": "available",
+            "text_digest": _authority_text_digest(str(text)),
+        }
+        if source_url:
+            row["source_url"] = source_url
+        rows.append(row)
     return rows
+
+
+def _authority_text_source_url(authority: dict[str, Any]) -> str:
+    for key in ("authority_text_url", "authority_url", "source_url", "absolute_url"):
+        value = str(authority.get(key) or "").strip()
+        if value:
+            return value
+    return ""
 
 
 def _authority_text_digest(text: str) -> str:

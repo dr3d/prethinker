@@ -459,6 +459,44 @@ def test_legal_authority_pin_range_contains_matched_quote_page(tmp_path: Path) -
     }
 
 
+def test_legal_authority_report_carries_authority_text_source_url_without_fact_expansion(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        (
+            "Brown v. Board of Education, 347 U.S. 483, 495 (1954), states "
+            '"Separate educational facilities are inherently unequal."'
+        ),
+        encoding="utf-8",
+    )
+    inventory_data = json.loads((FIXTURE / "authority_inventory.json").read_text(encoding="utf-8"))
+    for authority in inventory_data["authorities"]:
+        if authority["authority_id"] == "auth_brown_347_us_483":
+            authority["authority_text_url"] = "https://example.test/authority/brown"
+    inventory = tmp_path / "authority_inventory.json"
+    inventory.write_text(json.dumps(inventory_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=inventory,
+        document_id="legal_authority_text_source_url",
+    )
+
+    assert report["authority_text_sources"] == [
+        {
+            "authority_id": "auth_brown_347_us_483",
+            "source_url": "https://example.test/authority/brown",
+            "text_digest": "sha256_85cc42e31389",
+            "text_scope": "page_495",
+            "text_status": "available",
+        }
+    ]
+    assert report["ledger_queries"]["which_authority_text_sources_were_used"] == report["authority_text_sources"]
+    assert (
+        "legal_authority_text_source("
+        "auth_brown_347_us_483, page_495, available, sha256_85cc42e31389, authority_inventory)."
+    ) in report["facts"]
+
+
 def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_scoped() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE_V4 / "source.md",
