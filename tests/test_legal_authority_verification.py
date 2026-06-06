@@ -435,6 +435,30 @@ def test_legal_authority_resolves_declared_federal_reporter_inventory(tmp_path: 
     ]
 
 
+def test_legal_authority_pin_range_contains_matched_quote_page(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        (
+            "Obergefell v. Hodges, 576 U.S. 644, 675-76 (2015), states "
+            '"The Court now holds that same-sex couples may exercise the fundamental right to marry."'
+        ),
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=FIXTURE / "authority_inventory.json",
+        document_id="legal_authority_pin_range",
+    )
+
+    assert report["summary"]["verified_mentions"] == 1
+    assert report["summary"]["pin_mismatch"] == 0
+    assert report["mentions"][0]["pin_check"] == {
+        "pin": "page_675_76",
+        "status": "pin_contains_quote",
+    }
+
+
 def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_scoped() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE_V4 / "source.md",

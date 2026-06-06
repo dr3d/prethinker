@@ -30,18 +30,18 @@ CASE_PARTY_RE = rf"{CASE_WORD_RE}(?:\s+{CASE_WORD_RE}){{0,8}}"
 CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
-    r"(?:,\s+(?P<pin>\d+))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
+    r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
 )
 GENERIC_CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>[A-Z][A-Za-z. ]{1,24})\s+(?P<page>\d+)"
-    r"(?:,\s+(?P<pin>\d+))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
+    r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
 )
 BARE_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
     r"(?P<page>\d+)"
-    r"(?:,\s+(?P<pin_comma>\d+)|\s+at\s+(?P<pin_at>\d+))?"
+    r"(?:,\s+(?P<pin_comma>\d+(?:-\d+)?)|\s+at\s+(?P<pin_at>\d+(?:-\d+)?))?"
     r"(?:\s+\([^)]*?(?P<year>\d{4})[^)]*?\))?"
 )
 QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"')
@@ -914,6 +914,8 @@ def _pin_status(
         return "not_applicable", pin_atom
     pages = authority.get("pages") if isinstance(authority.get("pages"), dict) else {}
     if pin not in pages:
+        if _pin_contains_matched_location(pin=pin, matched_location=matched_location):
+            return "pin_contains_quote", pin_atom
         return "pin_unavailable", pin_atom
     if matched_location == pin_atom:
         return "pin_contains_quote", pin_atom
@@ -922,6 +924,32 @@ def _pin_status(
 
 def _page_atom(page: str) -> str:
     return "page_" + re.sub(r"[^a-z0-9]+", "_", page.casefold()).strip("_")
+
+
+def _pin_contains_matched_location(*, pin: str, matched_location: str) -> bool:
+    if not matched_location.startswith("page_"):
+        return False
+    matched_page = matched_location.removeprefix("page_")
+    if not matched_page.isdigit():
+        return False
+    return int(matched_page) in _pin_page_numbers(pin)
+
+
+def _pin_page_numbers(pin: str) -> set[int]:
+    match = re.fullmatch(r"(?P<start>\d+)(?:-(?P<end>\d+))?", pin)
+    if not match:
+        return set()
+    start_text = match.group("start")
+    start = int(start_text)
+    end_text = match.group("end")
+    if not end_text:
+        return {start}
+    if len(end_text) < len(start_text):
+        end_text = start_text[: -len(end_text)] + end_text
+    end = int(end_text)
+    if end < start or end - start > 100:
+        return {start}
+    return set(range(start, end + 1))
 
 
 def _has_proposition_boundary(paragraph: str, citation_end: int) -> bool:
