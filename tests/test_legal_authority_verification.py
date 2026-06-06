@@ -97,6 +97,7 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
 
     queries = report["ledger_queries"]
     assert len(queries["which_citations_do_not_resolve"]) == 1
+    assert len(queries["which_citations_are_ambiguous"]) == 1
     assert len(queries["which_cases_have_metadata_mismatches"]) == 2
     assert len(queries["which_authority_text_is_unavailable"]) == 1
     assert len(queries["which_authority_text_sources_were_used"]) == 2
@@ -131,6 +132,7 @@ def test_legal_authority_micro_fixture_v3_catches_unsupported_reporter() -> None
 
     queries = report["ledger_queries"]
     assert len(queries["which_citations_do_not_resolve"]) == 1
+    assert len(queries["which_citations_use_unsupported_reporters"]) == 1
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 1,

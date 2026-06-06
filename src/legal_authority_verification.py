@@ -397,6 +397,10 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         for row in mentions
         if row.get("resolution_status") in {"unresolved", "ambiguous", "invalid_reporter", "unavailable"}
     ]
+    ambiguous = [_mention_brief(row) for row in mentions if row.get("resolution_status") == "ambiguous"]
+    unsupported_reporters = [
+        _mention_brief(row) for row in mentions if row.get("resolution_status") == "invalid_reporter"
+    ]
     metadata_mismatches = [
         {
             "mention_id": row["mention_id"],
@@ -465,6 +469,8 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
     ]
     return {
         "which_citations_do_not_resolve": unresolved,
+        "which_citations_are_ambiguous": ambiguous,
+        "which_citations_use_unsupported_reporters": unsupported_reporters,
         "which_cases_have_metadata_mismatches": metadata_mismatches,
         "which_quotes_cannot_be_found": quote_mismatches,
         "which_authority_text_is_unavailable": unavailable_authority_text,
@@ -543,6 +549,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Blocking issues: `{clean.get('blocking_issue_count', 0)}`",
                 f"- Review-required propositions: `{clean.get('review_required_count', 0)}`",
                 f"- Unresolved citations: `{len(queries.get('which_citations_do_not_resolve') or [])}`",
+                f"- Ambiguous citations: `{len(queries.get('which_citations_are_ambiguous') or [])}`",
+                f"- Unsupported reporter citations: `{len(queries.get('which_citations_use_unsupported_reporters') or [])}`",
                 f"- Unavailable authority text: `{len(queries.get('which_authority_text_is_unavailable') or [])}`",
                 f"- Authority text source receipts: `{len(queries.get('which_authority_text_sources_were_used') or [])}`",
                 f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
