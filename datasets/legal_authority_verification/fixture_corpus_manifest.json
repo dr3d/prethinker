@@ -114,12 +114,12 @@
         "forbidden_facts.pl",
         "manifest.json"
       ],
-      "status": "deferred_until_clean_public_baseline"
+      "status": "queued_for_source_only_packet"
     }
   ],
   "next_external_work_order_needed": {
-    "needed_now": false,
-    "reason": "Clean-public legal filings have been imported. Next expansion should be decided from the imported baseline audit before known hallucination/sanction fixtures are opened."
+    "needed_now": true,
+    "reason": "Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is prepared at tmp/legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be named legal_authority_known_hallucination_sanction_20260606_01.zip and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest."
   },
   "purpose": "Fixture-class plan for legal authority verification. This manifest prevents premature expansion into real sanctioned/hallucination filings before the clean-public baseline lands under the deterministic resolver and report contract.",
   "schema": "prethinker.legal_authority_verification.fixture_corpus_manifest.v1",

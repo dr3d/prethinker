@@ -71,7 +71,10 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert fixtures["clean_legal_filing_001"]["matched_expected_fact_count"] == 18
     assert fixtures["clean_legal_filing_002"]["matched_expected_fact_count"] == 20
     assert fixtures["clean_legal_filing_003"]["matched_expected_fact_count"] == 18
-    assert report["next_external_work_order_needed"]["needed_now"] is False
+    assert report["next_external_work_order_needed"]["needed_now"] is True
+    assert "legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip" in report[
+        "next_external_work_order_needed"
+    ]["reason"]
 
 
 def test_legal_authority_status_markdown_names_false_verified_gate() -> None:

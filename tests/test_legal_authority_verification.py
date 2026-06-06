@@ -1264,7 +1264,15 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
         "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_002",
         "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_003",
     ]
-    assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_clean_public_baseline"
-    assert manifest["next_external_work_order_needed"]["needed_now"] is False
+    assert classes["known_hallucination_or_sanction_filings"]["status"] == "queued_for_source_only_packet"
+    assert manifest["next_external_work_order_needed"]["needed_now"] is True
     assert "Clean-public legal filings have been imported" in manifest["next_external_work_order_needed"]["reason"]
-    assert "known hallucination/sanction fixtures" in manifest["next_external_work_order_needed"]["reason"]
+    assert "legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip" in manifest[
+        "next_external_work_order_needed"
+    ]["reason"]
+    assert "legal_authority_known_hallucination_sanction_20260606_01.zip" in manifest[
+        "next_external_work_order_needed"
+    ]["reason"]
+    assert "--fixture-class known_hallucination_or_sanction_filings" in manifest[
+        "next_external_work_order_needed"
+    ]["reason"]

@@ -46,7 +46,7 @@ It reads local fixture files and authority inventories only; it does not call an
 | --- | --- | ---: |
 | `controlled_adversarial_mutations` | `seeded` | 9 |
 | `clean_public_filings` | `seeded` | 3 |
-| `known_hallucination_or_sanction_filings` | `deferred_until_clean_public_baseline` | 0 |
+| `known_hallucination_or_sanction_filings` | `queued_for_source_only_packet` | 0 |
 
 ## Fixture Results
 
@@ -67,5 +67,5 @@ It reads local fixture files and authority inventories only; it does not call an
 
 ## Next External Work Order
 
-- Needed now: `False`
-- Reason: Clean-public legal filings have been imported. Next expansion should be decided from the imported baseline audit before known hallucination/sanction fixtures are opened.
+- Needed now: `True`
+- Reason: Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is prepared at tmp/legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be named legal_authority_known_hallucination_sanction_20260606_01.zip and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest.
