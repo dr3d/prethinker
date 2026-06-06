@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import urllib.error
 import urllib.parse
@@ -98,6 +99,7 @@ def test_courtlistener_client_writes_cache_metadata_for_live_get(tmp_path, monke
         "method": "GET",
         "url": url,
         "body_sha256": "",
+        "payload_sha256": hashlib.sha256(cached.read_bytes()).hexdigest(),
         "cache_file": cached.name,
     }
 
@@ -133,6 +135,7 @@ def test_courtlistener_client_writes_cache_metadata_for_live_citation_lookup(tmp
     assert metadata["method"] == "POST"
     assert metadata["url"] == url
     assert metadata["body_sha256"]
+    assert metadata["payload_sha256"] == hashlib.sha256(cached.read_bytes()).hexdigest()
     assert metadata["cache_file"] == cached.name
 
 

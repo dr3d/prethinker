@@ -9,6 +9,7 @@ untracked claim evidence.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -116,12 +117,17 @@ def render_markdown(report: dict[str, Any]) -> str:
     ]
     rows = report.get("payloads") or []
     if rows:
-        lines.extend(["| Payload | Metadata | Method | URL | Errors |", "| --- | --- | --- | --- | --- |"])
+        lines.extend(
+            [
+                "| Payload | Metadata | Method | URL | Payload SHA-256 | Errors |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+        )
         for row in rows:
             errors = ", ".join(f"`{error}`" for error in row["errors"]) or "`[]`"
             lines.append(
                 f"| `{row['payload_file']}` | `{row['metadata_file']}` | `{row['method']}` | "
-                f"`{row['url']}` | {errors} |"
+                f"`{row['url']}` | `{row['payload_sha256']}` | {errors} |"
             )
     else:
         lines.append("_No retained CourtListener cache payloads._")
@@ -149,6 +155,7 @@ def _audit_payload(path: Path, *, allowed_url_prefix: str) -> dict[str, Any]:
         "metadata_file": _display_path(metadata_path) if metadata_path.exists() else "",
         "method": str(metadata.get("method") or ""),
         "url": str(metadata.get("url") or ""),
+        "payload_sha256": str(metadata.get("payload_sha256") or ""),
         "errors": errors,
     }
 
@@ -170,6 +177,11 @@ def _metadata_errors(metadata: dict[str, Any], *, payload_path: Path, allowed_ur
         errors.append("metadata_get_body_sha256_must_be_empty")
     if method == "POST" and not SHA256_RE.match(body_sha256):
         errors.append("metadata_post_body_sha256_invalid")
+    payload_sha256 = str(metadata.get("payload_sha256") or "")
+    if not SHA256_RE.match(payload_sha256):
+        errors.append("metadata_payload_sha256_invalid")
+    elif payload_sha256 != hashlib.sha256(payload_path.read_bytes()).hexdigest():
+        errors.append("metadata_payload_sha256_mismatch")
     if metadata.get("cache_file") != payload_path.name:
         errors.append("metadata_cache_file_mismatch")
     return errors

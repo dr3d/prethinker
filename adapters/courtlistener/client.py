@@ -109,8 +109,15 @@ class CourtListenerClient:
                 message=_url_error_message(exc=exc, method=method, url=url),
             ) from exc
         cached.parent.mkdir(parents=True, exist_ok=True)
-        cached.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        self._write_cache_metadata(cached=cached, method=method, url=url, body=body)
+        payload_text = json.dumps(payload, ensure_ascii=False, indent=2)
+        cached.write_text(payload_text, encoding="utf-8")
+        self._write_cache_metadata(
+            cached=cached,
+            method=method,
+            url=url,
+            body=body,
+            payload_sha256=hashlib.sha256(cached.read_bytes()).hexdigest(),
+        )
         return payload
 
     def _url(self, path: str, params: dict[str, Any]) -> str:
@@ -126,7 +133,15 @@ class CourtListenerClient:
     def _cache_metadata_path(self, cached: Path) -> Path:
         return cached.with_name(f"{cached.stem}.meta.json")
 
-    def _write_cache_metadata(self, *, cached: Path, method: str, url: str, body: bytes | None) -> None:
+    def _write_cache_metadata(
+        self,
+        *,
+        cached: Path,
+        method: str,
+        url: str,
+        body: bytes | None,
+        payload_sha256: str,
+    ) -> None:
         body_digest = hashlib.sha256(body).hexdigest() if body is not None else ""
         metadata = {
             "schema": "prethinker.courtlistener_cache_metadata.v1",
@@ -134,6 +149,7 @@ class CourtListenerClient:
             "method": method.upper(),
             "url": url,
             "body_sha256": body_digest,
+            "payload_sha256": payload_sha256,
             "cache_file": cached.name,
         }
         self._cache_metadata_path(cached).write_text(

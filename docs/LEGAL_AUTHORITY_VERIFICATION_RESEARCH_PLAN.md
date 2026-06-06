@@ -236,8 +236,9 @@ not turn a measurement into an unrecorded external dependency. Live outputs
 need a provider manifest and retained cache before they become research
 evidence. Retained cache entries include payload JSON plus
 `prethinker.courtlistener_cache_metadata.v1` sidecars recording provider,
-method, URL, body digest, and cache filename; they may replay without a token.
-Cache misses are live calls and remain token-gated.
+method, URL, request-body digest, retained-payload digest, and cache filename;
+they may replay without a token. Cache misses are live calls and remain
+token-gated.
 
 The verifier defaults to the local resolver. Any external resolver must be
 passed explicitly, and a citation resolved by CourtListener without retained

@@ -39,7 +39,9 @@ should retain the cache/provider manifest needed to reproduce the resolver
 inputs offline. Cache payloads that become retained research evidence must have
 matching `prethinker.courtlistener_cache_metadata.v1` sidecars; governance runs
 `scripts/audit_courtlistener_cache_provenance.py` to block orphan payloads or
-untracked provider metadata.
+untracked provider metadata. Sidecars bind both the request body digest and the
+retained payload digest, so cached resolver evidence cannot be edited silently
+after acquisition.
 
 ## Boundary
 
