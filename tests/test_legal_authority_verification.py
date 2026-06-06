@@ -48,6 +48,11 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 3,
+        "blocking_issue_types": [
+            "quote_not_found_in_authority",
+            "quote_outside_cited_pin",
+            "unresolved",
+        ],
         "review_required_count": 1,
         "answer": "no",
     }
@@ -104,6 +109,11 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 4,
+        "blocking_issue_types": [
+            "ambiguous",
+            "authority_text_unavailable",
+            "metadata_mismatch",
+        ],
         "review_required_count": 0,
         "answer": "no",
     }
@@ -136,6 +146,7 @@ def test_legal_authority_micro_fixture_v3_catches_unsupported_reporter() -> None
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 1,
+        "blocking_issue_types": ["invalid_reporter"],
         "review_required_count": 0,
         "answer": "no",
     }
@@ -168,6 +179,7 @@ def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_sco
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 1,
+        "blocking_issue_types": ["quote_not_found_in_authority"],
         "review_required_count": 0,
         "answer": "no",
     }
@@ -207,6 +219,7 @@ def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_witho
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": True,
         "blocking_issue_count": 0,
+        "blocking_issue_types": [],
         "review_required_count": 0,
         "answer": "yes",
     }
@@ -247,6 +260,7 @@ def test_legal_authority_micro_fixture_v6_checks_quotes_before_citations() -> No
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 1,
+        "blocking_issue_types": ["quote_not_found_in_authority"],
         "review_required_count": 0,
         "answer": "no",
     }
@@ -399,6 +413,7 @@ def test_legal_authority_report_renders_review_required_boundary() -> None:
     assert "`human_review_required`" in markdown
     assert "Ledger Query Answers" in markdown
     assert "Certification answer: `no`" in markdown
+    assert "Blocking issue types: `quote_not_found_in_authority, quote_outside_cited_pin, unresolved`" in markdown
 
 
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:

@@ -467,6 +467,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
             "quote_outside_cited_pin",
         }
     ]
+    blocking_issue_types = sorted({str(row.get("issue") or "") for row in blocking_issues if row.get("issue")})
     return {
         "which_citations_do_not_resolve": unresolved,
         "which_citations_are_ambiguous": ambiguous,
@@ -480,6 +481,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         "can_this_filing_be_certified_citation_clean": {
             "citation_clean": not blocking_issues,
             "blocking_issue_count": len(blocking_issues),
+            "blocking_issue_types": blocking_issue_types,
             "review_required_count": len(proposition_review),
             "answer": "yes" if not blocking_issues and not proposition_review else "no",
         },
@@ -547,6 +549,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Certification answer: `{clean.get('answer', '')}`",
                 f"- Citation clean: `{clean.get('citation_clean', False)}`",
                 f"- Blocking issues: `{clean.get('blocking_issue_count', 0)}`",
+                f"- Blocking issue types: `{', '.join(clean.get('blocking_issue_types') or [])}`",
                 f"- Review-required propositions: `{clean.get('review_required_count', 0)}`",
                 f"- Unresolved citations: `{len(queries.get('which_citations_do_not_resolve') or [])}`",
                 f"- Ambiguous citations: `{len(queries.get('which_citations_are_ambiguous') or [])}`",
