@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Prethinker Docs</title>
-  <meta name="description" content="Current public documentation for Prethinker, including closed-domain predicate packs, governed compile artifacts, and hard-clean transfer evidence.">
+  <meta name="description" content="Phase-close documentation for Prethinker: governed document compilation, closed predicate packs, strict gates, and explicit non-claims.">
   <style>
     :root {
       color-scheme: light dark;
@@ -16,7 +16,6 @@
       --panel-2: #ebe8df;
       --accent: #2f766d;
       --accent-2: #a84f30;
-      --good: #2d7c48;
       --warn: #9a6a18;
       --shadow: 0 18px 48px rgba(44, 38, 28, 0.12);
     }
@@ -31,15 +30,12 @@
         --panel-2: #20272a;
         --accent: #69c4b8;
         --accent-2: #e18a63;
-        --good: #80d898;
         --warn: #e1bd68;
         --shadow: 0 20px 56px rgba(0, 0, 0, 0.34);
       }
     }
 
     * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -53,7 +49,7 @@
     a:hover { color: var(--accent-2); }
 
     .hero {
-      min-height: 68vh;
+      min-height: 62vh;
       display: grid;
       align-items: end;
       position: relative;
@@ -67,7 +63,7 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(90deg, rgba(17, 26, 29, 0.98) 0%, rgba(17, 26, 29, 0.84) 45%, rgba(17, 26, 29, 0.48) 100%),
+        linear-gradient(90deg, rgba(17, 26, 29, 0.98) 0%, rgba(17, 26, 29, 0.82) 48%, rgba(17, 26, 29, 0.52) 100%),
         url("assets/prethinker-spectral-graph-hero.png") center center / cover no-repeat;
       opacity: 0.82;
     }
@@ -82,7 +78,7 @@
 
     .hero-inner,
     .wrap {
-      width: min(1120px, calc(100vw - 32px));
+      width: min(1080px, calc(100vw - 32px));
       margin: 0 auto;
     }
 
@@ -161,9 +157,7 @@
       border-color: #fffaf1;
     }
 
-    main {
-      padding: 34px 0 68px;
-    }
+    main { padding: 34px 0 68px; }
 
     .status {
       display: grid;
@@ -211,9 +205,7 @@
       font-size: 13px;
     }
 
-    .section {
-      margin-top: 34px;
-    }
+    .section { margin-top: 34px; }
 
     .section-head {
       display: flex;
@@ -231,9 +223,7 @@
       color: var(--muted);
     }
 
-    h2 {
-      font-size: clamp(26px, 4vw, 40px);
-    }
+    h2 { font-size: clamp(26px, 4vw, 40px); }
 
     .grid {
       display: grid;
@@ -242,14 +232,12 @@
     }
 
     .panel {
-      min-height: 160px;
+      min-height: 150px;
       padding: 18px;
       border-radius: 8px;
     }
 
-    .panel h3 {
-      font-size: 20px;
-    }
+    .panel h3 { font-size: 20px; }
 
     .panel p {
       margin: 10px 0 0;
@@ -262,9 +250,7 @@
       text-underline-offset: 3px;
     }
 
-    .wide {
-      grid-column: span 2;
-    }
+    .wide { grid-column: span 2; }
 
     .callout {
       margin-top: 18px;
@@ -285,18 +271,12 @@
     }
 
     @media (max-width: 860px) {
-      .hero { min-height: 74vh; }
+      .hero { min-height: 72vh; }
       .status,
-      .grid {
-        grid-template-columns: 1fr;
-      }
+      .grid { grid-template-columns: 1fr; }
       .wide { grid-column: auto; }
-      .section-head {
-        display: block;
-      }
-      .section-head p {
-        margin-top: 8px;
-      }
+      .section-head { display: block; }
+      .section-head p { margin-top: 8px; }
     }
   </style>
 </head>
@@ -305,310 +285,124 @@
     <div class="hero-inner">
       <nav class="topline" aria-label="Primary">
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/README.md">README</a>
-        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md">Research Headline</a>
+        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md">Closeout Note</a>
+        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md">Predicate Packs</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md">Evidence</a>
-        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md">Predicate Process</a>
-        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md">Active Lanes</a>
-        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md">Compiled KB</a>
-        <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md">QA Instrument</a>
         <a class="chip" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md">Docs Guide</a>
       </nav>
       <h1>Prethinker Docs</h1>
       <p class="lede">
-        Current public documentation for a governed semantic compile and QA
-        research system: closed predicate domains, deterministic admission,
-        frozen KB artifacts, and measured transfer boundaries.
+        Phase-close documentation for governed document compilation: what
+        survived the measurement reset, what did not, and which claims are
+        deliberately not being made.
       </p>
       <div class="hero-actions">
-        <a class="button primary" href="https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md">Read Technical Note</a>
-        <a class="button" href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md">Current Claim</a>
-        <a class="button" href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md">Research Evidence</a>
+        <a class="button primary" href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md">Read Closeout Note</a>
+        <a class="button" href="https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md">Technical Result</a>
+        <a class="button" href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Project State</a>
       </div>
     </div>
   </header>
 
   <main>
     <div class="wrap">
-      <section class="status" aria-label="Current measurement summary">
+      <section class="status" aria-label="Current research summary">
         <article class="metric">
-          <span>SEC Skeleton</span>
-          <strong>11-13 / 13</strong>
-          <small>clean closed-language gates; compile recall remains model/path-sensitive</small>
+          <span>Mode</span>
+          <strong>Closed</strong>
+          <small>research phase closeout, not an active product sprint</small>
         </article>
         <article class="metric">
-          <span>FDA Case Study</span>
-          <strong>11 / 29; 19 / 26</strong>
-          <small>transfer_002 is governance-clean but incomplete; transfer_003 is a clean boundary cell</small>
+          <span>Positive</span>
+          <strong>Skeleton</strong>
+          <small>recurring official-document anatomy can stabilize</small>
         </article>
         <article class="metric">
-          <span>NTSB Boundary</span>
-          <strong>22 / 25</strong>
-          <small>current scoped injury-count manifest; findings remain the open boundary</small>
+          <span>Boundary</span>
+          <strong>Substance</strong>
+          <small>causal findings and proposition support remain unsolved</small>
         </article>
         <article class="metric">
-          <span>OSHA Probe</span>
-          <strong>36 / 36</strong>
-          <small>standing seed plus first transfer cells complete; FTA total penalty independently accepted</small>
+          <span>Old Scores</span>
+          <strong>Retired</strong>
+          <small>90%+ style figures are historical contamination evidence</small>
         </article>
       </section>
 
       <section class="section" id="read-first">
         <div class="section-head">
           <h2>Read First</h2>
-          <p>The active docs surface is intentionally short. Older worksheets,
-            generated reports, and scratch artifacts live in Git history or
-            <code>C:\prethinker_tmp_archive</code>.</p>
+          <p>This is the short public path. Generated status pages are retained
+            as supporting evidence, not as a live work queue.</p>
         </div>
         <div class="grid">
           <article class="panel wide">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md">From Contaminated Scores to Governed Document Compilation</a></h3>
-            <p>The close-out technical note: what survived the measurement reset,
-              why older high scores are quarantined, and where closed predicate
-              packs currently work or abstain.</p>
+            <p>The main closeout note: the reset, the contamination mechanism,
+              the current result, and the non-claims.</p>
           </article>
           <article class="panel wide">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md">Closed Domain Predicate Packs Technical Note</a></h3>
-            <p>The phase-close result: closed, lens-scoped predicate packs
-              stabilize recurring official-document skeleton anatomy under
-              strict governance; open-ended substance remains a boundary.</p>
-          </article>
-          <article class="panel wide">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md">Current Research Headline</a></h3>
-            <p>The narrow June 2026 claim: closed, lens-scoped predicate domains
-              can stabilize recurring official-document anatomy under strict
-              governance; open-ended substance remains a boundary.</p>
-          </article>
-          <article class="panel wide">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md">Domain Pack Research Evidence</a></h3>
-            <p>The compact artifact ledger for the SEC, FDA, NTSB, and OSHA cells
-              that support the current research claim and its abstention
-              boundary.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md">Current Compile-Fact QA Status</a></h3>
-            <p>A generated manifest-backed score table with source/settings
-              provenance, redaction replay, typed-plan replay gates, and
-              repeated unexpected-fact precision diagnostics.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md">Query Grounding Status</a></h3>
-            <p>A generated status page for atom-library query planning over
-              retained typed artifacts. It separates query viability from
-              compile recall.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md">Domain Pack Status</a></h3>
-            <p>A generated registry and typed-fixture inventory for the active
-              closed predicate packs. It reads no source prose or QA outputs.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md">Domain Accountability Status</a></h3>
-            <p>A generated omission-contract coverage view for active closed
-              predicate packs. It surfaces undeclared omission patterns.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md">SEC Value-Axis Integrity Status</a></h3>
-            <p>A generated audit for the SEC item, exhibit, and treatment
-              typed-fact axis split. It reads typed fact strings only.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md">FDA Violation Alignment Status</a></h3>
-            <p>A generated expected-hold audit for current FDA
-              violation/category/citation boundaries. It records the hold
-              instead of treating it as a solved score.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md">Domain Predicate Proposal Status</a></h3>
-            <p>A generated review queue for candidate predicate surfaces before
-              they become claim-bearing domain-pack rows.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md">Pending External Work Orders</a></h3>
-            <p>A generated packet audit for the current source-only review queue.
-              It validates package structure, not source facts.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md">Legal Authority Verification Status</a></h3>
-            <p>A generated deterministic fixture audit for the generic legal
-              citation, quote, pin-cite, and abstention underlay.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md">Legal Document-Family Domain Pack Plan</a></h3>
-            <p>The research redirect from generic citation plumbing toward a
-              specific legal document-family predicate pack.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_CACHE_PROVENANCE_STATUS.md">CourtListener Cache Provenance Status</a></h3>
-            <p>An offline audit for retained legal resolver cache payloads and
-              provider metadata sidecars.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md">Candidate Oracle Review Status</a></h3>
-            <p>A generated audit for retained blind/source-only candidate review
-              packages before they influence proposal evidence.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md">Domain Predicate Schema Process</a></h3>
-            <p>How source samples, micro-fixtures, carrier contracts, value
-              domains, and omission ledgers become a customizable predicate
-              pack.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md">Active Research Lanes</a></h3>
-            <p>The current work map without historical worksheet sediment.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md">Compiled KB Artifact Package</a></h3>
-            <p>What a compiled document package contains and what query and QA
-              may use.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md">QA Instrument</a></h3>
-            <p>How governed QA uses planning and judging without turning the
-              judge into the thesis metric.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md">Legal Authority Verification Research Plan</a></h3>
-            <p>A candidate lane for deterministic citation, quote, and
-              pin-cite checks. It is not a legal-domain pack, legal-QA claim, or
-              product-readiness claim.</p>
+            <p>The bounded technical result: closed predicate packs can
+              stabilize recurring skeleton anatomy under hard gates.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md">Project State</a></h3>
-            <p>Compact snapshot of the repo, current instrument state, and
-              verification headline.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="instrument">
-        <div class="section-head">
-          <h2>Instrument</h2>
-          <p>Prethinker compiles source documents into governed KB packages,
-            then runs governed QA over admitted state and deterministic ledgers.</p>
-        </div>
-        <div class="grid">
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md">Compiled KB Artifact Package</a></h3>
-            <p>What the compiled document product contains and what Q&A may use.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md">QA Instrument</a></h3>
-            <p>Why QA is a governed semantic pass rather than a deterministic-only replay.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md">Semantic Lens Roster</a></h3>
-            <p>The current lens vocabulary and transfer discipline.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md">Overlay Architecture</a></h3>
-            <p>How ACH, timeline, and future review lenses read compiled evidence without mutating KB truth.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md">Legal Authority Verification Research Plan</a></h3>
-            <p>The proposed legal-authority ledger lane: resolve citations,
-              check metadata, quotes, and pin locality, and abstain on legal
-              proposition support unless independently reviewed.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md">Legal Document-Family Domain Pack Plan</a></h3>
-            <p>The next legal research lane: choose one document family and
-              test whether its recurring skeleton anatomy stabilizes as a
-              closed predicate pack.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md">Legal Authority Verification Status</a></h3>
-            <p>The current generated fixture audit for the legal authority
-              ledger: expected facts, forbidden traps, and false-verified count.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_CACHE_PROVENANCE_STATUS.md">CourtListener Cache Provenance Status</a></h3>
-            <p>The current generated resolver-cache audit: retained payloads,
-              provider sidecars, and blocking provenance errors.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md">Multi-Pass Semantic Compiler</a></h3>
-            <p>Semantic parallax, safe-surface accumulation, and rule-lens work.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md">Semantic IR Mapper Spec</a></h3>
-            <p>The deterministic mapper and admission contract.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="method">
-        <div class="section-head">
-          <h2>Method</h2>
-          <p>The project treats high scores as evidence only when the run shape,
-            cleanliness counters, and transfer caveats are visible.</p>
-        </div>
-        <div class="grid">
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md">Boundary Probe Method</a></h3>
-            <p>How fixtures are designed as pressure instruments rather than
-              random ingestion samples.</p>
+            <p>Compact current orientation for the repo after the phase close.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md">Domain Pack Research Evidence</a></h3>
-            <p>Family-by-family evidence, artifact roots, current boundaries,
-              and non-claims for the closed-domain transfer result.</p>
+            <p>Retained artifact ledger and family-by-family evidence.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md">Current Compile-Fact QA Status</a></h3>
-            <p>Generated support>=2, per-run exact, replay-gate, and provenance
-              summary for the standing compile-fact QA manifest, including
-              repeated unexpected-fact precision diagnostics.</p>
+            <p>Generated retained-cell status with replay gates and provenance.</p>
           </article>
+        </div>
+      </section>
+
+      <section class="section" id="supporting">
+        <div class="section-head">
+          <h2>Supporting Status</h2>
+          <p>These pages are useful for auditability. They are not the headline.</p>
+        </div>
+        <div class="grid">
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md">Domain Pack Status</a></h3>
-            <p>Generated inventory of active domain registries, lens scopes,
-              typed fixture oracles, and unassigned micro-fixtures.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/FIXTURE_BANK_DOMAIN_INVENTORY.md">Fixture Bank Domain Inventory</a></h3>
-            <p>Metadata-only map of retained real-world fixture families,
-              closed-profile selection coverage, and possible future domains.</p>
+            <p>Generated registry and typed-fixture inventory.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md">Domain Accountability Status</a></h3>
-            <p>Registry omission requirements, fixture coverage, and
-              fixture-only omission patterns without source-prose inspection.</p>
+            <p>Generated omission-contract coverage.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md">Query Grounding Status</a></h3>
+            <p>Atom-library query planning status over retained typed artifacts.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md">SEC Value-Axis Integrity Status</a></h3>
-            <p>Generated check that SEC item structure, item legal treatment,
-              and exhibit legal treatment remain separate typed axes.</p>
+            <p>Audit for the SEC item/exhibit/treatment axis split.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md">FDA Violation Alignment Status</a></h3>
-            <p>Expected-hold check for FDA violation/category/citation alignment
-              so the transfer_002 boundary remains visible and gated.</p>
+            <p>Expected-hold audit for FDA violation/category/citation boundaries.</p>
           </article>
           <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md">Domain Predicate Proposal Status</a></h3>
-            <p>Candidate predicate surfaces and validation status before any
-              proposed lane can become a promoted claim.</p>
-          </article>
-          <article class="panel">
-            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md">Domain Predicate Schema Process</a></h3>
-            <p>The method for turning a bounded document family into a closed,
-              lens-scoped predicate pack without reopening prose smuggling.</p>
+            <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md">Legal Authority Verification Status</a></h3>
+            <p>Deterministic citation/quote/pin underlay status; not a legal-domain pack.</p>
           </article>
         </div>
         <div class="callout">
-          <strong>Caveat kept visible:</strong> older high-score measurements
-          are not current public claims. Some were contaminated by prose
-          smuggling and judge-facing answer tokens. The current claim-bearing
-          result is the closed-domain transfer finding described in the
-          phase-close technical note.
+          <strong>Non-claim kept visible:</strong> Prethinker does not currently
+          claim broad legal hallucination solving, arbitrary-domain document
+          understanding, product readiness, or 90%+ general QA accuracy.
         </div>
       </section>
 
       <footer>
-        <p>Last updated: 2026-06-05. Source repository:
+        <p>Last updated: 2026-06-06. Source repository:
           <a href="https://github.com/dr3d/prethinker">github.com/dr3d/prethinker</a>.
-          This page is a compact current index; historical notes live in Git history or local archive.</p>
+          Historical notes live in Git history or local archive.</p>
       </footer>
     </div>
   </main>

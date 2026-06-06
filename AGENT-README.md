@@ -8,25 +8,20 @@ Read these in order before changing code:
 
 1. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 2. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-3. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
+3. [docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md)
 4. [docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
-5. [docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
-6. [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
-7. [docs/DOMAIN_PACK_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md)
-8. [docs/DOMAIN_ACCOUNTABILITY_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md)
-9. [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md)
-10. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
-11. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
-12. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
-13. [docs/QA_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
-14. [docs/OVERLAY_ARCHITECTURE.md](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
-15. [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
+5. [docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+6. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
 
 Treat worksheets, generated reports, prompt snapshots, and long run journals as
 archive material. Git history and `C:\prethinker_tmp_archive` preserve them; do
 not use them as day-one guidance unless the user names a specific artifact.
 
 ## Current Shape
+
+The repo is in research phase closeout. Do not continue broad "next blocker"
+work unless the user explicitly opens a new phase with one falsifiable question,
+a timebox, gates, and stop conditions.
 
 - `src/mcp_server.py` owns the canonical `process_utterance()` runtime.
 - `ui_gateway/` is the manual cockpit for demos, route telemetry, KB mutation,
@@ -58,9 +53,9 @@ not use them as day-one guidance unless the user names a specific artifact.
   release blockers; diagnostic holds are instrument signals. Do not silently
   relax the old headline, and do not treat every diagnostic hold as a release
   failure.
-- Current claim-bearing research question: can a closed, lens-scoped predicate
-  domain built from a small seed set transfer hard-clean to unlike messy
-  official documents in the same family under strict governance?
+- Phase-close research question: can a closed, lens-scoped predicate domain
+  built from a small seed set transfer hard-clean to unlike messy official
+  documents in the same family under strict governance?
 - Older `80.5%`, `92%+`, `95%`, `98%+`, and `99%` scorecards are historical
   contamination evidence, not current accuracy claims. Some were inflated by
   prose/source-record routing, question-shape routing, and judge-facing answer
@@ -94,6 +89,10 @@ order is created, keep it packetized and blind to model outputs.
 
 ACH remains overlay-only: it may propose and score evidence matrices, but it
 must not mutate KB facts, QA verdicts, or compile artifacts.
+
+The possible AI-citation-sanction/correction-order legal document-family pack is
+parked. Do not create sanction-order carrier contracts or profiles unless a new
+timeboxed phase is explicitly opened.
 
 Do not set cadence timers unless the user explicitly asks. The user prefers
 continuous autonomous progress within the current session and will interrupt

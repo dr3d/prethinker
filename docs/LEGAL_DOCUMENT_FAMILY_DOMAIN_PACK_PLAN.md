@@ -1,6 +1,13 @@
 # Legal Document-Family Domain Pack Plan
 
-This is the research redirect after the legal-authority verifier work.
+**Status: parked next-phase candidate, not current work.**
+
+This note is retained because it records a possible next falsifiable experiment.
+It is not part of the Mode A closeout claim, and it should not be read as an
+active legal-domain result.
+
+This was the research redirect considered after the legal-authority verifier
+work.
 
 The current `legal_authority_verification_v1` lane is useful plumbing, but it is
 not a legal domain pack. Its predicates are generic citation mechanics:

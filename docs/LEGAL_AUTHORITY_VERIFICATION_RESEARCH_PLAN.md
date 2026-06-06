@@ -1,5 +1,12 @@
 # Legal Authority Verification Research Plan
 
+**Status: parked underlay plan, not a current legal-domain pack.**
+
+This note records the deterministic citation/quote/pin verification lane and
+its abstention boundary. It is retained as supporting architecture history. It
+does not claim broad legal hallucination solving, legal proposition-support
+verification, or product readiness.
+
 Status: candidate next research lane, June 2026. This document is a plan, not a
 claim-bearing result.
 

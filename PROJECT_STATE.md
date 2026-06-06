@@ -2,55 +2,47 @@
 
 Last updated: 2026-06-06
 
-## One-Sentence Shape
+## Mode A Closeout
+
+This repository is being left in **research phase closeout** state.
 
 Prethinker is currently a research instrument for testing whether LLM-proposed,
 closed, lens-scoped predicate domains can compile messy official documents into
-auditable typed facts under strict deterministic governance.
+auditable typed facts under deterministic governance.
 
-## Current Center
-
-The active research question is:
+The phase is not a product sprint and not an open-ended blocker hunt. The
+current repo should answer one question for a reader:
 
 ```text
-Can a closed predicate domain, built from a small seed set, transfer hard-clean
-to unseen messy official documents in the same family under strict governance?
+What did this research phase actually establish, and what did it not establish?
 ```
 
-Current evidence says: yes for recurring official-document skeleton anatomy;
-not yet for open-ended substantive detail.
+## Phase Result
 
-The current front-door documents are:
+The positive result:
 
-- `docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md`
-- `docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md`
-- `docs/CURRENT_RESEARCH_HEADLINE.md`
-- `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
-- `docs/CURRENT_COMPILE_FACT_QA_STATUS.md`
-- `docs/QUERY_GROUNDING_STATUS.md`
-- `docs/DOMAIN_PACK_STATUS.md`
-- `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`
-- `docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md`
-- `docs/FDA_VIOLATION_ALIGNMENT_STATUS.md`
-- `docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md`
-- `docs/PENDING_EXTERNAL_WORK_ORDERS.md`
-- `docs/CANDIDATE_ORACLE_REVIEW_STATUS.md`
-- `docs/SOURCE_ORACLE_REVIEW_STATUS.md`
-- `docs/ACTIVE_RESEARCH_LANES.md`
-- `docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md`
-- `docs/PUBLIC_DOCS_GUIDE.md`
+```text
+Closed, lens-scoped predicate packs can stabilize recurring
+official-document skeleton anatomy under strict governance.
+```
 
-Older 80.5%, 92.33%, 95%, 98.5%, and 99% measurements remain historical
-calibration evidence only. Some were contaminated by prose-smuggling paths:
-source/display text, question-shape routing, and judge-facing answer tokens
-helped rows score exact without proving typed derivation. They are not current
-claim-bearing metrics unless a newer note explicitly re-gates them under the
-current hard-clean conditions.
+The boundary:
+
+```text
+Open-ended substance, causal findings, dense interpretation, unstable role
+semantics, and legal proposition support remain abstention or future-research
+boundaries unless a compact domain layer reproduces on unlike documents.
+```
+
+Older 80.5%, 92.33%, 95%, 98.5%, and 99%-looking measurements are historical
+contamination evidence only. Some were inflated by source/display prose routing,
+question-shape routing, model-prior completion, or judge-facing answer tokens.
+They are not current accuracy claims.
 
 ## Claim-Bearing Gates
 
 A domain-pack result is claim-bearing only when the named run satisfies the
-gates relevant to that result:
+relevant gates:
 
 - closed profile registry;
 - lens-scoped offered signatures;
@@ -61,7 +53,6 @@ gates relevant to that result:
 - atom-shape pass;
 - lens-scope pass;
 - carrier value-domain pass where applicable;
-- sign-clean audit pass for current code where applicable;
 - no source-record prose matching;
 - no query-text routing;
 - no fixture vocabulary;
@@ -71,624 +62,86 @@ Targeted replays are mechanism evidence, not transfer claims. Composed
 historical runs are diagnostic unless a fresh same-condition bundle reproduces
 them.
 
-## Current Evidence
+## Current Claim Surfaces
 
-```text
-Domain omission accountability
-  live negative-control sweep, local Qwen MoE, N=3/support>=2:
-    NTSB report-id omission wrapper lens:
-      expected omission 1 / 1, forbidden ntsb_report 0 / 1,
-      unexpected same-signature wrapper rows 3, atom/lens gates clean
-    OSHA inspection-id omission wrapper lens:
-      expected omission 1 / 1, forbidden osha_inspection 0 / 1,
-      unexpected same-signature establishment rows 2, atom/lens gates clean
-    SEC signature omission lens:
-      expected omission 1 / 1, forbidden sec_signatory 0 / 1,
-      unexpected same-signature rows 0, atom/lens gates clean
-  guard changes:
-    added typed-only NTSB report-omission contradiction guard
-    refined SEC signature omission guard so all-not-stated dummy signatory rows
-      lose to the registered omission while real signatory rows still beat
-      contradictory omissions
-  artifact root:
-    C:\prethinker_tmp_archive\omission_accountability_live_20260604
-  read:
-    omission accountability is now live-tested across SEC, OSHA, and NTSB
-    negative controls; the guards read typed facts only and do not interpret
-    source prose or query text
+Read these, in order:
 
-SEC Form 8-K skeleton pack
-  historical pre-axis-repair cells:
-    seed micro: 13 / 13
-    transfer_001: 13 / 13
-    transfer_002: 12 / 12
-    transfer_003: 12 / 12
-  current axis-clean schema:
-    `sec_filing_item/5.item_role` is structural only
-    `sec_filing_item_treatment/4` carries source-stated item legal treatment
-    `sec_exhibit/5.exhibit_role` is legal treatment only
-    Item 9.01 item-treatment misattachments are blocked by typed governance
-    exhibit-table-scope item-treatment rows and cover-page IXBRL treatment
-      inference are also blocked by typed governance
-  repaired transfer_003 Qwen MoE reruns:
-    R1: 12 / 13, 0 / 11 supported forbidden, clean axis/value/atom gates
-    R2 after treatment-contract tightening and typed Item 9.01 guard:
-      11 / 13, 0 / 10 supported forbidden, clean axis/value/atom gates
-    R3 pre-registered stability rerun:
-      12 / 13, 0 / 10 supported forbidden, clean atom/signature/lens/value-axis gates
-    R3 omission-accountability guard rescore:
-      12 / 13, 0 / 10 supported forbidden, unexpected same-signature facts
-      reduced from 2 to 0 by typed registry/contradiction guards
-    R4/R5 item-treatment seam diagnostics:
-      profile-clarity rerun: 12 / 13, 0 / 10 supported forbidden, clean
-      atom/lens/value-axis gates, but item-treatment support stayed below
-      threshold. SEC filing-id normalization now includes
-      `sec_filing_item_treatment/4`; this lets a valid admitted treatment row
-      survive typed atom-shape governance when it appears. Fresh rerun after
-      that seam fix: 11 / 13, 0 / 10 supported forbidden, clean gates.
-      Read this as a real typed-slot seam fix, not a support lift.
-    R6 fresh same-condition Qwen MoE refresh:
-      13 / 13, 0 / 10 supported forbidden, per-run exact 37 / 39
-      clean atom/lens/value-domain/value-axis gates, with one unexpected
-      `sec_filing_item_treatment/4` row at support=1 only
-      Read this as the favorable end of the current repaired-schema band, not
-      as a new fixed SEC number.
-    source-only typed reconciliation over the current transfer_003 root:
-      artifact:
-        C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604\sec8k-t003-item-treatment-filing-id-r2-20260604\reports\typed_reconcile_support_ge2_value.md
-      result:
-        11 reconciled facts, all support=3, 0 skipped, 0 conflicts
-        stable facts are filing wrapper, registrant, four identifiers
-        excluding telephone, two filing items, two exhibits, and signatory
-        item 2.02 treatment and telephone remain below support threshold
-  repaired breadth check over retained seed / transfer_001 / transfer_002:
-    seed: 13 / 13, 0 / 7 supported forbidden after exhibit/item axis
-      contract clarification, clean atom/lens gates
-    transfer_001: 5 / 13, 0 / 8 supported forbidden, clean atom/lens gates
-      after the current-mainline full-bundle negative retest replaced the
-      older favorable breadth root. A later imported source-only review
-      rejected 10 candidate variants. Follow-up source-scope and
-      no-truncation contract guidance clears the alias leakage, but a
-      same-condition repeat drops the current standing manifest cell to
-      8 / 13 support>=2 with 0 / 0 forbidden emissions at
-      support>=1 / support>=2 and 0 unexpected same-signature rows. The
-      no-truncation evidence band is now 8-11 / 13; exhibit, telephone, and
-      signatory support remain unstable boundaries.
-    transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
-      before the source-scope filing-id integrity guard; current standing
-      manifest support is now 10 / 12 under the stricter guard.
-  fenced event-substance probe:
-    `sec_material_event/6` is registered for experiments but not offered by the
-      promoted SEC skeleton profile
-    seed probe with a temporary event lens: 12 / 13 skeleton support, 0 / 6
-      supported forbidden, clean atom/lens gates; event-substance rows did not
-      reproduce at support>=2
-  read: SEC remains useful evidence that small closed skeleton packs transfer,
-    but the formal SEC methods-anchor claim is no longer the old 12/12 cell
-    or the later green 109/141 standing manifest.
-    Recent repaired transfer_003 roots now span 11-13 / 13 under the same local
-    Qwen MoE lane. The current honest boundary is favorable-draw risk,
-    exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
-    duplicate commission-file value, unstable item-treatment recall, and
-    ordinary MoE jitter. Bad SEC omission-accounting rows are now
-    blocked/dropped by typed guards; do not inflate the cell with prompt
-    polishing or a favorable same-condition draw.
-  latest SEC governance artifact:
-    C:\prethinker_tmp_archive\sec_axis_scope_guard_20260604
-    C:\prethinker_tmp_archive\sec_item_treatment_filing_id_20260604
-    C:\prethinker_tmp_archive\sec_t003_refresh_20260605
-    These guard/seam cleanups did not raise SEC support; they tightened the
-      axis cage and stopped valid companion rows from being lost to typed
-      filing-id normalization when emitted. The 2026-06-05 refresh is a
-      favorable same-condition point inside the observed SEC band.
-  current compile-fact QA precision detail:
-    docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
-    unexpected same-signature facts at support>=2 and any emitted forbidden
-    facts. The current standing manifest is green after importing
-    `sec_t001_source_review_20260605`, promoting the typed source-scope
-    filing-id guard, and adding SEC no-truncation contract guidance: overall
-    support is 110 / 141 at support>=2 and 304 / 423 per-run exact, with 0
-    prose-dependent exact rows, 0 unregistered exact typed plans, and 0 / 0
-    forbidden emissions at support>=1 / support>=2. SEC transfer_001 remains
-    bounded at 8 / 13 in the standing root, with an 8-11 / 13 retained band:
-    exhibit, telephone, and signatory support are still below the claim
-    threshold in the lower repeat. The typed source-scope filing-id guard is
-    promoted; a company-specific alias reducer was not added.
-    FDA transfer_002 remains 11 / 29 support>=2 with 0 / 8 supported forbidden
-    in the fresh full-lens current-pack retest. The prior 21 / 29
-    contract-only root is historical context, not the current full-lens recall
-    claim. The earlier false 501(a)(2)(A) insanitary-basis row is retained as
-    an integrity lesson, not a current claim blocker.
+1. [README](https://github.com/dr3d/prethinker/blob/main/README.md)
+2. [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md)
+3. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
+4. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
+5. [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md)
+6. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
 
-FDA warning-letter pack
-  older deterministic judged-QA v2 across transfer_001 and transfer_002:
-    137 / 159 exact = 86.16%
-    all 137 exact rows pass typed-plan replay and redaction replay
-    transfer_001: 78 / 78 exact across N=3
-    transfer_002: 59 / 81 exact across N=3, with 7 partial and 15 miss
-    support>=2 view:
-      transfer_001: 26 / 26
-      transfer_002: 20 / 27
-    status: retained as historical/pre-review compile-fact evidence; not the
-      current claim-bearing transfer_002 status after the source-only focused
-      review added two expected detail rows and one forbidden adulteration-basis
-      sentinel
-  standing transfer_002 current-pack status:
-    11 / 29 support>=2, 0 / 8 supported forbidden
-    read: clean but incomplete full-lens boundary cell. The prior 21 / 29
-      contract-only root remains historical context after explicit
-      adulteration-basis contract tightening removed the false 501(a)(2)(A)
-      insanitary-basis row; it is not the current full-lens recall claim
-  transfer_003 fresh current-pack local rerun:
-    19 / 26 support>=2, 0 / 10 supported forbidden
-    atom-shape / registered-signature / lens-scope blockers: 0
-    read: clean second boundary cell; the seven unsupported rows are
-      `fda_violation_detail/5` value/detail flesh
-  read: primary richer case study; skeleton/citation/regulatory boilerplate
-    transfer better than wrapper role semantics, context-dependent categories,
-    response/detail value flesh, and other substance lanes
-  proposal review: `fda_response_documentation_gap/5` blind review on
-    transfer_002 found 0 expected / 13 forbidden; stable candidate emissions
-    for violations 1, 2, and 3 are false positives
-  candidate review: `fda_response_assessment_item/6` now has retained
-    source-only candidate-review results for transfer_001, transfer_002, and
-    transfer_003 under `datasets\candidate_oracle_reviews`; do not cite
-    assessment-item support as a promoted claim until the carrier is promoted
-    through a fresh same-condition compile measurement.
-  scope note: v2 is oracle-shaped compile-fact QA, not evidence that messy
-    human query planning is solved
-  reproducibility note: `scripts/build_compile_fact_judged_qa.py` now
-    regenerates this deterministic compile-fact QA package locally from
-    `expected_facts.pl` and compile JSON typed facts
+Generated status pages such as domain-pack status, accountability status,
+pending work orders, legal-authority verifier status, and cache provenance are
+retained because they are checked by the governance runner. They support the
+closeout record; they are not a standing instruction to continue expanding the
+project.
 
-NTSB investigation pack
-  seed micro: 13 / 13
-  first unlike transfer, current scoped injury-count manifest: 22 / 25
-  deterministic compile-fact QA over first unlike transfer:
-    60 / 75 per-run exact
-    22 / 25 support>=2
-    all 60 exact rows pass typed-plan replay and redaction replay
-  forbidden support: 0 / 15
-  read: corroborating boundary evidence; wrapper, chronology, vehicles, and
-    conditions transfer more cleanly than findings/probable-cause substance;
-    scoped injury-count partitions now clear, with one timeline sequence-role
-    row still unstable
+## Evidence Summary
 
-OSHA accident/inspection pack
-  seed micro: 21 / 21 support>=2 after high-arity registry intake fix and
-    current related-activity blank-flag contract
-  first unlike transfer: 15 / 15 support>=2
-  forbidden support: 0 in both measured cells
-  new transfer diagnostics:
-    transfer_002 long violation table: 18 / 53 support>=2, 0 / 8 forbidden
-    transfer_003 mixed news-release/prior-inspection fixture: 2 / 21 support>=2
-      with 0 / 10 supported forbidden after the typed accident-omission
-      contradiction guard
-  governance: registered signatures, atom-shape, and lens-scope clean
-  read: fourth-family corroboration for skeleton/table anatomy; accident,
-    employee injury, violation counts, penalties, item, and status rows transfer
-    better than long-table enumeration and mixed-source section attachment. The
-    prior repeated FTA total-penalty extra was adjudicated as source-backed and
-    is now in the seed oracle; the retained blind candidate review
-    `datasets/candidate_oracle_reviews/osha_fta_total_penalty_blind_review_20260605`
-    independently accepts the row. The
-    transfer_003 guard is cleanup only: support
-    stays 2 / 21 while the current news-release accident/injury rows are
-    blocked from contaminating the prior inspection detail.
+- **SEC Form 8-K skeletons:** useful closed-language skeleton evidence; current
+  cells are boundary-aware and lower than old favorable runs. Dense model
+  substitutions stayed inside the governed language but landed lower on the
+  same role-semantics rows, so compile recall is capability-sensitive.
+- **FDA warning letters:** richest case study; skeleton and recurring
+  regulatory anatomy transfer better than wrapper role semantics,
+  context-dependent categories, response/detail value flesh, and other
+  substance lanes.
+- **NTSB investigations:** corroborates the same skeleton-vs-substance boundary.
+  Wrappers, chronology, vehicles, and conditions transfer more cleanly than
+  findings/probable-cause substance.
+- **OSHA accident/inspection records:** corroborating skeleton probe from
+  retained fixtures, not a broad OSHA product claim.
+- **Legal authority verification:** deterministic citation/metadata/quote/pin
+  plumbing with `false_verified=0` in the retained fixture audit. This is an
+  underlay, not a specific legal-domain pack or proposition-support verifier.
+- **ACH overlay:** exploratory overlay only. It preserves the
+  model-proposes/code-decides shape, but existing probes do not validate
+  contested-case discrimination or pivotal-evidence sensitivity.
 
-State-AG settlement/AOD seed
-  fixture:
-    state_ag_settlement_aod_v1
-  profile:
-    datasets/domain_profiles/state_ag_settlement_v1/ontology_registry.json
-  retained seed artifact root:
-    C:\prethinker_tmp_archive\state_ag_settlement_seed_20260604\state-ag-seed-all-lenses-r2-20260604
-  current fresh local Qwen MoE all-lens seed rerun:
-    C:\prethinker_tmp_archive\state_ag_current_rerun_20260604\state-ag-seed-current-rerun-r1-20260604
-    17 / 27 support>=2
-    0 / 9 supported forbidden
-    57 unexpected same-signature facts
-    registered-signature / atom-shape / lens-scope gates clean
-    carrier value-domain audit clean: 0 violations across 134 checked slots
-  read:
-    fifth-domain process probe only, not transfer evidence. Wrapper,
-    contacts, several chronology rows, and several obligation rows stabilize.
-    Citation subsection specificity, event-subject naming,
-    counsel/registered-agent attachment, monetary payment support, and likely
-    obligation-oracle design remain boundaries. The overproduction is currently
-    inside the closed value domains, not an atom-shape or unregistered-language
-    leak. A regenerated unexpected-bucket report shows all 57 unexpected
-    same-signature rows at support=1 only; no unexpected State-AG row currently
-    survives the support>=2 claim threshold.
-  source-only unlike transfer intake:
-    t002 fixture source:
-      datasets/real_world_transfer/fresh_ugly_public_20260528_01/state_ag_settlement_ugly_002/source.md
-    retained artifact root:
-      C:\prethinker_tmp_archive\state_ag_t002_source_only_n3_20260604\state-ag-t002-source-only-intake-n3-r1-20260604
-    run:
-      local Qwen MoE, N=3, skip-score, same closed state-AG registry
-      union atom audit: 54 typed facts, 5 signatures, 100% registered,
-        atom-shape/lens-scope clean
-      carrier value-domain audit: 0 violations across 68 checked slots
-      value-mode typed reconcile after state-AG reconcile harness coverage:
-        7 support>=2 facts, 0 conflicts, 0 skipped
-        stable facts are 5 authority-citation rows and 2 contact-channel rows
-    read:
-      useful pre-oracle transfer-intake signal, not QA/expected-fact evidence.
-      The pack transfers authority/contact anatomy cleanly on the unlike
-      Equinox AOD, while wrapper party, obligation, chronology, monetary, and
-      signature support are not stable enough to claim without an independent
-      transfer oracle and likely pack work.
-    t003 fixture source:
-      datasets/real_world_transfer/fresh_ugly_public_20260529_01/state_ag_settlement_ugly_003/source.md
-    retained artifact root:
-      C:\prethinker_tmp_archive\state_ag_t003_source_only_n3_20260604\state-ag-t003-source-only-intake-n3-r1-20260604
-    run:
-      local Qwen MoE, N=3, skip-score, same closed state-AG registry
-      union atom audit: 103 typed facts, 8 signatures, 100% registered,
-        atom-shape/lens-scope clean
-      carrier value-domain audit: 0 violations across 134 checked slots
-      value-mode typed reconcile:
-        24 support>=2 facts, 0 conflicts, 0 skipped
-        stable layers include instrument wrapper, authority citations,
-        contacts, one effective-date event, parties, signatures, and a
-        repeated obligation sequence
-    read:
-      second useful source-only intake and notably stronger than t002, but
-      still not a scored transfer claim. It suggests the State-AG pack can
-      stabilize richer settlement/AOD skeleton on some unlike documents while
-      source family shape and oracle design remain unresolved.
-    t001 fixture source:
-      datasets/real_world_transfer/fresh_ugly_public_20260526_01/state_ag_ugly_001/source.md
-    retained artifact root:
-      C:\prethinker_tmp_archive\state_ag_t001_source_only_n3_20260604\state-ag-t001-source-only-intake-n3-r1-20260604
-    run:
-      local Qwen MoE, N=3, skip-score, same closed state-AG registry
-      union atom audit: 36 typed facts, 5 signatures, 100% registered,
-        atom-shape/lens-scope clean
-      carrier value-domain audit: 0 violations across 39 checked slots
-      value-mode typed reconcile:
-        4 support>=2 facts, 0 conflicts, 0 skipped
-        stable facts are all authority-citation rows
-    read:
-      broader consent-order/judgment source is governance-clean but much
-      thinner under this AOD/settlement pack. It is boundary evidence: the
-      current State-AG pack transfers authority citations across this shape,
-      but wrapper, parties, obligations, contacts, signatures, and payments
-      are unstable without a more specific consent-judgment layer or oracle.
-  harness note:
-    scripts\run_domain_lens_bundle.py now has --reconcile-unions for future
-    source-only intakes. It runs typed value-mode reconciliation across union
-    artifacts without reading source prose, QA, or oracle answers.
-    scripts\reconcile_typed_micro_compiles.py now loads allowed signatures
-    from closed domain registries instead of requiring each domain predicate
-    to be hand-added to a script allowlist; SEC and State-AG still have narrow
-    typed value-key normalization for known document-id aliases.
+## Explicit Non-Claims
 
-Fixture-bank / next-domain inventory
-  generated status:
-    docs\FIXTURE_BANK_DOMAIN_INVENTORY.md
-  current read:
-    88 retained real-world metadata fixtures, 52 metadata families, 5 closed
-    profiles, 7 unprofiled/profile-unrelated multi-fixture families, of which
-    3 are QA-bearing. This is a domain-selection map only; it reads metadata
-    and profile selection paths, not source prose, QA, oracle answers, or judge
-    outputs.
-  PUC pre-registry proposal:
-    datasets\domain_predicate_proposals\puc_order_wrapper_v1.json
-    status: draft
-    candidate signature: puc_order/7
-    evidence: two local Qwen MoE profile-only PUC bootstraps archived at
-      C:\prethinker_tmp_archive\puc_domain_bootstrap_20260604
-    read: the two PUC sources agree on wrapper/docket/order/procedure anatomy
-      but drift in candidate predicate names, so PUC should proceed through
-      closed carrier/oracle review rather than open profile induction.
-    retained source oracle:
-      datasets\source_oracle_reviews\puc_order_wrapper_v1_puc_order_wrapper_oracle_review_20260604
-    proposal-status traceability:
-      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this retained
-      source-only oracle review directly in the proposal table.
-    next step: if pursued, register the carrier and run same-condition compile
-      measurement; do not request another oracle packet for the wrapper.
-  Procurement / GAO bid-protest pre-registry proposal:
-    datasets\domain_predicate_proposals\procurement_gao_decision_wrapper_v1.json
-    status: draft
-    candidate signature: gao_bid_protest_decision/7
-    evidence: two local Qwen MoE profile-only procurement bootstraps archived
-      at C:\prethinker_tmp_archive\procurement_domain_bootstrap_20260605
-    read: both retained GAO bid-protest decisions expose recurring wrapper,
-      docket, decision-date, procurement, party/procedural, protest-ground,
-      evaluation-factor, and citation anatomy. The first bootstrap drifted on
-      protest-ground/finding surfaces and the second flagged timeliness
-      slot-loss, so only the wrapper carrier is drafted; merits/finding lanes
-      stay out of scope.
-    retained source oracle:
-      datasets\source_oracle_reviews\procurement_gao_decision_wrapper_v1_procurement_gao_decision_wrapper_oracle_review_20260605
-    proposal-status traceability:
-      docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md now surfaces this retained
-      source-only oracle review directly in the proposal table.
-    next step: if pursued, register the carrier and run same-condition compile
-      measurement; do not request another oracle packet for the wrapper.
-  FTC public-order pre-registry negative:
-    artifact root:
-      C:\prethinker_tmp_archive\ftc_domain_bootstrap_20260605
-    basis:
-      two retained ACH-stress public-order fixtures, one FTC decision/order and
-      one FTC administrative complaint, both source-only profile bootstraps
-      under local Qwen MoE
-    result:
-      t001: 13 candidate predicates, 37 admitted facts, 0 skipped
-      t002: 17 candidate predicates, 53 admitted facts, 8 skipped
-      predicate-overlap Jaccard: 2 / 26 = 0.077
-      atom-shape audit: fail, 15 blockers (numeric-leading file id and
-        prose-shaped definition atoms)
-    read:
-      do not package this pair as a closed FTC public-order domain yet. It is a
-      useful negative showing that same agency/order-ish surface labels are not
-      enough; the retained pair mixes remedy-order anatomy and data-security
-      complaint anatomy, and the open bootstrap drifts into substance/detail
-      predicates rather than a compact shared skeleton.
-  active external work-order packet audit:
-    docs\PENDING_EXTERNAL_WORK_ORDERS.md
-    status: pass
-    tracked coverage: 0 proposal-declared pending work-order zips
-    local tmp preflight:
-      `python scripts\audit_pending_external_work_orders.py --include-tmp-zips`
-      currently reports 1 standalone tmp work order for
-      `sec_form_8k_skeleton_transfer_001`
-    blocking errors: 0
-    warnings: 0
-    answer-leak policy:
-      queued pending packets fail if they include filled oracle files,
-      judged-QA manifests, model outputs, compile/run artifacts, or literal
-      fact examples inside oracle templates.
-  retained candidate-oracle review audit:
-    docs\CANDIDATE_ORACLE_REVIEW_STATUS.md
-    current retained reviews: 9
-    blocking errors: 0
-    warnings: 14
-    scope: validates blind/source-only metadata and candidate
-      expected/forbidden fact-file shape only, review folder identity, and
-      repo-relative source-file references; it does not read source prose or
-      decide whether the review facts are true.
-    importer:
-      scripts\import_candidate_oracle_review.py stages returned review zips,
-      copies only manifest / candidate expected facts / candidate forbidden
-      facts / README / adjudication notes, drops source and work-order payloads,
-      audits the staged review, and refuses overwrites unless explicitly
-      requested. Manifestless standalone returns, such as the SEC transfer_001
-      source-review packet, can be imported with explicit `--review-id` and
-      `--fixture-id`; the importer splits filled expected/forbidden templates
-      by predicate into ordinary single-predicate candidate-review folders.
-  retained source-oracle review audit:
-    docs\SOURCE_ORACLE_REVIEW_STATUS.md
-    current retained reviews: 2, covering 4 source-only expected/forbidden
-      outputs for draft PUC and procurement wrapper proposals
-    blocking errors: 0
-    warnings: 12
-
-Atom-library query grounding
-  strict path: source-record predicates/header inventories are filtered out,
-    source-record proposals are blocked, and relaxed-constant fallback is
-    disabled; constants absent from compiled atom slots are blocked
-  SEC transfer_003 local smoke: 5 / 5 judged exact after mapper variable
-    preservation; all five exact rows pass typed-plan replay and redacted
-    rejudge, with 0 compatibility/runtime/write rows
-  first pre-registered query-variance cell:
-    Qwen local temp 0 over the same five rows, N=5:
-      23 / 25 product exact; 23 / 25 typed-plan replay; 23 / 25 redacted
-      rejudge; 0 prose-dependent exact rows
-    Qwen temp sweep:
-      temp 0.2: 13 / 15 product exact, but redaction rejudge blocked one
-        normalized-name row, leaving 12 / 15 thesis exact
-      temp 0.5: 13 / 15 product exact and 13 / 15 redacted rejudge
-    Gemma 4 12B local dense control, temp 0, N=5:
-      25 / 25 product exact and typed-plan replay; redaction rejudge marked
-      24 / 25 thesis exact because one normalized-name row was judged partial
-    Gemma 4 12B local Q4_K_M control, temp 0, N=5, random local seed:
-      25 / 25 product exact; 25 / 25 typed-plan replay; 25 / 25 redacted
-      rejudge; 0 prose-dependent exact rows; artifact metadata captured
-      quantization, architecture, and loaded context
-  read: the query-over-atoms path is real but still a variance-measured query
-    lane; Gemma Q4 is a useful query-control candidate, not a promoted model
-    switch
-  compile-substitution control on SEC transfer_003:
-    Gemma 4 12B local Q4_K_M, temp 0, N=3, same SEC closed registry:
-      two same-condition roots both landed 10 / 12 support>=2; 0 / 10
-      supported forbidden; registered signatures, atom-shape, and lens-scope
-      all clean; unexpected same-signature facts were 7 in the early root and
-      6 in the retained r1 root
-    Qwen 3.6 27B local dense Q4_K_M, temp 0, N=3, same SEC closed registry:
-      10 / 12 support>=2; 0 / 10 supported forbidden; registered signatures,
-      atom-shape, and lens-scope all clean; 3 unexpected same-signature facts
-    Qwen reference for the same cell:
-      12 / 12 support>=2; 0 / 10 supported forbidden; 1 unexpected fact
-      (historical pre-axis-repair reference; current repaired transfer_003
-      reruns span 11-13 / 13)
-    read: dense controls can stay inside the closed SEC language, but they did
-      not reproduce the SEC compile cell cleanly. The model-swap robustness
-      claim is therefore not established; dirty rows are SEC role/key semantics
-      and one Qwen 27B accountability inconsistency, not a governance leak.
-  mapper finding: the strict path exposed that uppercase query variables emitted
-    by the LLM were being atomized into lowercase constants; the mapper now
-    preserves uppercase slot-label query variables while still atomizing ordinary
-    proper-name constants
-  read: query-over-atoms is governed, but messy human query planning is not yet
-    solved; the next test needs a larger and unlike query set
-```
-
-The publishable technical shape is narrow:
-
-```text
-Closed, lens-scoped predicate domains can stabilize recurring official-document
-anatomy under strict governance. Open-ended substance remains an abstention or
-lower-tier boundary unless a compact domain layer reproduces on unlike
-documents.
-```
-
-This does not support claims of 90%+ general QA accuracy, arbitrary-domain
-document understanding, product readiness, or self-serve schema induction.
-
-## Active Architecture
-
-```text
-source document family
-  -> closed domain profile
-  -> lens-scoped offered predicate signatures
-  -> LLM compile proposals
-  -> deterministic contract / signature / value-domain admission
-  -> typed artifact bundle
-  -> deterministic replay and governance gates
-  -> claim-bearing rows only if they survive hard-clean checks
-```
-
-The important boundary is source meaning versus durable truth:
-
-- LLMs may judge source meaning and propose typed facts inside a closed
-  domain/lens scope.
-- The LLM may not freely define the instrument language after the domain pack is
-  closed.
-- Deterministic code may normalize and replay typed atoms.
-- Deterministic code may not parse source prose, display text, or query text for
-  semantic routing.
-- Query and compile must meet on the same governed atoms.
-- Predicate sets are offered as a function of lens, not as one global bag
-  available to every compile pass.
-- Lens-bundle manifests now expose `lens_scopes[].offered_signatures`; the
-  `profile_registry_lens_plan` setting only describes optional compile-plan
-  pass behavior and does not mean the source compile received a global
-  predicate bag.
-
-## Current Research Pressure
-
-The next useful work is not another row-grinding climb. It is to preserve and
-explain the current falsifiable result:
-
-- keep `docs/DOMAIN_PACK_STATUS.md` regenerated from
-  `scripts/summarize_domain_pack_status.py` so domain/predicate/fixture counts
-  are visible without worksheet archaeology;
-- keep `docs/DOMAIN_ACCOUNTABILITY_STATUS.md` regenerated from
-  `scripts/summarize_domain_accountability_status.py` so omission requirements,
-  fixture coverage, and fixture-only omission patterns are visible;
-- treat SEC as a boundary-aware skeleton case study unless one more
-  pre-registered repaired-schema rerun materially tightens the current
-  seed/transfer boundary;
-- keep FDA as the richer case study with both positive transfer and boundary
-  evidence;
-- keep NTSB as corroborating boundary evidence, not as a new grind target;
-- keep stale-number re-gating visible as a research finding;
-- run answer-judge null controls and oracle-isolation checks before any QA
-  metric becomes claim-bearing;
-- choose any next domain-pack experiment only if it answers a named research
-  gap.
-
-## Non-Claims
-
-The repo should not currently claim:
+This repo does not currently claim:
 
 - 90%+ general Prethinker QA accuracy;
-- arbitrary-document understanding;
+- arbitrary-domain document understanding;
+- legal proposition-support verification;
+- legal hallucination solving beyond deterministic citation/quote/pin plumbing;
+- self-serve predicate-schema induction;
 - product readiness;
-- broad FDA warning-letter completion;
-- a promoted full NTSB pack;
-- self-serve schema induction;
-- that a targeted replay is a transfer claim;
-- that a composed historical run is equivalent to a fresh same-condition
-  bundle;
-- that judge exactness alone is a claim-bearing score.
+- model-independent compile recall;
+- that LLM-judged exact-rate is claim-bearing without null controls.
 
-## Operating Notes
+## Parked Possible Next Phase
 
-- OpenRouter remains the main hosted measurement lane when broad runs are
-  necessary, but provider/model/settings metadata must be recorded.
-- Local LM Studio remains useful for small probes, package/API development, and
-  local-domain experiments when speed and reproducibility are adequate.
-- Provider/backend, quantization, context, routing, and prompt packing are
-  measurement conditions; see `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
-- The next model/runtime variance excursion is pre-registered in
-  `docs/MODEL_VARIANCE_PRE_REGISTRATION_20260604.md`; it must report all Qwen,
-  Gemma, seed, and temperature cells rather than keeping the best result.
-- `PRETHINKER_LLM_SEED`, when supplied, is now recorded in compile
-  `model_serving_path.decoding`; a recorded seed is a reproducibility surface,
-  not proof that historical and fresh runs are interchangeable.
-- Atom-library query grounding is strict: planner payloads are filtered to
-  emitted typed atoms, and source-record fallback execution is blocked even if
-  the separate sign-clean flag was not supplied.
-- Durable fixtures belong under `datasets/`.
-- Temporary run artifacts may live under `tmp/`; old useful run artifacts can
-  be moved to `C:\prethinker_tmp_archive`.
-- Old worksheets should not become public front-door state. Active worksheets
-  should stay run-scoped and should retire to archive/history once the claim is
-  summarized in a current note.
+If work resumes, it should start from a pre-registered falsifiable question, not
+from "next blockers." The narrow candidate discussed but not started as a
+claim-bearing phase is:
+
+```text
+Can an AI-citation-sanction/correction-order document family be compiled as a
+closed predicate pack beyond generic citation checking?
+```
+
+That is parked. No uncommitted sanction-order predicate pack should be treated
+as part of this closeout state.
 
 ## Verification Commands
 
-The compile-fact manifest source audit now replays retained bundle atom/lens
-and carrier value-domain gates from the archived compile artifacts as well as
-checking run provenance, union model/settings metadata, and lens-compile
-model/settings comparability: a manifested claim cell fails if its retained
-lens or union artifacts contain nonzero atom-shape, unregistered-fact,
-lens-scope, or closed-slot value-domain blockers, or if hidden lens compiles
-mix incompatible inference settings behind clean union metadata.
+```powershell
+python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
+python scripts\audit_historical_score_claims.py
+python scripts\audit_research_artifact_paths.py
+python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
+python -m pytest -q
+```
 
-The pending external work-order audit now also blocks answer-leak entries in
-queued review packets: filled oracle files, judged-QA manifests, model outputs,
-and compile/run artifacts are not allowed in pending source-only packets.
-Template files and focused candidate-review targets are allowed, with focused
-candidate packets labeled as not fully blind. Template files are also scanned
-for literal fact examples so target-specific answers cannot hide in comments
-under a safe filename.
-
-Current full-suite result on 2026-06-05:
+Latest full-suite pass for this public-doc closeout:
 
 ```text
-2569 passed, 59 skipped, 9 xfailed, 2 subtests passed
+2674 passed, 59 skipped, 9 xfailed, 2 subtests passed
 ```
 
-The strict xfails are legacy MCP/QA selector expectations from before the
-sign-clean reset. They are intentionally not claim-bearing; if one XPASSes,
-pytest fails and forces review.
-
-Common local checks:
-
-```powershell
-$env:PYTHONPATH='.'
-pytest -q
-python scripts\run_current_research_governance.py --out-root tmp\current_research_governance
-python scripts\validate_domain_predicate_schema.py --root datasets\domain_profiles
-python scripts\build_compile_fact_judged_qa.py --help
-python scripts\run_compile_fact_judged_qa_manifest.py --out-root tmp\compile_fact_qa_manifest_run
-python scripts\audit_compile_fact_qa_manifest_sources.py --out-json tmp\compile_fact_manifest_sources.json --out-md tmp\compile_fact_manifest_sources.md
-python scripts\audit_reference_judge_null_control_reports.py --out-json tmp\reference_judge_null_control_reports.json --out-md tmp\reference_judge_null_control_reports.md
-python scripts\summarize_current_compile_fact_qa_status.py --manifest-run tmp\compile_fact_qa_manifest_run\summary.json --source-audit tmp\compile_fact_manifest_sources.json --out-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md --out-json tmp\current_compile_fact_qa_status.json --expect-md docs\CURRENT_COMPILE_FACT_QA_STATUS.md
-python scripts\summarize_query_grounding_status.py --out-json tmp\query_grounding_status.json --out-md docs\QUERY_GROUNDING_STATUS.md --expect-md docs\QUERY_GROUNDING_STATUS.md
-python scripts\audit_research_artifact_paths.py
-python scripts\audit_historical_score_claims.py
-python scripts\summarize_domain_pack_status.py --out-md docs\DOMAIN_PACK_STATUS.md --out-json tmp\domain_pack_status_current.json --expect-md docs\DOMAIN_PACK_STATUS.md
-python scripts\summarize_domain_accountability_status.py --out-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md --out-json tmp\domain_accountability_status_current.json --expect-md docs\DOMAIN_ACCOUNTABILITY_STATUS.md
-python scripts\summarize_fixture_bank_domains.py --out-md docs\FIXTURE_BANK_DOMAIN_INVENTORY.md --out-json tmp\fixture_bank_domain_inventory.json --expect-md docs\FIXTURE_BANK_DOMAIN_INVENTORY.md
-python scripts\validate_domain_predicate_proposals.py --out-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md --out-json tmp\domain_predicate_proposal_status.json --expect-md docs\DOMAIN_PREDICATE_PROPOSAL_STATUS.md
-python scripts\audit_pending_external_work_orders.py --include-tmp-zips --out-json tmp\pending_external_work_orders.json --out-md docs\PENDING_EXTERNAL_WORK_ORDERS.md --expect-md docs\PENDING_EXTERNAL_WORK_ORDERS.md
-python scripts\audit_source_oracle_reviews.py --out-json tmp\source_oracle_reviews.json --out-md docs\SOURCE_ORACLE_REVIEW_STATUS.md --expect-md docs\SOURCE_ORACLE_REVIEW_STATUS.md
-```
-
-The governance command should pass without `--exit-zero` before current public
-docs are treated as synchronized. Generated roots under `tmp\` should be
-archived or removed after review.
-
-Before a public/docs cleanup commit, also run stale-claim greps over
-`README.md`, `PROJECT_STATE.md`, `docs/*.md`, and `docs/index.html`.
-
-## Next Decision
-
-This phase is close enough to land as a technical note. The next decision is
-whether to:
-
-1. stop and publish the narrow domain-pack transfer finding as the current
-   research milestone;
-2. run one bounded follow-up that strengthens a missing cell in the note;
-3. select a new document family only if it tests a named gap in the closed-pack
-   thesis rather than chasing a higher-looking score.
-
-If new research continues, it should start from the phase-close note and the
-claim-bearing gates above, not from historical QA-score targets.
+Rerun the full suite after any public-claim or governance change.

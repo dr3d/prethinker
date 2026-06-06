@@ -1,103 +1,64 @@
 # Prethinker Docs
 
-![Semantic Lenses Plain Guide](assets/semantic-lenses-plain-guide.png)
+This directory contains the current public documentation and generated
+governance status pages for Prethinker.
 
-This directory contains the current public documentation for Prethinker.
-
-Prethinker is a governed semantic-intake workbench: a model proposes a
-structured semantic workspace, deterministic admission decides what becomes
-durable Prolog state, and the UI/trace layers show the decision path.
-
-Current status: the project is in a research-first domain-pack transfer phase.
-Older 90%+ scorecards are historical calibration evidence, not current public
-claims. Some were contaminated by prose-smuggling paths that let source/display
-text, question-shape routing, or judge-facing answer tokens lift exact-rate
-without proving typed derivation. The close-out research note is
-[From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md).
-The current claim-bearing question is documented in
-[Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
-and
-[Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md).
+**Status: research phase closeout, June 2026.** Older worksheets, generated
+run dumps, prompt snapshots, and stale product notes should stay in Git history
+or the local archive. This directory should explain what the project has
+actually established after the measurement reset.
 
 ## Start Here
 
-Use this short path if you are new:
-
-1. [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md) - close-out research note and measurement-reset lesson.
-2. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
-3. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - compact research claim and evidence snapshot.
+1. [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md) - the main closeout note.
+2. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - the bounded technical result and non-claims.
+3. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current orientation.
 4. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - artifact ledger and family-by-family evidence.
-5. [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with provenance, replay gates, and repeated unexpected-fact precision diagnostics.
-6. [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md) - generated status for atom-library query planning over retained typed artifacts.
-7. [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
-8. [Domain Accountability Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
-9. [SEC Value-Axis Integrity Status](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated audit for the SEC item/exhibit/treatment axis split.
-10. [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
-11. [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
-12. [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for the current source-only review queue.
-13. [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the generic legal citation/quote/pin underlay.
-14. [Legal Document-Family Domain Pack Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md) - redirect from generic citation plumbing toward a specific legal document-family predicate pack.
-15. [CourtListener Cache Provenance Status](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_CACHE_PROVENANCE_STATUS.md) - generated offline audit for retained legal resolver cache payloads and provider metadata.
-16. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
-17. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
-18. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
-19. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
-20. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
-21. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
-22. [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future review lenses read evidence without mutating the KB.
-23. [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate lane for deterministic authority, quote, and pin-cite verification; not a legal-domain pack or legal-QA claim.
-24. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - doctrine for designing fixtures as boundary probes rather than random ingestion.
-25. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
-26. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
+5. [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed status for retained cells.
+6. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - short reading map.
 
-Then go deeper:
+## Current Result
 
-- [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - what the deterministic admission layer accepts, skips, blocks, projects, or clarifies.
-- [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed as boundary probes without fixture-vocabulary leakage.
-- [Compiling Language](https://github.com/dr3d/prethinker/blob/main/docs/COMPILING_LANGUAGE.md) - visitor-friendly mental model for language as a compiled source.
-- [Roadmap](https://github.com/dr3d/prethinker/blob/main/ROADMAP.md) - secondary planning note; current truth stays in Project State and the headline.
+```text
+Closed, lens-scoped predicate packs can stabilize recurring
+official-document skeleton anatomy under strict governance.
+```
 
-## Current Research Lanes
+This does not claim broad document understanding, product readiness, legal
+proposition-support verification, self-serve schema induction, or 90%+ general
+QA accuracy. 90%+ general QA accuracy is not a claim.
 
-- [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
-- [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md)
-- [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
-- [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
-- [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
-- [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md)
-- [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md)
+## Supporting Governance Pages
+
+The following pages are retained because the governance runner regenerates or
+checks them. They support the closeout record; they are not an active work
+queue.
+
 - [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md)
 - [Domain Accountability Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md)
+- [Domain Pack Variance Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_VARIANCE_STATUS.md)
+- [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md)
 - [SEC Value-Axis Integrity Status](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md)
 - [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md)
 - [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md)
 - [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md)
-- [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md)
-- [Legal Document-Family Domain Pack Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md)
-- [CourtListener Cache Provenance Status](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_CACHE_PROVENANCE_STATUS.md)
 - [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md)
 - [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md)
-- [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md)
+- [CourtListener Cache Provenance Status](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_CACHE_PROVENANCE_STATUS.md)
+
+## Method And Architecture
+
+- [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
-- [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
+- [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+- [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
-- [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md)
-- [Legal Document-Family Domain Pack Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md)
-- [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 
-## Domain Notes
+## Parked Notes
 
-- [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
-
-## Demo And UI
-
-- [UI Gateway README](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
-
-## History
-
-Older parser-lane notes, generated run reports, dated handoffs, retired
-lab-automation plans, publishing plans, public-benchmarking plans, and stale
-experiment reports are intentionally not kept in this front-door docs set. Git
-history preserves the trail; this directory should describe the project as it
-works now.
+The legal authority verifier, ACH overlay, and legal document-family pack plan
+are parked research notes unless a new phase is explicitly opened. They should
+not be read as current product claims or as proof of broad legal hallucination
+solving.

@@ -6,7 +6,7 @@ This is the visitor-friendly mental model. Current measurements and non-claims
 live in
 [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
 and
-[Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md).
+[From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md).
 
 How Prethinker treats ordinary English as compilable input and turns it into a
 queryable, auditable knowledge program.

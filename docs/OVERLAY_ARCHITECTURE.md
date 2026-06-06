@@ -112,7 +112,7 @@ preservation and admission. Overlays can then make specialized review modes
 legible to people who already work with evidence matrices, timelines, coverage
 gaps, contradictions, obligations, and source confidence.
 
-This keeps the market-facing story broad while keeping the instrument narrow:
+This keeps any future-facing story broad while keeping the instrument narrow:
 
 ```text
 compile messy official documents into auditable evidence;

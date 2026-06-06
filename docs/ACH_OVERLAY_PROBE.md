@@ -1,5 +1,11 @@
 # ACH Overlay Probe
 
+**Status: parked exploratory overlay, not a current claim-bearing lane.**
+
+This note is retained as a disciplined overlay experiment. It is not a product
+claim, not a QA-score path, and not evidence that ACH can yet discriminate
+genuinely contested real-world explanations.
+
 Started: 2026-05-22
 
 This note explores an Analysis of Competing Hypotheses overlay for Prethinker.
