@@ -35,6 +35,7 @@ lesson are documented in the governed document compilation technical note.
 18. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
 19. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
 20. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
+21. [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate next lane for deterministic citation, quote, and pin-cite checks; not a legal-QA or product-readiness claim.
 
 ## Core Architecture
 
@@ -63,6 +64,7 @@ lesson are documented in the governed document compilation technical note.
 - [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
+- [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md)
 
 ## Lens And Product Story
 

@@ -9,10 +9,10 @@ Use this as a domain-selection map, not as evidence that a domain pack transfers
 
 - Fixtures with metadata: `88`
 - Metadata families: `52`
-- Closed profiles: `7`
+- Closed profiles: `8`
 - Fixtures selected by at least one closed profile: `17`
 - Fixtures not selected by a closed profile: `71`
-- Unprofiled and profile-unrelated families with at least two fixtures: `5`
+- Unprofiled and profile-unrelated families with at least two fixtures: `4`
 - QA-bearing unprofiled/profile-unrelated multi-fixture families: `1`
 - Declared non-English fixtures: `0`
 - Fixtures with no declared language: `60`
@@ -31,7 +31,7 @@ Use this as a domain-selection map, not as evidence that a domain pack transfers
 | `sec` | 5 | 125 | `en` | `sec_form_8k_v1` | `sec_form_8k_v1` | `selected_by_closed_profile` | `sec_ugly_001`, `sec_ugly_002`, `sec_ugly_003`, `sec_material_event_ugly_006`, `sec_material_event_ugly_007` |
 | `sec_material_event` | 5 | 0 | - | `sec_form_8k_v1` | `sec_form_8k_v1` | `selected_by_closed_profile` | `sec_material_event_ugly_001`, `sec_material_event_ugly_002`, `sec_material_event_ugly_003`, `sec_material_event_ugly_004`, `sec_material_event_ugly_005` |
 | `enforcement_single_document_hook_001` | 2 | 0 | `en` | - | - | `candidate_unprofiled` | `enforcement_single_document_hook_001`, `enforcement_single_document_hook_001` |
-| `legal_controls_medium_001` | 2 | 0 | `en` | - | - | `candidate_unprofiled` | `legal_controls_medium_001`, `legal_controls_medium_001` |
+| `legal_controls_medium_001` | 2 | 0 | `en` | - | `legal_authority_verification_v1` | `profile_family_related` | `legal_controls_medium_001`, `legal_controls_medium_001` |
 | `ntsb` | 2 | 50 | - | - | `ntsb_investigation_v1` | `profile_family_related` | `ntsb_ugly_001`, `ntsb_ugly_002` |
 | `ntsb_aviation` | 2 | 0 | - | - | `ntsb_investigation_v1` | `profile_family_related` | `ntsb_aviation_ugly_001`, `ntsb_aviation_ugly_002` |
 | `ntsb_marine` | 2 | 0 | - | - | `ntsb_investigation_v1` | `profile_family_related` | `ntsb_marine_ugly_001`, `ntsb_marine_ugly_002` |
@@ -96,7 +96,6 @@ a compact seed scope, and independent expected/forbidden oracles before they can
 | Family | Fixtures | Questions | Languages | Sample paths |
 | --- | ---: | ---: | --- | --- |
 | `enforcement_single_document_hook_001` | 2 | 0 | `en` | `datasets/real_world_transfer/fresh_ach_stress_public_20260528_02/enforcement_single_document_hook_001`, `datasets/real_world_transfer/fresh_ach_stress_public_20260528_03/enforcement_single_document_hook_001` |
-| `legal_controls_medium_001` | 2 | 0 | `en` | `datasets/real_world_transfer/fresh_ach_stress_public_20260528_02/legal_controls_medium_001`, `datasets/real_world_transfer/fresh_ach_stress_public_20260528_03/legal_controls_medium_001` |
 | `public_order_low_001` | 2 | 0 | `en` | `datasets/real_world_transfer/fresh_ach_stress_public_20260528_02/public_order_low_001`, `datasets/real_world_transfer/fresh_ach_stress_public_20260528_03/public_order_low_001` |
 | `regulatory_quality_medium_001` | 2 | 0 | `en` | `datasets/real_world_transfer/fresh_ach_stress_public_20260528_02/regulatory_quality_medium_001`, `datasets/real_world_transfer/fresh_ach_stress_public_20260528_03/regulatory_quality_medium_001` |
 | `unknown` | 2 | 50 | - | `datasets/real_world_transfer/fresh_non_english_wild_20260526_01/ja_corporate_001`, `datasets/real_world_transfer/fresh_non_english_wild_20260526_01/ja_regulator_001` |
@@ -106,6 +105,7 @@ a compact seed scope, and independent expected/forbidden oracles before they can
 | Profile | Selection paths in registry | Exact matched metadata fixtures |
 | --- | ---: | ---: |
 | `fda_warning_letter_v1` | 0 | 0 |
+| `legal_authority_verification_v1` | 1 | 0 |
 | `ntsb_investigation_v1` | 10 | 1 |
 | `osha_incident_v1` | 5 | 5 |
 | `procurement_gao_decision_v1` | 2 | 2 |

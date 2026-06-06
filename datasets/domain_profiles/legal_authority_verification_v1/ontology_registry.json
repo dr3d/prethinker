@@ -1,0 +1,111 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "legal_authority_verification_v1",
+  "source": "Candidate legal-authority verification pack for deterministic citation, quote, and pin-cite checks. This is a research plan/domain vocabulary, not legal advice.",
+  "purpose": "Constrain legal verification compiles to authority-ledger anatomy: citations, resolution status, metadata checks, quote checks, pin-cite locality, and explicit abstention on proposition-support questions.",
+  "selection": {
+    "mode": "candidate_micro_fixture",
+    "date": "2026-06-06",
+    "source_families": [
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1"
+    ]
+  },
+  "accountability_requirements": [
+    {
+      "id": "missing_authority_text",
+      "carrier_signature": "legal_quote_span_match/5",
+      "omission_kind": "source_unavailable",
+      "reason_code": "authority_text_unavailable",
+      "trigger": "citation_resolves_but_authority_text_is_not_available_for_quote_or_pin_check"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "citation_resolution",
+      "purpose": "Citation mentions and authority-resolution status.",
+      "allowed_signatures": [
+        "legal_citation_mention/5",
+        "legal_authority_resolution/5",
+        "legal_authority_metadata_check/5",
+        "legal_verification_abstention/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "quote_pin_check",
+      "purpose": "Quote claims, quote-span matches, and pin-cite locality checks.",
+      "allowed_signatures": [
+        "legal_quote_claim/5",
+        "legal_quote_span_match/5",
+        "legal_pin_cite_check/5",
+        "legal_verification_abstention/4",
+        "domain_omission/5"
+      ]
+    },
+    {
+      "id": "proposition_boundary",
+      "purpose": "Proposition-support boundary rows that require human review instead of deterministic legal-support claims.",
+      "allowed_signatures": [
+        "legal_proposition_support_boundary/5",
+        "legal_verification_abstention/4",
+        "domain_omission/5"
+      ]
+    }
+  ],
+  "predicates": [
+    {
+      "signature": "legal_citation_mention/5",
+      "args": ["document_id", "mention_id", "citation_text", "citation_line", "source_or_scope"],
+      "category": "legal_citation_extraction",
+      "notes": "Preserves one citation-like mention from a legal filing with source coordinate. citation_text is a normalized compact citation atom such as cite_576_us_644, not a proposition or source sentence."
+    },
+    {
+      "signature": "legal_authority_resolution/5",
+      "args": ["mention_id", "normalized_citation", "resolution_status", "authority_id", "source_or_scope"],
+      "category": "legal_authority_resolution",
+      "notes": "Records deterministic citation lookup status against a declared authority inventory or external legal authority database. It does not decide good-law status or proposition support."
+    },
+    {
+      "signature": "legal_authority_metadata_check/5",
+      "args": ["mention_id", "authority_id", "metadata_field", "check_status", "source_or_scope"],
+      "category": "legal_authority_metadata",
+      "notes": "Records whether extracted metadata such as case name or year matches the resolved authority metadata. Details stay in the report; the fact row carries only compact check status."
+    },
+    {
+      "signature": "legal_quote_claim/5",
+      "args": ["mention_id", "quote_id", "quote_digest", "quote_location", "source_or_scope"],
+      "category": "legal_quote_claim",
+      "notes": "Records that the filing made a quoted-language claim near a citation. quote_digest is a digest, not the quoted prose. quote_location is a compact source coordinate."
+    },
+    {
+      "signature": "legal_quote_span_match/5",
+      "args": ["quote_id", "authority_id", "match_status", "matched_location", "source_or_scope"],
+      "category": "legal_quote_verification",
+      "notes": "Records whether the quote digest/text from the filing was found in the resolved authority text. matched_location is a page, paragraph, span id, no_match, or authority_unavailable."
+    },
+    {
+      "signature": "legal_pin_cite_check/5",
+      "args": ["mention_id", "authority_id", "pin_cite", "pin_status", "source_or_scope"],
+      "category": "legal_pin_cite_verification",
+      "notes": "Records whether a cited pin page or paragraph contains the quoted material when authority text has page/paragraph structure."
+    },
+    {
+      "signature": "legal_verification_abstention/4",
+      "args": ["subject_id", "abstention_kind", "reason_code", "source_or_scope"],
+      "category": "legal_verification_abstention",
+      "notes": "Records an explicit non-verification boundary, such as unresolved authority, unavailable authority text, unsupported semantic legal proposition, or good-law status outside scope."
+    },
+    {
+      "signature": "legal_proposition_support_boundary/5",
+      "args": ["mention_id", "proposition_id", "boundary_status", "review_requirement", "source_or_scope"],
+      "category": "legal_proposition_boundary",
+      "notes": "Records that a citation was used for a proposition and whether deterministic verification abstains or requires review. This row must not claim the proposition is legally correct."
+    },
+    {
+      "signature": "domain_omission/5",
+      "args": ["domain_or_subject_id", "carrier_signature", "omission_kind", "reason_code", "source_or_scope"],
+      "category": "compile_accountability",
+      "notes": "Records accountable omissions for expected legal-authority verification carrier families. It is not an answer substitute."
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+# Legal Authority Verification Research Plan
+
+Status: candidate next research lane, June 2026. This document is a plan, not a
+claim-bearing result.
+
+## Why This Lane Exists
+
+Courts are now sanctioning filings that contain AI-fabricated legal citations,
+fabricated quotations, and mischaracterized authorities. The lesson matches
+Prethinker's current research finding:
+
+```text
+AI may propose, but verification must bottom out in deterministic or
+independently source-backed checks.
+```
+
+The legal lane should therefore avoid the broad "AI legal answer" trap. The
+first research target is not to decide legal merits. It is to compile a filing
+into an authority ledger and verify the parts that can be checked without
+asking another LLM to certify the first LLM.
+
+## Research Question
+
+Can Prethinker compile a legal filing into a governed authority ledger that
+deterministically verifies citation existence, authority metadata, quotations,
+pin-cite locality, and proposition-support boundaries while abstaining from
+semantic legal judgment unless an independent reviewer closes that loop?
+
+## Non-Claims
+
+This lane does not claim:
+
+- broad legal QA;
+- legal advice;
+- "good law" / Shepard's / KeyCite status;
+- deterministic verification that a case supports a legal proposition;
+- replacement of attorney review;
+- product readiness.
+
+The first honest claim, if earned, is narrower:
+
+```text
+This document's cited authorities, metadata, quotes, and pin-cite checks were
+resolved or flagged through a replayable authority ledger.
+```
+
+## Tier Boundary
+
+### Tier 1: Deterministic Or Source-Backed
+
+Tier 1 rows may be claim-bearing if they survive the same governance family as
+the domain-pack work:
+
+- citation mention extraction with source coordinates;
+- citation resolution against a declared authority inventory or external legal
+  authority database;
+- case-name, court, year, reporter, and page metadata checks;
+- quote existence checks against authority text;
+- pin-cite locality checks when source pages or paragraphs are available;
+- explicit unresolved, ambiguous, unavailable, and abstention rows.
+
+### Tier 2: Governed Proposal, Review Required
+
+Tier 2 may use an LLM to propose structured review targets:
+
+- what proposition the filing appears to attach to a citation;
+- which source span might support that proposition;
+- whether a human should review a mismatch or legal-support boundary.
+
+Tier 2 is report-only until independently reviewed. The LLM may propose a
+support assessment, but it may not verify itself.
+
+### Tier 3: Out Of Scope For This Phase
+
+These are deliberately outside the first lane:
+
+- drafting legal arguments;
+- predicting case outcome;
+- determining whether an authority is still good law;
+- deciding that a case legally supports a proposition without human or citator
+  closure.
+
+## Closed Predicate Domain
+
+Initial domain profile:
+
+```text
+datasets/domain_profiles/legal_authority_verification_v1/ontology_registry.json
+```
+
+Initial Tier 1 carrier families:
+
+```text
+legal_citation_mention/5
+legal_authority_resolution/5
+legal_authority_metadata_check/5
+legal_quote_claim/5
+legal_quote_span_match/5
+legal_pin_cite_check/5
+legal_verification_abstention/4
+legal_proposition_support_boundary/5
+domain_omission/5
+```
+
+The predicates intentionally keep source prose out of answer-bearing atoms.
+Quote text is represented by digest and source coordinate, not by storing the
+quote as an atom. Proposition text is not a Tier 1 value; a proposition boundary
+row can say that review is required without pretending the support question is
+deterministically solved.
+
+## First Micro-Fixture
+
+Initial fixture:
+
+```text
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v1
+```
+
+It contains:
+
+- one clean citation and quote;
+- one citation that does not resolve;
+- one real authority with a fabricated quote;
+- one real authority with the quote present in the authority but outside the
+  cited pin page;
+- one proposition-support boundary that must abstain.
+
+The fixture uses a local authority inventory so the first prototype can run
+offline. A later CourtListener-backed run can replace or supplement that
+inventory while keeping the same report contract.
+
+## Prototype Resolver
+
+The first deterministic prototype is:
+
+```text
+src/legal_authority_verification.py
+scripts/run_legal_authority_verification.py
+```
+
+It produces CourtListener/Eyecite-shaped citation lookup rows:
+
+```text
+citation
+normalized_citations
+start_index
+end_index
+status
+error_message
+clusters
+```
+
+Status values follow the same broad shape:
+
+- `200`: resolved;
+- `300`: ambiguous;
+- `400`: parsed but invalid shape or unsupported reporter;
+- `404`: citation-like value did not resolve;
+- `429`: reserved for external throttling, not used by the offline fixture.
+
+The first implementation is local and deterministic. CourtListener integration
+requires a token and should be a later adapter, not an excuse to let the LLM
+verify citations.
+
+## Metrics
+
+Primary metric:
+
+```text
+false_verified = 0
+```
+
+In other words, the system must not mark an unresolved citation, fabricated
+quote, metadata mismatch, or pin-cite mismatch as verified.
+
+Secondary metrics:
+
+- citation extraction precision/recall;
+- authority resolution rate;
+- quote-match precision/recall;
+- pin-cite locality accuracy;
+- abstention rate;
+- human-review burden.
+
+High abstention is acceptable. False verification is the dangerous failure.
+
+## Expansion Sequence
+
+1. Prove the micro-fixture with deterministic expected/forbidden facts.
+2. Add a small public filing sample where all authorities are available.
+3. Add controlled adversarial mutations of that filing.
+4. Add known public hallucination/sanction examples only after the resolver and
+   report contract are stable.
+5. Add optional CourtListener lookup behind an explicit provider manifest and
+   rate-limit discipline.
+
+## Human Intervention Needed Later
+
+The first local prototype does not need a credential. A CourtListener-backed
+phase will need:
+
+```text
+COURTLISTENER_TOKEN=<token>
+```
+
+It will also need a decision on whether bulk authority text should be cached
+locally, and if so, where the cache lives and what citation/license constraints
+apply.

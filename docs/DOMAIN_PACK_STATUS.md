@@ -5,14 +5,14 @@ This report does not read source prose, QA questions, or judge outputs.
 
 ## Summary
 
-- Domains: `7`
-- Predicates: `62` (`57` domain-specific plus shared carriers)
-- Lenses: `31`
-- Associated fixtures: `30`
+- Domains: `8`
+- Predicates: `71` (`65` domain-specific plus shared carriers)
+- Lenses: `34`
+- Associated fixtures: `31`
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
-- Expected facts in associated fixtures: `573`
-- Forbidden facts in associated fixtures: `250`
+- Expected facts in associated fixtures: `605`
+- Forbidden facts in associated fixtures: `254`
 - Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -20,6 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
+| `legal_authority_verification_v1` | 9 | 8 | 3 | 1 | 32 | 4 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
@@ -64,6 +65,28 @@ This report does not read source prose, QA questions, or judge outputs.
 | `fda_warning_letter_observation_transfer_001` | `fixture_id_prefix` | 31 | 8 | `fda_adulteration_basis/5`:1, `fda_cgmp_violation_item/5`:2, `fda_conclusion_scope/4`:1, `fda_correspondence_party/5`:3, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_inspection_event/6`:1, `fda_regulatory_meeting/4`:1, `fda_response_assessment/5`:2, `fda_response_requirement/6`:1, `fda_violation/5`:2, `fda_violation_citation/4`:2, `fda_violation_detail/5`:6, `fda_violation_detail_slot/4`:6, `fda_warning_letter/5`:1 |
 | `fda_warning_letter_observation_transfer_002` | `fixture_id_prefix` | 40 | 8 | `domain_omission/5`:1, `fda_adulteration_basis/5`:1, `fda_cgmp_violation_item/5`:4, `fda_conclusion_scope/4`:1, `fda_consultant_recommendation/4`:1, `fda_correspondence_party/5`:3, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_insanitary_condition/5`:2, `fda_inspection_event/6`:1, `fda_response_assessment/5`:2, `fda_response_requirement/6`:1, `fda_violation/5`:4, `fda_violation_citation/4`:4, `fda_violation_detail/5`:6, `fda_violation_detail_slot/4`:6, `fda_warning_letter/5`:1 |
 | `fda_warning_letter_observation_transfer_003` | `fixture_id_prefix` | 41 | 7 | `domain_omission/5`:1, `fda_adulteration_basis/5`:1, `fda_cgmp_violation_item/5`:4, `fda_conclusion_scope/4`:1, `fda_consultant_recommendation/4`:1, `fda_correspondence_party/5`:3, `fda_facility_identity/5`:1, `fda_form483_response/4`:1, `fda_insanitary_condition/5`:2, `fda_inspection_event/6`:1, `fda_response_assessment/5`:3, `fda_response_requirement/6`:1, `fda_violation/5`:4, `fda_violation_citation/4`:4, `fda_violation_detail/5`:6, `fda_violation_detail_slot/4`:6, `fda_warning_letter/5`:1 |
+
+## legal_authority_verification_v1
+
+- Registry: `datasets/domain_profiles/legal_authority_verification_v1/ontology_registry.json`
+- Predicates: `9`
+- Domain-specific predicates: `8`
+- Lenses: `3`
+- Accountability requirements: `1`
+
+### Lenses
+
+| Lens | Allowed signatures |
+| --- | --- |
+| `citation_resolution` | `legal_citation_mention/5`, `legal_authority_resolution/5`, `legal_authority_metadata_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
+| `quote_pin_check` | `legal_quote_claim/5`, `legal_quote_span_match/5`, `legal_pin_cite_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
+| `proposition_boundary` | `legal_proposition_support_boundary/5`, `legal_verification_abstention/4`, `domain_omission/5` |
+
+### Fixture Oracles
+
+| Fixture | Association | Expected | Forbidden | Expected signatures |
+| --- | --- | ---: | ---: | --- |
+| `legal_authority_verification_micro_v1` | `fixture_id_prefix` | 32 | 4 | `legal_authority_metadata_check/5`:8, `legal_authority_resolution/5`:5, `legal_citation_mention/5`:5, `legal_pin_cite_check/5`:3, `legal_proposition_support_boundary/5`:1, `legal_quote_claim/5`:3, `legal_quote_span_match/5`:3, `legal_verification_abstention/4`:4 |
 
 ## ntsb_investigation_v1
 

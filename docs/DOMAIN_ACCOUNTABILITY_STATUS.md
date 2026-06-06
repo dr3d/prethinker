@@ -8,10 +8,10 @@ This page shows which omission contracts exist and which typed fixture oracles e
 
 ## Summary
 
-- Domains: `7`
-- Registry accountability requirements: `8`
+- Domains: `8`
+- Registry accountability requirements: `9`
 - Requirements covered by fixture omissions: `8`
-- Requirements not yet covered by fixture omissions: `0`
+- Requirements not yet covered by fixture omissions: `1`
 - Fixture omission facts: `11`
 - Fixture-only omission patterns: `0`
 - Status: `pass`
@@ -19,6 +19,7 @@ This page shows which omission contracts exist and which typed fixture oracles e
 | Domain | Requirements | Covered | Fixture omissions | Fixture-only patterns |
 | --- | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 3 | 3 | 6 | 0 |
+| `legal_authority_verification_v1` | 1 | 0 | 0 | 0 |
 | `ntsb_investigation_v1` | 2 | 2 | 2 | 0 |
 | `osha_incident_v1` | 2 | 2 | 2 | 0 |
 | `procurement_gao_decision_v1` | 0 | 0 | 0 | 0 |
@@ -47,6 +48,23 @@ This page shows which omission contracts exist and which typed fixture oracles e
 ### Accountability Read
 
 All declared requirements have fixture coverage, and no fixture-only omission patterns are present.
+
+## legal_authority_verification_v1
+
+### Registry Requirements
+
+| ID | Carrier | Kind | Reason | Fixture support |
+| --- | --- | --- | --- | ---: |
+| `missing_authority_text` | `legal_quote_span_match/5` | `source_unavailable` | `authority_text_unavailable` | 0 |
+
+### Fixture Omission Patterns
+
+_No expected `domain_omission/5` facts in associated fixtures._
+
+### Accountability Read
+
+Uncovered registry requirements:
+- `missing_authority_text`: `legal_quote_span_match/5` / `source_unavailable` / `authority_text_unavailable`
 
 ## ntsb_investigation_v1
 
