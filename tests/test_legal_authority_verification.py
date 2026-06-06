@@ -995,6 +995,35 @@ def test_legal_authority_short_form_citation_blocks_certification_without_fake_r
     assert not any("legal_authority_resolution(short_form_001" in fact for fact in report["facts"])
 
 
+def test_legal_authority_ibid_short_form_requires_context(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        "Brown v. Board of Education, 347 U.S. 483, 495 (1954).\nIbid.",
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=FIXTURE / "authority_inventory.json",
+        document_id="legal_authority_ibid_short_form",
+    )
+
+    assert report["summary"]["short_form_citations"] == 1
+    assert report["ledger_queries"]["which_citations_require_context"] == [
+        {
+            "short_form_id": "short_form_001",
+            "citation": "Ibid.",
+            "line": 2,
+            "reason": "short_form_citation_requires_context",
+        }
+    ]
+    assert (
+        "legal_verification_abstention("
+        "short_form_001, authority_resolution, short_form_citation_requires_context, source_line_2)."
+    ) in report["facts"]
+    assert not any("legal_authority_resolution(short_form_001" in fact for fact in report["facts"])
+
+
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
