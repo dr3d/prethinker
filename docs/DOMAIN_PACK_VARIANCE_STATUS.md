@@ -142,7 +142,7 @@ Roots:
 
 - Group: `sec_t001_current_mainline_retest_negative`
 - Fixture: `sec_form_8k_skeleton_transfer_001`
-- Read: Use as a negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score.
+- Read: Use as a pre-source-review negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. The imported source-only review and source-scope filing-id guard now tighten the current standing manifest cell to 3/13 with source-reviewed registrant alias blockers; do not use this 5/13 root as the current score.
 - Support band: `5/13`
 - Supported forbidden total: `0`
 - Unexpected band: `15`
@@ -159,7 +159,7 @@ Roots:
 
 - Group: `sec_t002_current_mainline_retest`
 - Fixture: `sec_form_8k_skeleton_transfer_002`
-- Read: Use as the current standing transfer_002 cell: the fresh current-mainline Qwen MoE retest preserves 11/12 support with clean governance, while duplicate commission-file value support remains the live boundary.
+- Read: Use as pre-source-scope-guard variance evidence: the fresh current-mainline Qwen MoE retest preserved 11/12 support with clean governance, while duplicate commission-file value support remained the live boundary. The current standing manifest now scores this cell at 10/12 under the stricter source-scope filing-id guard.
 - Support band: `11/12`
 - Supported forbidden total: `0`
 - Unexpected band: `2`

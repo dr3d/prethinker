@@ -12,7 +12,7 @@ This report does not read source prose, QA questions, or judge outputs.
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
 - Expected facts in associated fixtures: `573`
-- Forbidden facts in associated fixtures: `240`
+- Forbidden facts in associated fixtures: `250`
 - Schema status: `pass` (0 errors, 0 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -24,7 +24,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
 | `puc_order_v1` | 1 | 1 | 1 | 2 | 2 | 15 |
-| `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 32 |
+| `sec_form_8k_v1` | 8 | 7 | 4 | 5 | 52 | 42 |
 | `state_ag_settlement_v1` | 9 | 8 | 5 | 3 | 74 | 33 |
 
 ## fda_warning_letter_v1
@@ -183,7 +183,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Fixture | Association | Expected | Forbidden | Expected signatures |
 | --- | --- | ---: | ---: | --- |
 | `sec_form_8k_signature_omission_v1` | `manifest_domain_profile` | 1 | 1 | `domain_omission/5`:1 |
-| `sec_form_8k_skeleton_transfer_001` | `manifest_domain_profile` | 13 | 8 | `sec_exhibit/5`:3, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
+| `sec_form_8k_skeleton_transfer_001` | `manifest_domain_profile` | 13 | 18 | `sec_exhibit/5`:3, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_transfer_002` | `manifest_domain_profile` | 12 | 6 | `sec_exhibit/5`:1, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_registrant/4`:1, `sec_registrant_identifier/5`:6, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_transfer_003` | `fixture_id_prefix` | 13 | 10 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:2, `sec_filing_item_treatment/4`:1, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |
 | `sec_form_8k_skeleton_v1` | `manifest_domain_profile` | 13 | 7 | `sec_exhibit/5`:2, `sec_filing/6`:1, `sec_filing_item/5`:3, `sec_registrant/4`:1, `sec_registrant_identifier/5`:5, `sec_signatory/5`:1 |

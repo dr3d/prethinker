@@ -51,6 +51,21 @@ def test_sec_value_axis_audit_accepts_axis_clean_roles(tmp_path: Path) -> None:
     assert report["issues"] == []
 
 
+def test_sec_value_axis_audit_skips_forbidden_fact_sentinels(tmp_path: Path) -> None:
+    fact_file = tmp_path / "forbidden_facts.pl"
+    fact_file.write_text(
+        "sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, filed, SrcExhibit104).\n",
+        encoding="utf-8",
+    )
+
+    report = build_report(compile_roots=[], compile_jsons=[], fact_files=[fact_file])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["fact_count"] == 1
+    assert report["summary"]["checked_sec_fact_count"] == 0
+    assert report["issues"] == []
+
+
 def test_sec_value_axis_audit_expect_md_marks_stale_report(
     tmp_path: Path,
     monkeypatch,

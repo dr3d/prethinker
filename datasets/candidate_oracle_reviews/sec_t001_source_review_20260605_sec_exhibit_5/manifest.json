@@ -1,0 +1,12 @@
+{
+  "bundle_review_id": "sec_t001_source_review_20260605",
+  "fixture_id": "sec_form_8k_skeleton_transfer_001",
+  "predicate": "sec_exhibit/5",
+  "review_id": "sec_t001_source_review_20260605_sec_exhibit_5",
+  "reviewer_blind_to_model_outputs": true,
+  "reviewer_read_forbidden_inputs": false,
+  "source_files": [
+    "datasets/compile_micro_fixtures/sec_form_8k_skeleton_transfer_001/source.md"
+  ],
+  "source_only_review": true
+}

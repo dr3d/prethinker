@@ -6,21 +6,26 @@ This page does not read source prose, call an LLM, or judge messy human question
 
 ## Summary
 
-- Status: `pass`
+- Status: `fail`
 - Cells: `8` across `4` families
-- Support>=2: `109 / 141` expected typed facts
-- Per-run exact: `309 / 423` deterministic fact rows
-- Unexpected same-signature facts support>=2: `4`
+- Support>=2: `105 / 141` expected typed facts
+- Per-run exact: `293 / 423` deterministic fact rows
+- Unexpected same-signature facts support>=2: `2`
 - Unexpected support>=2 counts are pinned in the standing manifest; count drift blocks the manifest run.
-- Forbidden fact emissions support>=1 / support>=2: `0 / 0`
+- Forbidden fact emissions support>=1 / support>=2: `4 / 0`
 - Prose-dependent exact rows: `0`
 - Unregistered exact typed plans: `0`
 - Source/provenance warnings: `0`
 - Registered variance groups on current cells: `9`
-- Unsupported expected facts support<2: `32`
-- Unsupported split support 0 / support 1: `21 / 11`
-- Unsupported repair postures: `compile_recall_boundary` x16, `primary_constant_boundary` x7, `compile_stability_boundary` x3, `source_choice_boundary` x3, `value_choice_variance_boundary` x3
+- Unsupported expected facts support<2: `36`
+- Unsupported split support 0 / support 1: `24 / 12`
+- Unsupported repair postures: `compile_recall_boundary` x21, `primary_constant_boundary` x8, `compile_stability_boundary` x3, `value_choice_variance_boundary` x3, `source_choice_boundary` x1
 - Excluded associated fixtures: `22` (audit `pass`; missing `0`)
+
+## Blocking Reasons
+
+- `manifest_run_status_not_pass`
+- `sec_form_8k_skeleton_transfer_001:forbidden_emissions_ge_1:4`
 
 ## Excluded Associated Fixtures
 
@@ -73,16 +78,16 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `fda_warning_letter` | 1 | 11 / 29 | 33 / 87 | 2 | 0 / 0 | 0 | 0 |
 | `ntsb_investigation` | 1 | 22 / 25 | 60 / 75 | 0 | 0 / 0 | 0 | 0 |
 | `osha_incident` | 2 | 36 / 36 | 93 / 108 | 0 | 0 / 0 | 0 | 0 |
-| `sec_form_8k` | 4 | 40 / 51 | 123 / 153 | 2 | 0 / 0 | 0 | 0 |
+| `sec_form_8k` | 4 | 36 / 51 | 107 / 153 | 0 | 4 / 0 | 0 | 0 |
 
 ## Cells
 
 | Cell | Fixture | Support>=2 | Per-run exact | Unexpected>=2 | Forbidden | Replay gates | Source metadata |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | 13 / 13 | 39 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_seed_qwen_moe_same_condition` `13/13` |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 5 / 13 | 18 / 39 | 2 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t001_current_mainline_retest_negative` `5/13` |
-| `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | 11 / 12 | 31 / 36 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t002_current_mainline_retest` `11/12` |
-| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 11 / 13 | 35 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t003_qwen_moe_repaired_schema` `11-13/13`, `sec_t003_dense_compile_substitution_controls` `10/12` |
+| `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | 13 / 13 | 33 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_seed_qwen_moe_same_condition` `13/13` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 3 / 13 | 14 / 39 | 0 | 4 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t001_current_mainline_retest_negative` `5/13` |
+| `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | 10 / 12 | 28 / 36 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t002_current_mainline_retest` `11/12` |
+| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | 10 / 13 | 32 / 39 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `sec_t003_qwen_moe_repaired_schema` `11-13/13`, `sec_t003_dense_compile_substitution_controls` `10/12` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | 22 / 25 | 60 / 75 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `18`; manifest `present`; variance `ntsb_transfer001_qwen_moe_same_condition` `22/25` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 11 / 29 | 33 / 87 | 2 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `30`; manifest `present`; variance `fda_transfer002_qwen_moe_same_condition_negative` `11/29` |
 | `osha_incident_seed` | `osha_incident_domain_v1` | 21 / 21 | 57 / 63 | 0 | 0 / 0 | redaction `pass` / prose `0`; typed-plan `pass` / unregistered `0`; artifact atom pass/pass; value pass/pass | `lmstudio` `local_lmstudio` `lmstudio` `qwen/qwen3.6-35b-a3b`; quant `Q4_K_M`; temp `0.0`; top_p `1.0`; top_k `20`; ctx `65536`; matcher `constant_slot`; lens compiles `12`; manifest `present`; variance `osha_seed_qwen_moe_same_condition` `21/21` |
@@ -96,8 +101,8 @@ They are attached to current cells so a favorable retained root is not promoted 
 | Cell | Fixture | Group | Roots | Support Band | Forbidden Total | Unexpected Band | Read |
 | --- | --- | --- | ---: | --- | ---: | --- | --- |
 | `sec_form_8k_skeleton_seed` | `sec_form_8k_skeleton_v1` | `sec_seed_qwen_moe_same_condition` | 1 | `13/13` | 0 | `5` | Use as the current standing SEC seed cell: the fresh current-mainline retest preserves 13/13 support with clean governance, while singleton item-treatment rows remain precision noise rather than promoted support. |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_t001_current_mainline_retest_negative` | 1 | `5/13` | 0 | `15` | Use as a negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. |
-| `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | `sec_t002_current_mainline_retest` | 1 | `11/12` | 0 | `2` | Use as the current standing transfer_002 cell: the fresh current-mainline Qwen MoE retest preserves 11/12 support with clean governance, while duplicate commission-file value support remains the live boundary. |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_t001_current_mainline_retest_negative` | 1 | `5/13` | 0 | `15` | Use as a pre-source-review negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. The imported source-only review and source-scope filing-id guard now tighten the current standing manifest cell to 3/13 with source-reviewed registrant alias blockers; do not use this 5/13 root as the current score. |
+| `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | `sec_t002_current_mainline_retest` | 1 | `11/12` | 0 | `2` | Use as pre-source-scope-guard variance evidence: the fresh current-mainline Qwen MoE retest preserved 11/12 support with clean governance, while duplicate commission-file value support remained the live boundary. The current standing manifest now scores this cell at 10/12 under the stricter source-scope filing-id guard. |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_qwen_moe_repaired_schema` | 5 | `11-13/13` | 0 | `0-2` | Use as an 11-13/13 same-condition band. Do not promote a favorable 13/13 draw as a fixed score. |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_t003_dense_compile_substitution_controls` | 2 | `10/12` | 0 | `3-6` | Use as model-path robustness evidence: closed-language governance held, but recall did not reproduce the Qwen MoE favorable cell. |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_transfer001_qwen_moe_same_condition` | 2 | `22/25` | 0 | `16` | Use as a 22/25 same-condition NTSB transfer band with clean governance and 0 supported forbidden rows; precision remains noisy because the fresh rerun produced 16 singleton unexpected same-signature facts. |
@@ -128,7 +133,8 @@ non-exact runs only; they do not change support scores.
 | `ntsb_investigation` | `ntsb_finding/5` | 2 | 0 | 2 | 2 | `unstable_zero_yield` x2 | 0 | 0 | 0 |  | `compile_stability_boundary` x2 | `ntsb_transfer_surface_001` |
 | `ntsb_investigation` | `ntsb_timeline_event/6` | 1 | 0 | 1 | 0 |  | 1 | 0 | 0 | `sequence_role` x1 | `value_choice_variance_boundary` x1 | `ntsb_transfer_surface_001` |
 | `sec_form_8k` | `sec_registrant_identifier/5` | 7 | 1 | 6 | 0 |  | 3 | 4 | 0 | `identifier_value` x3, `identifier_kind` x2 | `primary_constant_boundary` x4, `value_choice_variance_boundary` x2, `source_choice_boundary` x1 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_002`, `sec_form_8k_skeleton_transfer_003` |
-| `sec_form_8k` | `sec_exhibit/5` | 2 | 2 | 0 | 0 |  | 2 | 0 | 0 | `exhibit_role` x2 | `source_choice_boundary` x2 | `sec_form_8k_skeleton_transfer_001` |
+| `sec_form_8k` | `sec_exhibit/5` | 4 | 4 | 0 | 4 | `persistent_zero_yield` x4 | 0 | 0 | 0 |  | `compile_recall_boundary` x4 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_002` |
+| `sec_form_8k` | `sec_signatory/5` | 2 | 1 | 1 | 1 | `persistent_zero_yield` x1 | 0 | 1 | 0 |  | `compile_recall_boundary` x1, `primary_constant_boundary` x1 | `sec_form_8k_skeleton_transfer_001`, `sec_form_8k_skeleton_transfer_003` |
 | `sec_form_8k` | `sec_filing_item_treatment/4` | 1 | 0 | 1 | 1 | `unstable_zero_yield` x1 | 0 | 0 | 0 |  | `compile_stability_boundary` x1 | `sec_form_8k_skeleton_transfer_003` |
 | `sec_form_8k` | `sec_registrant/4` | 1 | 0 | 1 | 0 |  | 0 | 1 | 0 |  | `primary_constant_boundary` x1 | `sec_form_8k_skeleton_transfer_001` |
 
@@ -136,15 +142,19 @@ non-exact runs only; they do not change support scores.
 
 | Cell | Fixture | Carrier | Support | Residue | Repair Posture | Drift Slots | Verdicts | Expected Fact | Non-Exact Emissions |
 | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_exhibit/5` | 0 | `same_signature_drift` (2/3; candidates 3) | `source_choice_boundary` | `exhibit_role` | run1: partial, run2: partial, run3: partial | `sec_exhibit(Filing, exhibit_10_1, agreement, not_stated, SrcExhibit101).` | `sec_exhibit(sec_8k_servicenow_20251223, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).; sec_exhibit(sec_material_event_ugly_003, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).` |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_exhibit/5` | 0 | `same_signature_drift` (2/3; candidates 3) | `source_choice_boundary` | `exhibit_role` | run1: partial, run2: partial, run3: partial | `sec_exhibit(Filing, exhibit_10_2, other_exhibit, not_stated, SrcExhibit102).` | `sec_exhibit(sec_8k_servicenow_20251223, exhibit_10_2, other_exhibit, filed, exhibit_table_row_10_2).; sec_exhibit(sec_material_event_ugly_003, exhibit_10_2, other_exhibit, filed, exhibit_table_row_10_2).` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_exhibit/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, not_stated, SrcExhibit104).` | `` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_exhibit/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `sec_exhibit(Filing, exhibit_10_1, agreement, not_stated, SrcExhibit101).` | `` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_exhibit/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `sec_exhibit(Filing, exhibit_10_2, other_exhibit, not_stated, SrcExhibit102).` | `` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 0 | `same_signature_drift` (1/3; candidates 4) | `source_choice_boundary` | `identifier_kind`, `identifier_value` | run1: partial, run2: miss, run3: miss | `sec_registrant_identifier(Filing, servicenow_inc, telephone, phone_408_501_8550, SrcPhone).` | `sec_registrant_identifier(filing_sec_8k_servicenow_20251223, servicenow_inc, commission_file_number, file_001_35580, sec_material_event_ugly_003).` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant/4` | 1 | `same_signature_no_primary` (0/2; candidates 1) | `primary_constant_boundary` |  | run1: exact, run2: miss, run3: miss | `sec_registrant(Filing, servicenow_inc, delaware, SrcRegistrant).` | `` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 1 | `same_signature_no_primary` (0/3; candidates 4) | `primary_constant_boundary` |  | run1: exact, run2: miss, run3: miss | `sec_registrant_identifier(Filing, servicenow_inc, commission_file_number, file_001_35580, SrcFileNumber).` | `` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 1 | `same_signature_no_primary` (0/3; candidates 4) | `primary_constant_boundary` |  | run1: exact, run2: miss, run3: miss | `sec_registrant_identifier(Filing, servicenow_inc, exchange_name, exchange_new_york_stock_exchange, SrcExchange).` | `` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 1 | `same_signature_no_primary` (0/3; candidates 4) | `primary_constant_boundary` |  | run1: exact, run2: miss, run3: miss | `sec_registrant_identifier(Filing, servicenow_inc, irs_ein, ein_20_2056195, SrcEin).` | `` |
 | `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 1 | `same_signature_no_primary` (0/3; candidates 4) | `primary_constant_boundary` |  | run1: exact, run2: miss, run3: miss | `sec_registrant_identifier(Filing, servicenow_inc, ticker_symbol, ticker_now, SrcTicker).` | `` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | `sec_signatory/5` | 1 | `same_signature_no_primary` (0/3; candidates 1) | `primary_constant_boundary` |  | run1: miss, run2: exact, run3: miss | `sec_signatory(Filing, russell_s_elmer, general_counsel, v_2025_12_23, SrcSignature).` | `` |
+| `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | `sec_exhibit/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `sec_exhibit(Filing, exhibit_104, cover_page_ixbrl, not_stated, SrcExhibit104).` | `` |
 | `sec_form_8k_skeleton_transfer_002` | `sec_form_8k_skeleton_transfer_002` | `sec_registrant_identifier/5` | 1 | `same_signature_drift` (2/3; candidates 5) | `value_choice_variance_boundary` | `identifier_value` | run1: exact, run2: partial, run3: partial | `sec_registrant_identifier(Filing, driven_brands_holdings_inc, commission_file_number, file_139898, SrcFileNumberCover).` | `sec_registrant_identifier(filing_sec_8k_20260225, driven_brands_holdings_inc, commission_file_number, file_001_39898, sec_material_event_ugly_007).` |
+| `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_signatory/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `sec_signatory(Filing, michael_s_chae, chief_financial_officer, v_2025_10_23, SrcSignature).` | `` |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_filing_item_treatment/4` | 1 | `unstable_zero_yield` (0/2; candidates 0) | `compile_stability_boundary` |  | run1: exact, run2: miss, run3: miss | `sec_filing_item_treatment(Filing, item_2_02, furnished, SrcItem202).` | `` |
 | `sec_form_8k_skeleton_transfer_003` | `sec_form_8k_skeleton_transfer_003` | `sec_registrant_identifier/5` | 1 | `same_signature_drift` (1/3; candidates 4) | `value_choice_variance_boundary` | `identifier_kind`, `identifier_value` | run1: partial, run2: exact, run3: partial | `sec_registrant_identifier(Filing, blackstone_inc, telephone, phone_212_583_5000, SrcPhone).` | `sec_registrant_identifier(filing_sec_8ka_blackstone_20251023, blackstone_inc, commission_file_number, file_001_33551, sec_material_event_ugly_004).; sec_registrant_identifier(sec_filing_8ka_blackstone_20251023, blackstone_inc, commission_file_number, file_001_33551, sec_8ka_blackstone_20251023_amend1).` |
 | `ntsb_transfer_surface_001` | `ntsb_investigation_transfer_surface_001` | `ntsb_finding/5` | 1 | `unstable_zero_yield` (0/1; candidates 0) | `compile_stability_boundary` |  | run1: exact, run2: miss, run3: miss | `ntsb_finding(Occurrence, CauseFinding, probable_cause, FindingValue, SrcCause).` | `` |
@@ -169,6 +179,18 @@ non-exact runs only; they do not change support scores.
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 0 | `persistent_zero_yield` (0/5; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_violation_detail(violation_4, observation_subject, peeling_paint_ceiling, violation_scope, direct).` | `` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | `fda_warning_letter/5` | 0 | `persistent_zero_yield` (0/3; candidates 0) | `compile_recall_boundary` |  | run1: miss, run2: miss, run3: miss | `fda_warning_letter(Letter, cder, rechon_life_science_ab, v_2025_04_30, SrcLetter).` | `` |
 
+## Forbidden Fact Emissions
+
+These rows are source-rejected facts that the compiler still emitted.
+Any occurrence blocks claim-bearing status for the cell.
+
+| Cell | Fixture | Support | Forbidden Fact | Compiled Fact(s) |
+| --- | --- | ---: | --- | --- |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 1 | `sec_registrant(Filing, service_now_inc, delaware, SrcRegistrant).` | `sec_registrant(sec_8k_servicenow_20251223, service_now_inc, delaware, sec_material_event_ugly_003).` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 1 | `sec_registrant(Filing, svc_now_inc, delaware, SrcRegistrant).` | `sec_registrant(sec_8k_servicenow_20251223, svc_now_inc, delaware, cover_page).` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 1 | `sec_registrant_identifier(Filing, service_now_inc, commission_file_number, file_001_35580, SrcFileNumber).` | `sec_registrant_identifier(sec_8k_servicenow_20251223, service_now_inc, commission_file_number, file_001_35580, sec_material_event_ugly_003).` |
+| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 1 | `sec_registrant_identifier(Filing, svc_now_inc, commission_file_number, file_001_35580, SrcFileNumber).` | `sec_registrant_identifier(sec_8k_servicenow_20251223, svc_now_inc, commission_file_number, file_001_35580, cover_page).` |
+
 ## Unexpected Same-Signature Support>=2
 
 These rows are precision-pressure diagnostics only. They are not
@@ -177,8 +199,6 @@ adds them to the fixture.
 
 | Cell | Fixture | Support | Fact |
 | --- | --- | ---: | --- |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 2 | `sec_exhibit(sec_material_event_ugly_003, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).` |
-| `sec_form_8k_skeleton_transfer_001` | `sec_form_8k_skeleton_transfer_001` | 2 | `sec_exhibit(sec_material_event_ugly_003, exhibit_10_2, other_exhibit, filed, exhibit_table_row_10_2).` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 3 | `fda_violation_citation(fda_warning_letter_320_25_68, fdca_501_a_2_b, adulteration_authority, source_url).` |
 | `fda_warning_letter_transfer_002_current_pack` | `fda_warning_letter_domain_transfer_002` | 3 | `fda_violation_citation(fda_warning_letter_320_25_68, fdca_801_a_3, adulteration_authority, source_url).` |
 
@@ -187,7 +207,7 @@ adds them to the fixture.
 | Cell | Note |
 | --- | --- |
 | `sec_form_8k_skeleton_seed` | SEC Form 8-K skeleton seed micro current-mainline retest; support remains 13/13 while singleton item-treatment precision noise is visible. |
-| `sec_form_8k_skeleton_transfer_001` | SEC Form 8-K skeleton transfer 001 current-mainline negative retest; wrapper date recovered but registrant/exhibit axes destabilized. |
+| `sec_form_8k_skeleton_transfer_001` | SEC Form 8-K skeleton transfer 001 current-mainline negative retest; stricter source-scope filing-id guard removes fixture-id support, while source-reviewed registrant aliases remain forbidden emissions. |
 | `sec_form_8k_skeleton_transfer_002` | SEC Form 8-K skeleton transfer 002 current-mainline retest; support count remains 11/12 with the duplicate commission-file value boundary visible. |
 | `sec_form_8k_skeleton_transfer_003` | SEC Form 8-K/A skeleton transfer 003, current axis-clean item/exhibit/treatment repair rerun. |
 | `ntsb_transfer_surface_001` | NTSB first unlike transfer, rerun with scoped injury-count partition contract. |

@@ -110,6 +110,9 @@ def build_report(
     fact_count = 0
     checked_fact_count = 0
     for source in sources:
+        if _is_forbidden_fact_file(source):
+            fact_count += len(source["facts"])
+            continue
         for fact in source["facts"]:
             fact_count += 1
             parsed = _parse_fact(fact)
@@ -138,6 +141,12 @@ def build_report(
     }
 
 
+def _is_forbidden_fact_file(source: dict[str, Any]) -> bool:
+    if source.get("kind") != "fact_file":
+        return False
+    return Path(str(source.get("path") or "")).name == "forbidden_facts.pl"
+
+
 def render_markdown(report: dict[str, Any]) -> str:
     summary = report["summary"]
     lines = [
@@ -145,6 +154,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "This report checks SEC item/exhibit/treatment typed facts for axis mixing.",
         "It does not read source prose, questions, answers, or model outputs beyond typed fact strings.",
+        "Forbidden fact files are counted as sources but skipped for semantic-axis enforcement because they may deliberately encode blocked invalid rows.",
         "",
         f"- Sources: `{summary['sources']}`",
         f"- Facts: `{summary['fact_count']}`",

@@ -79,14 +79,21 @@ SEC Form 8-K skeleton pack
       13 / 13, 0 / 7 supported forbidden; five singleton unexpected
       `sec_filing_item_treatment/4` rows, all support=1 only
     axis/value-domain/atom/lens gates clean in the repaired cells
-  standing manifest over retained seed / transfer_001 / transfer_002:
-    13 / 13; 5 / 13; 11 / 12
-    0 supported forbidden and clean atom/lens/value gates in each cell
-    the older transfer_001 11/13 repaired-breadth root is historical
-      mechanism evidence, not the current standing cell
-    transfer_002 was also rerun on 2026-06-05 under the current full-bundle
-      mainline; it preserved 11/12 support with clean governance, so the
-      current score is corroborated rather than lifted
+  standing manifest over retained seed / transfer_001 / transfer_002 /
+  transfer_003:
+    13 / 13; 3 / 13; 10 / 12; 10 / 13
+    the older transfer_001 11/13 repaired-breadth root and later 5/13
+      current-mainline root are historical mechanism/negative evidence, not
+      the current standing cell
+    source-only review `sec_t001_source_review_20260605` rejected all 10
+      transfer_001 candidate variants: three exhibit-treatment overstatements,
+      four registrant-id aliases, and three fixture-id-as-filing-id rows
+    a typed source-scope filing-id integrity guard now removes the fixture-id
+      rows without reading source prose, but four source-reviewed registrant
+      alias rows still emit at support>=1. Those aliases are not safe to fix
+      with a ServiceNow-specific reducer.
+    transfer_002 and transfer_003 also drop under the same typed guard. Treat
+      this as stricter current measurement, not a support-polish invitation.
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
     methods anchor yet. Recent repaired transfer_003 roots now span
     11-13 / 13 under the same local Qwen MoE lane, so the current boundary is
@@ -111,16 +118,19 @@ SEC Form 8-K skeleton pack
     and exchange rows at support>=2 (6/13 overall because the probe was wrapper
     lens only); telephone stayed 0/3. This remains focused mechanism evidence,
     not a standing full-bundle support lift. A subsequent current-mainline
-    full-bundle transfer_001 rerun landed at 5/13 with 0 supported forbidden
-    and 15 unexpected same-signature facts: the wrapper date recovered, but
-    registrant/exhibit axes destabilized. Treat that as a negative retest, not
-    as a prompt-polish invitation.
+    full-bundle transfer_001 rerun landed at 5/13 before source-only review,
+    but the imported review tightened the oracle and promoted the safe
+    source-scope guard. The current standing t001 cell is therefore 3/13 with
+    4/0 forbidden emissions at support>=1/support>=2. The live blocker is
+    registrant-id aliasing (`service_now_inc`, `svc_now_inc`), not prose
+    leakage and not a safe deterministic normalization target yet.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
-    status: pass
-    109/141 expected facts at support>=2 and 309/423 deterministic per-run
+    status: fail
+    105/141 expected facts at support>=2 and 293/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
-    plans, and 0 supported forbidden emissions across the standing cells.
+    plans, and 4/0 forbidden emissions at support>=1/support>=2 across the
+    standing cells.
 
 FDA warning-letter pack
   older deterministic judged-QA v2 across transfer_001 and transfer_002:

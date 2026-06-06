@@ -113,7 +113,7 @@
       "id": "sec_t001_current_mainline_retest_negative",
       "title": "SEC transfer_001 current-mainline full-bundle retest negative",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "claim_read": "Use as a negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score.",
+      "claim_read": "Use as a pre-source-review negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. The imported source-only review and source-scope filing-id guard now tighten the current standing manifest cell to 3/13 with source-reviewed registrant alias blockers; do not use this 5/13 root as the current score.",
       "roots": [
         {
           "id": "current_mainline_r1",
@@ -126,7 +126,7 @@
       "id": "sec_t002_current_mainline_retest",
       "title": "SEC transfer_002 current-mainline full-bundle retest",
       "fixture_id": "sec_form_8k_skeleton_transfer_002",
-      "claim_read": "Use as the current standing transfer_002 cell: the fresh current-mainline Qwen MoE retest preserves 11/12 support with clean governance, while duplicate commission-file value support remains the live boundary.",
+      "claim_read": "Use as pre-source-scope-guard variance evidence: the fresh current-mainline Qwen MoE retest preserved 11/12 support with clean governance, while duplicate commission-file value support remained the live boundary. The current standing manifest now scores this cell at 10/12 under the stricter source-scope filing-id guard.",
       "roots": [
         {
           "id": "current_mainline_r1",

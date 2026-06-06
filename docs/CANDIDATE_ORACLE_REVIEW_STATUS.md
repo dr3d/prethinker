@@ -6,7 +6,7 @@ It verifies review folder identity and repo-relative source-file references with
 Expected facts are hard-gated for compact atom shape and registered carrier value domains.
 Forbidden facts are negative sentinels; off-domain or prose-shaped sentinel values are warnings, not support.
 
-- Reviews: `9`
+- Reviews: `12`
 - Blocking errors: `0`
 - Warnings: `14`
 - Status: `pass`
@@ -29,3 +29,6 @@ Forbidden facts are negative sentinels; off-domain or prose-shaped sentinel valu
 | `fda_t002_peeling_paint_detail_focused_review_20260605` | `fda_warning_letter_domain_transfer_002` | `fda_violation_detail/5` | 1 | 0 | `True` | `False` | `[]` | `[]` |
 | `osha_fta_total_penalty_blind_review_20260605` | `osha_incident_domain_v1` | `osha_penalty_amount/5` | 1 | 0 | `True` | `False` | `[]` | `[]` |
 | `sec_exhibit_treatment_blind_review_20260605` | `sec_form_8k_skeleton_v1` | `sec_exhibit/5` | 0 | 1 | `True` | `False` | `[]` | `[]` |
+| `sec_t001_source_review_20260605_sec_exhibit_5` | `sec_form_8k_skeleton_transfer_001` | `sec_exhibit/5` | 0 | 6 | `True` | `False` | `[]` | `[]` |
+| `sec_t001_source_review_20260605_sec_registrant_4` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant/4` | 0 | 2 | `True` | `False` | `[]` | `[]` |
+| `sec_t001_source_review_20260605_sec_registrant_identifier_5` | `sec_form_8k_skeleton_transfer_001` | `sec_registrant_identifier/5` | 0 | 2 | `True` | `False` | `[]` | `[]` |

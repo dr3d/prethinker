@@ -2292,6 +2292,7 @@ def main() -> int:
         _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
         _apply_sec_exhibit_treatment_specificity_integrity(record["source_compile"])
         _apply_sec_filing_id_atom_reduction(record["source_compile"])
+        _apply_sec_source_scope_filing_id_integrity(record["source_compile"])
         _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
         _apply_sec_identifier_value_atom_reduction(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
@@ -2352,6 +2353,7 @@ def main() -> int:
         _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
         _apply_sec_exhibit_treatment_specificity_integrity(record["source_compile"])
         _apply_sec_filing_id_atom_reduction(record["source_compile"])
+        _apply_sec_source_scope_filing_id_integrity(record["source_compile"])
         _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
         _apply_sec_identifier_value_atom_reduction(record["source_compile"])
         _apply_fda_facility_subject_convergence(record["source_compile"])
@@ -2430,6 +2432,7 @@ def main() -> int:
         _apply_sec_exhibit_number_atom_reduction(record["source_compile"])
         _apply_sec_exhibit_treatment_specificity_integrity(record["source_compile"])
         _apply_sec_filing_id_atom_reduction(record["source_compile"])
+        _apply_sec_source_scope_filing_id_integrity(record["source_compile"])
         _apply_sec_typed_slot_prefix_reduction(record["source_compile"])
         _apply_sec_identifier_value_atom_reduction(record["source_compile"])
         _apply_ntsb_timestamp_atom_reduction(record["source_compile"])
@@ -11002,6 +11005,81 @@ def _apply_sec_filing_id_atom_reduction(source_compile: dict[str, Any]) -> dict[
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _sec_source_scope_values(facts: list[str]) -> set[str]:
+    values: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        signature = f"{predicate}/{len(args)}"
+        contract = carrier_contract(signature)
+        if not isinstance(contract, dict):
+            continue
+        arg_names = [str(item).strip() for item in contract.get("args", [])]
+        for index, arg_name in enumerate(arg_names):
+            if arg_name == "source_or_scope" and index < len(args):
+                value = str(args[index]).strip().strip("'\"")
+                if value:
+                    values.add(value)
+    return values
+
+
+def _apply_sec_source_scope_filing_id_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop SEC rows that reuse a source/provenance atom as the filing_id."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    source_scope_values = _sec_source_scope_values(facts)
+    declared_filing_ids: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "sec_filing" and len(args) == 6 and args:
+            declared_filing_ids.add(str(args[0]).strip().strip("'\""))
+
+    out: list[str] = []
+    seen: set[str] = set()
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate in SEC_FILING_ID_SIGNATURES and args:
+                filing_id = str(args[0]).strip().strip("'\"")
+                if filing_id in source_scope_values and filing_id not in declared_filing_ids:
+                    dropped.append(
+                        {
+                            "fact": fact,
+                            "slot": "filing_id",
+                            "value": filing_id,
+                            "issue": "source_scope_value_reused_as_filing_id",
+                        }
+                    )
+                    continue
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_source_scope_filing_id_integrity_count"] = len(dropped)
+    source_compile["deterministic_sec_source_scope_filing_id_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_sec_source_scope_filing_id_integrity_policy"] = {
+        "schema_version": "deterministic_sec_source_scope_filing_id_integrity_v1",
+        "authority": "typed_carrier_slot_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops SEC registered-carrier rows whose filing_id slot reuses an atom already emitted "
+            "as source_or_scope in the same typed compile, unless that atom is itself declared as a "
+            "sec_filing/6 filing_id. It does not infer a replacement filing id or read source prose."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped": dropped[:100]}
 
 
 STATE_AG_TYPED_SLOT_ATOM_REDUCTIONS: dict[tuple[str, int], dict[int, dict[str, str]]] = {

@@ -19,13 +19,13 @@
     {
       "id": "sec_form_8k_skeleton_transfer_001",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "description": "SEC Form 8-K skeleton transfer 001 current-mainline negative retest; wrapper date recovered but registrant/exhibit axes destabilized.",
+      "description": "SEC Form 8-K skeleton transfer 001 current-mainline negative retest; stricter source-scope filing-id guard removes fixture-id support, while source-reviewed registrant aliases remain forbidden emissions.",
       "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_current_pack_rerun_negative_20260605\\sec-t001-current-pack-r1-20260605",
       "expect": {
         "support.reference_count": 13,
         "support.runs_seen": 3,
-        "support.exact_support_ge_2": 5,
-        "unexpected.unexpected_same_signature_ge_2": 2,
+        "support.exact_support_ge_2": 3,
+        "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
       }
@@ -38,7 +38,7 @@
       "expect": {
         "support.reference_count": 12,
         "support.runs_seen": 3,
-        "support.exact_support_ge_2": 11,
+        "support.exact_support_ge_2": 10,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0
@@ -52,7 +52,7 @@
       "expect": {
         "support.reference_count": 13,
         "support.runs_seen": 3,
-        "support.exact_support_ge_2": 11,
+        "support.exact_support_ge_2": 10,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0

@@ -110,6 +110,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_sec_exhibit_treatment_specificity_integrity,
     _apply_sec_filing_id_atom_reduction,
     _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_source_scope_filing_id_integrity,
     _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
     _apply_state_ag_typed_atom_reduction,
@@ -8674,6 +8675,38 @@ def test_sec_filing_id_atom_reduction_canonicalizes_numeric_leading_ids_only() -
         "fda_violation(001_39898, cfr_21_211_192, data_integrity, observation, src).",
     ]
     policy = source_compile["deterministic_sec_filing_id_atom_reduction_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_source_scope_filing_id_integrity_drops_provenance_as_filing_id_only() -> None:
+    source_compile = {
+        "facts": [
+            "sec_filing(filing_servicenow_8k, form_8_k, current_report, v_2025_12_23, not_stated, sec_material_event_ugly_003).",
+            "sec_exhibit(sec_material_event_ugly_003, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).",
+            "sec_exhibit(filing_servicenow_8k, exhibit_10_1, agreement, not_stated, exhibit_table_row_10_1).",
+            "sec_signatory(filing_servicenow_8k, russell_s_elmer, general_counsel, v_2025_12_23, sec_material_event_ugly_003).",
+        ]
+    }
+
+    report = _apply_sec_source_scope_filing_id_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "sec_filing(filing_servicenow_8k, form_8_k, current_report, v_2025_12_23, not_stated, sec_material_event_ugly_003).",
+        "sec_exhibit(filing_servicenow_8k, exhibit_10_1, agreement, not_stated, exhibit_table_row_10_1).",
+        "sec_signatory(filing_servicenow_8k, russell_s_elmer, general_counsel, v_2025_12_23, sec_material_event_ugly_003).",
+    ]
+    dropped = source_compile["deterministic_sec_source_scope_filing_id_integrity_dropped_facts"]
+    assert dropped == [
+        {
+            "fact": "sec_exhibit(sec_material_event_ugly_003, exhibit_10_1, agreement, filed, exhibit_table_row_10_1).",
+            "slot": "filing_id",
+            "value": "sec_material_event_ugly_003",
+            "issue": "source_scope_value_reused_as_filing_id",
+        }
+    ]
+    policy = source_compile["deterministic_sec_source_scope_filing_id_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
 

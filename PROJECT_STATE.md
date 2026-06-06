@@ -144,8 +144,13 @@ SEC Form 8-K skeleton pack
       contract clarification, clean atom/lens gates
     transfer_001: 5 / 13, 0 / 8 supported forbidden, clean atom/lens gates
       after the current-mainline full-bundle negative retest replaced the
-      older favorable breadth root
+      older favorable breadth root. A later imported source-only review
+      rejected 10 candidate variants, and the current standing manifest is now
+      stricter: 3 / 13 support>=2, with 4 / 0 forbidden emissions at
+      support>=1 / support>=2 from rejected registrant aliases.
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
+      before the source-scope filing-id integrity guard; current standing
+      manifest support is now 10 / 12 under the stricter guard.
   fenced event-substance probe:
     `sec_material_event/6` is registered for experiments but not offered by the
       promoted SEC skeleton profile
@@ -153,7 +158,8 @@ SEC Form 8-K skeleton pack
       supported forbidden, clean atom/lens gates; event-substance rows did not
       reproduce at support>=2
   read: SEC remains useful evidence that small closed skeleton packs transfer,
-    but the formal SEC methods-anchor claim is no longer the old 12/12 cell.
+    but the formal SEC methods-anchor claim is no longer the old 12/12 cell
+    or the later green 109/141 standing manifest.
     Recent repaired transfer_003 roots now span 11-13 / 13 under the same local
     Qwen MoE lane. The current honest boundary is favorable-draw risk,
     exhibit legal-treatment ambiguity, wrapper filing/telephone recall, one
@@ -172,12 +178,19 @@ SEC Form 8-K skeleton pack
   current compile-fact QA precision detail:
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
     unexpected same-signature facts at support>=2 and any emitted forbidden
-    facts. The current standing manifest is green: FDA transfer_002 is
-    11 / 29 support>=2 with 0 / 8 supported forbidden in the fresh full-lens
-    current-pack retest. The prior 21 / 29 contract-only root is historical
-    context, not the current full-lens recall claim. The earlier false
-    501(a)(2)(A) insanitary-basis row is retained as an integrity lesson, not
-    a current claim blocker.
+    facts. The current standing manifest is red after importing
+    `sec_t001_source_review_20260605`: overall support is 105 / 141 at
+    support>=2 and 293 / 423 per-run exact, with 0 prose-dependent exact rows,
+    0 unregistered exact typed plans, and 4 / 0 forbidden emissions at
+    support>=1 / support>=2. The only current manifest blocker is SEC
+    transfer_001 source-reviewed registrant aliases (`service_now_inc`,
+    `svc_now_inc`). The typed source-scope filing-id guard is promoted; a
+    company-specific alias reducer is not.
+    FDA transfer_002 remains 11 / 29 support>=2 with 0 / 8 supported forbidden
+    in the fresh full-lens current-pack retest. The prior 21 / 29
+    contract-only root is historical context, not the current full-lens recall
+    claim. The earlier false 501(a)(2)(A) insanitary-basis row is retained as
+    an integrity lesson, not a current claim blocker.
 
 FDA warning-letter pack
   older deterministic judged-QA v2 across transfer_001 and transfer_002:

@@ -281,13 +281,17 @@ signatory. The missing reconciled rows in that root were item 2.02 treatment
 and telephone.
 A repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells previously landed at `13/13`, `11/13`, and `11/12`, but the
-standing manifest now demotes transfer_001 to the current-mainline negative
-retest at `5/13`, `0/8` supported forbidden, and clean atom/lens/value gates.
-The older transfer_001 `11/13` root is historical mechanism evidence, not the
-current standing cell. Transfer_002 was rerun under the current full-bundle
-mainline on 2026-06-05 and preserved `11/12`, `0/6` supported forbidden, and
-clean atom/lens/value gates, so its standing root is now the retest rather than
-the older breadth root. The seed lift came from a fresh
+standing manifest first demoted transfer_001 to the current-mainline negative
+retest at `5/13`, then the imported source-only review
+`sec_t001_source_review_20260605` tightened the current standing t001 cell to
+`3/13` with `4/0` forbidden emissions at support>=1/support>=2. The safe
+source-scope filing-id guard removes fixture-id-as-filing-id rows; the remaining
+blocker is source-reviewed registrant alias emission (`service_now_inc`,
+`svc_now_inc`). The older transfer_001 `11/13` root and the later 5/13 root are
+historical mechanism/negative evidence, not the current standing cell.
+Transfer_002 was rerun under the current full-bundle mainline on 2026-06-05 and
+preserved `11/12` before the new source-scope guard; current standing support is
+`10/12`. The seed lift came from a fresh
 2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
 axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
 source-rejected `incorporated_by_reference` exhibit-role row is absent. The
