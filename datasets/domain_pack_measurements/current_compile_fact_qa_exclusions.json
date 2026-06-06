@@ -184,6 +184,15 @@
       ]
     },
     {
+      "fixture_id": "legal_authority_verification_micro_v11",
+      "reason_code": "seed_or_component_micro_fixture",
+      "status": "candidate_lane_seed",
+      "note": "Eleventh legal authority verification micro-fixture validates that support-cue language triggers proposition-review abstention instead of citation-clean certification. It is not a standing compile-fact transfer measurement cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\legal_authority_verification_micro_v11"
+      ]
+    },
+    {
       "fixture_id": "ntsb_investigation_report_id_omission_v1",
       "reason_code": "accountability_control_micro_fixture",
       "status": "omission_control",

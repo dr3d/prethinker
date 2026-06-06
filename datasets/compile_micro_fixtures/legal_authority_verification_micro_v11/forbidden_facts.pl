@@ -1,0 +1,4 @@
+legal_proposition_support_boundary(mention_001, proposition_001, support_verified, no_review_required, source_line_3).
+legal_proposition_claim(mention_001, proposition_001, ai_case_summary_trust_supported, filing_line_3, independently_reviewed).
+legal_proposition_source_span(proposition_001, auth_brown_347_us_483, page_495, candidate_span_proposed, source_line_3).
+legal_support_assessment(proposition_001, auth_brown_347_us_483, reviewed_support, no_independent_review, source_line_3).

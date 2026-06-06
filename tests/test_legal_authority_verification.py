@@ -24,6 +24,7 @@ FIXTURE_V6 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_ver
 FIXTURE_V8 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v8"
 FIXTURE_V9 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v9"
 FIXTURE_V10 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v10"
+FIXTURE_V11 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v11"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -1288,6 +1289,60 @@ def test_legal_authority_micro_fixture_v10_blocks_clean_filing_mutations() -> No
     }
 
 
+def test_legal_authority_micro_fixture_v11_abstains_on_support_cue_proposition() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V11 / "source.md",
+        authority_inventory_path=FIXTURE_V11 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v11",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 0
+    assert report["summary"]["review_required_mentions"] == 1
+    assert report["summary"]["resolved"] == 1
+    assert report["summary"]["unresolved"] == 0
+    assert report["summary"]["metadata_checks"] == 5
+    assert report["summary"]["metadata_match"] == 5
+    assert report["summary"]["metadata_mismatch"] == 0
+    assert report["summary"]["quote_claims"] == 0
+    assert report["summary"]["authority_text_sources"] == 1
+    assert report["summary"]["authority_text_available_sources"] == 1
+    assert report["summary"]["proposition_boundaries"] == 1
+    assert report["summary"]["verification_abstentions"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert report["summary"]["document_outcome"] == "review_required"
+
+    assert report["ledger_queries"]["which_propositions_require_human_review"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "347 U.S. 483",
+            "proposition_id": "proposition_001",
+            "review_requirement": "human_review_required",
+            "support_assessment": "deterministic_abstain",
+        }
+    ]
+    assert report["ledger_queries"]["which_authorities_are_attached_to_propositions"] == [
+        {
+            "proposition_id": "proposition_001",
+            "mention_id": "mention_001",
+            "citation": "347 U.S. 483",
+            "authority_id": "auth_brown_347_us_483",
+            "review_requirement": "human_review_required",
+            "support_assessment": "deterministic_abstain",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": True,
+        "blocking_issue_count": 0,
+        "blocking_issue_types": [],
+        "review_required_count": 1,
+        "answer": "no",
+    }
+    assert "legal_support_assessment(" in facts_text(report)
+    assert not any("support_verified" in fact for fact in report["facts"])
+
+
 def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanctions() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
@@ -1325,6 +1380,9 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v10" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert classes["clean_public_filings"]["status"] == "seeded"

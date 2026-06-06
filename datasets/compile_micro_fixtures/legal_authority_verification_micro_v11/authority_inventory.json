@@ -1,0 +1,19 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_brown_347_us_483",
+      "canonical_citation": "347 U.S. 483",
+      "case_name": "Brown v. Board of Education of Topeka",
+      "court": "Supreme Court of the United States",
+      "year": "1954",
+      "reporter": "U.S.",
+      "volume": "347",
+      "page": "483",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/347/483/",
+      "pages": {
+        "495": "We conclude that, in the field of public education, the doctrine of 'separate but equal' has no place. Separate educational facilities are inherently unequal."
+      }
+    }
+  ]
+}

@@ -1096,7 +1096,19 @@ def _pin_page_numbers(pin: str) -> set[int]:
 
 def _has_proposition_boundary(paragraph: str, citation_end: int) -> bool:
     tail = paragraph[citation_end:].casefold()
-    return "proposition" in tail
+    tail = re.sub(r'"[^"]*"', " ", tail)
+    review_cues = (
+        r"\bfor\s+the\s+proposition\s+that\b",
+        r"\bproposition\s+that\b",
+        r"\bheld\s+that\b",
+        r"\bholds\s+that\b",
+        r"\bholding\s+that\b",
+        r"\bstands\s+for\s+the\s+proposition\s+that\b",
+        r"\bsupports\s+the\s+proposition\s+that\b",
+        r"\bcited\s+for\s+the\s+proposition\s+that\b",
+        r"\brelied\s+on\s+for\s+the\s+proposition\s+that\b",
+    )
+    return any(re.search(pattern, tail) for pattern in review_cues)
 
 
 def _mention_verification_status(mention: dict[str, Any]) -> str:

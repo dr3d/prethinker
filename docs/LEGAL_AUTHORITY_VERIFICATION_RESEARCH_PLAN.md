@@ -142,6 +142,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v7
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v8
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v9
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v10
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v11
 ```
 
 They contain:
@@ -168,6 +169,8 @@ They contain:
 - one controlled mutation of a clean public filing excerpt that must block a
   fabricated quote, altered citation, and metadata year mismatch;
 - one proposition-support boundary that must abstain.
+- one support-cue proposition boundary such as `held that` that must abstain
+  instead of certifying legal support.
 - one short-form citation such as `Id.` that must require context and abstain
   instead of inventing a resolved authority.
 - one named short-form citation such as `Brown, 347 U.S. at 495` that also
