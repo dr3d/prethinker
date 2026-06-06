@@ -9,7 +9,7 @@ It reads local fixture files and authority inventories only; it does not call an
 - Matched forbidden facts: `0 / 37`
 - Citation mentions: `17`
 - Verified / blocked / review-required mentions: `6 / 10 / 1`
-- Resolved / unresolved / ambiguous / invalid reporter: `14 / 1 / 1 / 1`
+- Resolved / unresolved / ambiguous / invalid reporter / unavailable: `14 / 1 / 1 / 1 / 0`
 - Metadata checks / matches / mismatches: `64 / 62 / 2`
 - Quote claims / quote matches / quote mismatches: `9 / 5 / 3`
 - Pin mismatches: `1`

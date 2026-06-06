@@ -292,6 +292,7 @@ def test_external_resolver_throttling_is_unavailable_not_unresolved(tmp_path: Pa
     )
 
     assert report["mentions"][0]["resolution_status"] == "unavailable"
+    assert report["summary"]["unavailable"] == 1
     assert report["issues"] == [
         {
             "mention_id": "mention_001",
@@ -304,6 +305,23 @@ def test_external_resolver_throttling_is_unavailable_not_unresolved(tmp_path: Pa
         "legal_verification_abstention("
         "mention_001, authority_resolution, authority_lookup_unavailable, source_line_1)."
     ) in report["facts"]
+    assert report["ledger_queries"]["which_citations_do_not_resolve"] == []
+    assert report["ledger_queries"]["which_citation_lookups_are_unavailable"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "347 U.S. 483",
+            "line": 1,
+            "resolution_status": "unavailable",
+            "authority_id": "authority_lookup_unavailable",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 1,
+        "blocking_issue_types": ["unavailable"],
+        "review_required_count": 0,
+        "answer": "no",
+    }
 
 
 def test_courtlistener_lookup_resolver_maps_throttling_exception_to_abstention(tmp_path: Path) -> None:
@@ -326,6 +344,7 @@ def test_courtlistener_lookup_resolver_maps_throttling_exception_to_abstention(t
     )
 
     assert report["mentions"][0]["resolution_status"] == "unavailable"
+    assert report["summary"]["unavailable"] == 1
     assert report["issues"] == [
         {
             "mention_id": "mention_001",
@@ -339,6 +358,7 @@ def test_courtlistener_lookup_resolver_maps_throttling_exception_to_abstention(t
         "mention_001, authority_resolution, authority_lookup_unavailable, source_line_1)."
     ) in report["facts"]
     assert report["summary"]["false_verified"] == 0
+    assert len(report["ledger_queries"]["which_citation_lookups_are_unavailable"]) == 1
 
 
 def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavailable_text() -> None:

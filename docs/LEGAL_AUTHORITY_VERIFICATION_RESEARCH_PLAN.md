@@ -198,7 +198,8 @@ Status values follow the same broad shape:
 - `300`: ambiguous;
 - `400`: parsed but invalid shape or unsupported reporter;
 - `404`: citation-like value did not resolve;
-- `429`: reserved for external throttling, not used by the offline fixture.
+- transient external lookup failures such as `408`, `425`, `429`, `500`,
+  `502`, `503`, and `504`: unavailable lookup, not a bad citation.
 
 The current implementation has two layers:
 
@@ -264,6 +265,7 @@ compiled ledger, not from a second pass over source prose:
 which_citations_do_not_resolve
 which_citations_are_ambiguous
 which_citations_use_unsupported_reporters
+which_citation_lookups_are_unavailable
 which_citations_require_context
 which_cases_have_metadata_mismatches
 which_quotes_cannot_be_found

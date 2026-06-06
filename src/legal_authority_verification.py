@@ -413,6 +413,7 @@ def verify_legal_authorities(
         "unresolved": sum(1 for row in mentions if row["resolution_status"] == "unresolved"),
         "ambiguous": sum(1 for row in mentions if row["resolution_status"] == "ambiguous"),
         "invalid_reporter": sum(1 for row in mentions if row["resolution_status"] == "invalid_reporter"),
+        "unavailable": sum(1 for row in mentions if row["resolution_status"] == "unavailable"),
         "metadata_checks": len(metadata_checks),
         "metadata_match": sum(1 for check in metadata_checks if check.get("status") == "match"),
         "metadata_mismatch": sum(1 for check in metadata_checks if check.get("status") == "mismatch"),
@@ -503,12 +504,13 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
     unresolved = [
         _mention_brief(row)
         for row in mentions
-        if row.get("resolution_status") in {"unresolved", "ambiguous", "invalid_reporter", "unavailable"}
+        if row.get("resolution_status") in {"unresolved", "ambiguous", "invalid_reporter"}
     ]
     ambiguous = [_mention_brief(row) for row in mentions if row.get("resolution_status") == "ambiguous"]
     unsupported_reporters = [
         _mention_brief(row) for row in mentions if row.get("resolution_status") == "invalid_reporter"
     ]
+    unavailable_lookups = [_mention_brief(row) for row in mentions if row.get("resolution_status") == "unavailable"]
     metadata_mismatches = [
         {
             "mention_id": row["mention_id"],
@@ -591,6 +593,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
             "unresolved",
             "ambiguous",
             "invalid_reporter",
+            "unavailable",
             "metadata_mismatch",
             "authority_text_unavailable",
             "quote_not_found_in_authority",
@@ -603,6 +606,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         "which_citations_do_not_resolve": unresolved,
         "which_citations_are_ambiguous": ambiguous,
         "which_citations_use_unsupported_reporters": unsupported_reporters,
+        "which_citation_lookups_are_unavailable": unavailable_lookups,
         "which_cases_have_metadata_mismatches": metadata_mismatches,
         "which_quotes_cannot_be_found": quote_mismatches,
         "which_authority_text_is_unavailable": unavailable_authority_text,
@@ -633,6 +637,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Review-required mentions: `{summary['review_required_mentions']}`",
         f"- Resolved: `{summary['resolved']}`",
         f"- Unresolved: `{summary['unresolved']}`",
+        f"- Unavailable citation lookups: `{summary['unavailable']}`",
         f"- Invalid reporter: `{summary['invalid_reporter']}`",
         f"- Metadata checks / matches / mismatches: `{summary['metadata_checks']} / {summary['metadata_match']} / {summary['metadata_mismatch']}`",
         f"- Quote claims: `{summary['quote_claims']}`",
@@ -690,6 +695,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Unresolved citations: `{len(queries.get('which_citations_do_not_resolve') or [])}`",
                 f"- Ambiguous citations: `{len(queries.get('which_citations_are_ambiguous') or [])}`",
                 f"- Unsupported reporter citations: `{len(queries.get('which_citations_use_unsupported_reporters') or [])}`",
+                f"- Unavailable citation lookups: `{len(queries.get('which_citation_lookups_are_unavailable') or [])}`",
                 f"- Unavailable authority text: `{len(queries.get('which_authority_text_is_unavailable') or [])}`",
                 f"- Authority text source receipts: `{len(queries.get('which_authority_text_sources_were_used') or [])}`",
                 f"- Short-form citations requiring context: `{len(queries.get('which_citations_require_context') or [])}`",

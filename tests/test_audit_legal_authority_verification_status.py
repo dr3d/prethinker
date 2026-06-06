@@ -18,6 +18,7 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert summary["blocked_mentions"] == 10
     assert summary["review_required_mentions"] == 1
     assert summary["invalid_reporter"] == 1
+    assert summary["unavailable"] == 0
     assert summary["metadata_checks"] == 64
     assert summary["metadata_match"] == 62
     assert summary["metadata_mismatch"] == 2
@@ -75,7 +76,7 @@ def test_legal_authority_status_markdown_names_false_verified_gate() -> None:
     assert "Expected facts: `148 / 148`" in markdown
     assert "Matched forbidden facts: `0 / 37`" in markdown
     assert "Authority text sources: `11`" in markdown
-    assert "Resolved / unresolved / ambiguous / invalid reporter:" in markdown
+    assert "Resolved / unresolved / ambiguous / invalid reporter / unavailable:" in markdown
     assert "Metadata checks / matches / mismatches: `64 / 62 / 2`" in markdown
     assert "Short-form citations requiring context: `1`" in markdown
     assert "Verification abstentions: `10`" in markdown
