@@ -245,7 +245,8 @@ the verifier from silently depending on authority prose that is not visible in
 the typed report. When an authority inventory includes a retained authority-text
 URL, the report and ledger-query row carry that URL as provenance metadata; the
 typed fact remains the compact five-slot `legal_authority_text_source/5`
-receipt.
+receipt. Fixture intake treats retained authority/source URLs as public
+provenance and rejects non-HTTP(S) local paths or opaque references.
 
 ## Ledger Query Surface
 

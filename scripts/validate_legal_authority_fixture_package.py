@@ -65,6 +65,7 @@ ALLOWED_AUTHORITY_REPORTERS = {
     "F. Supp. 3d",
     "S. Ct.",
 }
+AUTHORITY_SOURCE_URL_FIELDS = ("authority_text_url", "authority_url", "source_url", "absolute_url")
 
 
 def parse_args() -> argparse.Namespace:
@@ -259,6 +260,9 @@ def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str, inventory: di
     for key in ("source_title", "source_url", "excerpt_method"):
         if not str(metadata.get(key) or "").strip():
             errors.append(f"source_metadata_missing_{key}")
+    source_url = str(metadata.get("source_url") or "").strip()
+    if source_url and not _is_http_url(source_url):
+        errors.append("source_metadata_source_url_not_http")
     independence = metadata.get("oracle_independence")
     if not isinstance(independence, dict):
         errors.append("source_metadata_missing_oracle_independence")
@@ -293,6 +297,10 @@ def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str, inventory: di
                 errors.append(f"source_metadata_authority_source_{index}:missing_canonical_citation")
             elif canonical_citation != str(inventory_row.get("canonical_citation") or "").strip():
                 errors.append(f"source_metadata_authority_source_{index}:canonical_citation_mismatch")
+            for key in AUTHORITY_SOURCE_URL_FIELDS:
+                url = str(row.get(key) or "").strip()
+                if url and not _is_http_url(url):
+                    errors.append(f"source_metadata_authority_source_{index}:{key}_not_http")
     return errors
 
 
@@ -330,7 +338,15 @@ def _inventory_errors(inventory: dict[str, Any]) -> list[str]:
         pages = row.get("pages")
         if pages is not None and not isinstance(pages, dict):
             errors.append(f"authority_{index}:pages_not_object")
+        for key in AUTHORITY_SOURCE_URL_FIELDS:
+            url = str(row.get(key) or "").strip()
+            if url and not _is_http_url(url):
+                errors.append(f"authority_{index}:{key}_not_http")
     return errors
+
+
+def _is_http_url(value: str) -> bool:
+    return value.startswith(("http://", "https://"))
 
 
 def _fact_errors(facts: list[str], *, label: str) -> list[str]:

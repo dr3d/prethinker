@@ -182,6 +182,32 @@ def test_validate_legal_authority_fixture_package_rejects_metadata_citation_mism
     assert "source_metadata_authority_source_1:canonical_citation_mismatch" in report["fixtures"][0]["errors"]
 
 
+def test_validate_legal_authority_fixture_package_rejects_non_http_metadata_authority_url(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    metadata_path = package / "clean_legal_filing_001" / "source_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["authority_sources"][0]["authority_text_url"] = "file:///tmp/obergefell"
+    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "source_metadata_authority_source_1:authority_text_url_not_http" in report["fixtures"][0]["errors"]
+
+
+def test_validate_legal_authority_fixture_package_rejects_non_http_inventory_authority_url(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    inventory_path = package / "clean_legal_filing_001" / "authority_inventory.json"
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    inventory["authorities"][0]["authority_text_url"] = "C:/local/obergefell.html"
+    inventory_path.write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "authority_1:authority_text_url_not_http" in report["fixtures"][0]["errors"]
+
+
 def test_validate_legal_authority_fixture_package_accepts_federal_reporter_inventory(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     inventory_path = package / "clean_legal_filing_001" / "authority_inventory.json"
