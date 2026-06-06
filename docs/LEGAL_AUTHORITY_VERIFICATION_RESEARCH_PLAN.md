@@ -256,6 +256,13 @@ datasets/legal_authority_verification/fixture_corpus_manifest.json
    python scripts/validate_legal_authority_fixture_package.py <package-or-zip>
    ```
 
+   Once a returned package passes validation, import it through the
+   validation-first importer rather than copying fixtures by hand:
+
+   ```text
+   python scripts/import_legal_authority_fixture_package.py <package-or-zip>
+   ```
+
    The validator is offline and deterministic. It checks fixture shape,
    source-only oracle metadata, authority inventory hygiene, registered fact
    signatures, expected/forbidden replay, false_verified=0, quote/pin coverage,
