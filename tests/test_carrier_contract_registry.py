@@ -444,6 +444,8 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "telephone values" in registrant_text
     assert "full source-stated legal registrant name" in registrant_text
     assert "not ticker symbols" in registrant_text
+    assert "do not split conjoined" in registrant_text
+    assert "do not abbreviate name components" in registrant_text
     assert "same registrant_id" in registrant_text
     assert "full_cover_table" in registrant_text
 
@@ -458,6 +460,8 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     identifier_text = " ".join(identifier["contract"] + identifier["forbidden_uses"])
     assert "same full-legal-name-derived registrant_id" in identifier_text
     assert "do not substitute ticker symbols" in identifier_text
+    assert "do not split conjoined brand words" in identifier_text
+    assert "abbreviate components" in identifier_text
     assert "numeric-leading" in identifier_text
     assert "do not infer CIK" in identifier_text
     assert "unstated_cik" in identifier_text
@@ -500,6 +504,7 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "sec_filing_item_treatment/4" in exhibit_text
     assert "filed as Exhibit N and incorporated by reference" in exhibit_text
     assert "exhibit_role=filed" in exhibit_text
+    assert "Do not infer filed or furnished merely because an exhibit appears in Item 9.01(d)" in exhibit_text
     assert "never infer legal treatment from cover_page_ixbrl format alone" in exhibit_text
     assert "cover_page_ixbrl" in exhibit["value_domains"]["exhibit_kind"]
 

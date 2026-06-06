@@ -809,6 +809,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "SEC registrant relation: link a filing to the source-stated registrant and jurisdiction of incorporation or organization.",
             "registrant_id is a compact normalized entity atom from the registrant name; jurisdiction is a compact state or not_stated.",
             "Derive registrant_id from the full source-stated legal registrant name, not ticker symbols, exchange abbreviations, or ad-hoc shortened names.",
+            "Preserve source-stated legal-name word boundaries when compacting registrant_id: do not split conjoined or internally capitalized brand words into extra tokens, and do not abbreviate name components.",
             "Use sec_registrant_identifier/5 for CIK, commission file number, IRS EIN, ticker, exchange, and telephone values.",
             "Use the same registrant_id consistently across sec_registrant/4 and sec_registrant_identifier/5 rows for the same filing.",
             "Do not pack the whole cover-page table or address block into registrant_id or jurisdiction.",
@@ -827,6 +828,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "contract": [
             "SEC registrant identifier relation: preserve one source-stated identifier for the registrant.",
             "Use the same full-legal-name-derived registrant_id emitted by sec_registrant/4 for the same filing; do not substitute ticker symbols or abbreviated aliases as the registrant_id.",
+            "The registrant_id must preserve the same legal-name word-boundary choices used by sec_registrant/4; do not split conjoined brand words or abbreviate components inside identifier rows.",
             "identifier_kind is a compact controlled value such as cik, commission_file_number, irs_ein, ticker_symbol, exchange_name, or telephone.",
             "identifier_value is one compact atom for the value; use prefixes such as cik_, file_, ein_, ticker_, exchange_, or phone_ so numeric-leading values do not leak into the atom layer.",
             "Emit cik only when a CIK label and value are explicitly stated in the provided source; do not infer CIK from company knowledge, issuer identity, or SEC lookup.",
@@ -921,6 +923,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "exhibit_role is legal treatment only: filed, furnished, incorporated_by_reference, or not_stated.",
             "Item-body language saying an agreement is incorporated herein by reference belongs to sec_filing_item_treatment/4, not to sec_exhibit/5, when the exhibit table/source row states the exhibit is filed or furnished.",
             "When an item body says an agreement is filed as Exhibit N and incorporated by reference, sec_exhibit/5 for Exhibit N uses exhibit_role=filed; the incorporation statement is an item-treatment fact on sec_filing_item_treatment/4.",
+            "Do not infer filed or furnished merely because an exhibit appears in Item 9.01(d), an exhibit table, or a Form 8-K filing; use exhibit_role=not_stated unless the exhibit row or nearby source text explicitly states filed, furnished, or incorporated treatment.",
             "Do not put content-format values such as embedded_ixbrl or inline_xbrl in exhibit_role; cover-page Inline XBRL rows use exhibit_kind=cover_page_ixbrl.",
             "Use exhibit_role=not_stated when the source table states a cover-page Inline XBRL exhibit but does not state whether that exhibit is filed, furnished, or incorporated by reference; never infer legal treatment from cover_page_ixbrl format alone.",
             "source_or_scope should be a source handle such as exhibit_table_row_10_1 or exhibit_table_row_104, not the exhibit description or contract title.",

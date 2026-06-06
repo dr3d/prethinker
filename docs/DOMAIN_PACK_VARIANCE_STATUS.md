@@ -5,10 +5,13 @@ This report does not read source prose, QA questions, judge output, or oracle an
 
 ## Summary
 
-- Status: `pass`
-- Groups: `9`
-- Roots: `16`
+- Status: `fail`
+- Groups: `10`
+- Roots: `17`
 - Warnings: `0`
+
+Blocking reasons:
+- `contract_probe_r1:supported_forbidden_fact`
 
 ## Groups
 
@@ -21,6 +24,7 @@ This report does not read source prose, QA questions, judge output, or oracle an
 | `osha_seed_qwen_moe_same_condition` | `osha_incident_domain_v1` | 1 | `21/21` | 0 | `0` | `pass` |
 | `fda_transfer002_qwen_moe_same_condition_negative` | `fda_warning_letter_domain_transfer_002` | 1 | `11/29` | 0 | `33` | `pass` |
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
+| `sec_t001_contract_probe_20260606` | `sec_form_8k_skeleton_transfer_001` | 1 | `9/13` | 2 | `2` | `fail` |
 | `sec_t002_current_mainline_retest` | `sec_form_8k_skeleton_transfer_002` | 1 | `11/12` | 0 | `2` | `pass` |
 | `ntsb_transfer001_qwen_moe_same_condition` | `ntsb_investigation_transfer_surface_001` | 2 | `22/25` | 0 | `16` | `pass` |
 
@@ -154,6 +158,23 @@ Roots:
 
 Roots:
 - `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605\sec-t001-current-pack-r1-20260605`
+
+## SEC transfer_001 legal-name/exhibit-treatment contract probe
+
+- Group: `sec_t001_contract_probe_20260606`
+- Fixture: `sec_form_8k_skeleton_transfer_001`
+- Read: Use as the current contract-probe evidence: legal-name and exhibit-treatment contract clarifications lift support to 9/13 and remove support>=2 forbidden rows, but one Qwen MoE run still emits source-reviewed svc_now_inc alias rows at support=1. The cell remains red under the standing no-forbidden-emission gate.
+- Support band: `9/13`
+- Supported forbidden total: `2`
+- Unexpected band: `2`
+- Status: `fail`
+
+| Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
+| --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| `contract_probe_r1` | fresh local-Qwen N=3 lens bundle after legal-name and exhibit-treatment contract clarifications | `9/13` | `26/39` | 2 | 2 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+
+Roots:
+- `contract_probe_r1`: `C:\prethinker_tmp_archive\sec_t001_contract_probe_20260606\sec-t001-exhibit-treatment-boundary-r1-20260606`
 
 ## SEC transfer_002 current-mainline full-bundle retest
 

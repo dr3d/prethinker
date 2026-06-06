@@ -19,12 +19,12 @@
     {
       "id": "sec_form_8k_skeleton_transfer_001",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "description": "SEC Form 8-K skeleton transfer 001 current-mainline negative retest; stricter source-scope filing-id guard removes fixture-id support, while source-reviewed registrant aliases remain forbidden emissions.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_current_pack_rerun_negative_20260605\\sec-t001-current-pack-r1-20260605",
+      "description": "SEC Form 8-K skeleton transfer 001 current-mainline contract probe; legal-name and exhibit-treatment contract clarifications lift support, but a source-reviewed registrant alias remains a forbidden single-run emission.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_contract_probe_20260606\\sec-t001-exhibit-treatment-boundary-r1-20260606",
       "expect": {
         "support.reference_count": 13,
         "support.runs_seen": 3,
-        "support.exact_support_ge_2": 3,
+        "support.exact_support_ge_2": 9,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0

@@ -123,6 +123,19 @@
       ]
     },
     {
+      "id": "sec_t001_contract_probe_20260606",
+      "title": "SEC transfer_001 legal-name/exhibit-treatment contract probe",
+      "fixture_id": "sec_form_8k_skeleton_transfer_001",
+      "claim_read": "Use as the current contract-probe evidence: legal-name and exhibit-treatment contract clarifications lift support to 9/13 and remove support>=2 forbidden rows, but one Qwen MoE run still emits source-reviewed svc_now_inc alias rows at support=1. The cell remains red under the standing no-forbidden-emission gate.",
+      "roots": [
+        {
+          "id": "contract_probe_r1",
+          "role": "fresh local-Qwen N=3 lens bundle after legal-name and exhibit-treatment contract clarifications",
+          "path": "C:/prethinker_tmp_archive/sec_t001_contract_probe_20260606/sec-t001-exhibit-treatment-boundary-r1-20260606"
+        }
+      ]
+    },
+    {
       "id": "sec_t002_current_mainline_retest",
       "title": "SEC transfer_002 current-mainline full-bundle retest",
       "fixture_id": "sec_form_8k_skeleton_transfer_002",

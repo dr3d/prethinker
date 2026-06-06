@@ -13,7 +13,7 @@ This report does not read source prose, QA questions, or judge outputs.
 - Unassigned fixtures accounted for: `4 / 4`
 - Expected facts in associated fixtures: `573`
 - Forbidden facts in associated fixtures: `250`
-- Schema status: `pass` (0 errors, 0 warnings)
+- Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
 

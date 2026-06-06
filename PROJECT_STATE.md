@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## One-Sentence Shape
 
@@ -145,9 +145,11 @@ SEC Form 8-K skeleton pack
     transfer_001: 5 / 13, 0 / 8 supported forbidden, clean atom/lens gates
       after the current-mainline full-bundle negative retest replaced the
       older favorable breadth root. A later imported source-only review
-      rejected 10 candidate variants, and the current standing manifest is now
-      stricter: 3 / 13 support>=2, with 4 / 0 forbidden emissions at
-      support>=1 / support>=2 from rejected registrant aliases.
+      rejected 10 candidate variants. Follow-up legal-name and
+      exhibit-treatment contract guidance lifted the current standing manifest
+      cell to 9 / 13 support>=2, but it remains red with 2 / 0 forbidden
+      emissions at support>=1 / support>=2 from rejected `svc_now_inc`
+      registrant-alias rows.
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
       before the source-scope filing-id integrity guard; current standing
       manifest support is now 10 / 12 under the stricter guard.
@@ -179,12 +181,13 @@ SEC Form 8-K skeleton pack
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
     unexpected same-signature facts at support>=2 and any emitted forbidden
     facts. The current standing manifest is red after importing
-    `sec_t001_source_review_20260605`: overall support is 105 / 141 at
-    support>=2 and 293 / 423 per-run exact, with 0 prose-dependent exact rows,
-    0 unregistered exact typed plans, and 4 / 0 forbidden emissions at
+    `sec_t001_source_review_20260605` and the 2026-06-06 SEC t001 contract
+    probe: overall support is 111 / 141 at support>=2 and 305 / 423 per-run
+    exact, with 0 prose-dependent exact rows, 0 unregistered exact typed
+    plans, and 2 / 0 forbidden emissions at
     support>=1 / support>=2. The only current manifest blocker is SEC
-    transfer_001 source-reviewed registrant aliases (`service_now_inc`,
-    `svc_now_inc`). The typed source-scope filing-id guard is promoted; a
+    transfer_001 source-reviewed registrant aliasing (`svc_now_inc` in the
+    current probe). The typed source-scope filing-id guard is promoted; a
     company-specific alias reducer is not.
     FDA transfer_002 remains 11 / 29 support>=2 with 0 / 8 supported forbidden
     in the fresh full-lens current-pack retest. The prior 21 / 29

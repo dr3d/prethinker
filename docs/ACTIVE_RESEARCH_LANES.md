@@ -283,11 +283,12 @@ A repaired breadth check over the retained seed, transfer_001, and
 transfer_002 cells previously landed at `13/13`, `11/13`, and `11/12`, but the
 standing manifest first demoted transfer_001 to the current-mainline negative
 retest at `5/13`, then the imported source-only review
-`sec_t001_source_review_20260605` tightened the current standing t001 cell to
-`3/13` with `4/0` forbidden emissions at support>=1/support>=2. The safe
-source-scope filing-id guard removes fixture-id-as-filing-id rows; the remaining
-blocker is source-reviewed registrant alias emission (`service_now_inc`,
-`svc_now_inc`). The older transfer_001 `11/13` root and the later 5/13 root are
+`sec_t001_source_review_20260605` tightened the forbidden set. The safe
+source-scope filing-id guard removes fixture-id-as-filing-id rows, and
+follow-up legal-name/exhibit-treatment contract guidance lifts the current
+standing t001 cell to `9/13`; the cell remains red with `2/0` forbidden
+emissions at support>=1/support>=2 from source-reviewed `svc_now_inc` alias
+rows. The older transfer_001 `11/13` root and the later 5/13 root are
 historical mechanism/negative evidence, not the current standing cell.
 Transfer_002 was rerun under the current full-bundle mainline on 2026-06-05 and
 preserved `11/12` before the new source-scope guard; current standing support is
@@ -295,7 +296,7 @@ preserved `11/12` before the new source-scope guard; current standing support is
 2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
 axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
 source-rejected `incorporated_by_reference` exhibit-role row is absent. The
-remaining boundary is transfer_001 registrant/exhibit destabilization, wrapper
+remaining boundary is transfer_001 registrant aliasing, wrapper
 filing/telephone recall, one duplicate commission-file value, unstable
 item-treatment recall, and MoE jitter rather than prose leakage. Dense compile
 substitutions on transfer_003

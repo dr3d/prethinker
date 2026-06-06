@@ -216,10 +216,11 @@ def main() -> int:
     union_value_audit_path = None
     reconcile_path = None
     score_path = None
+    score_exit_code = None
     if not bool(args.skip_score):
         print("scoring lens bundle union", flush=True)
         score_path = report_root / "typed_micro_series_summary.json"
-        _run(
+        score_exit_code = _run_report_command(
             _build_score_command(
                 fixture=fixture,
                 union_jsons=union_jsons,
@@ -228,7 +229,8 @@ def main() -> int:
                 support_threshold=int(args.support_threshold),
                 matcher=str(args.matcher),
                 apply_domain_reducers=not bool(args.no_apply_domain_reducers),
-            )
+            ),
+            report_path=score_path,
         )
     if not bool(args.skip_audit):
         print("auditing lens and union atoms", flush=True)
@@ -318,6 +320,7 @@ def main() -> int:
         "runs": run_reports,
         "reports": {
             "score_json": str(score_path or ""),
+            "score_exit_code": score_exit_code,
             "lens_atom_audit_json": str(lens_audit_path or ""),
             "union_atom_audit_json": str(union_audit_path or ""),
             "lens_carrier_value_domains_json": str(lens_value_audit_path or ""),
@@ -616,6 +619,13 @@ def _build_reconcile_command(
 
 def _run(command: list[str]) -> None:
     subprocess.run(command, cwd=REPO_ROOT, check=True)
+
+
+def _run_report_command(command: list[str], *, report_path: Path) -> int:
+    completed = subprocess.run(command, cwd=REPO_ROOT)
+    if completed.returncode != 0 and not report_path.exists():
+        completed.check_returncode()
+    return completed.returncode
 
 
 def _latest_compile_json(path: Path) -> Path:
