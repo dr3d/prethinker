@@ -83,6 +83,44 @@ def test_validate_legal_authority_fixture_package_rejects_claim_bearing_support_
     assert "expected_facts.pl:line_23:proposition_boundary_must_abstain_clean_public" in errors
 
 
+def test_validate_legal_authority_fixture_package_requires_expected_authority_text_receipts(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    expected_path = package / "clean_legal_filing_001" / "expected_facts.pl"
+    expected_path.write_text(
+        "\n".join(
+            line
+            for line in expected_path.read_text(encoding="utf-8").splitlines()
+            if not line.startswith("legal_authority_text_source(")
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "expected_facts_missing_authority_text_source_receipt" in report["fixtures"][0]["errors"]
+
+
+def test_validate_legal_authority_fixture_package_requires_forbidden_authority_text_trap(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    forbidden_path = package / "clean_legal_filing_001" / "forbidden_facts.pl"
+    forbidden_lines = [
+        line
+        for line in forbidden_path.read_text(encoding="utf-8").splitlines()
+        if not line.startswith("legal_authority_text_source(")
+    ]
+    forbidden_lines.append(
+        "legal_authority_resolution(mention_999, cite_1_us_1, unresolved, authority_not_found, source_line_99)."
+    )
+    forbidden_path.write_text("\n".join(forbidden_lines) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "forbidden_facts_missing_authority_text_source_trap" in report["fixtures"][0]["errors"]
+
+
 def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     zip_path = tmp_path / "legal_authority_clean_public_filings_20260606_01.zip"

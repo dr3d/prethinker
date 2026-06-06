@@ -140,6 +140,8 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
     inventory = _load_json(path / "authority_inventory.json") if (path / "authority_inventory.json").exists() else {}
     expected_facts = _load_fact_lines(path / "expected_facts.pl")
     forbidden_facts = _load_fact_lines(path / "forbidden_facts.pl")
+    expected_authority_text_sources = _signature_count(expected_facts, "legal_authority_text_source/5")
+    forbidden_authority_text_sources = _signature_count(forbidden_facts, "legal_authority_text_source/5")
 
     errors.extend(_manifest_errors(manifest, fixture_id=fixture_id, fixture_class=fixture_class))
     errors.extend(_metadata_errors(metadata, fixture_id=fixture_id))
@@ -180,6 +182,14 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
         quote_claims = int(verifier_summary.get("quote_claims", 0) or 0)
         if quote_claims < 1:
             errors.append("missing_quote_claim")
+        if quote_claims >= 1:
+            authority_text_sources = int(verifier_summary.get("authority_text_sources", 0) or 0)
+            if authority_text_sources < 1:
+                errors.append("quote_fixture_missing_authority_text_source_receipts")
+            if expected_authority_text_sources < 1:
+                errors.append("expected_facts_missing_authority_text_source_receipt")
+        if expected_authority_text_sources >= 1 and forbidden_authority_text_sources < 1:
+            errors.append("forbidden_facts_missing_authority_text_source_trap")
         mentions = list(report.get("mentions") or [])
         if not any(row.get("quote_check") and str(row.get("pin") or "").strip() for row in mentions):
             errors.append("missing_quoted_pin_cite")
@@ -283,6 +293,17 @@ def _fact_errors(facts: list[str], *, label: str) -> list[str]:
         if carrier_contract(signature) is None:
             errors.append(f"{label}:line_{line_number}:unregistered_signature:{signature}")
     return errors
+
+
+def _signature_count(facts: list[str], signature: str) -> int:
+    count = 0
+    for fact in facts:
+        parsed = _parse_fact(fact)
+        if parsed is None:
+            continue
+        if f"{parsed['predicate']}/{len(parsed['args'])}" == signature:
+            count += 1
+    return count
 
 
 def _clean_public_expected_fact_policy_errors(facts: list[str]) -> list[str]:
