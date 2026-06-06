@@ -47,6 +47,9 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
         "mode": "local_inventory",
         "class": "LocalAuthorityInventoryResolver",
         "default_local": "yes",
+        "provider": "local",
+        "external_lookup": "no",
+        "inventory_assisted": "yes",
     }
 
     issues = {row["issue"] for row in report["issues"]}
@@ -758,6 +761,12 @@ def test_legal_authority_cli_can_use_cached_courtlistener_resolver_without_token
         "mode": "courtlistener_citation_lookup",
         "class": "CourtListenerCitationLookupResolver",
         "default_local": "no",
+        "provider": "courtlistener",
+        "external_lookup": "explicit",
+        "base_url": "https://www.courtlistener.com/api/rest/v4",
+        "cache_dir": str(cache_dir),
+        "inventory_assisted": "yes",
+        "live_call_policy": "cache_replay_or_token_required",
     }
     assert report["summary"]["verified_mentions"] == 1
     assert report["summary"]["false_verified"] == 0

@@ -415,14 +415,34 @@ def verify_legal_authorities(
 def _resolver_report(*, resolver: LegalAuthorityResolver, default_local: bool) -> dict[str, str]:
     if isinstance(resolver, LocalAuthorityInventoryResolver):
         mode = "local_inventory"
+        extra = {
+            "provider": "local",
+            "external_lookup": "no",
+            "inventory_assisted": "yes",
+        }
     elif isinstance(resolver, CourtListenerCitationLookupResolver):
         mode = "courtlistener_citation_lookup"
+        client = resolver.client
+        extra = {
+            "provider": "courtlistener",
+            "external_lookup": "explicit",
+            "base_url": str(getattr(client, "base_url", "")),
+            "cache_dir": str(getattr(client, "cache_dir", "")),
+            "inventory_assisted": "yes" if resolver.inventory else "no",
+            "live_call_policy": "cache_replay_or_token_required",
+        }
     else:
         mode = "custom_resolver"
+        extra = {
+            "provider": "custom",
+            "external_lookup": "explicit",
+            "inventory_assisted": "unknown",
+        }
     return {
         "mode": mode,
         "class": resolver.__class__.__name__,
         "default_local": "yes" if default_local else "no",
+        **extra,
     }
 
 

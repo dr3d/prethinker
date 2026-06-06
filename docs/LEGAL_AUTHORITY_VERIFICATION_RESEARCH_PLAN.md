@@ -233,7 +233,10 @@ python scripts/run_legal_authority_verification.py \
 ```
 
 The first form is the local claim condition. The second form is a live/cached
-resolver comparison condition and must be reported separately.
+resolver comparison condition and must be reported separately. Reports include
+a `resolver` block with provider, class, cache directory, external-lookup
+policy, and inventory-assist status so comparison runs do not collapse into the
+local baseline.
 
 Authority text used for quote/pin verification is also emitted as a compact
 provenance ledger: available page/paragraph scopes get a digest, while missing
