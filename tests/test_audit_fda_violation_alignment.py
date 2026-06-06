@@ -210,6 +210,31 @@ def test_fda_violation_alignment_expect_md_allows_recorded_boundary(tmp_path: Pa
     assert mismatched.returncode == 1
 
 
+def test_fda_violation_alignment_cli_collapses_duplicate_findings(tmp_path: Path) -> None:
+    compile_paths = []
+    for index in (1, 2):
+        compile_json = tmp_path / "fixture_repeat" / f"compile_{index}.json"
+        compile_json.parent.mkdir(exist_ok=True)
+        _write_compile(
+            compile_json,
+            [
+                "fda_violation_citation(violation_1, cfr_21_211_192, cgmps_requirement, src_1).",
+            ],
+        )
+        compile_paths.append(compile_json)
+
+    command = [sys.executable, str(SCRIPT)]
+    for compile_path in compile_paths:
+        command.extend(["--compile-json", str(compile_path)])
+    result = subprocess.run(command, check=False, text=True, capture_output=True)
+
+    assert result.returncode == 1
+    report = json.loads(result.stdout)
+    assert report["raw_finding_count"] == 2
+    assert report["finding_count"] == 1
+    assert report["findings"][0]["support_count"] == "2"
+
+
 def test_fda_violation_alignment_audit_flags_reused_cgmp_citation(tmp_path: Path) -> None:
     compile_json = tmp_path / "fixture_reused" / "compile.json"
     compile_json.parent.mkdir()

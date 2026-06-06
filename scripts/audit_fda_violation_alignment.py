@@ -389,29 +389,54 @@ def audit_payload(path: Path) -> dict[str, Any]:
     )
 
 
+def _finding_detail(item: dict[str, str]) -> str:
+    return (
+        item.get("detail")
+        or item.get("citation")
+        or item.get("expected_categories")
+        or item.get("facts")
+        or item.get("fact")
+        or ""
+    )
+
+
+def _dedupe_findings(findings: list[dict[str, str]]) -> list[dict[str, str]]:
+    grouped: dict[tuple[str, str, str, str], dict[str, str]] = {}
+    counts: dict[tuple[str, str, str, str], int] = defaultdict(int)
+    for item in findings:
+        key = (
+            item.get("fixture", ""),
+            item.get("issue", ""),
+            item.get("violation_id", ""),
+            _finding_detail(item),
+        )
+        counts[key] += 1
+        if key not in grouped:
+            grouped[key] = dict(item)
+    out: list[dict[str, str]] = []
+    for key in sorted(grouped):
+        item = grouped[key]
+        item["support_count"] = str(counts[key])
+        out.append(item)
+    return out
+
+
 def _markdown(report: dict[str, Any]) -> str:
     lines = [
         "# FDA Violation Alignment Audit",
         "",
         f"- Compile artifacts: `{report['compile_count']}`",
         f"- Findings: `{report['finding_count']}`",
+        f"- Raw findings before duplicate collapse: `{report.get('raw_finding_count', report['finding_count'])}`",
         f"- Status: `{'pass' if report['finding_count'] == 0 else 'hold'}`",
         "",
-        "| Fixture | Issue | Violation | Detail |",
-        "| --- | --- | --- | --- |",
+        "| Fixture | Issue | Violation | Runs | Detail |",
+        "| --- | --- | --- | ---: | --- |",
     ]
     for item in report["findings"]:
-        detail = (
-            item.get("detail")
-            or item.get("citation")
-            or item.get("expected_categories")
-            or item.get("facts")
-            or item.get("fact")
-            or ""
-        )
         lines.append(
             f"| `{item.get('fixture', '')}` | `{item.get('issue', '')}` | "
-            f"`{item.get('violation_id', '')}` | `{detail}` |"
+            f"`{item.get('violation_id', '')}` | {item.get('support_count', '1')} | `{_finding_detail(item)}` |"
         )
     return "\n".join(lines) + "\n"
 
@@ -420,7 +445,8 @@ def main() -> int:
     args = parse_args()
     paths = _compile_paths(args)
     audits = [audit_payload(path) for path in paths]
-    findings = [finding for audit in audits for finding in audit["findings"]]
+    raw_findings = [finding for audit in audits for finding in audit["findings"]]
+    findings = _dedupe_findings(raw_findings)
     report = {
         "schema_version": "fda_violation_alignment_audit_v1",
         "policy": {
@@ -434,6 +460,7 @@ def main() -> int:
         },
         "compile_count": len(audits),
         "finding_count": len(findings),
+        "raw_finding_count": len(raw_findings),
         "audits": audits,
         "findings": findings,
     }
