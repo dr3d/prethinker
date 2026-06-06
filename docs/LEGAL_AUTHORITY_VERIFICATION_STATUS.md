@@ -41,4 +41,4 @@ It reads local fixture files and authority inventories only; it does not call an
 ## Next External Work Order
 
 - Needed now: `True`
-- Reason: The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r6.zip. Known hallucination/sanction filings remain deferred until the clean-public baseline lands.
+- Reason: The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r6.zip. Returned packages must pass scripts/import_legal_authority_fixture_package.py before fixtures are added to this manifest. Known hallucination/sanction filings remain deferred until the clean-public baseline lands.
