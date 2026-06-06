@@ -463,6 +463,18 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         for row in mentions
         if row.get("proposition_boundary")
     ]
+    proposition_authorities = [
+        {
+            "proposition_id": row["proposition_boundary"]["proposition_id"],
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "authority_id": row.get("authority_id", ""),
+            "review_requirement": row["proposition_boundary"]["review_requirement"],
+            "support_assessment": row["proposition_boundary"].get("support_assessment", ""),
+        }
+        for row in mentions
+        if row.get("proposition_boundary")
+    ]
     blocking_issues = [
         row
         for row in issues
@@ -488,6 +500,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         "which_authority_text_sources_were_used": authority_text_sources,
         "which_pin_cites_do_not_contain_the_quote": pin_mismatches,
         "which_propositions_require_human_review": proposition_review,
+        "which_authorities_are_attached_to_propositions": proposition_authorities,
         "can_this_filing_be_certified_citation_clean": {
             "citation_clean": not blocking_issues,
             "blocking_issue_count": len(blocking_issues),
@@ -570,6 +583,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Authority text source receipts: `{len(queries.get('which_authority_text_sources_were_used') or [])}`",
                 f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
                 f"- Pin-cite mismatches: `{len(queries.get('which_pin_cites_do_not_contain_the_quote') or [])}`",
+                f"- Proposition authority links: `{len(queries.get('which_authorities_are_attached_to_propositions') or [])}`",
             ]
         )
     return "\n".join(lines) + "\n"

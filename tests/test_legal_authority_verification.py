@@ -49,6 +49,16 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
     assert len(queries["which_quotes_cannot_be_found"]) == 1
     assert len(queries["which_pin_cites_do_not_contain_the_quote"]) == 1
     assert len(queries["which_propositions_require_human_review"]) == 1
+    assert queries["which_authorities_are_attached_to_propositions"] == [
+        {
+            "proposition_id": "proposition_005",
+            "mention_id": "mention_005",
+            "citation": "347 U.S. 483",
+            "authority_id": "auth_brown_347_us_483",
+            "review_requirement": "human_review_required",
+            "support_assessment": "deterministic_abstain",
+        }
+    ]
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 3,
@@ -234,6 +244,7 @@ def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_witho
     queries = report["ledger_queries"]
     assert queries["which_cases_have_metadata_mismatches"] == []
     assert queries["which_pin_cites_do_not_contain_the_quote"] == []
+    assert queries["which_authorities_are_attached_to_propositions"] == []
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": True,
         "blocking_issue_count": 0,
@@ -438,6 +449,7 @@ def test_legal_authority_report_renders_review_required_boundary() -> None:
     assert "Ledger Query Answers" in markdown
     assert "Certification answer: `no`" in markdown
     assert "Blocking issue types: `quote_not_found_in_authority, quote_outside_cited_pin, unresolved`" in markdown
+    assert "Proposition authority links: `1`" in markdown
 
 
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:

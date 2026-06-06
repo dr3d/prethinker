@@ -217,6 +217,29 @@ authority text emits `authority_unavailable` and forces abstention. This keeps
 the verifier from silently depending on authority prose that is not visible in
 the typed report.
 
+## Ledger Query Surface
+
+The prototype report exposes practical query answers derived only from the
+compiled ledger, not from a second pass over source prose:
+
+```text
+which_citations_do_not_resolve
+which_citations_are_ambiguous
+which_citations_use_unsupported_reporters
+which_cases_have_metadata_mismatches
+which_quotes_cannot_be_found
+which_authority_text_is_unavailable
+which_authority_text_sources_were_used
+which_pin_cites_do_not_contain_the_quote
+which_propositions_require_human_review
+which_authorities_are_attached_to_propositions
+can_this_filing_be_certified_citation_clean
+```
+
+The proposition-authority query is deliberately not a support verdict. It only
+links a detected proposition boundary to the cited authority and preserves the
+review state, usually `human_review_required` / `deterministic_abstain`.
+
 ## Metrics
 
 Primary metric:
