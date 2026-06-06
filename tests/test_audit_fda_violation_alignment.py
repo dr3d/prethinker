@@ -150,6 +150,66 @@ def test_fda_violation_alignment_audit_flags_fdca_authority_on_numbered_violatio
     )
 
 
+def test_fda_violation_alignment_expect_md_allows_recorded_boundary(tmp_path: Path) -> None:
+    compile_json = tmp_path / "fixture_expected_hold" / "compile.json"
+    compile_json.parent.mkdir()
+    _write_compile(
+        compile_json,
+        [
+            "fda_violation(violation_1, letter_1, violation_1, process_validation, src_1).",
+            "fda_violation_citation(violation_1, fdca_501_a_2_b, adulteration_authority, src_2).",
+        ],
+    )
+    expected_md = tmp_path / "expected.md"
+
+    first = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--compile-json",
+            str(compile_json),
+            "--out-md",
+            str(expected_md),
+            "--exit-zero",
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert first.returncode == 0
+
+    matched = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--compile-json",
+            str(compile_json),
+            "--expect-md",
+            str(expected_md),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert matched.returncode == 0
+
+    expected_md.write_text("# stale\n", encoding="utf-8")
+    mismatched = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--compile-json",
+            str(compile_json),
+            "--expect-md",
+            str(expected_md),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert mismatched.returncode == 1
+
+
 def test_fda_violation_alignment_audit_flags_reused_cgmp_citation(tmp_path: Path) -> None:
     compile_json = tmp_path / "fixture_reused" / "compile.json"
     compile_json.parent.mkdir()

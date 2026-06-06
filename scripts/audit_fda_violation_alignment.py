@@ -54,6 +54,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile-root", type=Path)
     parser.add_argument("--out-json", type=Path)
     parser.add_argument("--out-md", type=Path)
+    parser.add_argument("--expect-md", type=Path)
     parser.add_argument("--exit-zero", action="store_true")
     return parser.parse_args()
 
@@ -436,14 +437,21 @@ def main() -> int:
         "audits": audits,
         "findings": findings,
     }
+    md = _markdown(report)
+    expected_md_match = None
+    if args.expect_md:
+        expected_md_match = args.expect_md.exists() and args.expect_md.read_text(encoding="utf-8") == md
+        report["expected_md_match"] = expected_md_match
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     if args.out_md:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
-        args.out_md.write_text(_markdown(report), encoding="utf-8")
+        args.out_md.write_text(md, encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(report, indent=2, sort_keys=True))
+    if args.expect_md:
+        return 0 if expected_md_match else 1
     return 0 if args.exit_zero or not findings else 1
 
 
