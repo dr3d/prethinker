@@ -261,6 +261,46 @@ def test_summarize_current_compile_fact_qa_status_blocks_forbidden_emissions(tmp
     assert "fdca_501_a_2_a" in md
 
 
+def test_summarize_current_compile_fact_qa_status_blocks_failed_artifact_gate(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(
+        tmp_path,
+        gate_overrides={
+            "sec_form_8k_skeleton_seed": {
+                "union_atom_inventory": {"status": "fail"},
+            }
+        },
+    )
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "sec_form_8k_skeleton_seed:artifact_gate_status:union_atom_inventory:fail"
+        in report["summary"]["blocking_reasons"]
+    )
+
+
+def test_summarize_current_compile_fact_qa_status_blocks_missing_artifact_gate(tmp_path: Path) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(
+        tmp_path,
+        gate_overrides={
+            "osha_incident_transfer_001": {
+                "union_value_domains": None,
+            }
+        },
+    )
+
+    report = build_report(manifest_run_path=manifest_run, source_audit_path=source_audit)
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "osha_incident_transfer_001:artifact_gate_missing:union_value_domains"
+        in report["summary"]["blocking_reasons"]
+    )
+
+
 def test_summarize_current_compile_fact_qa_status_blocks_retained_favorable_variance_root(
     tmp_path: Path,
 ) -> None:
@@ -414,19 +454,32 @@ def _write_manifest_run(
     return path
 
 
-def _write_source_audit(tmp_path: Path, *, source_status: str = "pass") -> Path:
+def _write_source_audit(
+    tmp_path: Path,
+    *,
+    source_status: str = "pass",
+    gate_overrides: dict[str, dict[str, dict | None]] | None = None,
+) -> Path:
     path = tmp_path / "source_audit.json"
+    cells = [
+        _source_cell(
+            "sec_form_8k_skeleton_seed",
+            warning="sec_form_8k_skeleton_seed:missing_bundle_manifest_recovered_from_compile_json",
+        ),
+        _source_cell("osha_incident_transfer_001"),
+    ]
+    for cell in cells:
+        overrides = (gate_overrides or {}).get(str(cell["id"]), {})
+        for key, value in overrides.items():
+            if value is None:
+                cell["artifact_gate_summaries"].pop(key, None)
+            else:
+                cell["artifact_gate_summaries"][key] = value
     path.write_text(
         json.dumps(
             {
                 "summary": {"status": source_status},
-                "cells": [
-                    _source_cell(
-                        "sec_form_8k_skeleton_seed",
-                        warning="sec_form_8k_skeleton_seed:missing_bundle_manifest_recovered_from_compile_json",
-                    ),
-                    _source_cell("osha_incident_transfer_001"),
-                ],
+                "cells": cells,
             }
         ),
         encoding="utf-8",

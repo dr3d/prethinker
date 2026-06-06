@@ -30,6 +30,12 @@ from src.carrier_contract_registry import carrier_contract
 
 DEFAULT_MANIFEST_RUN = Path("tmp/compile_fact_qa_manifest_run/summary.json")
 DEFAULT_SOURCE_AUDIT = Path("tmp/compile_fact_manifest_sources.json")
+REQUIRED_ARTIFACT_GATES = (
+    "lens_atom_inventory",
+    "union_atom_inventory",
+    "lens_value_domains",
+    "union_value_domains",
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -233,6 +239,7 @@ def _cell_row(
         "source_root": str(source.get("source_root") or ""),
         "bundle_manifest_status": str(source.get("bundle_manifest_status") or ""),
         "lens_compile_count": int(source.get("lens_compile_count") or 0),
+        "artifact_gate_summaries": dict(source.get("artifact_gate_summaries") or {}),
         "artifact_gate_status": _artifact_gate_status(source.get("artifact_gate_summaries") or {}),
         "source_warning_count": len(source.get("warnings") or []),
         "source_warnings": list(source.get("warnings") or []),
@@ -868,9 +875,27 @@ def _blocking_reasons(
             )
         if cell["forbidden_emissions_ge_1"]:
             blockers.append(f"{cell_id}:forbidden_emissions_ge_1:{cell['forbidden_emissions_ge_1']}")
+        for reason in _artifact_gate_blocking_reasons(cell):
+            blockers.append(f"{cell_id}:{reason}")
         for check in cell.get("favorable_variance_root_checks") or []:
             if isinstance(check, dict) and check.get("status") == "fail":
                 blockers.append(str(check.get("blocking_reason") or "favorable_variance_root"))
+    return blockers
+
+
+def _artifact_gate_blocking_reasons(cell: dict[str, Any]) -> list[str]:
+    summaries = cell.get("artifact_gate_summaries")
+    if not isinstance(summaries, dict):
+        summaries = {}
+    blockers: list[str] = []
+    for gate in REQUIRED_ARTIFACT_GATES:
+        summary = summaries.get(gate)
+        if not isinstance(summary, dict):
+            blockers.append(f"artifact_gate_missing:{gate}")
+            continue
+        status = str(summary.get("status") or "unknown")
+        if status != "pass":
+            blockers.append(f"artifact_gate_status:{gate}:{status}")
     return blockers
 
 
