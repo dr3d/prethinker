@@ -90,6 +90,7 @@ class CourtListenerClient:
             payload = json.loads(response.read().decode("utf-8"))
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        self._write_cache_metadata(cached=cached, method=method, url=url, body=body)
         return payload
 
     def _url(self, path: str, params: dict[str, Any]) -> str:
@@ -101,3 +102,21 @@ class CourtListenerClient:
         cache_key = method.upper().encode("utf-8") + b"\0" + url.encode("utf-8") + b"\0" + (body or b"")
         digest = hashlib.sha256(cache_key).hexdigest()
         return self.cache_dir / f"{digest}.json"
+
+    def _cache_metadata_path(self, cached: Path) -> Path:
+        return cached.with_name(f"{cached.stem}.meta.json")
+
+    def _write_cache_metadata(self, *, cached: Path, method: str, url: str, body: bytes | None) -> None:
+        body_digest = hashlib.sha256(body).hexdigest() if body is not None else ""
+        metadata = {
+            "schema": "prethinker.courtlistener_cache_metadata.v1",
+            "provider": "courtlistener",
+            "method": method.upper(),
+            "url": url,
+            "body_sha256": body_digest,
+            "cache_file": cached.name,
+        }
+        self._cache_metadata_path(cached).write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )

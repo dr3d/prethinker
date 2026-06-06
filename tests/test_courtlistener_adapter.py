@@ -66,6 +66,74 @@ def test_courtlistener_client_replays_cached_citation_lookup_without_token(tmp_p
     assert client.citation_lookup(text=text) == [{"citation": "347 U.S. 483", "status": 200}]
 
 
+def test_courtlistener_client_writes_cache_metadata_for_live_get(tmp_path, monkeypatch):
+    monkeypatch.setenv("COURTLISTENER_API_TOKEN", "test-token")
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def read(self):
+            return b'{"count": 0, "results": []}'
+
+    monkeypatch.setattr(
+        "adapters.courtlistener.client.urllib.request.urlopen",
+        lambda request, timeout: FakeResponse(),
+    )
+    client = CourtListenerClient(cache_dir=tmp_path)
+    url = client._url("/search/", {"page_size": "1", "q": "Brown", "type": "o"})
+    cached = client._cache_path(method="GET", url=url, body=None)
+
+    assert client.search(q="Brown", page_size=1) == {"count": 0, "results": []}
+
+    metadata = json.loads(client._cache_metadata_path(cached).read_text(encoding="utf-8"))
+    assert metadata == {
+        "schema": "prethinker.courtlistener_cache_metadata.v1",
+        "provider": "courtlistener",
+        "method": "GET",
+        "url": url,
+        "body_sha256": "",
+        "cache_file": cached.name,
+    }
+
+
+def test_courtlistener_client_writes_cache_metadata_for_live_citation_lookup(tmp_path, monkeypatch):
+    monkeypatch.setenv("COURTLISTENER_API_TOKEN", "test-token")
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def read(self):
+            return b'[{"citation": "347 U.S. 483", "status": 200}]'
+
+    monkeypatch.setattr(
+        "adapters.courtlistener.client.urllib.request.urlopen",
+        lambda request, timeout: FakeResponse(),
+    )
+    client = CourtListenerClient(cache_dir=tmp_path)
+    text = "Brown v. Board of Education, 347 U.S. 483 (1954)"
+    url = client._url("/citation-lookup/", {})
+    body = urllib.parse.urlencode({"text": text}).encode("utf-8")
+    cached = client._cache_path(method="POST", url=url, body=body)
+
+    assert client.citation_lookup(text=text) == [{"citation": "347 U.S. 483", "status": 200}]
+
+    metadata = json.loads(client._cache_metadata_path(cached).read_text(encoding="utf-8"))
+    assert metadata["schema"] == "prethinker.courtlistener_cache_metadata.v1"
+    assert metadata["provider"] == "courtlistener"
+    assert metadata["method"] == "POST"
+    assert metadata["url"] == url
+    assert metadata["body_sha256"]
+    assert metadata["cache_file"] == cached.name
+
+
 def test_normalize_opinion_record_tolerates_search_result_shape():
     raw = {
         "id": 123,

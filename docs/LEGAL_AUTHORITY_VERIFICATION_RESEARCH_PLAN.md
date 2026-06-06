@@ -206,8 +206,10 @@ The local inventory remains the reproducible claim path. CourtListener live
 lookup is useful for fixture acquisition and resolver comparison, but it should
 not turn a measurement into an unrecorded external dependency. Live outputs
 need a provider manifest and retained cache before they become research
-evidence. Retained cache entries may replay without a token; cache misses are
-live calls and remain token-gated.
+evidence. Retained cache entries include payload JSON plus
+`prethinker.courtlistener_cache_metadata.v1` sidecars recording provider,
+method, URL, body digest, and cache filename; they may replay without a token.
+Cache misses are live calls and remain token-gated.
 
 Authority text used for quote/pin verification is also emitted as a compact
 provenance ledger: available page/paragraph scopes get a digest, while missing
