@@ -33,6 +33,7 @@ propagation = visible recomputation, not hidden belief
 
 ## Read First
 
+- [Technical note: from contaminated scores to governed document compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md) - the close-out research note on what survived the measurement reset.
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
 - [Closed domain predicate packs technical note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
 - [Domain predicate schema process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a document family becomes a customizable governed predicate pack.
@@ -85,9 +86,8 @@ SEC Form 8-K skeleton pack:
     transfer_003 repaired reruns now span 11-13 / 13 under the
       same local Qwen MoE lane
     standing breadth check: seed 13 / 13 after exhibit/item axis contract
-      rerun; transfer_001 5 / 13 after the current-mainline full-bundle
-      negative retest;
-      transfer_002 11 / 12
+      rerun; transfer_001 8 / 13 after source-only review and the
+      no-truncation repeat; transfer_002 10 / 12; transfer_003 10 / 13
     forbidden support: 0 in repaired cells
   boundary: exhibit legal-treatment ambiguity, wrapper/telephone recall,
     duplicate commission-file value, unstable item-treatment recall,
@@ -225,8 +225,9 @@ Current high-signal evidence:
   were seed `13 / 13` and three transfers `13 / 13`, `12 / 12`, and `12 / 12`.
   A later value-axis audit split item structure, item legal treatment, and
   exhibit legal treatment. The current standing breadth cells land at
-  seed `13 / 13`, transfer_001 `5 / 13`, transfer_002 `11 / 12`, and
-  transfer_003 now spans `11-13 / 13` under the same local Qwen MoE lane, all
+  seed `13 / 13`, transfer_001 `8 / 13`, transfer_002 `10 / 12`, and
+  transfer_003 `10 / 13`; repaired transfer_003 roots previously spanned
+  `11-13 / 13` under the same local Qwen MoE lane. The standing cells all run
   with `0` supported forbidden and clean governance. Dense compile substitutions on
   transfer_003 landed lower on the same role-semantics rows, so this is
   boundary-aware skeleton evidence, not the old pristine or model-independent

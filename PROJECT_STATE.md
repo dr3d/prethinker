@@ -22,6 +22,7 @@ not yet for open-ended substantive detail.
 
 The current front-door documents are:
 
+- `docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md`
 - `docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md`
 - `docs/CURRENT_RESEARCH_HEADLINE.md`
 - `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`
@@ -30,6 +31,7 @@ The current front-door documents are:
 - `docs/DOMAIN_PACK_STATUS.md`
 - `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`
 - `docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md`
+- `docs/FDA_VIOLATION_ALIGNMENT_STATUS.md`
 - `docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md`
 - `docs/PENDING_EXTERNAL_WORK_ORDERS.md`
 - `docs/CANDIDATE_ORACLE_REVIEW_STATUS.md`

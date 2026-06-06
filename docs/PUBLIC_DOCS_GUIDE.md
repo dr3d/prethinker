@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 This is the public reading map. It should stay short and current. Git history
 and `C:\prethinker_tmp_archive` keep older research diaries, prompt snapshots,
@@ -10,34 +10,36 @@ Current status: Prethinker is in a research-first domain-pack transfer phase.
 Older 90%+ measurement notes are historical calibration evidence, not current
 claims. Some were contaminated by prose-smuggling paths that let source/display
 text, question-shape routing, or judge-facing answer tokens lift exact-rate
-without proving typed derivation. The current phase-close result is documented
-in the closed-domain predicate-pack technical note.
+without proving typed derivation. The close-out result and measurement-reset
+lesson are documented in the governed document compilation technical note.
 
 ## Start Here
 
 1. [README](https://github.com/dr3d/prethinker/blob/main/README.md) - project entry point.
 2. [Docs README](https://github.com/dr3d/prethinker/blob/main/docs/README.md) - documentation map.
-3. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
-4. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - compact current claim and evidence snapshot.
-5. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - artifact ledger and family-by-family evidence.
-6. [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with source/settings provenance, replay gates, and repeated unexpected-fact precision diagnostics.
-7. [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md) - generated status for atom-library query planning over retained typed artifacts.
-8. [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
-9. [Domain Accountability Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
-10. [SEC Value-Axis Integrity Status](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated audit for the SEC item/exhibit/treatment axis split.
-11. [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
-12. [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
-13. [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for the current source-only review queue.
-14. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
-15. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
-16. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
-17. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
-18. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
-19. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
+3. [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md) - close-out research note and measurement-reset lesson.
+4. [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md) - phase-close technical result and non-claims.
+5. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - compact current claim and evidence snapshot.
+6. [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md) - artifact ledger and family-by-family evidence.
+7. [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md) - generated manifest-backed score table with source/settings provenance, replay gates, and repeated unexpected-fact precision diagnostics.
+8. [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md) - generated status for atom-library query planning over retained typed artifacts.
+9. [Domain Pack Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_STATUS.md) - generated registry/fixture inventory for active closed predicate packs.
+10. [Domain Accountability Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_ACCOUNTABILITY_STATUS.md) - generated omission-contract coverage for active closed predicate packs.
+11. [SEC Value-Axis Integrity Status](https://github.com/dr3d/prethinker/blob/main/docs/SEC_VALUE_AXIS_INTEGRITY_STATUS.md) - generated audit for the SEC item/exhibit/treatment axis split.
+12. [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
+13. [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
+14. [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for the current source-only review queue.
+15. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
+16. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
+17. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
+18. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
+19. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
+20. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
 
 ## Core Architecture
 
 - [Closed Domain Predicate Packs Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/CLOSED_DOMAIN_PREDICATE_PACKS_TECHNICAL_NOTE.md)
+- [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
 - [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
@@ -47,6 +49,7 @@ in the closed-domain predicate-pack technical note.
 ## Research Method
 
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [From Contaminated Scores to Governed Document Compilation](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_TECHNICAL_NOTE_GOVERNED_DOCUMENT_COMPILATION.md)
 - [Domain Pack Research Evidence](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md)
 - [Current Compile-Fact QA Status](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_COMPILE_FACT_QA_STATUS.md)
 - [Query Grounding Status](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_GROUNDING_STATUS.md)
