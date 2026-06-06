@@ -23,6 +23,20 @@ It reads local fixture files and authority inventories only; it does not call an
 - Blocking rows: `0`
 - Status: `pass`
 
+## Ledger-Only Query Totals
+
+These counts are derived only from structured verifier ledger rows.
+
+- Citation-clean certification yes / no: `4 / 9`
+- Blocking issues / review-required propositions: `16 / 1`
+- Unresolved-or-ambiguous citations: `4`
+- Unavailable citation lookups: `0`
+- Metadata mismatches: `3`
+- Quote mismatches / unavailable authority text: `4 / 1`
+- Pin mismatches / unavailable pins: `1 / 1`
+- Short-form citations requiring context: `2`
+- Proposition review rows / authority links: `1 / 1`
+
 ## Fact Signature Coverage
 
 | Signature | Expected matched/total | Forbidden matched/total |
@@ -69,4 +83,4 @@ It reads local fixture files and authority inventories only; it does not call an
 ## Next External Work Order
 
 - Needed now: `True`
-- Reason: Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is prepared at tmp/legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be named legal_authority_known_hallucination_sanction_20260606_01.zip and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest.
+- Reason: Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is archived outside active governance tmp at C:\prethinker_tmp_archive\pending_work_orders\legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be placed in tmp, named legal_authority_known_hallucination_sanction_20260606_01.zip, and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest.

@@ -195,6 +195,21 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "proposition_boundaries": 0,
         "verification_abstentions": 0,
         "false_verified": 0,
+        "ledger_certification_yes": 0,
+        "ledger_certification_no": 0,
+        "ledger_blocking_issue_count": 0,
+        "ledger_review_required_count": 0,
+        "ledger_unresolved_or_ambiguous": 0,
+        "ledger_unavailable_citation_lookups": 0,
+        "ledger_metadata_mismatches": 0,
+        "ledger_quote_mismatches": 0,
+        "ledger_authority_text_unavailable": 0,
+        "ledger_authority_text_sources": 0,
+        "ledger_short_form_context_required": 0,
+        "ledger_pin_mismatches": 0,
+        "ledger_pin_unavailable": 0,
+        "ledger_propositions_requiring_review": 0,
+        "ledger_proposition_authority_links": 0,
     }
     signature_totals: dict[str, dict[str, int]] = {}
     for row in rows:
@@ -203,6 +218,27 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
         totals["forbidden_fact_count"] += int(row.get("forbidden_fact_count", 0))
         totals["matched_forbidden_fact_count"] += len(row.get("matched_forbidden_facts") or [])
         summary = row.get("verifier_summary") or {}
+        ledger_query = row.get("ledger_query_summary") or {}
+        if ledger_query.get("certification_answer") == "yes":
+            totals["ledger_certification_yes"] += 1
+        elif ledger_query.get("certification_answer") == "no":
+            totals["ledger_certification_no"] += 1
+        for ledger_key in (
+            "blocking_issue_count",
+            "review_required_count",
+            "unresolved_or_ambiguous",
+            "unavailable_citation_lookups",
+            "metadata_mismatches",
+            "quote_mismatches",
+            "authority_text_unavailable",
+            "authority_text_sources",
+            "short_form_context_required",
+            "pin_mismatches",
+            "pin_unavailable",
+            "propositions_requiring_review",
+            "proposition_authority_links",
+        ):
+            totals[f"ledger_{ledger_key}"] += int(ledger_query.get(ledger_key, 0) or 0)
         for signature_row in row.get("fact_signature_summary") or []:
             signature = str(signature_row.get("signature") or "").strip()
             if not signature:
@@ -353,6 +389,20 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- False verified: `{summary['false_verified']}`",
         f"- Blocking rows: `{summary['blocking_rows']}`",
         f"- Status: `{summary['status']}`",
+        "",
+        "## Ledger-Only Query Totals",
+        "",
+        "These counts are derived only from structured verifier ledger rows.",
+        "",
+        f"- Citation-clean certification yes / no: `{summary['ledger_certification_yes']} / {summary['ledger_certification_no']}`",
+        f"- Blocking issues / review-required propositions: `{summary['ledger_blocking_issue_count']} / {summary['ledger_review_required_count']}`",
+        f"- Unresolved-or-ambiguous citations: `{summary['ledger_unresolved_or_ambiguous']}`",
+        f"- Unavailable citation lookups: `{summary['ledger_unavailable_citation_lookups']}`",
+        f"- Metadata mismatches: `{summary['ledger_metadata_mismatches']}`",
+        f"- Quote mismatches / unavailable authority text: `{summary['ledger_quote_mismatches']} / {summary['ledger_authority_text_unavailable']}`",
+        f"- Pin mismatches / unavailable pins: `{summary['ledger_pin_mismatches']} / {summary['ledger_pin_unavailable']}`",
+        f"- Short-form citations requiring context: `{summary['ledger_short_form_context_required']}`",
+        f"- Proposition review rows / authority links: `{summary['ledger_propositions_requiring_review']} / {summary['ledger_proposition_authority_links']}`",
         "",
         "## Fact Signature Coverage",
         "",

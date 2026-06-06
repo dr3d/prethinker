@@ -121,7 +121,7 @@
   ],
   "next_external_work_order_needed": {
     "needed_now": true,
-    "reason": "Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is prepared at tmp/legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be named legal_authority_known_hallucination_sanction_20260606_01.zip and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest."
+    "reason": "Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is archived outside active governance tmp at C:\\prethinker_tmp_archive\\pending_work_orders\\legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be placed in tmp, named legal_authority_known_hallucination_sanction_20260606_01.zip, and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest."
   },
   "purpose": "Fixture-class plan for legal authority verification. This manifest prevents premature expansion into real sanctioned/hallucination filings before the clean-public baseline lands under the deterministic resolver and report contract.",
   "schema": "prethinker.legal_authority_verification.fixture_corpus_manifest.v1",

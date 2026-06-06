@@ -33,6 +33,20 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert summary["short_form_citations"] == 2
     assert summary["pin_unavailable"] == 1
     assert summary["verification_abstentions"] == 14
+    assert summary["ledger_certification_yes"] == 4
+    assert summary["ledger_certification_no"] == 9
+    assert summary["ledger_blocking_issue_count"] == 16
+    assert summary["ledger_review_required_count"] == 1
+    assert summary["ledger_unresolved_or_ambiguous"] == 4
+    assert summary["ledger_unavailable_citation_lookups"] == 0
+    assert summary["ledger_metadata_mismatches"] == 3
+    assert summary["ledger_quote_mismatches"] == 4
+    assert summary["ledger_authority_text_unavailable"] == 1
+    assert summary["ledger_pin_mismatches"] == 1
+    assert summary["ledger_pin_unavailable"] == 1
+    assert summary["ledger_short_form_context_required"] == 2
+    assert summary["ledger_propositions_requiring_review"] == 1
+    assert summary["ledger_proposition_authority_links"] == 1
     signatures = {row["signature"]: row for row in summary["fact_signature_summary"]}
     assert signatures["legal_citation_mention/5"] == {
         "signature": "legal_citation_mention/5",
@@ -96,6 +110,11 @@ def test_legal_authority_status_markdown_names_false_verified_gate() -> None:
     assert "Short-form citations requiring context: `2`" in markdown
     assert "Pin unavailable: `1`" in markdown
     assert "Verification abstentions: `14`" in markdown
+    assert "Ledger-Only Query Totals" in markdown
+    assert "Citation-clean certification yes / no: `4 / 9`" in markdown
+    assert "Blocking issues / review-required propositions: `16 / 1`" in markdown
+    assert "Quote mismatches / unavailable authority text: `4 / 1`" in markdown
+    assert "Proposition review rows / authority links: `1 / 1`" in markdown
     assert "Fact Signature Coverage" in markdown
     assert "`legal_quote_span_match/5` | 14/14 | 0/13" in markdown
     assert "Clean-public legal filings have been imported" in markdown
