@@ -19,12 +19,12 @@
     {
       "id": "sec_form_8k_skeleton_transfer_001",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "description": "SEC Form 8-K skeleton transfer 001 no-truncation contract probe; legal-name truncation guidance clears source-reviewed alias emissions while telephone and signatory remain support boundaries.",
-      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_no_truncate_contract_20260606\\sec-t001-no-truncate-full-r1-20260606",
+      "description": "SEC Form 8-K skeleton transfer 001 no-truncation repeat probe; source-reviewed alias emissions stay cleared, but same-condition recall drops to 8/13 with exhibit, telephone, and signatory support boundaries.",
+      "domain_lens_bundle": "C:\\prethinker_tmp_archive\\sec_t001_no_truncate_contract_20260606\\sec-t001-no-truncate-full-r2-20260606",
       "expect": {
         "support.reference_count": 13,
         "support.runs_seen": 3,
-        "support.exact_support_ge_2": 11,
+        "support.exact_support_ge_2": 8,
         "unexpected.unexpected_same_signature_ge_2": 0,
         "redaction.prose_dependent_exact": 0,
         "typed_plan.unregistered_plan_exact_rows": 0

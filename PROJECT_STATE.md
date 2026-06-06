@@ -146,11 +146,12 @@ SEC Form 8-K skeleton pack
       after the current-mainline full-bundle negative retest replaced the
       older favorable breadth root. A later imported source-only review
       rejected 10 candidate variants. Follow-up source-scope and
-      no-truncation contract guidance now lifts the current standing manifest
-      cell to 11 / 13 support>=2 with 0 / 0 forbidden emissions at
+      no-truncation contract guidance clears the alias leakage, but a
+      same-condition repeat drops the current standing manifest cell to
+      8 / 13 support>=2 with 0 / 0 forbidden emissions at
       support>=1 / support>=2 and 0 unexpected same-signature rows. The
-      remaining unsupported rows are telephone and signatory support
-      boundaries, not alias leakage.
+      no-truncation evidence band is now 8-11 / 13; exhibit, telephone, and
+      signatory support remain unstable boundaries.
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
       before the source-scope filing-id integrity guard; current standing
       manifest support is now 10 / 12 under the stricter guard.
@@ -184,12 +185,13 @@ SEC Form 8-K skeleton pack
     facts. The current standing manifest is green after importing
     `sec_t001_source_review_20260605`, promoting the typed source-scope
     filing-id guard, and adding SEC no-truncation contract guidance: overall
-    support is 113 / 141 at support>=2 and 309 / 423 per-run exact, with 0
+    support is 110 / 141 at support>=2 and 304 / 423 per-run exact, with 0
     prose-dependent exact rows, 0 unregistered exact typed plans, and 0 / 0
     forbidden emissions at support>=1 / support>=2. SEC transfer_001 remains
-    bounded at 11 / 13: telephone and signatory support are still below the
-    claim threshold. The typed source-scope filing-id guard is promoted; a
-    company-specific alias reducer was not added.
+    bounded at 8 / 13 in the standing root, with an 8-11 / 13 retained band:
+    exhibit, telephone, and signatory support are still below the claim
+    threshold in the lower repeat. The typed source-scope filing-id guard is
+    promoted; a company-specific alias reducer was not added.
     FDA transfer_002 remains 11 / 29 support>=2 with 0 / 8 supported forbidden
     in the fresh full-lens current-pack retest. The prior 21 / 29
     contract-only root is historical context, not the current full-lens recall

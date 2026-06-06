@@ -285,8 +285,9 @@ standing manifest first demoted transfer_001 to the current-mainline negative
 retest at `5/13`, then the imported source-only review
 `sec_t001_source_review_20260605` tightened the forbidden set. The safe
 source-scope filing-id guard removes fixture-id-as-filing-id rows, and
-follow-up no-truncation legal-name guidance lifts the current standing t001
-cell to `11/13`; the cell now has `0/0` forbidden emissions at
+follow-up no-truncation legal-name guidance clears the alias emissions, but a
+same-condition repeat drops the current standing t001 cell to `8/13`; the
+retained no-truncation band is `8-11/13`, with `0/0` forbidden emissions at
 support>=1/support>=2 and 0 unexpected same-signature rows. The older
 transfer_001 `11/13` root, the later 5/13 root, and the red 9/13 alias probe
 are historical mechanism/negative evidence, not the current standing cell.
@@ -296,9 +297,10 @@ preserved `11/12` before the new source-scope guard; current standing support is
 2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
 axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
 source-rejected `incorporated_by_reference` exhibit-role row is absent. The
-remaining boundary is wrapper/telephone recall, transfer_001 and transfer_003
-signatory support, one duplicate commission-file value, unstable item-treatment
-recall, and MoE jitter rather than prose leakage. Dense compile
+remaining boundary is wrapper/telephone recall, transfer_001 exhibit recall,
+transfer_001 and transfer_003 signatory support, one duplicate commission-file
+value, unstable item-treatment recall, and MoE jitter rather than prose
+leakage. Dense compile
 substitutions on transfer_003
 with Gemma 4 12B Q4 and Qwen 27B Q4 both landed at `10/12`, `0` forbidden,
 with clean gates, missing the same role-semantics rows. SEC therefore supports

@@ -81,7 +81,7 @@ SEC Form 8-K skeleton pack
     axis/value-domain/atom/lens gates clean in the repaired cells
   standing manifest over retained seed / transfer_001 / transfer_002 /
   transfer_003:
-    13 / 13; 11 / 13; 10 / 12; 10 / 13
+    13 / 13; 8 / 13; 10 / 12; 10 / 13
     the older transfer_001 11/13 repaired-breadth root and later 5/13
       current-mainline root are historical mechanism/negative evidence, not
       the current standing cell
@@ -90,10 +90,10 @@ SEC Form 8-K skeleton pack
       four registrant-id aliases, and three fixture-id-as-filing-id rows
     a typed source-scope filing-id integrity guard now removes the fixture-id
       rows without reading source prose. Legal-name and exhibit-treatment
-      contract guidance then recovered expected registrant/exhibit support;
-      a later no-truncation contract probe lifts transfer_001 to 11/13 with
-      0/0 forbidden emissions and 0 unexpected same-signature rows. No
-      ServiceNow-specific alias reducer was added.
+      contract guidance then recovered expected registrant/exhibit support in
+      one root; a later no-truncation repeat leaves transfer_001 at an
+      8-11/13 band with 0/0 forbidden emissions and 0 unexpected
+      same-signature rows. No ServiceNow-specific alias reducer was added.
     transfer_002 and transfer_003 also drop under the same typed guard. Treat
       this as stricter current measurement, not a support-polish invitation.
   claim: SEC remains a strong skeleton-pack case study, but not a pristine
@@ -122,15 +122,16 @@ SEC Form 8-K skeleton pack
     not a standing full-bundle support lift. A subsequent current-mainline
     full-bundle transfer_001 rerun landed at 5/13 before source-only review,
     but the imported review tightened the oracle and promoted the safe
-    source-scope guard. A follow-up no-truncation contract probe lifts the
-    current standing t001 cell to 11/13, with 0/0 forbidden emissions at
-    support>=1/support>=2 and 0 unexpected rows. The live boundary is now
-    telephone and signatory support, not prose leakage and not source-reviewed
-    alias emission.
+    source-scope guard. A follow-up no-truncation contract probe clears the
+    alias emissions, but a same-condition repeat drops the current standing
+    t001 cell to 8/13 with 0/0 forbidden emissions at support>=1/support>=2
+    and 0 unexpected rows. The live boundary is now exhibit, telephone, and
+    signatory support, not prose leakage and not source-reviewed alias
+    emission.
   latest standing compile-fact manifest:
     docs/CURRENT_COMPILE_FACT_QA_STATUS.md
     status: pass
-    113/141 expected facts at support>=2 and 309/423 deterministic per-run
+    110/141 expected facts at support>=2 and 304/423 deterministic per-run
     exact rows, with 0 prose-dependent exact rows, 0 unregistered exact typed
     plans, and 0/0 forbidden emissions at support>=1/support>=2 across the
     standing cells.

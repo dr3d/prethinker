@@ -126,12 +126,17 @@
       "id": "sec_t001_no_truncate_contract_20260606",
       "title": "SEC transfer_001 no-truncation contract probe",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "claim_read": "Use as the current SEC transfer_001 contract-probe evidence: no-truncation legal-name guidance lifts support to 11/13 with 0 supported forbidden rows and 0 unexpected rows. Telephone and signatory remain unsupported boundaries.",
+      "claim_read": "Use as the current SEC transfer_001 no-truncation evidence band: the no-truncation guidance clears source-reviewed alias emissions, but same-condition recall spans 8-11/13 across retained roots. Use the lower repeat root as the standing manifest cell; exhibit, telephone, and signatory support remain unstable boundaries.",
       "roots": [
         {
           "id": "no_truncate_full_r1",
           "role": "fresh local-Qwen N=3 full lens bundle after legal-name no-truncation guidance",
           "path": "C:/prethinker_tmp_archive/sec_t001_no_truncate_contract_20260606/sec-t001-no-truncate-full-r1-20260606"
+        },
+        {
+          "id": "no_truncate_full_r2",
+          "role": "same-condition repeat showing lower recall after legal-name no-truncation guidance",
+          "path": "C:/prethinker_tmp_archive/sec_t001_no_truncate_contract_20260606/sec-t001-no-truncate-full-r2-20260606"
         }
       ]
     },
