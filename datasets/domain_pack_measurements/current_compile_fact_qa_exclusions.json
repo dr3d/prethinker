@@ -139,6 +139,15 @@
       ]
     },
     {
+      "fixture_id": "legal_authority_verification_micro_v6",
+      "reason_code": "seed_or_component_micro_fixture",
+      "status": "candidate_lane_seed",
+      "note": "Sixth legal authority verification micro-fixture validates quote-before-citation extraction and punctuation-normalized quote matching. It is not a standing compile-fact transfer measurement cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\legal_authority_verification_micro_v6"
+      ]
+    },
+    {
       "fixture_id": "ntsb_investigation_report_id_omission_v1",
       "reason_code": "accountability_control_micro_fixture",
       "status": "omission_control",

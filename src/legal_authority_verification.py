@@ -204,7 +204,7 @@ def verify_legal_authorities(
                         }
                     )
 
-            quote_match = QUOTE_RE.search(paragraph.text, citation_extract.end)
+            quote_match = _quote_near_citation(paragraph.text, citation_extract)
             if quote_match:
                 quote_index += 1
                 quote_id = f"quote_{quote_index:03d}"
@@ -615,6 +615,21 @@ def _citation_text(*, volume: str, reporter: str, page: str) -> str:
     return f"{volume} {_normalized_reporter_text(reporter)} {page}"
 
 
+def _quote_near_citation(text: str, citation: CitationExtract) -> re.Match[str] | None:
+    candidates: list[tuple[int, re.Match[str]]] = []
+    after = QUOTE_RE.search(text, citation.end)
+    if after and after.start() - citation.end <= 180:
+        candidates.append((after.start() - citation.end, after))
+    before_matches = [match for match in QUOTE_RE.finditer(text[: citation.start])]
+    if before_matches:
+        before = before_matches[-1]
+        if citation.start - before.end() <= 180:
+            candidates.append((citation.start - before.end(), before))
+    if not candidates:
+        return None
+    return min(candidates, key=lambda row: row[0])[1]
+
+
 def _citation_atom(citation: str) -> str:
     citation = citation.casefold().replace("u.s.", "us")
     compact = re.sub(r"[^a-z0-9]+", "_", citation).strip("_")
@@ -670,8 +685,13 @@ def _quote_span_match(quote: str, authority: dict[str, Any]) -> tuple[str, str]:
     normalized_quote = _normalize_text(quote)
     pages = authority.get("pages") if isinstance(authority.get("pages"), dict) else {}
     for page, text in pages.items():
-        if normalized_quote and normalized_quote in _normalize_text(str(text)):
+        normalized_text = _normalize_text(str(text))
+        if normalized_quote and normalized_quote in normalized_text:
             return "exact_match", f"page_{page}"
+        loose_quote = _normalize_quote_for_match(quote)
+        loose_text = _normalize_quote_for_match(str(text))
+        if loose_quote and loose_quote in loose_text:
+            return "normalized_match", f"page_{page}"
     if not pages:
         return "authority_unavailable", "authority_unavailable"
     return "no_match", "no_match"
@@ -740,6 +760,11 @@ def _normalize_name(value: str) -> str:
 
 def _normalize_text(value: str) -> str:
     return _clean_space(value).casefold()
+
+
+def _normalize_quote_for_match(value: str) -> str:
+    normalized = _normalize_text(value)
+    return re.sub(r"[.,;:!?]+(?=$|\s)", "", normalized)
 
 
 def _clean_space(value: str) -> str:

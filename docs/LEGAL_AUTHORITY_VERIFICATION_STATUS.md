@@ -4,13 +4,13 @@ This generated report runs the deterministic legal-authority verifier over fixtu
 It reads local fixture files and authority inventories only; it does not call an LLM or live legal resolver.
 
 - Manifest: `datasets/legal_authority_verification/fixture_corpus_manifest.json`
-- Fixtures: `5`
-- Expected facts: `80 / 80`
-- Matched forbidden facts: `0 / 28`
-- Citation mentions: `15`
-- Verified / blocked / review-required mentions: `5 / 9 / 1`
-- Resolved / unresolved / ambiguous / invalid reporter: `12 / 1 / 1 / 1`
-- Quote claims / quote matches / quote mismatches: `7 / 4 / 2`
+- Fixtures: `6`
+- Expected facts: `94 / 94`
+- Matched forbidden facts: `0 / 33`
+- Citation mentions: `17`
+- Verified / blocked / review-required mentions: `6 / 10 / 1`
+- Resolved / unresolved / ambiguous / invalid reporter: `14 / 1 / 1 / 1`
+- Quote claims / quote matches / quote mismatches: `9 / 5 / 3`
 - Pin mismatches: `1`
 - Proposition boundaries: `1`
 - False verified: `0`
@@ -21,7 +21,7 @@ It reads local fixture files and authority inventories only; it does not call an
 
 | Class | Status | Fixtures |
 | --- | --- | ---: |
-| `controlled_adversarial_mutations` | `seeded` | 5 |
+| `controlled_adversarial_mutations` | `seeded` | 6 |
 | `clean_public_filings` | `planned` | 0 |
 | `known_hallucination_or_sanction_filings` | `deferred_until_resolver_contract_stable` | 0 |
 
@@ -34,8 +34,9 @@ It reads local fixture files and authority inventories only; it does not call an
 | `legal_authority_verification_micro_v3` | `controlled_adversarial_mutations` | 3/3 | 0 | 0 | `0/1/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v4` | `controlled_adversarial_mutations` | 8/8 | 0 | 0 | `0/1/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v5` | `controlled_adversarial_mutations` | 16/16 | 0 | 0 | `4/0/0` | `yes` | `[]` |
+| `legal_authority_verification_micro_v6` | `controlled_adversarial_mutations` | 14/14 | 0 | 0 | `1/1/0` | `no` | `[]` |
 
 ## Next External Work Order
 
 - Needed now: `True`
-- Reason: The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r4.zip. Known hallucination/sanction filings remain deferred until the clean-public baseline lands.
+- Reason: The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r5.zip. Known hallucination/sanction filings remain deferred until the clean-public baseline lands.

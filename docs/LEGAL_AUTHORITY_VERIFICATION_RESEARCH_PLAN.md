@@ -131,6 +131,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v2
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v3
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v4
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v5
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v6
 ```
 
 They contain:
@@ -145,6 +146,8 @@ They contain:
   metadata when those fields are not stated in that citation mention;
 - reporter-spacing variants such as `U. S.` normalized to the same authority key
   as `U.S.`;
+- quoted language immediately before a citation, including punctuation-normalized
+  quote matching and fabricated quote blocking;
 - one real authority with a fabricated quote;
 - one real quote attached to the wrong cited authority;
 - one real authority with the quote present in the authority but outside the
