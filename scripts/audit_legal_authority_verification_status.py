@@ -132,6 +132,7 @@ def _audit_fixture(*, class_id: str, fixture_path: Path) -> dict[str, Any]:
         verifier_summary = dict(report.get("summary") or {})
         ledger_queries = dict(report.get("ledger_queries") or {})
 
+    matched_expected = sorted(set(expected_facts) & emitted_facts)
     missing_expected = sorted(set(expected_facts) - emitted_facts)
     matched_forbidden = sorted(set(forbidden_facts) & emitted_facts)
     if missing_expected:
@@ -151,13 +152,19 @@ def _audit_fixture(*, class_id: str, fixture_path: Path) -> dict[str, Any]:
         "missing_expected_facts": missing_expected,
         "forbidden_fact_count": len(forbidden_facts),
         "matched_forbidden_facts": matched_forbidden,
+        "fact_signature_summary": _fact_signature_summary(
+            expected_facts=expected_facts,
+            matched_expected_facts=matched_expected,
+            forbidden_facts=forbidden_facts,
+            matched_forbidden_facts=matched_forbidden,
+        ),
         "verifier_summary": verifier_summary,
         "ledger_query_summary": _ledger_query_summary(ledger_queries),
         "errors": errors,
     }
 
 
-def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
+def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     totals = {
         "fixture_count": len(rows),
         "expected_fact_count": 0,
@@ -186,12 +193,28 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
         "verification_abstentions": 0,
         "false_verified": 0,
     }
+    signature_totals: dict[str, dict[str, int]] = {}
     for row in rows:
         totals["expected_fact_count"] += int(row.get("expected_fact_count", 0))
         totals["matched_expected_fact_count"] += int(row.get("matched_expected_fact_count", 0))
         totals["forbidden_fact_count"] += int(row.get("forbidden_fact_count", 0))
         totals["matched_forbidden_fact_count"] += len(row.get("matched_forbidden_facts") or [])
         summary = row.get("verifier_summary") or {}
+        for signature_row in row.get("fact_signature_summary") or []:
+            signature = str(signature_row.get("signature") or "").strip()
+            if not signature:
+                continue
+            bucket = signature_totals.setdefault(
+                signature,
+                {
+                    "expected": 0,
+                    "matched_expected": 0,
+                    "forbidden": 0,
+                    "matched_forbidden": 0,
+                },
+            )
+            for key in ("expected", "matched_expected", "forbidden", "matched_forbidden"):
+                bucket[key] += int(signature_row.get(key, 0) or 0)
         for key in (
             "citation_mentions",
             "verified_mentions",
@@ -216,6 +239,10 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
             "false_verified",
         ):
             totals[key] += int(summary.get(key, 0) or 0)
+    totals["fact_signature_summary"] = [
+        {"signature": signature, **counts}
+        for signature, counts in sorted(signature_totals.items())
+    ]
     return totals
 
 
@@ -233,7 +260,50 @@ def _ledger_query_summary(ledger_queries: dict[str, Any]) -> dict[str, Any]:
         "authority_text_sources": len(ledger_queries.get("which_authority_text_sources_were_used") or []),
         "pin_mismatches": len(ledger_queries.get("which_pin_cites_do_not_contain_the_quote") or []),
         "propositions_requiring_review": len(ledger_queries.get("which_propositions_require_human_review") or []),
+        "proposition_authority_links": len(ledger_queries.get("which_authorities_are_attached_to_propositions") or []),
     }
+
+
+def _fact_signature_summary(
+    *,
+    expected_facts: list[str],
+    matched_expected_facts: list[str],
+    forbidden_facts: list[str],
+    matched_forbidden_facts: list[str],
+) -> list[dict[str, Any]]:
+    expected = _signature_counts(expected_facts)
+    matched_expected = _signature_counts(matched_expected_facts)
+    forbidden = _signature_counts(forbidden_facts)
+    matched_forbidden = _signature_counts(matched_forbidden_facts)
+    signatures = sorted(set(expected) | set(matched_expected) | set(forbidden) | set(matched_forbidden))
+    return [
+        {
+            "signature": signature,
+            "expected": expected.get(signature, 0),
+            "matched_expected": matched_expected.get(signature, 0),
+            "forbidden": forbidden.get(signature, 0),
+            "matched_forbidden": matched_forbidden.get(signature, 0),
+        }
+        for signature in signatures
+    ]
+
+
+def _signature_counts(facts: list[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for fact in facts:
+        signature = _fact_signature(fact)
+        if signature:
+            counts[signature] = counts.get(signature, 0) + 1
+    return counts
+
+
+def _fact_signature(fact: str) -> str:
+    head, open_paren, rest = fact.partition("(")
+    if not open_paren:
+        return ""
+    args_text = rest.rsplit(")", 1)[0]
+    arity = 0 if not args_text.strip() else len([arg for arg in args_text.split(",")])
+    return f"{head.strip()}/{arity}"
 
 
 def _document_id_from_expected(expected_facts: list[str]) -> str:
@@ -273,11 +343,30 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Blocking rows: `{summary['blocking_rows']}`",
         f"- Status: `{summary['status']}`",
         "",
+        "## Fact Signature Coverage",
+        "",
+        "| Signature | Expected matched/total | Forbidden matched/total |",
+        "| --- | ---: | ---: |",
+    ]
+    for row in summary.get("fact_signature_summary") or []:
+        lines.append(
+            "| `{}` | {}/{} | {}/{} |".format(
+                row.get("signature", ""),
+                row.get("matched_expected", 0),
+                row.get("expected", 0),
+                row.get("matched_forbidden", 0),
+                row.get("forbidden", 0),
+            )
+        )
+    lines.extend(
+        [
+            "",
         "## Fixture Classes",
         "",
         "| Class | Status | Fixtures |",
         "| --- | --- | ---: |",
     ]
+    )
     for row in report.get("fixture_classes", []):
         lines.append(f"| `{row['id']}` | `{row['status']}` | {row['fixture_count']} |")
     lines.extend(

@@ -21,6 +21,23 @@ It reads local fixture files and authority inventories only; it does not call an
 - Blocking rows: `0`
 - Status: `pass`
 
+## Fact Signature Coverage
+
+| Signature | Expected matched/total | Forbidden matched/total |
+| --- | ---: | ---: |
+| `legal_authority_metadata_check/5` | 22/22 | 0/8 |
+| `legal_authority_resolution/5` | 17/17 | 0/7 |
+| `legal_authority_text_source/5` | 11/11 | 0/2 |
+| `legal_citation_mention/5` | 17/17 | 0/0 |
+| `legal_pin_cite_check/5` | 7/7 | 0/4 |
+| `legal_proposition_claim/5` | 1/1 | 0/1 |
+| `legal_proposition_source_span/5` | 1/1 | 0/1 |
+| `legal_proposition_support_boundary/5` | 1/1 | 0/1 |
+| `legal_quote_claim/5` | 9/9 | 0/0 |
+| `legal_quote_span_match/5` | 9/9 | 0/9 |
+| `legal_support_assessment/5` | 1/1 | 0/1 |
+| `legal_verification_abstention/4` | 9/9 | 0/1 |
+
 ## Fixture Classes
 
 | Class | Status | Fixtures |

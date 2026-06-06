@@ -163,6 +163,7 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
 
     verifier_summary: dict[str, Any] = {}
     ledger_query_summary: dict[str, Any] = {}
+    matched_expected: list[str] = []
     missing_expected: list[str] = []
     matched_forbidden: list[str] = []
     if not missing and (path / "source.md").exists() and (path / "authority_inventory.json").exists():
@@ -172,6 +173,7 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
             document_id=fixture_id,
         )
         emitted = {line.strip() for line in facts_text(report).splitlines() if line.strip()}
+        matched_expected = sorted(set(expected_facts) & emitted)
         missing_expected = sorted(set(expected_facts) - emitted)
         matched_forbidden = sorted(set(forbidden_facts) & emitted)
         verifier_summary = dict(report.get("summary") or {})
@@ -213,6 +215,12 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
         "missing_expected_facts": missing_expected,
         "forbidden_fact_count": len(forbidden_facts),
         "matched_forbidden_facts": matched_forbidden,
+        "fact_signature_summary": _fact_signature_summary(
+            expected_facts=expected_facts,
+            matched_expected_facts=matched_expected,
+            forbidden_facts=forbidden_facts,
+            matched_forbidden_facts=matched_forbidden,
+        ),
         "verifier_summary": verifier_summary,
         "ledger_query_summary": ledger_query_summary,
         "errors": errors,
@@ -379,7 +387,7 @@ def _clean_public_expected_fact_policy_errors(facts: list[str]) -> list[str]:
     return errors
 
 
-def _aggregate(rows: list[dict[str, Any]]) -> dict[str, int]:
+def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     totals = {
         "expected_fact_count": 0,
         "matched_expected_fact_count": 0,
@@ -401,6 +409,7 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, int]:
         "verification_abstentions": 0,
         "false_verified": 0,
     }
+    signature_totals: dict[str, dict[str, int]] = {}
     for row in rows:
         expected = int(row.get("expected_fact_count", 0) or 0)
         missing = len(row.get("missing_expected_facts") or [])
@@ -409,6 +418,21 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, int]:
         totals["forbidden_fact_count"] += int(row.get("forbidden_fact_count", 0) or 0)
         totals["matched_forbidden_fact_count"] += len(row.get("matched_forbidden_facts") or [])
         summary = row.get("verifier_summary") or {}
+        for signature_row in row.get("fact_signature_summary") or []:
+            signature = str(signature_row.get("signature") or "").strip()
+            if not signature:
+                continue
+            bucket = signature_totals.setdefault(
+                signature,
+                {
+                    "expected": 0,
+                    "matched_expected": 0,
+                    "forbidden": 0,
+                    "matched_forbidden": 0,
+                },
+            )
+            for key in ("expected", "matched_expected", "forbidden", "matched_forbidden"):
+                bucket[key] += int(signature_row.get(key, 0) or 0)
         for key in (
             "citation_mentions",
             "verified_mentions",
@@ -427,6 +451,10 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, int]:
             "false_verified",
         ):
             totals[key] += int(summary.get(key, 0) or 0)
+    totals["fact_signature_summary"] = [
+        {"signature": signature, **counts}
+        for signature, counts in sorted(signature_totals.items())
+    ]
     return totals
 
 
@@ -439,7 +467,43 @@ def _ledger_query_summary(queries: dict[str, Any]) -> dict[str, Any]:
         "review_required_count": int(clean.get("review_required_count", 0) or 0),
         "authority_text_sources": len(queries.get("which_authority_text_sources_were_used") or []),
         "authority_text_unavailable": len(queries.get("which_authority_text_is_unavailable") or []),
+        "proposition_authority_links": len(queries.get("which_authorities_are_attached_to_propositions") or []),
     }
+
+
+def _fact_signature_summary(
+    *,
+    expected_facts: list[str],
+    matched_expected_facts: list[str],
+    forbidden_facts: list[str],
+    matched_forbidden_facts: list[str],
+) -> list[dict[str, Any]]:
+    expected = _signature_counts(expected_facts)
+    matched_expected = _signature_counts(matched_expected_facts)
+    forbidden = _signature_counts(forbidden_facts)
+    matched_forbidden = _signature_counts(matched_forbidden_facts)
+    signatures = sorted(set(expected) | set(matched_expected) | set(forbidden) | set(matched_forbidden))
+    return [
+        {
+            "signature": signature,
+            "expected": expected.get(signature, 0),
+            "matched_expected": matched_expected.get(signature, 0),
+            "forbidden": forbidden.get(signature, 0),
+            "matched_forbidden": matched_forbidden.get(signature, 0),
+        }
+        for signature in signatures
+    ]
+
+
+def _signature_counts(facts: list[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for fact in facts:
+        parsed = _parse_fact(fact)
+        if parsed is None:
+            continue
+        signature = f"{parsed['predicate']}/{len(parsed['args'])}"
+        counts[signature] = counts.get(signature, 0) + 1
+    return counts
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -465,11 +529,30 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Blocking errors: `{summary['blocking_errors']}`",
         f"- Status: `{summary['status']}`",
         "",
+        "## Fact Signature Coverage",
+        "",
+        "| Signature | Expected matched/total | Forbidden matched/total |",
+        "| --- | ---: | ---: |",
+    ]
+    for row in summary.get("fact_signature_summary") or []:
+        lines.append(
+            "| `{}` | {}/{} | {}/{} |".format(
+                row.get("signature", ""),
+                row.get("matched_expected", 0),
+                row.get("expected", 0),
+                row.get("matched_forbidden", 0),
+                row.get("forbidden", 0),
+            )
+        )
+    lines.extend(
+        [
+            "",
         "## Fixtures",
         "",
         "| Fixture | Expected | Forbidden matched | False verified | Certification | Errors | Warnings |",
         "| --- | ---: | ---: | ---: | --- | --- | --- |",
     ]
+    )
     for row in report.get("fixtures", []):
         verifier = row.get("verifier_summary") or {}
         query = row.get("ledger_query_summary") or {}

@@ -25,6 +25,28 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert summary["authority_text_available_sources"] == 10
     assert summary["authority_text_unavailable_sources"] == 1
     assert summary["verification_abstentions"] == 9
+    signatures = {row["signature"]: row for row in summary["fact_signature_summary"]}
+    assert signatures["legal_citation_mention/5"] == {
+        "signature": "legal_citation_mention/5",
+        "expected": 17,
+        "matched_expected": 17,
+        "forbidden": 0,
+        "matched_forbidden": 0,
+    }
+    assert signatures["legal_quote_span_match/5"] == {
+        "signature": "legal_quote_span_match/5",
+        "expected": 9,
+        "matched_expected": 9,
+        "forbidden": 9,
+        "matched_forbidden": 0,
+    }
+    assert signatures["legal_verification_abstention/4"] == {
+        "signature": "legal_verification_abstention/4",
+        "expected": 9,
+        "matched_expected": 9,
+        "forbidden": 1,
+        "matched_forbidden": 0,
+    }
 
     fixtures = {row["fixture_id"]: row for row in report["fixtures"]}
     assert fixtures["legal_authority_verification_micro_v1"]["matched_expected_fact_count"] == 39
@@ -47,4 +69,6 @@ def test_legal_authority_status_markdown_names_false_verified_gate() -> None:
     assert "Resolved / unresolved / ambiguous / invalid reporter:" in markdown
     assert "Metadata checks / matches / mismatches: `22 / 20 / 2`" in markdown
     assert "Verification abstentions: `9`" in markdown
+    assert "Fact Signature Coverage" in markdown
+    assert "`legal_quote_span_match/5` | 9/9 | 0/9" in markdown
     assert "clean-public-filings batch" in markdown

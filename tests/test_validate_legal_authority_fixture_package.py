@@ -20,6 +20,28 @@ def test_validate_legal_authority_fixture_package_accepts_clean_public_batch(tmp
     assert report["summary"]["matched_forbidden_fact_count"] == 0
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["citation_mentions"] == 9
+    signatures = {row["signature"]: row for row in report["summary"]["fact_signature_summary"]}
+    assert signatures["legal_citation_mention/5"] == {
+        "signature": "legal_citation_mention/5",
+        "expected": 9,
+        "matched_expected": 9,
+        "forbidden": 0,
+        "matched_forbidden": 0,
+    }
+    assert signatures["legal_quote_span_match/5"] == {
+        "signature": "legal_quote_span_match/5",
+        "expected": 6,
+        "matched_expected": 6,
+        "forbidden": 3,
+        "matched_forbidden": 0,
+    }
+    assert signatures["legal_pin_cite_check/5"] == {
+        "signature": "legal_pin_cite_check/5",
+        "expected": 6,
+        "matched_expected": 6,
+        "forbidden": 3,
+        "matched_forbidden": 0,
+    }
     assert all(row["errors"] == [] for row in report["fixtures"])
 
 
@@ -162,6 +184,7 @@ def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Pa
 
     assert report["summary"]["status"] == "pass"
     assert report["summary"]["fixture_count"] == 3
+    assert any(row["signature"] == "legal_citation_mention/5" for row in report["summary"]["fact_signature_summary"])
 
 
 def test_validate_legal_authority_fixture_package_accepts_known_sanction_shape(tmp_path: Path) -> None:
