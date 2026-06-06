@@ -227,6 +227,18 @@ datasets/legal_authority_verification/fixture_corpus_manifest.json
 
 1. Prove the micro-fixture with deterministic expected/forbidden facts.
 2. Add a small public filing sample where all authorities are available.
+   Returned clean-public packages must pass the local intake validator before
+   they are added to the manifest:
+
+   ```text
+   python scripts/validate_legal_authority_fixture_package.py <package-or-zip>
+   ```
+
+   The validator is offline and deterministic. It checks fixture shape,
+   source-only oracle metadata, authority inventory hygiene, registered fact
+   signatures, expected/forbidden replay, false_verified=0, quote/pin coverage,
+   and the clean-public boundary that invalid reporters should not appear in
+   this fixture class.
 3. Add controlled adversarial mutations of that filing.
 4. Add known public hallucination/sanction examples only after the resolver and
    report contract are stable.

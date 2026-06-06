@@ -60,7 +60,8 @@
         "authority_inventory.json or authority_lookup_manifest.json",
         "expected_facts.pl",
         "forbidden_facts.pl",
-        "manifest.json"
+        "manifest.json",
+        "review_notes.md"
       ],
       "must_include": [
         "public source URL or retained public source record",
@@ -69,6 +70,7 @@
         "no answer-key or model-output contamination in oracle packet"
       ],
       "promotion_gate": [
+        "scripts/validate_legal_authority_fixture_package.py pass",
         "source-only oracle review",
         "false_verified=0",
         "quote and pin checks source-backed where authority text is available",
