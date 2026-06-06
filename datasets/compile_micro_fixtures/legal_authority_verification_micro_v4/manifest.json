@@ -1,0 +1,13 @@
+{
+  "fixture_id": "legal_authority_verification_micro_v4",
+  "domain_profile": "legal_authority_verification_v1",
+  "schema_version": "compile_micro_fixture_manifest_v1",
+  "purpose": "Fourth adversarial legal-authority verification fixture: a real quote from a different authority must not verify against the cited authority.",
+  "source_kind": "synthetic_micro_fixture",
+  "files": {
+    "source": "source.md",
+    "expected_facts": "expected_facts.pl",
+    "forbidden_facts": "forbidden_facts.pl"
+  },
+  "claim_status": "research_micro_fixture_not_legal_advice"
+}

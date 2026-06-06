@@ -146,6 +146,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "legal_authority_verification_micro_v1",
             "legal_authority_verification_micro_v2",
             "legal_authority_verification_micro_v3",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_authority_resolution/5": {
@@ -169,6 +170,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "legal_authority_verification_micro_v1",
             "legal_authority_verification_micro_v2",
             "legal_authority_verification_micro_v3",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_authority_metadata_check/5": {
@@ -191,6 +193,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "micro_fixtures": [
             "legal_authority_verification_micro_v1",
             "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_quote_claim/5": {
@@ -210,6 +213,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "micro_fixtures": [
             "legal_authority_verification_micro_v1",
             "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_quote_span_match/5": {
@@ -232,6 +236,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "micro_fixtures": [
             "legal_authority_verification_micro_v1",
             "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_pin_cite_check/5": {
@@ -260,6 +265,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "forbidden_uses": ["quote_text", "source_excerpt", "semantic_support_claim", "good_law_status"],
         "micro_fixtures": [
             "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_verification_abstention/4": {
@@ -299,6 +305,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "legal_authority_verification_micro_v1",
             "legal_authority_verification_micro_v2",
             "legal_authority_verification_micro_v3",
+            "legal_authority_verification_micro_v4",
         ],
     },
     "legal_proposition_claim/5": {
