@@ -880,6 +880,83 @@ def test_legal_authority_cli_can_use_cached_courtlistener_resolver_without_token
     assert report["summary"]["false_verified"] == 0
 
 
+def test_legal_authority_courtlistener_resolver_carries_cluster_source_url(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("COURTLISTENER_API_TOKEN", raising=False)
+    source = tmp_path / "source.md"
+    source.write_text("Brown v. Board of Education, 347 U.S. 483 (1954).", encoding="utf-8")
+    inventory = tmp_path / "authority_inventory.json"
+    inventory.write_text(
+        json.dumps({"schema_version": "legal_authority_inventory_v1", "authorities": []}),
+        encoding="utf-8",
+    )
+    cache_dir = tmp_path / "courtlistener-cache"
+    client = CourtListenerClient(cache_dir=cache_dir)
+    text = "347 U.S. 483"
+    url = client._url("/citation-lookup/", {})
+    body = urllib.parse.urlencode({"text": text}).encode("utf-8")
+    cached = client._cache_path(method="POST", url=url, body=body)
+    cached.parent.mkdir(parents=True, exist_ok=True)
+    cached.write_text(
+        json.dumps(
+            [
+                {
+                    "citation": text,
+                    "normalized_citations": [text],
+                    "start_index": 0,
+                    "end_index": 12,
+                    "status": 200,
+                    "error_message": "",
+                    "clusters": [
+                        {
+                            "id": 347483,
+                            "absolute_url": "/opinion/347483/brown-v-board/",
+                            "case_name": "Brown v. Board of Education",
+                            "court": "Supreme Court of the United States",
+                            "citations": [{"volume": 347, "reporter": "U.S.", "page": "483"}],
+                            "date_filed": "1954-05-17",
+                        }
+                    ],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    out_json = tmp_path / "report.json"
+
+    exit_code = main(
+        [
+            "--source",
+            str(source),
+            "--authority-inventory",
+            str(inventory),
+            "--document-id",
+            "legal_authority_cli_courtlistener_url",
+            "--resolver",
+            "courtlistener",
+            "--courtlistener-cache-dir",
+            str(cache_dir),
+            "--out-json",
+            str(out_json),
+        ]
+    )
+
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert report["authority_text_sources"] == [
+        {
+            "authority_id": "courtlistener_cluster_347483",
+            "source_url": "https://www.courtlistener.com/opinion/347483/brown-v-board/",
+            "text_digest": "no_digest",
+            "text_scope": "authority_text",
+            "text_status": "authority_unavailable",
+        }
+    ]
+    assert (
+        "legal_authority_text_source("
+        "courtlistener_cluster_347483, authority_text, authority_unavailable, no_digest, authority_inventory)."
+    ) in report["facts"]
+
+
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
@@ -910,4 +987,7 @@ def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_clean_public_baseline"
     assert manifest["next_external_work_order_needed"]["needed_now"] is True
     assert "clean-public-filings batch" in manifest["next_external_work_order_needed"]["reason"]
+    assert "legal_authority_clean_public_filings_work_order_20260606_r7.zip" in manifest[
+        "next_external_work_order_needed"
+    ]["reason"]
     assert "Known hallucination/sanction filings remain deferred" in manifest["next_external_work_order_needed"]["reason"]

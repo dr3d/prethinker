@@ -290,7 +290,7 @@ def _authority_row_from_cluster(cluster: dict[str, Any], *, fallback_citation: s
     cluster_id = cluster.get("id") or cluster.get("cluster_id") or cluster.get("absolute_url") or canonical_citation
     date_filed = str(cluster.get("date_filed") or cluster.get("dateFiled") or "")
     year = str(cluster.get("year") or (date_filed[:4] if re.match(r"\d{4}", date_filed) else ""))
-    return {
+    row = {
         "authority_id": _authority_id_from_cluster_id(cluster_id),
         "canonical_citation": canonical_citation,
         "case_name": str(cluster.get("case_name") or cluster.get("caseName") or cluster.get("case_name_full") or ""),
@@ -301,6 +301,20 @@ def _authority_row_from_cluster(cluster: dict[str, Any], *, fallback_citation: s
         "page": parsed.get("page", ""),
         "pages": {},
     }
+    source_url = _cluster_source_url(cluster)
+    if source_url:
+        row["source_url"] = source_url
+    return row
+
+
+def _cluster_source_url(cluster: dict[str, Any]) -> str:
+    for key in ("absolute_url", "source_url", "url", "frontend_url"):
+        value = str(cluster.get(key) or "").strip()
+        if value.startswith("https://") or value.startswith("http://"):
+            return value
+        if value.startswith("/"):
+            return f"https://www.courtlistener.com{value}"
+    return ""
 
 
 def _cluster_citations(cluster: dict[str, Any]) -> list[str]:

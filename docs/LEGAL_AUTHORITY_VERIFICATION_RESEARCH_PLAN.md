@@ -216,6 +216,10 @@ Cache misses are live calls and remain token-gated.
 The verifier defaults to the local resolver. Any external resolver must be
 passed explicitly, and a citation resolved by CourtListener without retained
 authority text still abstains on quote and pin-cite verification.
+When CourtListener lookup returns a cluster URL and no local inventory row
+matches it, the synthesized authority row carries the public CourtListener URL
+as report metadata only; this does not create authority text or make quote/pin
+verification available.
 
 CLI runs expose that boundary as an explicit switch:
 
