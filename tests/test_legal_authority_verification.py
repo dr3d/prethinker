@@ -19,6 +19,9 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
     )
 
     assert report["summary"]["citation_mentions"] == 5
+    assert report["summary"]["verified_mentions"] == 1
+    assert report["summary"]["blocked_mentions"] == 3
+    assert report["summary"]["review_required_mentions"] == 1
     assert report["summary"]["resolved"] == 4
     assert report["summary"]["unresolved"] == 1
     assert report["summary"]["quote_mismatch"] == 1
@@ -71,6 +74,9 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
     )
 
     assert report["summary"]["citation_mentions"] == 4
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 4
+    assert report["summary"]["review_required_mentions"] == 0
     assert report["summary"]["resolved"] == 3
     assert report["summary"]["ambiguous"] == 1
     assert report["summary"]["quote_claims"] == 1
@@ -145,6 +151,9 @@ def test_legal_authority_report_renders_review_required_boundary() -> None:
     markdown = render_markdown(report)
 
     assert "Document outcome: `review_required`" in markdown
+    assert "Verified mentions: `1`" in markdown
+    assert "`review_required`" in markdown
+    assert "`blocked`" in markdown
     assert "`quote_not_found_in_authority`" in markdown
     assert "`quote_outside_cited_pin`" in markdown
     assert "`human_review_required`" in markdown

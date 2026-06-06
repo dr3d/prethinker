@@ -251,11 +251,17 @@ def verify_legal_authorities(
                 )
             mentions.append(mention_report)
 
+    for mention in mentions:
+        mention["verification_status"] = _mention_verification_status(mention)
+
     false_verified = _false_verified_count(mentions)
     document_outcome = "citation_clean" if not issue_rows else "review_required"
     summary = {
         "document_id": document_id,
         "citation_mentions": len(mentions),
+        "verified_mentions": sum(1 for row in mentions if row.get("verification_status") == "verified"),
+        "blocked_mentions": sum(1 for row in mentions if row.get("verification_status") == "blocked"),
+        "review_required_mentions": sum(1 for row in mentions if row.get("verification_status") == "review_required"),
         "resolved": sum(1 for row in mentions if row["resolution_status"] == "resolved"),
         "unresolved": sum(1 for row in mentions if row["resolution_status"] == "unresolved"),
         "ambiguous": sum(1 for row in mentions if row["resolution_status"] == "ambiguous"),
@@ -389,6 +395,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Document: `{summary['document_id']}`",
         f"- Citation mentions: `{summary['citation_mentions']}`",
+        f"- Verified mentions: `{summary['verified_mentions']}`",
+        f"- Blocked mentions: `{summary['blocked_mentions']}`",
+        f"- Review-required mentions: `{summary['review_required_mentions']}`",
         f"- Resolved: `{summary['resolved']}`",
         f"- Unresolved: `{summary['unresolved']}`",
         f"- Quote claims: `{summary['quote_claims']}`",
@@ -409,13 +418,21 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append(f"| `{issue.get('mention_id', '')}` | `{issue.get('issue', '')}` | {detail} |")
     else:
         lines.append("_No issues._")
-    lines.extend(["", "## Mentions", "", "| Mention | Citation | Resolution | Quote | Pin | Proposition |", "| --- | --- | --- | --- | --- | --- |"])
+    lines.extend(
+        [
+            "",
+            "## Mentions",
+            "",
+            "| Mention | Citation | Status | Resolution | Quote | Pin | Proposition |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
     for row in report.get("mentions", []):
         quote = row["quote_check"]["status"] if row.get("quote_check") else ""
         pin = row["pin_check"]["status"] if row.get("pin_check") else ""
         proposition = row["proposition_boundary"]["review_requirement"] if row.get("proposition_boundary") else ""
         lines.append(
-            f"| `{row['mention_id']}` | `{row['citation']}` | `{row['resolution_status']}` | "
+            f"| `{row['mention_id']}` | `{row['citation']}` | `{row.get('verification_status', '')}` | `{row['resolution_status']}` | "
             f"`{quote}` | `{pin}` | `{proposition}` |"
         )
     queries = report.get("ledger_queries") or {}
@@ -554,11 +571,36 @@ def _has_proposition_boundary(paragraph: str, citation_end: int) -> bool:
     return "proposition" in tail
 
 
+def _mention_verification_status(mention: dict[str, Any]) -> str:
+    if _mention_blocking_reasons(mention):
+        return "blocked"
+    if mention.get("proposition_boundary"):
+        return "review_required"
+    return "verified"
+
+
+def _mention_blocking_reasons(mention: dict[str, Any]) -> list[str]:
+    reasons: list[str] = []
+    if mention.get("resolution_status") != "resolved":
+        reasons.append(str(mention.get("resolution_status") or "authority_resolution"))
+    for check in mention.get("metadata_checks", []):
+        if check.get("status") == "mismatch":
+            reasons.append(f"metadata_mismatch:{check.get('field', '')}")
+    quote_check = mention.get("quote_check")
+    if quote_check and quote_check.get("status") in {"no_match", "authority_unavailable"}:
+        reasons.append(str(quote_check.get("status")))
+    pin_check = mention.get("pin_check")
+    if pin_check and pin_check.get("status") == "quote_outside_pin":
+        reasons.append("quote_outside_pin")
+    return reasons
+
+
 def _false_verified_count(mentions: list[dict[str, Any]]) -> int:
-    # This prototype has no "verified despite blocker" state: mismatches become
-    # issues/abstentions, not verified rows. Keep this metric explicit because
-    # it is the primary legal-hallucination guardrail.
-    return 0
+    return sum(
+        1
+        for mention in mentions
+        if mention.get("verification_status") == "verified" and _mention_blocking_reasons(mention)
+    )
 
 
 def _normalize_name(value: str) -> str:
