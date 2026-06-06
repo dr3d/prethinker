@@ -190,7 +190,8 @@ The local inventory remains the reproducible claim path. CourtListener live
 lookup is useful for fixture acquisition and resolver comparison, but it should
 not turn a measurement into an unrecorded external dependency. Live outputs
 need a provider manifest and retained cache before they become research
-evidence.
+evidence. Retained cache entries may replay without a token; cache misses are
+live calls and remain token-gated.
 
 ## Metrics
 

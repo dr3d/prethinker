@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import urllib.parse
 from pathlib import Path
 
 import pytest
@@ -39,6 +40,30 @@ def test_courtlistener_client_requires_token_for_citation_lookup(tmp_path, monke
     client = CourtListenerClient(cache_dir=tmp_path)
     with pytest.raises(RuntimeError, match="COURTLISTENER_API_TOKEN"):
         client.citation_lookup(text="Brown v. Board of Education, 347 U.S. 483 (1954)")
+
+
+def test_courtlistener_client_replays_cached_get_without_token(tmp_path, monkeypatch):
+    monkeypatch.delenv("COURTLISTENER_API_TOKEN", raising=False)
+    client = CourtListenerClient(cache_dir=tmp_path)
+    url = client._url("/search/", {"page_size": "1", "q": "Brown", "type": "o"})
+    cached = client._cache_path(method="GET", url=url, body=None)
+    cached.parent.mkdir(parents=True, exist_ok=True)
+    cached.write_text(json.dumps({"count": 1, "results": [{"id": 7}]}), encoding="utf-8")
+
+    assert client.search(q="Brown", page_size=1) == {"count": 1, "results": [{"id": 7}]}
+
+
+def test_courtlistener_client_replays_cached_citation_lookup_without_token(tmp_path, monkeypatch):
+    monkeypatch.delenv("COURTLISTENER_API_TOKEN", raising=False)
+    client = CourtListenerClient(cache_dir=tmp_path)
+    text = "Brown v. Board of Education, 347 U.S. 483 (1954)"
+    url = client._url("/citation-lookup/", {})
+    body = urllib.parse.urlencode({"text": text}).encode("utf-8")
+    cached = client._cache_path(method="POST", url=url, body=body)
+    cached.parent.mkdir(parents=True, exist_ok=True)
+    cached.write_text(json.dumps([{"citation": "347 U.S. 483", "status": 200}]), encoding="utf-8")
+
+    assert client.citation_lookup(text=text) == [{"citation": "347 U.S. 483", "status": 200}]
 
 
 def test_normalize_opinion_record_tolerates_search_result_shape():

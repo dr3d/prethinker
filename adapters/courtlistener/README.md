@@ -33,7 +33,10 @@ python adapters/courtlistener/sample.py --query "breach of lease" --limit 25
 
 Generated live data should stay under ignored `datasets/courtlistener/generated/`
 unless it has been reviewed and intentionally turned into a small durable
-fixture.
+fixture. Cached raw responses can be replayed without a token; cache misses are
+live API calls and remain token-gated. Claim-bearing legal verification runs
+should retain the cache/provider manifest needed to reproduce the resolver
+inputs offline.
 
 ## Boundary
 

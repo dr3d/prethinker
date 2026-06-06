@@ -50,8 +50,6 @@ class CourtListenerClient:
         checked-in inventories.
         """
 
-        if not self.api_token:
-            raise RuntimeError("COURTLISTENER_API_TOKEN is required for live CourtListener API calls.")
         url = self._url("/citation-lookup/", {})
         body = urllib.parse.urlencode({"text": text}).encode("utf-8")
         payload = self._request_json(
@@ -67,8 +65,6 @@ class CourtListenerClient:
         raise RuntimeError("Unexpected CourtListener citation lookup response shape.")
 
     def get_json(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-        if not self.api_token:
-            raise RuntimeError("COURTLISTENER_API_TOKEN is required for live CourtListener API calls.")
         url = self._url(path, params or {})
         payload = self._request_json(method="GET", url=url)
         if not isinstance(payload, dict):
@@ -86,6 +82,8 @@ class CourtListenerClient:
         cached = self._cache_path(method=method, url=url, body=body)
         if cached.exists():
             return json.loads(cached.read_text(encoding="utf-8"))
+        if not self.api_token:
+            raise RuntimeError("COURTLISTENER_API_TOKEN is required for live CourtListener API calls.")
         headers = {"Authorization": f"Token {self.api_token}", **(extra_headers or {})}
         req = urllib.request.Request(url, data=body, headers=headers, method=method)
         with urllib.request.urlopen(req, timeout=30) as response:
