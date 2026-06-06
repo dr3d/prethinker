@@ -46,7 +46,8 @@ propagation = visible recomputation, not hidden belief
 - [FDA violation alignment status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
 - [Domain predicate proposal status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated review queue for candidate predicate surfaces before they become claims.
 - [Pending external work orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
-- [Legal authority verification status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the legal citation/quote/pin lane.
+- [Legal authority verification status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the generic legal citation/quote/pin underlay.
+- [Legal document-family domain pack plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md) - redirect toward a specific legal document-family predicate pack rather than generic citation plumbing.
 - [Candidate oracle review status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
 - [Source oracle review status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
@@ -55,7 +56,7 @@ propagation = visible recomputation, not hidden belief
 - [QA instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
 - [Overlay architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future overlays read evidence without mutating KB truth.
 - [Boundary probe method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed without fixture-vocabulary leakage.
-- [Legal authority verification research plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate next lane for deterministic citation, quote, and pin-cite checks; not a legal-QA or product-readiness claim.
+- [Legal authority verification research plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate lane for deterministic citation, quote, and pin-cite checks; not a legal-domain pack, legal-QA claim, or product-readiness claim.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
 
 Historical scorecards and older public notes remain in Git history or the local
@@ -154,7 +155,8 @@ The short version:
 - [docs/FDA_VIOLATION_ALIGNMENT_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for FDA violation/category/citation alignment boundaries.
 - [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
 - [docs/PENDING_EXTERNAL_WORK_ORDERS.md](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
-- [docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the legal citation/quote/pin lane.
+- [docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the generic legal citation/quote/pin underlay.
+- [docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_DOCUMENT_FAMILY_DOMAIN_PACK_PLAN.md) - plan for moving from citation underlay toward a specific legal document-family predicate pack.
 - [docs/CANDIDATE_ORACLE_REVIEW_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
 - [docs/SOURCE_ORACLE_REVIEW_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
 - [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - maintained public-doc reading map.
@@ -162,7 +164,7 @@ The short version:
 - [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
 - [docs/QA_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA pipeline and failure-surface interpretation.
 - [docs/OVERLAY_ARCHITECTURE.md](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future overlays read compiled evidence without mutating the KB.
-- [docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate legal-authority verification lane grounded in deterministic citation, quote, and pin-cite checks.
+- [docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - legal-authority verification underlay grounded in deterministic citation, quote, and pin-cite checks.
 - [AGENT-README.md](https://github.com/dr3d/prethinker/blob/main/AGENT-README.md) - fast onboarding for coding agents.
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - deterministic mapper/admission contract.
 - [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md) - profile/skill-style context packages for domain-aware Semantic IR.

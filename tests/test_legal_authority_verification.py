@@ -1616,10 +1616,10 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
     ]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "queued_for_source_only_packet"
     assert manifest["next_external_work_order_needed"]["needed_now"] is False
-    assert "legal_authority_known_hallucination_sanction_20260606_01.zip" in manifest[
-        "next_external_work_order_needed"
-    ]["reason"]
-    assert "extracts all 18 citation mentions" in manifest["next_external_work_order_needed"]["reason"]
-    assert "invalid_reporter=0 and false_verified=0" in manifest["next_external_work_order_needed"]["reason"]
-    assert "placeholder variables/source labels" in manifest["next_external_work_order_needed"]["reason"]
-    assert "C:\\prethinker\\tmp" in manifest["next_external_work_order_needed"]["reason"]
+    work_order_reason = manifest["next_external_work_order_needed"]["reason"]
+    assert "legal_authority_known_hallucination_sanction_20260606_02.zip" in work_order_reason
+    assert "false_verified=0" in work_order_reason
+    assert "loose oracle dialect" in work_order_reason
+    assert "Do not silently rewrite this package into a passing oracle" in work_order_reason
+    assert "C:\\prethinker\\tmp" in work_order_reason
+    assert "citation verification remains an underlay, not the domain" in work_order_reason

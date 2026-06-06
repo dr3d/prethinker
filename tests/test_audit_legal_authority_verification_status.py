@@ -103,10 +103,11 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert fixtures["clean_legal_filing_002"]["matched_expected_fact_count"] == 20
     assert fixtures["clean_legal_filing_003"]["matched_expected_fact_count"] == 18
     assert report["next_external_work_order_needed"]["needed_now"] is False
-    assert "extracts all 18 citation mentions" in report[
-        "next_external_work_order_needed"
-    ]["reason"]
-    assert "placeholder variables/source labels" in report["next_external_work_order_needed"]["reason"]
+    work_order_reason = report["next_external_work_order_needed"]["reason"]
+    assert "legal_authority_known_hallucination_sanction_20260606_02.zip" in work_order_reason
+    assert "loose oracle dialect" in work_order_reason
+    assert "Do not silently rewrite this package into a passing oracle" in work_order_reason
+    assert "citation verification remains an underlay, not the domain" in work_order_reason
     assert "C:\\prethinker\\tmp" in report["next_external_work_order_needed"]["reason"]
 
 
@@ -130,4 +131,6 @@ def test_legal_authority_status_markdown_names_false_verified_gate() -> None:
     assert "Proposition review rows / authority links: `2 / 2`" in markdown
     assert "Fact Signature Coverage" in markdown
     assert "`legal_quote_span_match/5` | 14/14 | 0/13" in markdown
-    assert "extracts all 18 citation mentions" in markdown
+    assert "legal_authority_known_hallucination_sanction_20260606_02.zip" in markdown
+    assert "loose oracle dialect" in markdown
+    assert "citation verification remains an underlay, not the domain" in markdown
