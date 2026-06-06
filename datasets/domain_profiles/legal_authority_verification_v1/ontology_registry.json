@@ -14,7 +14,8 @@
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v5",
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v6",
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v7",
-      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8"
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8",
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9"
     ]
   },
   "accountability_requirements": [
@@ -111,7 +112,7 @@
       "signature": "legal_verification_abstention/4",
       "args": ["subject_id", "abstention_kind", "reason_code", "source_or_scope"],
       "category": "legal_verification_abstention",
-      "notes": "Records an explicit non-verification boundary, such as unresolved authority, unavailable lookup, short-form citation requiring context, unavailable authority text, unsupported semantic legal proposition, or good-law status outside scope."
+      "notes": "Records an explicit non-verification boundary, such as unresolved authority, unavailable lookup, short-form citation requiring context, unavailable authority text, unavailable pin cite, unsupported semantic legal proposition, or good-law status outside scope."
     },
     {
       "signature": "legal_proposition_claim/5",

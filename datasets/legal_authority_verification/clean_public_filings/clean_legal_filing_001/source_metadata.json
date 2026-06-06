@@ -1,0 +1,30 @@
+{
+  "fixture_id": "clean_legal_filing_001",
+  "source_title": "Equal Protection and Public Education \u2014 Authority Excerpt",
+  "source_url": "https://supreme.justia.com/cases/federal/us/347/483/",
+  "excerpt_method": "synthesized_clean_filing_excerpt_from_public_domain_us_reports_opinions",
+  "oracle_independence": {
+    "used_model_output": false,
+    "review_basis": "source_and_authority_inventory_only"
+  },
+  "authority_sources": [
+    {
+      "authority_id": "auth_brown_347_us_483",
+      "canonical_citation": "347 U.S. 483",
+      "case_name": "Brown v. Board of Education of Topeka",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/347/483/"
+    },
+    {
+      "authority_id": "auth_bolling_347_us_497",
+      "canonical_citation": "347 U.S. 497",
+      "case_name": "Bolling v. Sharpe",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/347/497/"
+    },
+    {
+      "authority_id": "auth_loving_388_us_1",
+      "canonical_citation": "388 U.S. 1",
+      "case_name": "Loving v. Virginia",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/388/1/"
+    }
+  ]
+}

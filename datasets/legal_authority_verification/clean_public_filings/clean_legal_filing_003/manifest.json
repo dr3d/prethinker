@@ -1,0 +1,9 @@
+{
+  "fixture_id": "clean_legal_filing_003",
+  "domain_profile": "legal_authority_verification_v1",
+  "fixture_class": "clean_public_filings",
+  "source_kind": "public_legal_filing_excerpt",
+  "claim_status": "research_fixture_not_legal_advice",
+  "lane": "legal_authority_verification_v1",
+  "description": "Clean public-filing authority excerpt: Substantive Due Process and Fundamental Rights \u2014 Authority Excerpt."
+}

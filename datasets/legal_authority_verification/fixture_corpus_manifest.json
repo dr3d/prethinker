@@ -1,7 +1,4 @@
 {
-  "schema": "prethinker.legal_authority_verification.fixture_corpus_manifest.v1",
-  "status": "candidate_research_lane",
-  "purpose": "Fixture-class plan for legal authority verification. This manifest prevents premature expansion into real sanctioned/hallucination filings before the clean-public baseline lands under the deterministic resolver and report contract.",
   "claim_boundary": {
     "current_claim": "The micro-fixture exercises deterministic citation, metadata, quote, pin-cite, and proposition-review-boundary rows.",
     "non_claims": [
@@ -13,9 +10,6 @@
   },
   "fixture_classes": [
     {
-      "id": "controlled_adversarial_mutations",
-      "status": "seeded",
-      "purpose": "Known-answer adversarial legal-authority checks made from a controlled source/inventory pair.",
       "fixtures": [
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v2",
@@ -24,15 +18,10 @@
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v5",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v6",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v7",
-        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8"
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8",
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9"
       ],
-      "required_files": [
-        "source.md",
-        "authority_inventory.json",
-        "expected_facts.pl",
-        "forbidden_facts.pl",
-        "manifest.json"
-      ],
+      "id": "controlled_adversarial_mutations",
       "must_include": [
         "clean citation and quote",
         "unresolved citation",
@@ -45,6 +34,7 @@
         "real quote attached to the wrong authority",
         "quote outside cited pin",
         "authority-text-unavailable abstention",
+        "pin-cite-unavailable abstention",
         "proposition-support abstention",
         "short-form citation context-required abstention",
         "named short-form citation context-required abstention"
@@ -55,22 +45,24 @@
         "forbidden facts absent",
         "typed micro-fixture validator pass",
         "domain predicate schema validator pass"
-      ]
-    },
-    {
-      "id": "clean_public_filings",
-      "status": "planned",
-      "purpose": "Real public legal filings whose cited authorities are available for deterministic citation, metadata, quote, and pin checks.",
-      "fixtures": [],
+      ],
+      "purpose": "Known-answer adversarial legal-authority checks made from a controlled source/inventory pair.",
       "required_files": [
         "source.md",
-        "source_metadata.json",
         "authority_inventory.json",
         "expected_facts.pl",
         "forbidden_facts.pl",
-        "manifest.json",
-        "review_notes.md"
+        "manifest.json"
       ],
+      "status": "seeded"
+    },
+    {
+      "fixtures": [
+        "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_001",
+        "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_002",
+        "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_003"
+      ],
+      "id": "clean_public_filings",
       "must_include": [
         "public source URL or retained public source record",
         "declared authority lookup source",
@@ -83,22 +75,22 @@
         "false_verified=0",
         "quote and pin checks source-backed where authority text is available",
         "explicit abstention where authority text is unavailable"
-      ]
-    },
-    {
-      "id": "known_hallucination_or_sanction_filings",
-      "status": "deferred_until_clean_public_baseline",
-      "purpose": "Known public examples of AI-fabricated legal citations, fabricated quotes, or citation misuse.",
-      "fixtures": [],
+      ],
+      "purpose": "Real public legal filings whose cited authorities are available for deterministic citation, metadata, quote, and pin checks.",
       "required_files": [
         "source.md",
-        "sanction_or_correction_source.md",
         "source_metadata.json",
         "authority_inventory.json",
         "expected_facts.pl",
         "forbidden_facts.pl",
-        "manifest.json"
+        "manifest.json",
+        "review_notes.md"
       ],
+      "status": "seeded"
+    },
+    {
+      "fixtures": [],
+      "id": "known_hallucination_or_sanction_filings",
       "must_include": [
         "original filing or quoted filing excerpt",
         "public sanction/correction/order source when available",
@@ -111,11 +103,25 @@
         "false_verified=0",
         "no LLM-as-verifier claim",
         "all proposition-support rows remain review-required unless independently reviewed"
-      ]
+      ],
+      "purpose": "Known public examples of AI-fabricated legal citations, fabricated quotes, or citation misuse.",
+      "required_files": [
+        "source.md",
+        "sanction_or_correction_source.md",
+        "source_metadata.json",
+        "authority_inventory.json",
+        "expected_facts.pl",
+        "forbidden_facts.pl",
+        "manifest.json"
+      ],
+      "status": "deferred_until_clean_public_baseline"
     }
   ],
   "next_external_work_order_needed": {
-    "needed_now": true,
-    "reason": "The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r10.zip. Returned packages must pass scripts/import_legal_authority_fixture_package.py before fixtures are added to this manifest. Known hallucination/sanction filings remain deferred until the clean-public baseline lands."
-  }
+    "needed_now": false,
+    "reason": "Clean-public legal filings have been imported. Next expansion should be decided from the imported baseline audit before known hallucination/sanction fixtures are opened."
+  },
+  "purpose": "Fixture-class plan for legal authority verification. This manifest prevents premature expansion into real sanctioned/hallucination filings before the clean-public baseline lands under the deterministic resolver and report contract.",
+  "schema": "prethinker.legal_authority_verification.fixture_corpus_manifest.v1",
+  "status": "candidate_research_lane"
 }

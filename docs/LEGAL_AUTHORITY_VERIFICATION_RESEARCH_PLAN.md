@@ -140,6 +140,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v5
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v6
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v7
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v8
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v9
 ```
 
 They contain:
@@ -161,6 +162,8 @@ They contain:
 - one real authority with the quote present in the authority but outside the
   cited pin page;
 - one authority-text-unavailable quote check that must abstain;
+- one unavailable cited pin coordinate that must abstain instead of certifying
+  a quote match found elsewhere in retained authority text;
 - one proposition-support boundary that must abstain.
 - one short-form citation such as `Id.` that must require context and abstain
   instead of inventing a resolved authority.

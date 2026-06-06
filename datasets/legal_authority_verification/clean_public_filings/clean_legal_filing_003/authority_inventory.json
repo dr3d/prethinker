@@ -1,0 +1,41 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_obergefell_576_us_644",
+      "canonical_citation": "576 U.S. 644",
+      "case_name": "Obergefell v. Hodges",
+      "court": "Supreme Court of the United States",
+      "year": "2015",
+      "reporter": "U.S.",
+      "volume": "576",
+      "page": "644",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/576/644/",
+      "pages": {
+        "675": "The Court now holds that same-sex couples may exercise the fundamental right to marry. No longer may this liberty be denied to them."
+      }
+    },
+    {
+      "authority_id": "auth_griswold_381_us_479",
+      "canonical_citation": "381 U.S. 479",
+      "case_name": "Griswold v. Connecticut",
+      "court": "Supreme Court of the United States",
+      "year": "1965",
+      "reporter": "U.S.",
+      "volume": "381",
+      "page": "479",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/381/479/"
+    },
+    {
+      "authority_id": "auth_lawrence_539_us_558",
+      "canonical_citation": "539 U.S. 558",
+      "case_name": "Lawrence v. Texas",
+      "court": "Supreme Court of the United States",
+      "year": "2003",
+      "reporter": "U.S.",
+      "volume": "539",
+      "page": "558",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/539/558/"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "fixture_id": "clean_legal_filing_002",
+  "source_title": "Criminal Procedure Safeguards \u2014 Authority Excerpt",
+  "source_url": "https://supreme.justia.com/cases/federal/us/384/436/",
+  "excerpt_method": "synthesized_clean_filing_excerpt_from_public_domain_us_reports_opinions",
+  "oracle_independence": {
+    "used_model_output": false,
+    "review_basis": "source_and_authority_inventory_only"
+  },
+  "authority_sources": [
+    {
+      "authority_id": "auth_miranda_384_us_436",
+      "canonical_citation": "384 U.S. 436",
+      "case_name": "Miranda v. Arizona",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/384/436/"
+    },
+    {
+      "authority_id": "auth_gideon_372_us_335",
+      "canonical_citation": "372 U.S. 335",
+      "case_name": "Gideon v. Wainwright",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/372/335/"
+    },
+    {
+      "authority_id": "auth_mapp_367_us_643",
+      "canonical_citation": "367 U.S. 643",
+      "case_name": "Mapp v. Ohio",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/367/643/"
+    },
+    {
+      "authority_id": "auth_katz_389_us_347",
+      "canonical_citation": "389 U.S. 347",
+      "case_name": "Katz v. United States",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/389/347/"
+    }
+  ]
+}

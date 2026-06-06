@@ -22,6 +22,7 @@ FIXTURE_V4 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_ver
 FIXTURE_V5 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v5"
 FIXTURE_V6 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v6"
 FIXTURE_V8 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v8"
+FIXTURE_V9 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v9"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -1194,7 +1195,34 @@ def test_legal_authority_named_short_form_requires_context() -> None:
     assert not any("legal_authority_resolution(short_form_001" in fact for fact in report["facts"])
 
 
-def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
+def test_legal_authority_micro_fixture_v9_blocks_unavailable_pin_cite() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V9 / "source.md",
+        authority_inventory_path=FIXTURE_V9 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v9",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["resolved"] == 1
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 1
+    assert report["summary"]["quote_exact_or_normalized_match"] == 1
+    assert report["summary"]["pin_mismatch"] == 0
+    assert report["summary"]["pin_unavailable"] == 1
+    assert report["summary"]["verification_abstentions"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert report["ledger_queries"]["which_pin_cites_are_unavailable"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "576 U.S. 644",
+            "pin": "page_676",
+            "status": "pin_unavailable",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"]["answer"] == "no"
+
+
+def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanctions() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
             encoding="utf-8"
@@ -1227,10 +1255,16 @@ def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
+    assert classes["clean_public_filings"]["status"] == "seeded"
+    assert classes["clean_public_filings"]["fixtures"] == [
+        "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_001",
+        "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_002",
+        "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_003",
+    ]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_clean_public_baseline"
-    assert manifest["next_external_work_order_needed"]["needed_now"] is True
-    assert "clean-public-filings batch" in manifest["next_external_work_order_needed"]["reason"]
-    assert "legal_authority_clean_public_filings_work_order_20260606_r10.zip" in manifest[
-        "next_external_work_order_needed"
-    ]["reason"]
-    assert "Known hallucination/sanction filings remain deferred" in manifest["next_external_work_order_needed"]["reason"]
+    assert manifest["next_external_work_order_needed"]["needed_now"] is False
+    assert "Clean-public legal filings have been imported" in manifest["next_external_work_order_needed"]["reason"]
+    assert "known hallucination/sanction fixtures" in manifest["next_external_work_order_needed"]["reason"]

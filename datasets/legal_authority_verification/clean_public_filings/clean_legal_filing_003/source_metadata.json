@@ -1,0 +1,30 @@
+{
+  "fixture_id": "clean_legal_filing_003",
+  "source_title": "Substantive Due Process and Fundamental Rights \u2014 Authority Excerpt",
+  "source_url": "https://supreme.justia.com/cases/federal/us/576/644/",
+  "excerpt_method": "synthesized_clean_filing_excerpt_from_public_domain_us_reports_opinions",
+  "oracle_independence": {
+    "used_model_output": false,
+    "review_basis": "source_and_authority_inventory_only"
+  },
+  "authority_sources": [
+    {
+      "authority_id": "auth_obergefell_576_us_644",
+      "canonical_citation": "576 U.S. 644",
+      "case_name": "Obergefell v. Hodges",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/576/644/"
+    },
+    {
+      "authority_id": "auth_griswold_381_us_479",
+      "canonical_citation": "381 U.S. 479",
+      "case_name": "Griswold v. Connecticut",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/381/479/"
+    },
+    {
+      "authority_id": "auth_lawrence_539_us_558",
+      "canonical_citation": "539 U.S. 558",
+      "case_name": "Lawrence v. Texas",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/539/558/"
+    }
+  ]
+}

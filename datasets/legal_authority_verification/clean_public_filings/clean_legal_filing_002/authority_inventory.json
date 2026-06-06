@@ -1,0 +1,52 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_miranda_384_us_436",
+      "canonical_citation": "384 U.S. 436",
+      "case_name": "Miranda v. Arizona",
+      "court": "Supreme Court of the United States",
+      "year": "1966",
+      "reporter": "U.S.",
+      "volume": "384",
+      "page": "436",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/384/436/",
+      "pages": {
+        "444": "the prosecution may not use statements, whether exculpatory or inculpatory, stemming from custodial interrogation of the defendant unless it demonstrates the use of procedural safeguards effective to secure the privilege against self-incrimination."
+      }
+    },
+    {
+      "authority_id": "auth_gideon_372_us_335",
+      "canonical_citation": "372 U.S. 335",
+      "case_name": "Gideon v. Wainwright",
+      "court": "Supreme Court of the United States",
+      "year": "1963",
+      "reporter": "U.S.",
+      "volume": "372",
+      "page": "335",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/372/335/"
+    },
+    {
+      "authority_id": "auth_mapp_367_us_643",
+      "canonical_citation": "367 U.S. 643",
+      "case_name": "Mapp v. Ohio",
+      "court": "Supreme Court of the United States",
+      "year": "1961",
+      "reporter": "U.S.",
+      "volume": "367",
+      "page": "643",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/367/643/"
+    },
+    {
+      "authority_id": "auth_katz_389_us_347",
+      "canonical_citation": "389 U.S. 347",
+      "case_name": "Katz v. United States",
+      "court": "Supreme Court of the United States",
+      "year": "1967",
+      "reporter": "U.S.",
+      "volume": "389",
+      "page": "347",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/389/347/"
+    }
+  ]
+}

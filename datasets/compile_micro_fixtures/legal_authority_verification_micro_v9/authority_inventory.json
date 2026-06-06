@@ -1,0 +1,18 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_obergefell_576_us_644",
+      "canonical_citation": "576 U.S. 644",
+      "case_name": "Obergefell v. Hodges",
+      "court": "Supreme Court of the United States",
+      "year": "2015",
+      "reporter": "U.S.",
+      "volume": "576",
+      "page": "644",
+      "pages": {
+        "675": "The Court now holds that same-sex couples may exercise the fundamental right to marry."
+      }
+    }
+  ]
+}
