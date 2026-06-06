@@ -128,6 +128,7 @@ Initial fixtures:
 ```text
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v1
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v2
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v3
 ```
 
 They contain:
@@ -136,15 +137,17 @@ They contain:
 - one citation that does not resolve;
 - metadata mismatch checks;
 - ambiguous citation resolution;
+- unsupported reporter visibility as `invalid_reporter` plus explicit
+  abstention;
 - one real authority with a fabricated quote;
 - one real authority with the quote present in the authority but outside the
   cited pin page;
 - one authority-text-unavailable quote check that must abstain;
 - one proposition-support boundary that must abstain.
 
-The fixture uses a local authority inventory so the first prototype can run
-offline. A later CourtListener-backed run can replace or supplement that
-inventory while keeping the same report contract.
+The fixtures use local authority inventories so the first prototype can run
+offline. A later CourtListener-backed run can replace or supplement those
+inventories while keeping the same report contract.
 
 ## Prototype Resolver
 

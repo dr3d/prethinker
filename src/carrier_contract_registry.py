@@ -142,7 +142,11 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "This carrier does not prove that the citation resolves, that the authority is good law, or that the authority supports a proposition.",
         ],
         "forbidden_uses": ["source_excerpt", "legal_proposition", "quote_text", "argument_summary", "good_law_status"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v3",
+        ],
     },
     "legal_authority_resolution/5": {
         "schema_version": "carrier_contract_v1",
@@ -161,7 +165,11 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "resolution_status": ["resolved", "unresolved", "ambiguous", "invalid_reporter", "unavailable", "throttled"],
         },
         "forbidden_uses": ["source_excerpt", "semantic_support_claim", "good_law_status", "case_summary"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v3",
+        ],
     },
     "legal_authority_metadata_check/5": {
         "schema_version": "carrier_contract_v1",
@@ -180,7 +188,10 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "check_status": ["match", "mismatch", "not_stated", "not_applicable", "authority_unavailable"],
         },
         "forbidden_uses": ["source_excerpt", "case_summary", "semantic_support_claim", "full_case_name_blob"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+        ],
     },
     "legal_quote_claim/5": {
         "schema_version": "carrier_contract_v1",
@@ -196,7 +207,10 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "The quoted text belongs in the report/evidence file for review; it must not be stored as an answer-bearing atom.",
         ],
         "forbidden_uses": ["quote_text", "source_excerpt", "semantic_support_claim", "argument_summary"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+        ],
     },
     "legal_quote_span_match/5": {
         "schema_version": "carrier_contract_v1",
@@ -215,7 +229,10 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "match_status": ["exact_match", "normalized_match", "no_match", "authority_unavailable", "not_applicable"],
         },
         "forbidden_uses": ["quote_text", "source_excerpt", "semantic_support_claim", "good_law_status"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+        ],
     },
     "legal_pin_cite_check/5": {
         "schema_version": "carrier_contract_v1",
@@ -241,7 +258,9 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             ],
         },
         "forbidden_uses": ["quote_text", "source_excerpt", "semantic_support_claim", "good_law_status"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+        ],
     },
     "legal_verification_abstention/4": {
         "schema_version": "carrier_contract_v1",
@@ -276,7 +295,11 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             ],
         },
         "forbidden_uses": ["verified_answer", "legal_advice", "semantic_support_claim", "good_law_verdict"],
-        "micro_fixtures": ["legal_authority_verification_micro_v1"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v3",
+        ],
     },
     "legal_proposition_claim/5": {
         "schema_version": "carrier_contract_v1",
