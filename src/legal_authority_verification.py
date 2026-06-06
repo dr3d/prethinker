@@ -159,18 +159,28 @@ def verify_legal_authorities(
                     "status": quote_status,
                     "matched_location": matched_location,
                 }
-                if quote_status == "no_match":
+                if quote_status in {"no_match", "authority_unavailable"}:
+                    issue_name = (
+                        "authority_text_unavailable"
+                        if quote_status == "authority_unavailable"
+                        else "quote_not_found_in_authority"
+                    )
+                    abstention_reason = (
+                        "authority_text_unavailable"
+                        if quote_status == "authority_unavailable"
+                        else "quote_not_found_in_authority"
+                    )
                     issue_rows.append(
                         {
                             "mention_id": mention_id,
                             "quote_id": quote_id,
-                            "issue": "quote_not_found_in_authority",
+                            "issue": issue_name,
                             "line": quote_line,
                         }
                     )
                     facts.append(
                         "legal_verification_abstention("
-                        f"{quote_id}, quote_verification, quote_not_found_in_authority, {quote_scope})."
+                        f"{quote_id}, quote_verification, {abstention_reason}, {quote_scope})."
                     )
                 pin = match.group("pin")
                 pin_status, pin_atom = _pin_status(pin=pin, quote_status=quote_status, matched_location=matched_location, authority=authority)
@@ -312,6 +322,16 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         for row in mentions
         if row.get("quote_check") and row["quote_check"].get("status") == "no_match"
     ]
+    unavailable_authority_text = [
+        {
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "quote_id": row["quote_check"]["quote_id"],
+            "status": row["quote_check"]["status"],
+        }
+        for row in mentions
+        if row.get("quote_check") and row["quote_check"].get("status") == "authority_unavailable"
+    ]
     pin_mismatches = [
         {
             "mention_id": row["mention_id"],
@@ -336,12 +356,21 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
     blocking_issues = [
         row
         for row in issues
-        if row.get("issue") in {"unresolved", "ambiguous", "metadata_mismatch", "quote_not_found_in_authority", "quote_outside_cited_pin"}
+        if row.get("issue")
+        in {
+            "unresolved",
+            "ambiguous",
+            "metadata_mismatch",
+            "authority_text_unavailable",
+            "quote_not_found_in_authority",
+            "quote_outside_cited_pin",
+        }
     ]
     return {
         "which_citations_do_not_resolve": unresolved,
         "which_cases_have_metadata_mismatches": metadata_mismatches,
         "which_quotes_cannot_be_found": quote_mismatches,
+        "which_authority_text_is_unavailable": unavailable_authority_text,
         "which_pin_cites_do_not_contain_the_quote": pin_mismatches,
         "which_propositions_require_human_review": proposition_review,
         "can_this_filing_be_certified_citation_clean": {
@@ -402,6 +431,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Blocking issues: `{clean.get('blocking_issue_count', 0)}`",
                 f"- Review-required propositions: `{clean.get('review_required_count', 0)}`",
                 f"- Unresolved citations: `{len(queries.get('which_citations_do_not_resolve') or [])}`",
+                f"- Unavailable authority text: `{len(queries.get('which_authority_text_is_unavailable') or [])}`",
                 f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
                 f"- Pin-cite mismatches: `{len(queries.get('which_pin_cites_do_not_contain_the_quote') or [])}`",
             ]

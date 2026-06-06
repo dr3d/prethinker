@@ -105,7 +105,7 @@ a compact seed scope, and independent expected/forbidden oracles before they can
 | Profile | Selection paths in registry | Exact matched metadata fixtures |
 | --- | ---: | ---: |
 | `fda_warning_letter_v1` | 0 | 0 |
-| `legal_authority_verification_v1` | 1 | 0 |
+| `legal_authority_verification_v1` | 2 | 0 |
 | `ntsb_investigation_v1` | 10 | 1 |
 | `osha_incident_v1` | 5 | 5 |
 | `procurement_gao_decision_v1` | 2 | 2 |

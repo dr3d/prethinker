@@ -17,7 +17,8 @@
       "status": "seeded",
       "purpose": "Known-answer adversarial legal-authority checks made from a controlled source/inventory pair.",
       "fixtures": [
-        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1"
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1",
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v2"
       ],
       "required_files": [
         "source.md",
@@ -29,8 +30,11 @@
       "must_include": [
         "clean citation and quote",
         "unresolved citation",
+        "metadata mismatch",
+        "ambiguous citation",
         "fabricated quote on a real authority",
         "quote outside cited pin",
+        "authority-text-unavailable abstention",
         "proposition-support abstention"
       ],
       "promotion_gate": [

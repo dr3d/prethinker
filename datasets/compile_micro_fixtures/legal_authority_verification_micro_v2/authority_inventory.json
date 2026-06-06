@@ -1,0 +1,54 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_roe_410_us_113",
+      "canonical_citation": "410 U.S. 113",
+      "case_name": "Roe v. Wade",
+      "court": "Supreme Court of the United States",
+      "year": "1973",
+      "reporter": "U.S.",
+      "volume": "410",
+      "page": "113",
+      "pages": {
+        "152": "The right of privacy is broad enough to encompass a woman's decision whether or not to terminate her pregnancy."
+      }
+    },
+    {
+      "authority_id": "auth_alpha_123_us_456",
+      "canonical_citation": "123 U.S. 456",
+      "case_name": "Alpha v. Beta",
+      "court": "Fictional Test Court",
+      "year": "1900",
+      "reporter": "U.S.",
+      "volume": "123",
+      "page": "456",
+      "pages": {
+        "456": "Alpha test authority text."
+      }
+    },
+    {
+      "authority_id": "auth_gamma_123_us_456",
+      "canonical_citation": "123 U.S. 456",
+      "case_name": "Gamma v. Delta",
+      "court": "Fictional Test Court",
+      "year": "1900",
+      "reporter": "U.S.",
+      "volume": "123",
+      "page": "456",
+      "pages": {
+        "456": "Gamma test authority text."
+      }
+    },
+    {
+      "authority_id": "auth_gideon_372_us_335",
+      "canonical_citation": "372 U.S. 335",
+      "case_name": "Gideon v. Wainwright",
+      "court": "Supreme Court of the United States",
+      "year": "1963",
+      "reporter": "U.S.",
+      "volume": "372",
+      "page": "335"
+    }
+  ]
+}

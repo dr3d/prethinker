@@ -9,6 +9,7 @@ from src.legal_authority_verification import facts_text, render_markdown, verify
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v1"
+FIXTURE_V2 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v2"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -62,6 +63,37 @@ def test_local_authority_inventory_resolver_uses_courtlistener_like_lookup_shape
     assert unresolved.lookup_row["error_message"] == "citation_not_found"
 
 
+def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavailable_text() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V2 / "source.md",
+        authority_inventory_path=FIXTURE_V2 / "authority_inventory.json",
+        document_id="legal_authority_micro_v2",
+    )
+
+    assert report["summary"]["citation_mentions"] == 4
+    assert report["summary"]["resolved"] == 3
+    assert report["summary"]["ambiguous"] == 1
+    assert report["summary"]["quote_claims"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert report["summary"]["document_outcome"] == "review_required"
+
+    issues = {row["issue"] for row in report["issues"]}
+    assert "metadata_mismatch" in issues
+    assert "ambiguous" in issues
+    assert "authority_text_unavailable" in issues
+
+    queries = report["ledger_queries"]
+    assert len(queries["which_citations_do_not_resolve"]) == 1
+    assert len(queries["which_cases_have_metadata_mismatches"]) == 2
+    assert len(queries["which_authority_text_is_unavailable"]) == 1
+    assert queries["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 4,
+        "review_required_count": 0,
+        "answer": "no",
+    }
+
+
 def test_legal_authority_micro_fixture_emits_expected_and_not_forbidden_facts() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE / "source.md",
@@ -76,6 +108,28 @@ def test_legal_authority_micro_fixture_emits_expected_and_not_forbidden_facts() 
     forbidden = {
         line.strip()
         for line in (FIXTURE / "forbidden_facts.pl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+
+    assert expected <= emitted
+    assert emitted.isdisjoint(forbidden)
+
+
+def test_legal_authority_micro_fixture_v2_emits_expected_and_not_forbidden_facts() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V2 / "source.md",
+        authority_inventory_path=FIXTURE_V2 / "authority_inventory.json",
+        document_id="legal_authority_micro_v2",
+    )
+    emitted = {line.strip() for line in facts_text(report).splitlines() if line.strip()}
+    expected = {
+        line.strip()
+        for line in (FIXTURE_V2 / "expected_facts.pl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    forbidden = {
+        line.strip()
+        for line in (FIXTURE_V2 / "forbidden_facts.pl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     }
 
@@ -108,6 +162,9 @@ def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
 
     assert classes["controlled_adversarial_mutations"]["status"] == "seeded"
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v2" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_resolver_contract_stable"

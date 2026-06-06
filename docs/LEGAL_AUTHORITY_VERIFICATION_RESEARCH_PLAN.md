@@ -121,21 +121,25 @@ proposition IDs, proposition digests, candidate span IDs, and review state.
 They must not store proposition prose or convert an unreviewed model proposal
 into a support verdict.
 
-## First Micro-Fixture
+## Controlled Micro-Fixtures
 
-Initial fixture:
+Initial fixtures:
 
 ```text
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v1
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v2
 ```
 
-It contains:
+They contain:
 
 - one clean citation and quote;
 - one citation that does not resolve;
+- metadata mismatch checks;
+- ambiguous citation resolution;
 - one real authority with a fabricated quote;
 - one real authority with the quote present in the authority but outside the
   cited pin page;
+- one authority-text-unavailable quote check that must abstain;
 - one proposition-support boundary that must abstain.
 
 The fixture uses a local authority inventory so the first prototype can run
