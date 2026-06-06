@@ -55,6 +55,16 @@ REQUIRED_AUTHORITY_FIELDS = {
     "volume",
     "page",
 }
+ALLOWED_AUTHORITY_REPORTERS = {
+    "U.S.",
+    "F.2d",
+    "F.3d",
+    "F.4th",
+    "F. Supp.",
+    "F. Supp. 2d",
+    "F. Supp. 3d",
+    "S. Ct.",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -311,8 +321,9 @@ def _inventory_errors(inventory: dict[str, Any]) -> list[str]:
         if citation in seen_citations:
             errors.append(f"authority_{index}:duplicate_canonical_citation:{citation}")
         seen_citations.add(citation)
-        if str(row.get("reporter") or "").strip() != "U.S.":
-            errors.append(f"authority_{index}:reporter_not_us")
+        reporter = str(row.get("reporter") or "").strip()
+        if reporter not in ALLOWED_AUTHORITY_REPORTERS:
+            errors.append(f"authority_{index}:reporter_not_allowed:{reporter or 'missing'}")
         expected_citation = f"{row.get('volume', '')} {row.get('reporter', '')} {row.get('page', '')}".strip()
         if citation and citation != expected_citation:
             errors.append(f"authority_{index}:canonical_citation_slot_mismatch")

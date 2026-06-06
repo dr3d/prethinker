@@ -182,6 +182,44 @@ def test_validate_legal_authority_fixture_package_rejects_metadata_citation_mism
     assert "source_metadata_authority_source_1:canonical_citation_mismatch" in report["fixtures"][0]["errors"]
 
 
+def test_validate_legal_authority_fixture_package_accepts_federal_reporter_inventory(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    inventory_path = package / "clean_legal_filing_001" / "authority_inventory.json"
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    inventory["authorities"][0]["canonical_citation"] = "12 F.3d 34"
+    inventory["authorities"][0]["reporter"] = "F.3d"
+    inventory["authorities"][0]["volume"] = "12"
+    inventory["authorities"][0]["page"] = "34"
+    inventory_path.write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    metadata_path = package / "clean_legal_filing_001" / "source_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["authority_sources"][0]["canonical_citation"] = "12 F.3d 34"
+    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert "authority_1:reporter_not_allowed:F.3d" not in report["fixtures"][0]["errors"]
+
+
+def test_validate_legal_authority_fixture_package_rejects_unknown_reporter_inventory(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    inventory_path = package / "clean_legal_filing_001" / "authority_inventory.json"
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    inventory["authorities"][0]["canonical_citation"] = "12 Umbrella 34"
+    inventory["authorities"][0]["reporter"] = "Umbrella"
+    inventory["authorities"][0]["volume"] = "12"
+    inventory["authorities"][0]["page"] = "34"
+    inventory_path.write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    metadata_path = package / "clean_legal_filing_001" / "source_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["authority_sources"][0]["canonical_citation"] = "12 Umbrella 34"
+    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert "authority_1:reporter_not_allowed:Umbrella" in report["fixtures"][0]["errors"]
+
+
 def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     zip_path = tmp_path / "legal_authority_clean_public_filings_20260606_01.zip"
