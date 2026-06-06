@@ -61,7 +61,7 @@
       "required_files": [
         "source.md",
         "source_metadata.json",
-        "authority_inventory.json or authority_lookup_manifest.json",
+        "authority_inventory.json",
         "expected_facts.pl",
         "forbidden_facts.pl",
         "manifest.json",
@@ -90,7 +90,7 @@
         "source.md",
         "sanction_or_correction_source.md",
         "source_metadata.json",
-        "authority_inventory.json or authority_lookup_manifest.json",
+        "authority_inventory.json",
         "expected_facts.pl",
         "forbidden_facts.pl",
         "manifest.json"
