@@ -4,3 +4,4 @@ legal_authority_resolution(mention_003, cite_123_us_456, resolved, auth_alpha_12
 legal_authority_resolution(mention_003, cite_123_us_456, resolved, auth_gamma_123_us_456, source_line_11).
 legal_quote_span_match(quote_001, auth_gideon_372_us_335, exact_match, page_344, authority_inventory).
 legal_pin_cite_check(mention_004, auth_gideon_372_us_335, page_344, pin_contains_quote, source_line_15).
+legal_authority_text_source(auth_gideon_372_us_335, page_344, available, sha256_000000000000, authority_inventory).

@@ -32,6 +32,7 @@
         "legal_citation_mention/5",
         "legal_authority_resolution/5",
         "legal_authority_metadata_check/5",
+        "legal_authority_text_source/5",
         "legal_verification_abstention/4",
         "domain_omission/5"
       ]
@@ -41,6 +42,7 @@
       "purpose": "Quote claims, quote-span matches, and pin-cite locality checks.",
       "allowed_signatures": [
         "legal_quote_claim/5",
+        "legal_authority_text_source/5",
         "legal_quote_span_match/5",
         "legal_pin_cite_check/5",
         "legal_verification_abstention/4",
@@ -78,6 +80,12 @@
       "args": ["mention_id", "authority_id", "metadata_field", "check_status", "source_or_scope"],
       "category": "legal_authority_metadata",
       "notes": "Records whether extracted metadata such as case name or year matches the resolved authority metadata. Details stay in the report; the fact row carries only compact check status."
+    },
+    {
+      "signature": "legal_authority_text_source/5",
+      "args": ["authority_id", "text_scope", "text_status", "text_digest", "source_or_scope"],
+      "category": "legal_authority_text_provenance",
+      "notes": "Records compact provenance for authority text used by quote and pin-cite checks. text_digest is a digest of normalized authority text or no_digest; authority prose stays out of typed atoms."
     },
     {
       "signature": "legal_quote_claim/5",

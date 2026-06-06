@@ -94,6 +94,7 @@ Initial Tier 1 carrier families:
 legal_citation_mention/5
 legal_authority_resolution/5
 legal_authority_metadata_check/5
+legal_authority_text_source/5
 legal_quote_claim/5
 legal_quote_span_match/5
 legal_pin_cite_check/5
@@ -107,6 +108,11 @@ Quote text is represented by digest and source coordinate, not by storing the
 quote as an atom. Proposition text is not a Tier 1 value; a proposition boundary
 row can say that review is required without pretending the support question is
 deterministically solved.
+
+`legal_authority_text_source/5` is the authority-text provenance receipt. It
+records the compact authority coordinate, availability status, and normalized
+text digest used by quote and pin-cite checks. It must not store authority
+prose or propositions in atoms.
 
 Initial Tier 2 review-target carrier families:
 
@@ -202,6 +208,12 @@ not turn a measurement into an unrecorded external dependency. Live outputs
 need a provider manifest and retained cache before they become research
 evidence. Retained cache entries may replay without a token; cache misses are
 live calls and remain token-gated.
+
+Authority text used for quote/pin verification is also emitted as a compact
+provenance ledger: available page/paragraph scopes get a digest, while missing
+authority text emits `authority_unavailable` and forces abstention. This keeps
+the verifier from silently depending on authority prose that is not visible in
+the typed report.
 
 ## Metrics
 

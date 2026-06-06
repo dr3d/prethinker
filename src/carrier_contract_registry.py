@@ -202,6 +202,33 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "legal_authority_verification_micro_v6",
         ],
     },
+    "legal_authority_text_source/5": {
+        "schema_version": "carrier_contract_v1",
+        "status": "experimental",
+        "answer_types": ["legal_authority_verification", "authority_text_provenance"],
+        "args": ["authority_id", "text_scope", "text_status", "text_digest", "source_or_scope"],
+        "required_provenance": ["source_or_scope"],
+        "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
+        "contract": [
+            "Authority text source: the row records the compact provenance of authority text available to quote and pin-cite checks.",
+            "text_scope is a compact authority coordinate such as page_495, paragraph_12, authority_text, or authority_unavailable.",
+            "text_status is available or authority_unavailable.",
+            "text_digest is a compact digest of the normalized authority text used for deterministic checks, or no_digest when authority text is unavailable.",
+            "Do not store authority prose, source excerpts, propositions, or legal support rationales in any slot.",
+        ],
+        "value_domains": {
+            "text_status": ["available", "authority_unavailable"],
+        },
+        "forbidden_uses": ["source_excerpt", "authority_text_blob", "quote_text", "semantic_support_claim", "good_law_status"],
+        "micro_fixtures": [
+            "legal_authority_verification_micro_v1",
+            "legal_authority_verification_micro_v2",
+            "legal_authority_verification_micro_v3",
+            "legal_authority_verification_micro_v4",
+            "legal_authority_verification_micro_v5",
+            "legal_authority_verification_micro_v6",
+        ],
+    },
     "legal_quote_claim/5": {
         "schema_version": "carrier_contract_v1",
         "status": "experimental",

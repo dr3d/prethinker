@@ -12,3 +12,4 @@ legal_authority_metadata_check(mention_002, auth_brown_347_us_483, year, match, 
 legal_quote_claim(mention_002, quote_002, sha256_fed2ea7aca36, filing_line_7, source_line_7).
 legal_quote_span_match(quote_002, auth_brown_347_us_483, no_match, no_match, authority_inventory).
 legal_verification_abstention(quote_002, quote_verification, quote_not_found_in_authority, source_line_7).
+legal_authority_text_source(auth_brown_347_us_483, page_495, available, sha256_85cc42e31389, authority_inventory).

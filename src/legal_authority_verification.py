@@ -66,6 +66,8 @@ def verify_legal_authorities(
     resolver = LocalAuthorityInventoryResolver.from_path(authority_inventory_path)
     paragraphs = _paragraphs(source_text)
     facts: list[str] = []
+    authority_text_source_facts: set[str] = set()
+    authority_text_sources: dict[str, dict[str, Any]] = {}
     mentions: list[dict[str, Any]] = []
     lookup_rows: list[dict[str, Any]] = []
     issue_rows: list[dict[str, Any]] = []
@@ -174,6 +176,15 @@ def verify_legal_authorities(
                 )
                 mentions.append(mention_report)
                 continue
+
+            for source in _authority_text_sources(authority):
+                source["authority_id"] = str(authority["authority_id"])
+                authority_text_sources[f"{source['authority_id']}:{source['text_scope']}"] = source
+                authority_text_source_facts.add(
+                    "legal_authority_text_source("
+                    f"{source['authority_id']}, {source['text_scope']}, {source['text_status']}, "
+                    f"{source['text_digest']}, authority_inventory)."
+                )
 
             metadata_candidates = []
             if case_name:
@@ -348,6 +359,13 @@ def verify_legal_authorities(
         "pin_mismatch": sum(
             1 for row in mentions if row.get("pin_check") and row["pin_check"]["status"] == "quote_outside_pin"
         ),
+        "authority_text_sources": len(authority_text_sources),
+        "authority_text_available_sources": sum(
+            1 for row in authority_text_sources.values() if row.get("text_status") == "available"
+        ),
+        "authority_text_unavailable_sources": sum(
+            1 for row in authority_text_sources.values() if row.get("text_status") == "authority_unavailable"
+        ),
         "proposition_boundaries": sum(1 for row in mentions if row.get("proposition_boundary")),
         "false_verified": false_verified,
         "document_outcome": document_outcome,
@@ -359,9 +377,10 @@ def verify_legal_authorities(
         "authority_inventory": str(authority_inventory_path),
         "summary": summary,
         "courtlistener_like_lookup": lookup_rows,
+        "authority_text_sources": sorted(authority_text_sources.values(), key=lambda row: (row["authority_id"], row["text_scope"])),
         "mentions": mentions,
         "issues": issue_rows,
-        "facts": facts,
+        "facts": [*facts, *sorted(authority_text_source_facts)],
     }
     report["ledger_queries"] = build_ledger_queries(report)
     return report
@@ -372,6 +391,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
 
     mentions = list(report.get("mentions") or [])
     issues = list(report.get("issues") or [])
+    authority_text_sources = list(report.get("authority_text_sources") or [])
     unresolved = [
         _mention_brief(row)
         for row in mentions
@@ -448,6 +468,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         "which_cases_have_metadata_mismatches": metadata_mismatches,
         "which_quotes_cannot_be_found": quote_mismatches,
         "which_authority_text_is_unavailable": unavailable_authority_text,
+        "which_authority_text_sources_were_used": authority_text_sources,
         "which_pin_cites_do_not_contain_the_quote": pin_mismatches,
         "which_propositions_require_human_review": proposition_review,
         "can_this_filing_be_certified_citation_clean": {
@@ -475,6 +496,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Quote claims: `{summary['quote_claims']}`",
         f"- Quote mismatches: `{summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
+        f"- Authority text sources: `{summary['authority_text_sources']}`",
+        f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
         f"- Proposition support boundaries: `{summary['proposition_boundaries']}`",
         f"- False verified: `{summary['false_verified']}`",
         f"- Document outcome: `{summary['document_outcome']}`",
@@ -521,6 +544,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Review-required propositions: `{clean.get('review_required_count', 0)}`",
                 f"- Unresolved citations: `{len(queries.get('which_citations_do_not_resolve') or [])}`",
                 f"- Unavailable authority text: `{len(queries.get('which_authority_text_is_unavailable') or [])}`",
+                f"- Authority text source receipts: `{len(queries.get('which_authority_text_sources_were_used') or [])}`",
                 f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
                 f"- Pin-cite mismatches: `{len(queries.get('which_pin_cites_do_not_contain_the_quote') or [])}`",
             ]
@@ -641,6 +665,34 @@ def _quote_digest(quote: str) -> str:
     return f"sha256_{digest}"
 
 
+def _authority_text_sources(authority: dict[str, Any]) -> list[dict[str, str]]:
+    pages = authority.get("pages") if isinstance(authority.get("pages"), dict) else {}
+    if not pages:
+        return [
+            {
+                "text_scope": "authority_text",
+                "text_status": "authority_unavailable",
+                "text_digest": "no_digest",
+            }
+        ]
+    rows: list[dict[str, str]] = []
+    for page, text in sorted(pages.items(), key=lambda item: str(item[0])):
+        page_atom = _page_atom(str(page))
+        rows.append(
+            {
+                "text_scope": page_atom,
+                "text_status": "available",
+                "text_digest": _authority_text_digest(str(text)),
+            }
+        )
+    return rows
+
+
+def _authority_text_digest(text: str) -> str:
+    digest = hashlib.sha256(_normalize_text(text).encode("utf-8")).hexdigest()[:12]
+    return f"sha256_{digest}"
+
+
 def _proposition_digest(proposition_tail: str) -> str:
     digest = hashlib.sha256(_normalize_text(proposition_tail).encode("utf-8")).hexdigest()[:12]
     return f"sha256_{digest}"
@@ -706,7 +758,7 @@ def _pin_status(
 ) -> tuple[str, str]:
     if not pin:
         return "no_pin_stated", "no_pin_stated"
-    pin_atom = f"page_{pin}"
+    pin_atom = _page_atom(pin)
     if quote_status not in {"exact_match", "normalized_match"}:
         return "not_applicable", pin_atom
     pages = authority.get("pages") if isinstance(authority.get("pages"), dict) else {}
@@ -715,6 +767,10 @@ def _pin_status(
     if matched_location == pin_atom:
         return "pin_contains_quote", pin_atom
     return "quote_outside_pin", pin_atom
+
+
+def _page_atom(page: str) -> str:
+    return "page_" + re.sub(r"[^a-z0-9]+", "_", page.casefold()).strip("_")
 
 
 def _has_proposition_boundary(paragraph: str, citation_end: int) -> bool:

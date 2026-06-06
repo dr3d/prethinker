@@ -294,6 +294,9 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, int]:
         "quote_claims": 0,
         "quote_mismatch": 0,
         "pin_mismatch": 0,
+        "authority_text_sources": 0,
+        "authority_text_available_sources": 0,
+        "authority_text_unavailable_sources": 0,
         "false_verified": 0,
     }
     for row in rows:
@@ -312,6 +315,9 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, int]:
             "quote_claims",
             "quote_mismatch",
             "pin_mismatch",
+            "authority_text_sources",
+            "authority_text_available_sources",
+            "authority_text_unavailable_sources",
             "false_verified",
         ):
             totals[key] += int(summary.get(key, 0) or 0)
@@ -325,6 +331,8 @@ def _ledger_query_summary(queries: dict[str, Any]) -> dict[str, Any]:
         "citation_clean": bool(clean.get("citation_clean", False)),
         "blocking_issue_count": int(clean.get("blocking_issue_count", 0) or 0),
         "review_required_count": int(clean.get("review_required_count", 0) or 0),
+        "authority_text_sources": len(queries.get("which_authority_text_sources_were_used") or []),
+        "authority_text_unavailable": len(queries.get("which_authority_text_is_unavailable") or []),
     }
 
 
@@ -343,6 +351,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Verified / blocked / review-required mentions: `{summary['verified_mentions']} / {summary['blocked_mentions']} / {summary['review_required_mentions']}`",
         f"- Quote claims / quote mismatches: `{summary['quote_claims']} / {summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
+        f"- Authority text sources: `{summary['authority_text_sources']}`",
+        f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
         f"- False verified: `{summary['false_verified']}`",
         f"- Blocking errors: `{summary['blocking_errors']}`",
         f"- Status: `{summary['status']}`",

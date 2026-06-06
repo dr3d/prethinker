@@ -6,13 +6,13 @@ This report does not read source prose, QA questions, or judge outputs.
 ## Summary
 
 - Domains: `8`
-- Predicates: `74` (`68` domain-specific plus shared carriers)
+- Predicates: `75` (`69` domain-specific plus shared carriers)
 - Lenses: `34`
 - Associated fixtures: `36`
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
-- Expected facts in associated fixtures: `667`
-- Forbidden facts in associated fixtures: `283`
+- Expected facts in associated fixtures: `678`
+- Forbidden facts in associated fixtures: `285`
 - Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
-| `legal_authority_verification_v1` | 12 | 11 | 3 | 6 | 94 | 33 |
+| `legal_authority_verification_v1` | 13 | 12 | 3 | 6 | 105 | 35 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
@@ -69,8 +69,8 @@ This report does not read source prose, QA questions, or judge outputs.
 ## legal_authority_verification_v1
 
 - Registry: `datasets/domain_profiles/legal_authority_verification_v1/ontology_registry.json`
-- Predicates: `12`
-- Domain-specific predicates: `11`
+- Predicates: `13`
+- Domain-specific predicates: `12`
 - Lenses: `3`
 - Accountability requirements: `1`
 
@@ -78,20 +78,20 @@ This report does not read source prose, QA questions, or judge outputs.
 
 | Lens | Allowed signatures |
 | --- | --- |
-| `citation_resolution` | `legal_citation_mention/5`, `legal_authority_resolution/5`, `legal_authority_metadata_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
-| `quote_pin_check` | `legal_quote_claim/5`, `legal_quote_span_match/5`, `legal_pin_cite_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
+| `citation_resolution` | `legal_citation_mention/5`, `legal_authority_resolution/5`, `legal_authority_metadata_check/5`, `legal_authority_text_source/5`, `legal_verification_abstention/4`, `domain_omission/5` |
+| `quote_pin_check` | `legal_quote_claim/5`, `legal_authority_text_source/5`, `legal_quote_span_match/5`, `legal_pin_cite_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
 | `proposition_boundary` | `legal_proposition_claim/5`, `legal_proposition_source_span/5`, `legal_support_assessment/5`, `legal_proposition_support_boundary/5`, `legal_verification_abstention/4`, `domain_omission/5` |
 
 ### Fixture Oracles
 
 | Fixture | Association | Expected | Forbidden | Expected signatures |
 | --- | --- | ---: | ---: | --- |
-| `legal_authority_verification_micro_v1` | `fixture_id_prefix` | 35 | 7 | `legal_authority_metadata_check/5`:8, `legal_authority_resolution/5`:5, `legal_citation_mention/5`:5, `legal_pin_cite_check/5`:3, `legal_proposition_claim/5`:1, `legal_proposition_source_span/5`:1, `legal_proposition_support_boundary/5`:1, `legal_quote_claim/5`:3, `legal_quote_span_match/5`:3, `legal_support_assessment/5`:1, `legal_verification_abstention/4`:4 |
-| `legal_authority_verification_micro_v2` | `fixture_id_prefix` | 18 | 6 | `legal_authority_metadata_check/5`:6, `legal_authority_resolution/5`:4, `legal_citation_mention/5`:4, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:2 |
+| `legal_authority_verification_micro_v1` | `fixture_id_prefix` | 39 | 7 | `legal_authority_metadata_check/5`:8, `legal_authority_resolution/5`:5, `legal_authority_text_source/5`:4, `legal_citation_mention/5`:5, `legal_pin_cite_check/5`:3, `legal_proposition_claim/5`:1, `legal_proposition_source_span/5`:1, `legal_proposition_support_boundary/5`:1, `legal_quote_claim/5`:3, `legal_quote_span_match/5`:3, `legal_support_assessment/5`:1, `legal_verification_abstention/4`:4 |
+| `legal_authority_verification_micro_v2` | `fixture_id_prefix` | 20 | 7 | `legal_authority_metadata_check/5`:6, `legal_authority_resolution/5`:4, `legal_authority_text_source/5`:2, `legal_citation_mention/5`:4, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:2 |
 | `legal_authority_verification_micro_v3` | `fixture_id_prefix` | 3 | 3 | `legal_authority_resolution/5`:1, `legal_citation_mention/5`:1, `legal_verification_abstention/4`:1 |
-| `legal_authority_verification_micro_v4` | `fixture_id_prefix` | 8 | 3 | `legal_authority_metadata_check/5`:2, `legal_authority_resolution/5`:1, `legal_citation_mention/5`:1, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:1 |
-| `legal_authority_verification_micro_v5` | `fixture_id_prefix` | 16 | 9 | `legal_authority_metadata_check/5`:2, `legal_authority_resolution/5`:4, `legal_citation_mention/5`:4, `legal_pin_cite_check/5`:2, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2 |
-| `legal_authority_verification_micro_v6` | `fixture_id_prefix` | 14 | 5 | `legal_authority_metadata_check/5`:4, `legal_authority_resolution/5`:2, `legal_citation_mention/5`:2, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2, `legal_verification_abstention/4`:1 |
+| `legal_authority_verification_micro_v4` | `fixture_id_prefix` | 9 | 3 | `legal_authority_metadata_check/5`:2, `legal_authority_resolution/5`:1, `legal_authority_text_source/5`:1, `legal_citation_mention/5`:1, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:1 |
+| `legal_authority_verification_micro_v5` | `fixture_id_prefix` | 19 | 9 | `legal_authority_metadata_check/5`:2, `legal_authority_resolution/5`:4, `legal_authority_text_source/5`:3, `legal_citation_mention/5`:4, `legal_pin_cite_check/5`:2, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2 |
+| `legal_authority_verification_micro_v6` | `fixture_id_prefix` | 15 | 6 | `legal_authority_metadata_check/5`:4, `legal_authority_resolution/5`:2, `legal_authority_text_source/5`:1, `legal_citation_mention/5`:2, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2, `legal_verification_abstention/4`:1 |
 
 ## ntsb_investigation_v1
 

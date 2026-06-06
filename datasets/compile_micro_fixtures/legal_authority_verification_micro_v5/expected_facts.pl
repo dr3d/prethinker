@@ -14,3 +14,6 @@ legal_quote_span_match(quote_002, auth_obergefell_576_us_644, exact_match, page_
 legal_pin_cite_check(mention_003, auth_obergefell_576_us_644, page_675, pin_contains_quote, source_line_9).
 legal_citation_mention(legal_authority_verification_micro_v5, mention_004, cite_384_us_436, line_11, source_line_11).
 legal_authority_resolution(mention_004, cite_384_us_436, resolved, auth_miranda_384_us_436, source_line_11).
+legal_authority_text_source(auth_brown_347_us_483, page_495, available, sha256_85cc42e31389, authority_inventory).
+legal_authority_text_source(auth_miranda_384_us_436, page_444, available, sha256_8a32723087cc, authority_inventory).
+legal_authority_text_source(auth_obergefell_576_us_644, page_675, available, sha256_155cef51f8da, authority_inventory).

@@ -84,6 +84,9 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
     assert report["summary"]["resolved"] == 3
     assert report["summary"]["ambiguous"] == 1
     assert report["summary"]["quote_claims"] == 1
+    assert report["summary"]["authority_text_sources"] == 2
+    assert report["summary"]["authority_text_available_sources"] == 1
+    assert report["summary"]["authority_text_unavailable_sources"] == 1
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "review_required"
 
@@ -96,6 +99,7 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
     assert len(queries["which_citations_do_not_resolve"]) == 1
     assert len(queries["which_cases_have_metadata_mismatches"]) == 2
     assert len(queries["which_authority_text_is_unavailable"]) == 1
+    assert len(queries["which_authority_text_sources_were_used"]) == 2
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 4,
@@ -219,6 +223,8 @@ def test_legal_authority_micro_fixture_v6_checks_quotes_before_citations() -> No
     assert report["summary"]["quote_claims"] == 2
     assert report["summary"]["quote_exact_or_normalized_match"] == 1
     assert report["summary"]["quote_mismatch"] == 1
+    assert report["summary"]["authority_text_sources"] == 1
+    assert report["summary"]["authority_text_available_sources"] == 1
     assert report["summary"]["false_verified"] == 0
 
     assert report["mentions"][0]["quote_check"]["status"] == "normalized_match"
@@ -228,6 +234,14 @@ def test_legal_authority_micro_fixture_v6_checks_quotes_before_citations() -> No
 
     queries = report["ledger_queries"]
     assert len(queries["which_quotes_cannot_be_found"]) == 1
+    assert queries["which_authority_text_sources_were_used"] == [
+        {
+            "authority_id": "auth_brown_347_us_483",
+            "text_digest": "sha256_85cc42e31389",
+            "text_scope": "page_495",
+            "text_status": "available",
+        }
+    ]
     assert queries["can_this_filing_be_certified_citation_clean"] == {
         "citation_clean": False,
         "blocking_issue_count": 1,

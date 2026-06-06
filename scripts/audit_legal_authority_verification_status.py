@@ -176,6 +176,9 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
         "quote_exact_or_normalized_match": 0,
         "quote_mismatch": 0,
         "pin_mismatch": 0,
+        "authority_text_sources": 0,
+        "authority_text_available_sources": 0,
+        "authority_text_unavailable_sources": 0,
         "proposition_boundaries": 0,
         "false_verified": 0,
     }
@@ -198,6 +201,9 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
             "quote_exact_or_normalized_match",
             "quote_mismatch",
             "pin_mismatch",
+            "authority_text_sources",
+            "authority_text_available_sources",
+            "authority_text_unavailable_sources",
             "proposition_boundaries",
             "false_verified",
         ):
@@ -216,6 +222,7 @@ def _ledger_query_summary(ledger_queries: dict[str, Any]) -> dict[str, Any]:
         "metadata_mismatches": len(ledger_queries.get("which_cases_have_metadata_mismatches") or []),
         "quote_mismatches": len(ledger_queries.get("which_quotes_cannot_be_found") or []),
         "authority_text_unavailable": len(ledger_queries.get("which_authority_text_is_unavailable") or []),
+        "authority_text_sources": len(ledger_queries.get("which_authority_text_sources_were_used") or []),
         "pin_mismatches": len(ledger_queries.get("which_pin_cites_do_not_contain_the_quote") or []),
         "propositions_requiring_review": len(ledger_queries.get("which_propositions_require_human_review") or []),
     }
@@ -249,6 +256,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Resolved / unresolved / ambiguous / invalid reporter: `{summary['resolved']} / {summary['unresolved']} / {summary['ambiguous']} / {summary['invalid_reporter']}`",
         f"- Quote claims / quote matches / quote mismatches: `{summary['quote_claims']} / {summary['quote_exact_or_normalized_match']} / {summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
+        f"- Authority text sources: `{summary['authority_text_sources']}`",
+        f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
         f"- Proposition boundaries: `{summary['proposition_boundaries']}`",
         f"- False verified: `{summary['false_verified']}`",
         f"- Blocking rows: `{summary['blocking_rows']}`",
