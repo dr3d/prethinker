@@ -19,7 +19,8 @@
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v6",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v7",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8",
-        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9"
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9",
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v10"
       ],
       "id": "controlled_adversarial_mutations",
       "must_include": [
@@ -35,6 +36,7 @@
         "quote outside cited pin",
         "authority-text-unavailable abstention",
         "pin-cite-unavailable abstention",
+        "clean-public mutation false-verification traps",
         "proposition-support abstention",
         "short-form citation context-required abstention",
         "named short-form citation context-required abstention"

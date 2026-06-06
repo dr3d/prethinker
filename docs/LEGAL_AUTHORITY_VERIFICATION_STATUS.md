@@ -4,21 +4,21 @@ This generated report runs the deterministic legal-authority verifier over fixtu
 It reads local fixture files and authority inventories only; it does not call an LLM or live legal resolver.
 
 - Manifest: `datasets/legal_authority_verification/fixture_corpus_manifest.json`
-- Fixtures: `12`
-- Expected facts: `217 / 217`
-- Matched forbidden facts: `0 / 63`
-- Citation mentions: `30`
-- Verified / blocked / review-required mentions: `18 / 11 / 1`
-- Resolved / unresolved / ambiguous / invalid reporter / unavailable: `27 / 1 / 1 / 1 / 0`
-- Metadata checks / matches / mismatches: `125 / 123 / 2`
-- Quote claims / quote matches / quote mismatches: `13 / 9 / 3`
+- Fixtures: `13`
+- Expected facts: `239 / 239`
+- Matched forbidden facts: `0 / 68`
+- Citation mentions: `33`
+- Verified / blocked / review-required mentions: `18 / 14 / 1`
+- Resolved / unresolved / ambiguous / invalid reporter / unavailable: `29 / 2 / 1 / 1 / 0`
+- Metadata checks / matches / mismatches: `135 / 132 / 3`
+- Quote claims / quote matches / quote mismatches: `14 / 9 / 4`
 - Pin mismatches: `1`
 - Pin unavailable: `1`
-- Authority text sources: `22`
-- Authority text available / unavailable sources: `14 / 8`
+- Authority text sources: `24`
+- Authority text available / unavailable sources: `15 / 9`
 - Short-form citations requiring context: `2`
 - Proposition boundaries: `1`
-- Verification abstentions: `12`
+- Verification abstentions: `14`
 - False verified: `0`
 - Blocking rows: `0`
 - Status: `pass`
@@ -27,24 +27,24 @@ It reads local fixture files and authority inventories only; it does not call an
 
 | Signature | Expected matched/total | Forbidden matched/total |
 | --- | ---: | ---: |
-| `legal_authority_metadata_check/5` | 89/89 | 0/13 |
-| `legal_authority_resolution/5` | 30/30 | 0/16 |
-| `legal_authority_text_source/5` | 15/15 | 0/5 |
-| `legal_citation_mention/5` | 30/30 | 0/2 |
+| `legal_authority_metadata_check/5` | 99/99 | 0/14 |
+| `legal_authority_resolution/5` | 33/33 | 0/17 |
+| `legal_authority_text_source/5` | 17/17 | 0/7 |
+| `legal_citation_mention/5` | 33/33 | 0/2 |
 | `legal_pin_cite_check/5` | 11/11 | 0/9 |
 | `legal_proposition_claim/5` | 1/1 | 0/1 |
 | `legal_proposition_source_span/5` | 1/1 | 0/1 |
 | `legal_proposition_support_boundary/5` | 1/1 | 0/1 |
-| `legal_quote_claim/5` | 13/13 | 0/0 |
-| `legal_quote_span_match/5` | 13/13 | 0/12 |
+| `legal_quote_claim/5` | 14/14 | 0/0 |
+| `legal_quote_span_match/5` | 14/14 | 0/13 |
 | `legal_support_assessment/5` | 1/1 | 0/1 |
-| `legal_verification_abstention/4` | 12/12 | 0/2 |
+| `legal_verification_abstention/4` | 14/14 | 0/2 |
 
 ## Fixture Classes
 
 | Class | Status | Fixtures |
 | --- | --- | ---: |
-| `controlled_adversarial_mutations` | `seeded` | 9 |
+| `controlled_adversarial_mutations` | `seeded` | 10 |
 | `clean_public_filings` | `seeded` | 3 |
 | `known_hallucination_or_sanction_filings` | `queued_for_source_only_packet` | 0 |
 
@@ -61,6 +61,7 @@ It reads local fixture files and authority inventories only; it does not call an
 | `legal_authority_verification_micro_v7` | `controlled_adversarial_mutations` | 1/1 | 0 | 0 | `0/0/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v8` | `controlled_adversarial_mutations` | 1/1 | 0 | 0 | `0/0/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v9` | `controlled_adversarial_mutations` | 12/12 | 0 | 0 | `0/1/0` | `no` | `[]` |
+| `legal_authority_verification_micro_v10` | `controlled_adversarial_mutations` | 22/22 | 0 | 0 | `0/3/0` | `no` | `[]` |
 | `clean_legal_filing_001` | `clean_public_filings` | 18/18 | 0 | 0 | `4/0/0` | `yes` | `[]` |
 | `clean_legal_filing_002` | `clean_public_filings` | 20/20 | 0 | 0 | `4/0/0` | `yes` | `[]` |
 | `clean_legal_filing_003` | `clean_public_filings` | 18/18 | 0 | 0 | `4/0/0` | `yes` | `[]` |

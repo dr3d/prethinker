@@ -23,6 +23,7 @@ FIXTURE_V5 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_ver
 FIXTURE_V6 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v6"
 FIXTURE_V8 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v8"
 FIXTURE_V9 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v9"
+FIXTURE_V10 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v10"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -1222,6 +1223,71 @@ def test_legal_authority_micro_fixture_v9_blocks_unavailable_pin_cite() -> None:
     assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"]["answer"] == "no"
 
 
+def test_legal_authority_micro_fixture_v10_blocks_clean_filing_mutations() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V10 / "source.md",
+        authority_inventory_path=FIXTURE_V10 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v10",
+    )
+
+    assert report["summary"]["citation_mentions"] == 3
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 3
+    assert report["summary"]["review_required_mentions"] == 0
+    assert report["summary"]["resolved"] == 2
+    assert report["summary"]["unresolved"] == 1
+    assert report["summary"]["metadata_checks"] == 10
+    assert report["summary"]["metadata_match"] == 9
+    assert report["summary"]["metadata_mismatch"] == 1
+    assert report["summary"]["quote_claims"] == 1
+    assert report["summary"]["quote_exact_or_normalized_match"] == 0
+    assert report["summary"]["quote_mismatch"] == 1
+    assert report["summary"]["authority_text_sources"] == 2
+    assert report["summary"]["authority_text_available_sources"] == 1
+    assert report["summary"]["authority_text_unavailable_sources"] == 1
+    assert report["summary"]["verification_abstentions"] == 2
+    assert report["summary"]["false_verified"] == 0
+    assert report["summary"]["document_outcome"] == "review_required"
+
+    queries = report["ledger_queries"]
+    assert queries["which_citations_do_not_resolve"] == [
+        {
+            "mention_id": "mention_002",
+            "citation": "347 U.S. 498",
+            "resolution_status": "unresolved",
+            "authority_id": "authority_not_found",
+            "line": 7,
+        }
+    ]
+    assert queries["which_cases_have_metadata_mismatches"] == [
+        {
+            "mention_id": "mention_003",
+            "citation": "388 U.S. 1",
+            "field": "year",
+            "status": "mismatch",
+        }
+    ]
+    assert queries["which_quotes_cannot_be_found"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "347 U.S. 483",
+            "quote_id": "quote_001",
+            "status": "no_match",
+        }
+    ]
+    assert queries["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 3,
+        "blocking_issue_types": [
+            "metadata_mismatch",
+            "quote_not_found_in_authority",
+            "unresolved",
+        ],
+        "review_required_count": 0,
+        "answer": "no",
+    }
+
+
 def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanctions() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
@@ -1256,6 +1322,9 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v10" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert classes["clean_public_filings"]["status"] == "seeded"

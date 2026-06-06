@@ -141,6 +141,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v6
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v7
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v8
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v9
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v10
 ```
 
 They contain:
@@ -164,6 +165,8 @@ They contain:
 - one authority-text-unavailable quote check that must abstain;
 - one unavailable cited pin coordinate that must abstain instead of certifying
   a quote match found elsewhere in retained authority text;
+- one controlled mutation of a clean public filing excerpt that must block a
+  fabricated quote, altered citation, and metadata year mismatch;
 - one proposition-support boundary that must abstain.
 - one short-form citation such as `Id.` that must require context and abstain
   instead of inventing a resolved authority.

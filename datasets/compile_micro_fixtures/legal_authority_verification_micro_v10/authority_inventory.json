@@ -1,0 +1,41 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_brown_347_us_483",
+      "canonical_citation": "347 U.S. 483",
+      "case_name": "Brown v. Board of Education of Topeka",
+      "court": "Supreme Court of the United States",
+      "year": "1954",
+      "reporter": "U.S.",
+      "volume": "347",
+      "page": "483",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/347/483/",
+      "pages": {
+        "495": "We conclude that, in the field of public education, the doctrine of 'separate but equal' has no place. Separate educational facilities are inherently unequal."
+      }
+    },
+    {
+      "authority_id": "auth_bolling_347_us_497",
+      "canonical_citation": "347 U.S. 497",
+      "case_name": "Bolling v. Sharpe",
+      "court": "Supreme Court of the United States",
+      "year": "1954",
+      "reporter": "U.S.",
+      "volume": "347",
+      "page": "497",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/347/497/"
+    },
+    {
+      "authority_id": "auth_loving_388_us_1",
+      "canonical_citation": "388 U.S. 1",
+      "case_name": "Loving v. Virginia",
+      "court": "Supreme Court of the United States",
+      "year": "1967",
+      "reporter": "U.S.",
+      "volume": "388",
+      "page": "1",
+      "authority_text_url": "https://supreme.justia.com/cases/federal/us/388/1/"
+    }
+  ]
+}
