@@ -18,9 +18,13 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert summary["blocked_mentions"] == 10
     assert summary["review_required_mentions"] == 1
     assert summary["invalid_reporter"] == 1
+    assert summary["metadata_checks"] == 22
+    assert summary["metadata_match"] == 20
+    assert summary["metadata_mismatch"] == 2
     assert summary["authority_text_sources"] == 11
     assert summary["authority_text_available_sources"] == 10
     assert summary["authority_text_unavailable_sources"] == 1
+    assert summary["verification_abstentions"] == 9
 
     fixtures = {row["fixture_id"]: row for row in report["fixtures"]}
     assert fixtures["legal_authority_verification_micro_v1"]["matched_expected_fact_count"] == 39
@@ -41,4 +45,6 @@ def test_legal_authority_status_markdown_names_false_verified_gate() -> None:
     assert "Matched forbidden facts: `0 / 35`" in markdown
     assert "Authority text sources: `11`" in markdown
     assert "Resolved / unresolved / ambiguous / invalid reporter:" in markdown
+    assert "Metadata checks / matches / mismatches: `22 / 20 / 2`" in markdown
+    assert "Verification abstentions: `9`" in markdown
     assert "clean-public-filings batch" in markdown

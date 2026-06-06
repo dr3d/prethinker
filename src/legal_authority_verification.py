@@ -334,7 +334,13 @@ def verify_legal_authorities(
     for mention in mentions:
         mention["verification_status"] = _mention_verification_status(mention)
 
+    metadata_checks = [
+        check
+        for row in mentions
+        for check in row.get("metadata_checks", [])
+    ]
     false_verified = _false_verified_count(mentions)
+    verification_abstentions = sum(1 for fact in facts if fact.startswith("legal_verification_abstention("))
     document_outcome = "citation_clean" if not issue_rows else "review_required"
     summary = {
         "document_id": document_id,
@@ -346,6 +352,9 @@ def verify_legal_authorities(
         "unresolved": sum(1 for row in mentions if row["resolution_status"] == "unresolved"),
         "ambiguous": sum(1 for row in mentions if row["resolution_status"] == "ambiguous"),
         "invalid_reporter": sum(1 for row in mentions if row["resolution_status"] == "invalid_reporter"),
+        "metadata_checks": len(metadata_checks),
+        "metadata_match": sum(1 for check in metadata_checks if check.get("status") == "match"),
+        "metadata_mismatch": sum(1 for check in metadata_checks if check.get("status") == "mismatch"),
         "quote_claims": sum(1 for row in mentions if row.get("quote_check")),
         "quote_exact_or_normalized_match": sum(
             1
@@ -367,6 +376,7 @@ def verify_legal_authorities(
             1 for row in authority_text_sources.values() if row.get("text_status") == "authority_unavailable"
         ),
         "proposition_boundaries": sum(1 for row in mentions if row.get("proposition_boundary")),
+        "verification_abstentions": verification_abstentions,
         "false_verified": false_verified,
         "document_outcome": document_outcome,
         "status": "pass" if false_verified == 0 else "fail",
@@ -501,12 +511,14 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Resolved: `{summary['resolved']}`",
         f"- Unresolved: `{summary['unresolved']}`",
         f"- Invalid reporter: `{summary['invalid_reporter']}`",
+        f"- Metadata checks / matches / mismatches: `{summary['metadata_checks']} / {summary['metadata_match']} / {summary['metadata_mismatch']}`",
         f"- Quote claims: `{summary['quote_claims']}`",
         f"- Quote mismatches: `{summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
         f"- Authority text sources: `{summary['authority_text_sources']}`",
         f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
         f"- Proposition support boundaries: `{summary['proposition_boundaries']}`",
+        f"- Verification abstentions: `{summary['verification_abstentions']}`",
         f"- False verified: `{summary['false_verified']}`",
         f"- Document outcome: `{summary['document_outcome']}`",
         f"- Status: `{summary['status']}`",

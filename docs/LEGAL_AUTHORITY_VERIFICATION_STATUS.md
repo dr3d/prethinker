@@ -10,11 +10,13 @@ It reads local fixture files and authority inventories only; it does not call an
 - Citation mentions: `17`
 - Verified / blocked / review-required mentions: `6 / 10 / 1`
 - Resolved / unresolved / ambiguous / invalid reporter: `14 / 1 / 1 / 1`
+- Metadata checks / matches / mismatches: `22 / 20 / 2`
 - Quote claims / quote matches / quote mismatches: `9 / 5 / 3`
 - Pin mismatches: `1`
 - Authority text sources: `11`
 - Authority text available / unavailable sources: `10 / 1`
 - Proposition boundaries: `1`
+- Verification abstentions: `9`
 - False verified: `0`
 - Blocking rows: `0`
 - Status: `pass`

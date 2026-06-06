@@ -28,9 +28,13 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
     assert report["summary"]["review_required_mentions"] == 1
     assert report["summary"]["resolved"] == 4
     assert report["summary"]["unresolved"] == 1
+    assert report["summary"]["metadata_checks"] == 8
+    assert report["summary"]["metadata_match"] == 8
+    assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_mismatch"] == 1
     assert report["summary"]["pin_mismatch"] == 1
     assert report["summary"]["proposition_boundaries"] == 1
+    assert report["summary"]["verification_abstentions"] == 4
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "review_required"
 
@@ -88,10 +92,14 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
     assert report["summary"]["review_required_mentions"] == 0
     assert report["summary"]["resolved"] == 3
     assert report["summary"]["ambiguous"] == 1
+    assert report["summary"]["metadata_checks"] == 6
+    assert report["summary"]["metadata_match"] == 4
+    assert report["summary"]["metadata_mismatch"] == 2
     assert report["summary"]["quote_claims"] == 1
     assert report["summary"]["authority_text_sources"] == 2
     assert report["summary"]["authority_text_available_sources"] == 1
     assert report["summary"]["authority_text_unavailable_sources"] == 1
+    assert report["summary"]["verification_abstentions"] == 2
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "review_required"
 
@@ -134,6 +142,8 @@ def test_legal_authority_micro_fixture_v3_catches_unsupported_reporter() -> None
     assert report["summary"]["unresolved"] == 0
     assert report["summary"]["ambiguous"] == 0
     assert report["summary"]["invalid_reporter"] == 1
+    assert report["summary"]["metadata_checks"] == 0
+    assert report["summary"]["verification_abstentions"] == 1
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "review_required"
 
@@ -164,9 +174,13 @@ def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_sco
     assert report["summary"]["blocked_mentions"] == 1
     assert report["summary"]["review_required_mentions"] == 0
     assert report["summary"]["resolved"] == 1
+    assert report["summary"]["metadata_checks"] == 2
+    assert report["summary"]["metadata_match"] == 2
+    assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_claims"] == 1
     assert report["summary"]["quote_exact_or_normalized_match"] == 0
     assert report["summary"]["quote_mismatch"] == 1
+    assert report["summary"]["verification_abstentions"] == 1
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "review_required"
 
@@ -196,9 +210,13 @@ def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_witho
     assert report["summary"]["verified_mentions"] == 4
     assert report["summary"]["blocked_mentions"] == 0
     assert report["summary"]["resolved"] == 4
+    assert report["summary"]["metadata_checks"] == 2
+    assert report["summary"]["metadata_match"] == 2
+    assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_claims"] == 2
     assert report["summary"]["quote_exact_or_normalized_match"] == 2
     assert report["summary"]["pin_mismatch"] == 0
+    assert report["summary"]["verification_abstentions"] == 0
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "citation_clean"
 
@@ -235,11 +253,15 @@ def test_legal_authority_micro_fixture_v6_checks_quotes_before_citations() -> No
     assert report["summary"]["citation_mentions"] == 2
     assert report["summary"]["verified_mentions"] == 1
     assert report["summary"]["blocked_mentions"] == 1
+    assert report["summary"]["metadata_checks"] == 4
+    assert report["summary"]["metadata_match"] == 4
+    assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_claims"] == 2
     assert report["summary"]["quote_exact_or_normalized_match"] == 1
     assert report["summary"]["quote_mismatch"] == 1
     assert report["summary"]["authority_text_sources"] == 1
     assert report["summary"]["authority_text_available_sources"] == 1
+    assert report["summary"]["verification_abstentions"] == 1
     assert report["summary"]["false_verified"] == 0
 
     assert report["mentions"][0]["quote_check"]["status"] == "normalized_match"
@@ -406,6 +428,8 @@ def test_legal_authority_report_renders_review_required_boundary() -> None:
 
     assert "Document outcome: `review_required`" in markdown
     assert "Verified mentions: `1`" in markdown
+    assert "Metadata checks / matches / mismatches: `8 / 8 / 0`" in markdown
+    assert "Verification abstentions: `4`" in markdown
     assert "`review_required`" in markdown
     assert "`blocked`" in markdown
     assert "`quote_not_found_in_authority`" in markdown
