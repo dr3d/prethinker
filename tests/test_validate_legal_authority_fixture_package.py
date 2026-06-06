@@ -48,6 +48,20 @@ def test_validate_legal_authority_fixture_package_rejects_expected_fact_miss(tmp
     assert "missing_expected_facts:1" in report["fixtures"][2]["errors"]
 
 
+def test_validate_legal_authority_fixture_package_requires_four_forbidden_traps(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    forbidden_path = package / "clean_legal_filing_001" / "forbidden_facts.pl"
+    forbidden_path.write_text(
+        "legal_authority_resolution(mention_001, cite_576_us_644, unresolved, authority_not_found, source_line_5).\n",
+        encoding="utf-8",
+    )
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "forbidden_facts_expected_at_least_4_got_1" in report["fixtures"][0]["errors"]
+
+
 def test_validate_legal_authority_fixture_package_rejects_claim_bearing_support_rows(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     expected_path = package / "clean_legal_filing_001" / "expected_facts.pl"
@@ -173,6 +187,7 @@ Miranda v. Arizona, 384 U.S. 436 (1966), is also cited.
                 "legal_authority_resolution(mention_001, cite_576_us_644, unresolved, authority_not_found, source_line_5).",
                 "legal_quote_span_match(quote_001, auth_obergefell_576_us_644, no_match, no_match, authority_inventory).",
                 "legal_pin_cite_check(mention_001, auth_obergefell_576_us_644, page_675, quote_outside_pin, source_line_5).",
+                "legal_authority_text_source(auth_obergefell_576_us_644, page_675, authority_unavailable, no_digest, authority_inventory).",
                 "",
             ]
         ),

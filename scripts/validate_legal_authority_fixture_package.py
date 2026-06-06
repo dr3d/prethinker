@@ -147,6 +147,8 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
     errors.extend(_fact_errors(expected_facts, label="expected_facts.pl"))
     errors.extend(_fact_errors(forbidden_facts, label="forbidden_facts.pl"))
     if fixture_class == "clean_public_filings":
+        if len(forbidden_facts) < 4:
+            errors.append(f"forbidden_facts_expected_at_least_4_got_{len(forbidden_facts)}")
         errors.extend(_clean_public_expected_fact_policy_errors(expected_facts))
 
     verifier_summary: dict[str, Any] = {}
