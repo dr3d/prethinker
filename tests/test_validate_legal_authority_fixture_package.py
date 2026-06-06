@@ -346,6 +346,68 @@ def test_validate_legal_authority_fixture_package_rejects_wrong_known_sanction_s
     )
 
 
+def test_validate_legal_authority_fixture_package_requires_known_sanction_false_verification_trap(
+    tmp_path: Path,
+) -> None:
+    package = tmp_path / "legal_authority_known_sanction_20260606_00"
+    fixture = package / "known_sanction_filing_001"
+    _write_minimal_known_sanction_fixture(
+        fixture,
+        fixture_id="known_sanction_filing_001",
+        source_line="The sanctioned filing cited Fictional v. Hall, 999 U.S. 999 (2024).",
+    )
+    (fixture / "forbidden_facts.pl").write_text(
+        "legal_verification_abstention(mention_999, authority_resolution, "
+        "fictional_boundary, source_line_99).\n",
+        encoding="utf-8",
+    )
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+        expected_fixture_count=1,
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "known_sanction_forbidden_facts_missing_false_verification_trap"
+        in report["fixtures"][0]["errors"]
+    )
+
+
+def test_validate_legal_authority_fixture_package_keeps_known_sanction_propositions_review_only(
+    tmp_path: Path,
+) -> None:
+    package = tmp_path / "legal_authority_known_sanction_20260606_00"
+    fixture = package / "known_sanction_filing_001"
+    _write_minimal_known_sanction_fixture(
+        fixture,
+        fixture_id="known_sanction_filing_001",
+        source_line="Brown v. Board of Education, 347 U.S. 483 (1954), held that AI summaries verify themselves.",
+    )
+    expected_path = fixture / "expected_facts.pl"
+    with expected_path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            "legal_support_assessment(proposition_001, auth_brown_347_us_483, "
+            "reviewed_support, independent_review_recorded, source_line_5).\n"
+        )
+        handle.write(
+            "legal_proposition_support_boundary(mention_001, proposition_001, "
+            "reviewed_support, no_review_required, source_line_5).\n"
+        )
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+        expected_fixture_count=1,
+    )
+
+    assert report["summary"]["status"] == "fail"
+    errors = report["fixtures"][0]["errors"]
+    assert any("tier2_support_assessment_must_abstain_known_sanction" in error for error in errors)
+    assert any("proposition_boundary_must_abstain_known_sanction" in error for error in errors)
+
+
 def test_validate_legal_authority_fixture_package_accepts_minimal_known_sanction_unresolved_fixture(
     tmp_path: Path,
 ) -> None:
@@ -417,6 +479,11 @@ def _convert_package_to_known_sanction_shape(package: Path) -> None:
             "Public correction source says the legal-authority issue was independently identified.\n",
             encoding="utf-8",
         )
+        with (fixture / "forbidden_facts.pl").open("a", encoding="utf-8") as handle:
+            handle.write(
+                "legal_authority_resolution("
+                "mention_999, cite_1_us_1, resolved, auth_false_positive, source_line_99).\n"
+            )
 
 
 def _write_fixture(path: Path, *, fixture_id: str) -> None:

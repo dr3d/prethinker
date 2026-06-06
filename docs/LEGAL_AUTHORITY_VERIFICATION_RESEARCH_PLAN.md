@@ -360,7 +360,10 @@ datasets/legal_authority_verification/fixture_corpus_manifest.json
    The intake validator already reserves this fixture class with
    `source_kind=known_hallucination_or_sanction_filing_excerpt` and a required
    `sanction_or_correction_source.md`, so the next phase has a file-shape gate
-   before any real sanction examples become claim-bearing.
+   before any real sanction examples become claim-bearing. For this fixture
+   class, the validator also requires at least one explicit false-verification
+   trap in `forbidden_facts.pl`, and proposition-support expected rows must stay
+   abstention/review-only unless an independent review loop is added later.
 5. Add optional CourtListener lookup behind an explicit provider manifest and
    rate-limit discipline.
 

@@ -171,6 +171,8 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
         if len(forbidden_facts) < 4:
             errors.append(f"forbidden_facts_expected_at_least_4_got_{len(forbidden_facts)}")
         errors.extend(_clean_public_expected_fact_policy_errors(expected_facts))
+    elif fixture_class == "known_hallucination_or_sanction_filings":
+        errors.extend(_known_sanction_fact_policy_errors(expected_facts, forbidden_facts))
 
     verifier_summary: dict[str, Any] = {}
     ledger_query_summary: dict[str, Any] = {}
@@ -458,6 +460,81 @@ def _clean_public_expected_fact_policy_errors(facts: list[str]) -> list[str]:
                     f"expected_facts.pl:line_{line_number}:proposition_boundary_must_abstain_clean_public"
                 )
     return errors
+
+
+def _known_sanction_fact_policy_errors(expected_facts: list[str], forbidden_facts: list[str]) -> list[str]:
+    errors: list[str] = []
+    if not any(_is_false_verification_trap(fact) for fact in forbidden_facts):
+        errors.append("known_sanction_forbidden_facts_missing_false_verification_trap")
+    errors.extend(_known_sanction_expected_fact_policy_errors(expected_facts))
+    return errors
+
+
+def _known_sanction_expected_fact_policy_errors(facts: list[str]) -> list[str]:
+    errors: list[str] = []
+    allowed_proposition_claim_status = {"detected_unreviewed", "human_review_required"}
+    allowed_source_span_status = {
+        "authority_unavailable",
+        "human_review_required",
+        "no_deterministic_span",
+        "not_applicable",
+    }
+    for line_number, fact in enumerate(facts, start=1):
+        parsed = _parse_fact(fact)
+        if parsed is None:
+            continue
+        signature = f"{parsed['predicate']}/{len(parsed['args'])}"
+        args = [str(arg).strip() for arg in parsed["args"]]
+        if signature == "legal_support_assessment/5":
+            assessment_status = args[2] if len(args) > 2 else ""
+            review_basis = args[3] if len(args) > 3 else ""
+            if assessment_status != "deterministic_abstain" or review_basis != "no_independent_review":
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:tier2_support_assessment_must_abstain_known_sanction"
+                )
+        elif signature == "legal_proposition_claim/5":
+            review_status = args[4] if len(args) > 4 else ""
+            if review_status not in allowed_proposition_claim_status:
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:proposition_claim_must_be_review_required_known_sanction"
+                )
+        elif signature == "legal_proposition_source_span/5":
+            span_status = args[3] if len(args) > 3 else ""
+            if span_status not in allowed_source_span_status:
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:proposition_span_must_be_review_only_known_sanction"
+                )
+        elif signature == "legal_proposition_support_boundary/5":
+            boundary_status = args[2] if len(args) > 2 else ""
+            review_requirement = args[3] if len(args) > 3 else ""
+            if boundary_status != "deterministic_abstain" or review_requirement != "human_review_required":
+                errors.append(
+                    f"expected_facts.pl:line_{line_number}:proposition_boundary_must_abstain_known_sanction"
+                )
+    return errors
+
+
+def _is_false_verification_trap(fact: str) -> bool:
+    parsed = _parse_fact(fact)
+    if parsed is None:
+        return False
+    signature = f"{parsed['predicate']}/{len(parsed['args'])}"
+    args = [str(arg).strip() for arg in parsed["args"]]
+    if signature == "legal_authority_resolution/5":
+        return len(args) > 2 and args[2] == "resolved"
+    if signature == "legal_authority_metadata_check/5":
+        return len(args) > 3 and args[3] == "match"
+    if signature == "legal_quote_span_match/5":
+        return len(args) > 2 and args[2] in {"exact_match", "normalized_match"}
+    if signature == "legal_pin_cite_check/5":
+        return len(args) > 3 and args[3] == "pin_contains_quote"
+    if signature == "legal_support_assessment/5":
+        return len(args) > 2 and args[2] in {"reviewed_support", "support_verified"}
+    if signature == "legal_proposition_support_boundary/5":
+        boundary_status = args[2] if len(args) > 2 else ""
+        review_requirement = args[3] if len(args) > 3 else ""
+        return boundary_status in {"reviewed_support", "support_verified"} or review_requirement == "no_review_required"
+    return False
 
 
 def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
