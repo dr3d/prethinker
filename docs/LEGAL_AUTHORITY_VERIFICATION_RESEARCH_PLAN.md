@@ -260,10 +260,12 @@ datasets/legal_authority_verification/fixture_corpus_manifest.json
    source-only oracle metadata, authority inventory hygiene, registered fact
    signatures, expected/forbidden replay, false_verified=0, quote/pin coverage,
    authority-text provenance receipts, and the clean-public boundary that
-   invalid reporters should not appear in this fixture class. Quote-bearing
-   fixtures must include expected `legal_authority_text_source/5` receipts and
-   at least one forbidden authority-text-source trap, so authority prose cannot
-   quietly become an untracked verifier input. It also blocks claim-bearing
+   invalid reporters should not appear in this fixture class. Metadata
+   `authority_sources` rows must point to authority IDs and canonical citations
+   present in the local `authority_inventory.json`. Quote-bearing fixtures must
+   include expected `legal_authority_text_source/5` receipts and at least one
+   forbidden authority-text-source trap, so authority prose cannot quietly
+   become an untracked verifier input. It also blocks claim-bearing
    proposition-support rows in clean-public expected facts: proposition rows may
    only mark deterministic abstention or human review.
 3. Add controlled adversarial mutations of that filing.

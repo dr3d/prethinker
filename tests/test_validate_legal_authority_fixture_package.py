@@ -121,6 +121,35 @@ def test_validate_legal_authority_fixture_package_requires_forbidden_authority_t
     assert "forbidden_facts_missing_authority_text_source_trap" in report["fixtures"][0]["errors"]
 
 
+def test_validate_legal_authority_fixture_package_rejects_unknown_metadata_authority_source(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    metadata_path = package / "clean_legal_filing_001" / "source_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["authority_sources"][0]["authority_id"] = "auth_unknown_1_us_1"
+    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "source_metadata_authority_source_1:authority_id_not_in_inventory:auth_unknown_1_us_1"
+        in report["fixtures"][0]["errors"]
+    )
+
+
+def test_validate_legal_authority_fixture_package_rejects_metadata_citation_mismatch(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    metadata_path = package / "clean_legal_filing_001" / "source_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["authority_sources"][0]["canonical_citation"] = "1 U.S. 1"
+    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "source_metadata_authority_source_1:canonical_citation_mismatch" in report["fixtures"][0]["errors"]
+
+
 def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     zip_path = tmp_path / "legal_authority_clean_public_filings_20260606_01.zip"

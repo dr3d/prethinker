@@ -144,7 +144,7 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
     forbidden_authority_text_sources = _signature_count(forbidden_facts, "legal_authority_text_source/5")
 
     errors.extend(_manifest_errors(manifest, fixture_id=fixture_id, fixture_class=fixture_class))
-    errors.extend(_metadata_errors(metadata, fixture_id=fixture_id))
+    errors.extend(_metadata_errors(metadata, fixture_id=fixture_id, inventory=inventory))
     errors.extend(_inventory_errors(inventory))
     errors.extend(_fact_errors(expected_facts, label="expected_facts.pl"))
     errors.extend(_fact_errors(forbidden_facts, label="forbidden_facts.pl"))
@@ -225,7 +225,7 @@ def _manifest_errors(manifest: dict[str, Any], *, fixture_id: str, fixture_class
     return errors
 
 
-def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str) -> list[str]:
+def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str, inventory: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     if str(metadata.get("fixture_id") or "").strip() != fixture_id:
         errors.append("source_metadata_fixture_id_mismatch")
@@ -243,6 +243,29 @@ def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str) -> list[str]:
     authority_sources = metadata.get("authority_sources")
     if not isinstance(authority_sources, list) or not authority_sources:
         errors.append("source_metadata_missing_authority_sources")
+    else:
+        inventory_by_id = {
+            str(row.get("authority_id") or "").strip(): row
+            for row in inventory.get("authorities", [])
+            if isinstance(row, dict) and str(row.get("authority_id") or "").strip()
+        }
+        for index, row in enumerate(authority_sources, start=1):
+            if not isinstance(row, dict):
+                errors.append(f"source_metadata_authority_source_{index}:not_object")
+                continue
+            authority_id = str(row.get("authority_id") or "").strip()
+            canonical_citation = str(row.get("canonical_citation") or "").strip()
+            if not authority_id:
+                errors.append(f"source_metadata_authority_source_{index}:missing_authority_id")
+                continue
+            inventory_row = inventory_by_id.get(authority_id)
+            if inventory_row is None:
+                errors.append(f"source_metadata_authority_source_{index}:authority_id_not_in_inventory:{authority_id}")
+                continue
+            if not canonical_citation:
+                errors.append(f"source_metadata_authority_source_{index}:missing_canonical_citation")
+            elif canonical_citation != str(inventory_row.get("canonical_citation") or "").strip():
+                errors.append(f"source_metadata_authority_source_{index}:canonical_citation_mismatch")
     return errors
 
 
