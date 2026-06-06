@@ -217,6 +217,24 @@ The verifier defaults to the local resolver. Any external resolver must be
 passed explicitly, and a citation resolved by CourtListener without retained
 authority text still abstains on quote and pin-cite verification.
 
+CLI runs expose that boundary as an explicit switch:
+
+```text
+python scripts/run_legal_authority_verification.py \
+  --source <filing.md> \
+  --authority-inventory <authority_inventory.json> \
+  --resolver local
+
+python scripts/run_legal_authority_verification.py \
+  --source <filing.md> \
+  --authority-inventory <authority_inventory.json> \
+  --resolver courtlistener \
+  --courtlistener-cache-dir datasets/courtlistener/generated/cache
+```
+
+The first form is the local claim condition. The second form is a live/cached
+resolver comparison condition and must be reported separately.
+
 Authority text used for quote/pin verification is also emitted as a compact
 provenance ledger: available page/paragraph scopes get a digest, while missing
 authority text emits `authority_unavailable` and forces abstention. This keeps

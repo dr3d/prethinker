@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from src.legal_authority_resolvers import (
+    CourtListenerCitationLookupResolver,
     LegalAuthorityResolver,
     LocalAuthorityInventoryResolver,
     unsupported_reporter_lookup_row,
@@ -70,6 +71,7 @@ def verify_legal_authorities(
     resolver: LegalAuthorityResolver | None = None,
 ) -> dict[str, Any]:
     source_text = source_path.read_text(encoding="utf-8")
+    resolver_was_default = resolver is None
     resolver = resolver or LocalAuthorityInventoryResolver.from_path(authority_inventory_path)
     paragraphs = _paragraphs(source_text)
     facts: list[str] = []
@@ -398,6 +400,7 @@ def verify_legal_authorities(
         "schema_version": "legal_authority_verification_report_v1",
         "source": str(source_path),
         "authority_inventory": str(authority_inventory_path),
+        "resolver": _resolver_report(resolver=resolver, default_local=resolver_was_default),
         "summary": summary,
         "courtlistener_like_lookup": lookup_rows,
         "authority_text_sources": sorted(authority_text_sources.values(), key=lambda row: (row["authority_id"], row["text_scope"])),
@@ -407,6 +410,20 @@ def verify_legal_authorities(
     }
     report["ledger_queries"] = build_ledger_queries(report)
     return report
+
+
+def _resolver_report(*, resolver: LegalAuthorityResolver, default_local: bool) -> dict[str, str]:
+    if isinstance(resolver, LocalAuthorityInventoryResolver):
+        mode = "local_inventory"
+    elif isinstance(resolver, CourtListenerCitationLookupResolver):
+        mode = "courtlistener_citation_lookup"
+    else:
+        mode = "custom_resolver"
+    return {
+        "mode": mode,
+        "class": resolver.__class__.__name__,
+        "default_local": "yes" if default_local else "no",
+    }
 
 
 def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
@@ -895,6 +912,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--authority-inventory", type=Path, required=True)
     parser.add_argument("--document-id", default="legal_authority_micro")
+    parser.add_argument("--resolver", choices=["local", "courtlistener"], default="local")
+    parser.add_argument("--courtlistener-cache-dir", type=Path)
+    parser.add_argument("--courtlistener-base-url")
     parser.add_argument("--out-json", type=Path)
     parser.add_argument("--out-md", type=Path)
     parser.add_argument("--out-facts", type=Path)
@@ -904,6 +924,7 @@ def main(argv: list[str] | None = None) -> int:
         source_path=args.source,
         authority_inventory_path=args.authority_inventory,
         document_id=args.document_id,
+        resolver=_resolver_from_args(args),
     )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -917,6 +938,21 @@ def main(argv: list[str] | None = None) -> int:
     if not args.out_json and not args.out_md and not args.out_facts:
         print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["summary"]["status"] == "pass" else 1
+
+
+def _resolver_from_args(args: argparse.Namespace) -> LegalAuthorityResolver | None:
+    if args.resolver == "local":
+        return None
+    from adapters.courtlistener.client import CourtListenerClient, DEFAULT_BASE_URL, DEFAULT_CACHE_DIR
+
+    client = CourtListenerClient(
+        base_url=args.courtlistener_base_url or DEFAULT_BASE_URL,
+        cache_dir=args.courtlistener_cache_dir or DEFAULT_CACHE_DIR,
+    )
+    return CourtListenerCitationLookupResolver.from_inventory_path(
+        client=client,
+        path=args.authority_inventory,
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover

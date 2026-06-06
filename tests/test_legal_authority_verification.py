@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
+import urllib.parse
 from pathlib import Path
 
+from adapters.courtlistener.client import CourtListenerClient
 from src.legal_authority_resolvers import (
     CitationResolution,
     CourtListenerCitationLookupResolver,
     LocalAuthorityInventoryResolver,
 )
-from src.legal_authority_verification import facts_text, render_markdown, verify_legal_authorities
+from src.legal_authority_verification import facts_text, main, render_markdown, verify_legal_authorities
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +43,11 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
     assert report["summary"]["verification_abstentions"] == 4
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["document_outcome"] == "review_required"
+    assert report["resolver"] == {
+        "mode": "local_inventory",
+        "class": "LocalAuthorityInventoryResolver",
+        "default_local": "yes",
+    }
 
     issues = {row["issue"] for row in report["issues"]}
     assert "unresolved" in issues
@@ -667,6 +674,93 @@ def test_legal_authority_report_renders_review_required_boundary() -> None:
     assert "Certification answer: `no`" in markdown
     assert "Blocking issue types: `quote_not_found_in_authority, quote_outside_cited_pin, unresolved`" in markdown
     assert "Proposition authority links: `1`" in markdown
+
+
+def test_legal_authority_cli_defaults_to_local_resolver(tmp_path: Path) -> None:
+    out_json = tmp_path / "report.json"
+
+    exit_code = main(
+        [
+            "--source",
+            str(FIXTURE_V5 / "source.md"),
+            "--authority-inventory",
+            str(FIXTURE_V5 / "authority_inventory.json"),
+            "--document-id",
+            "legal_authority_cli_local",
+            "--out-json",
+            str(out_json),
+        ]
+    )
+
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert report["resolver"]["mode"] == "local_inventory"
+    assert report["resolver"]["default_local"] == "yes"
+    assert report["summary"]["false_verified"] == 0
+
+
+def test_legal_authority_cli_can_use_cached_courtlistener_resolver_without_token(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("COURTLISTENER_API_TOKEN", raising=False)
+    source = tmp_path / "source.md"
+    source.write_text("Brown v. Board of Education, 347 U.S. 483 (1954).", encoding="utf-8")
+    cache_dir = tmp_path / "courtlistener-cache"
+    client = CourtListenerClient(cache_dir=cache_dir)
+    text = "347 U.S. 483"
+    url = client._url("/citation-lookup/", {})
+    body = urllib.parse.urlencode({"text": text}).encode("utf-8")
+    cached = client._cache_path(method="POST", url=url, body=body)
+    cached.parent.mkdir(parents=True, exist_ok=True)
+    cached.write_text(
+        json.dumps(
+            [
+                {
+                    "citation": text,
+                    "normalized_citations": [text],
+                    "start_index": 0,
+                    "end_index": 12,
+                    "status": 200,
+                    "error_message": "",
+                    "clusters": [
+                        {
+                            "id": 347483,
+                            "case_name": "Brown v. Board of Education",
+                            "citations": [{"volume": 347, "reporter": "U.S.", "page": "483"}],
+                            "date_filed": "1954-05-17",
+                        }
+                    ],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    out_json = tmp_path / "report.json"
+
+    exit_code = main(
+        [
+            "--source",
+            str(source),
+            "--authority-inventory",
+            str(FIXTURE / "authority_inventory.json"),
+            "--document-id",
+            "legal_authority_cli_courtlistener_cached",
+            "--resolver",
+            "courtlistener",
+            "--courtlistener-cache-dir",
+            str(cache_dir),
+            "--out-json",
+            str(out_json),
+        ]
+    )
+
+    report = json.loads(out_json.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert report["resolver"] == {
+        "mode": "courtlistener_citation_lookup",
+        "class": "CourtListenerCitationLookupResolver",
+        "default_local": "no",
+    }
+    assert report["summary"]["verified_mentions"] == 1
+    assert report["summary"]["false_verified"] == 0
 
 
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
