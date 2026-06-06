@@ -190,6 +190,7 @@ def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_witho
         "case_name": "match",
         "year": "match",
     }
+    assert report["mentions"][2]["citation"] == "576 U.S. 644"
     assert all(row["case_name"] == "" for row in bare)
     assert all(row["metadata_checks"] == [] for row in bare)
 

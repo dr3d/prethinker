@@ -143,6 +143,8 @@ They contain:
   abstention;
 - bare reporter citations that resolve without inventing case-name or year
   metadata when those fields are not stated in that citation mention;
+- reporter-spacing variants such as `U. S.` normalized to the same authority key
+  as `U.S.`;
 - one real authority with a fabricated quote;
 - one real quote attached to the wrong cited authority;
 - one real authority with the quote present in the authority but outside the

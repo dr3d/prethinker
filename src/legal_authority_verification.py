@@ -24,12 +24,12 @@ CASE_WORD_RE = r"(?:[A-Z][A-Za-z0-9.&']*|of|the|and|for|in|on|to|ex|rel\.|&)"
 CASE_PARTY_RE = rf"{CASE_WORD_RE}(?:\s+{CASE_WORD_RE}){{0,8}}"
 CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
-    r"(?P<volume>\d+)\s+(?P<reporter>U\.S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
+    r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
     r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
 )
 BARE_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
-    r"(?P<volume>\d+)\s+(?P<reporter>U\.S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
+    r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
     r"(?P<page>\d+)"
     r"(?:,\s+(?P<pin_comma>\d+)|\s+at\s+(?P<pin_at>\d+))?"
     r"(?:\s+\((?P<year>\d{4})\))?"
@@ -612,7 +612,7 @@ def _spans_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
 
 
 def _citation_text(*, volume: str, reporter: str, page: str) -> str:
-    return f"{volume} {_clean_space(reporter)} {page}"
+    return f"{volume} {_normalized_reporter_text(reporter)} {page}"
 
 
 def _citation_atom(citation: str) -> str:
@@ -649,7 +649,14 @@ def _resolution_reason(status: str) -> str:
 
 
 def _supported_reporter(reporter: str) -> bool:
-    return _clean_space(reporter) == "U.S."
+    return _normalized_reporter_text(reporter) == "U.S."
+
+
+def _normalized_reporter_text(reporter: str) -> str:
+    compact = re.sub(r"\s+", "", reporter)
+    if compact == "U.S.":
+        return "U.S."
+    return _clean_space(reporter)
 
 
 def _metadata_matches(field: str, extracted: str, authority: dict[str, Any]) -> bool:
