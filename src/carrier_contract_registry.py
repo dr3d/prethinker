@@ -348,6 +348,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "legal_authority_verification_micro_v3",
             "legal_authority_verification_micro_v4",
             "legal_authority_verification_micro_v6",
+            "legal_authority_verification_micro_v7",
         ],
     },
     "legal_proposition_claim/5": {

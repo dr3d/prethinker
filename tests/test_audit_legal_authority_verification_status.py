@@ -8,10 +8,10 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     summary = report["summary"]
 
     assert summary["status"] == "pass"
-    assert summary["fixture_count"] == 6
-    assert summary["matched_expected_fact_count"] == summary["expected_fact_count"] == 147
+    assert summary["fixture_count"] == 7
+    assert summary["matched_expected_fact_count"] == summary["expected_fact_count"] == 148
     assert summary["matched_forbidden_fact_count"] == 0
-    assert summary["forbidden_fact_count"] == 35
+    assert summary["forbidden_fact_count"] == 37
     assert summary["citation_mentions"] == 17
     assert summary["false_verified"] == 0
     assert summary["verified_mentions"] == 6
@@ -24,13 +24,14 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert summary["authority_text_sources"] == 11
     assert summary["authority_text_available_sources"] == 10
     assert summary["authority_text_unavailable_sources"] == 1
-    assert summary["verification_abstentions"] == 9
+    assert summary["short_form_citations"] == 1
+    assert summary["verification_abstentions"] == 10
     signatures = {row["signature"]: row for row in summary["fact_signature_summary"]}
     assert signatures["legal_citation_mention/5"] == {
         "signature": "legal_citation_mention/5",
         "expected": 17,
         "matched_expected": 17,
-        "forbidden": 0,
+        "forbidden": 1,
         "matched_forbidden": 0,
     }
     assert signatures["legal_authority_metadata_check/5"] == {
@@ -49,8 +50,8 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     }
     assert signatures["legal_verification_abstention/4"] == {
         "signature": "legal_verification_abstention/4",
-        "expected": 9,
-        "matched_expected": 9,
+        "expected": 10,
+        "matched_expected": 10,
         "forbidden": 1,
         "matched_forbidden": 0,
     }
@@ -62,6 +63,7 @@ def test_legal_authority_status_audits_manifest_fixtures() -> None:
     assert fixtures["legal_authority_verification_micro_v4"]["matched_expected_fact_count"] == 12
     assert fixtures["legal_authority_verification_micro_v5"]["matched_expected_fact_count"] == 31
     assert fixtures["legal_authority_verification_micro_v6"]["matched_expected_fact_count"] == 21
+    assert fixtures["legal_authority_verification_micro_v7"]["matched_expected_fact_count"] == 1
     assert report["next_external_work_order_needed"]["needed_now"] is True
 
 
@@ -70,12 +72,13 @@ def test_legal_authority_status_markdown_names_false_verified_gate() -> None:
 
     assert "Legal Authority Verification Status" in markdown
     assert "False verified: `0`" in markdown
-    assert "Expected facts: `147 / 147`" in markdown
-    assert "Matched forbidden facts: `0 / 35`" in markdown
+    assert "Expected facts: `148 / 148`" in markdown
+    assert "Matched forbidden facts: `0 / 37`" in markdown
     assert "Authority text sources: `11`" in markdown
     assert "Resolved / unresolved / ambiguous / invalid reporter:" in markdown
     assert "Metadata checks / matches / mismatches: `64 / 62 / 2`" in markdown
-    assert "Verification abstentions: `9`" in markdown
+    assert "Short-form citations requiring context: `1`" in markdown
+    assert "Verification abstentions: `10`" in markdown
     assert "Fact Signature Coverage" in markdown
     assert "`legal_quote_span_match/5` | 9/9 | 0/9" in markdown
     assert "clean-public-filings batch" in markdown

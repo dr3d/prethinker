@@ -138,6 +138,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v3
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v4
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v5
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v6
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v7
 ```
 
 They contain:
@@ -160,6 +161,8 @@ They contain:
   cited pin page;
 - one authority-text-unavailable quote check that must abstain;
 - one proposition-support boundary that must abstain.
+- one short-form citation such as `Id.` that must require context and abstain
+  instead of inventing a resolved authority.
 
 The fixtures use local authority inventories so the first prototype can run
 offline. A CourtListener-backed resolver can replace or supplement those

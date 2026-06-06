@@ -20,7 +20,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Unsupported expected facts support<2: `31`
 - Unsupported split support 0 / support 1: `24 / 7`
 - Unsupported repair postures: `compile_recall_boundary` x21, `compile_stability_boundary` x4, `value_choice_variance_boundary` x3, `primary_constant_boundary` x2, `source_choice_boundary` x1
-- Excluded associated fixtures: `28` (audit `pass`; missing `0`)
+- Excluded associated fixtures: `29` (audit `pass`; missing `0`)
 
 ## Excluded Associated Fixtures
 
@@ -37,7 +37,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `diagnostic_boundary_probe` | 9 |
 | `diagnostic_lane_not_promoted` | 3 |
 | `external_judged_qa_package` | 1 |
-| `seed_or_component_micro_fixture` | 9 |
+| `seed_or_component_micro_fixture` | 10 |
 
 ### Rows
 
@@ -69,6 +69,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `legal_authority_verification_micro_v4` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Fourth legal authority verification micro-fixture validates authority-scoped quote verification when a real quote is attached to the wrong cited authority. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v5` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Fifth legal authority verification micro-fixture validates bare reporter citation resolution without inventing case-name or year metadata. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v6` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Sixth legal authority verification micro-fixture validates quote-before-citation extraction and punctuation-normalized quote matching. It is not a standing compile-fact transfer measurement cell. |
+| `legal_authority_verification_micro_v7` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Seventh legal authority verification micro-fixture validates short-form citation context-required abstention. It is not a standing compile-fact transfer measurement cell. |
 | `ntsb_investigation_domain_v1` | `seed_or_component_micro_fixture` | `fixture_bank_seed` | NTSB seed micro validates the initial pack; current transfer boundary evidence is represented by the unlike transfer cell. |
 | `state_ag_settlement_aod_v1` | `seed_or_component_micro_fixture` | `fixture_bank_seed` | State-AG settlement/AOD seed micro starts a fifth closed-domain pack candidate; it is schema and pressure evidence only until same-condition compiles and unlike transfer fixtures are measured. |
 

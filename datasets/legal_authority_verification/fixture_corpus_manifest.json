@@ -22,7 +22,8 @@
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v3",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v4",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v5",
-        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v6"
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v6",
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v7"
       ],
       "required_files": [
         "source.md",
@@ -43,7 +44,8 @@
         "real quote attached to the wrong authority",
         "quote outside cited pin",
         "authority-text-unavailable abstention",
-        "proposition-support abstention"
+        "proposition-support abstention",
+        "short-form citation context-required abstention"
       ],
       "promotion_gate": [
         "false_verified=0",
@@ -112,6 +114,6 @@
   ],
   "next_external_work_order_needed": {
     "needed_now": true,
-    "reason": "The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r8.zip. Returned packages must pass scripts/import_legal_authority_fixture_package.py before fixtures are added to this manifest. Known hallucination/sanction filings remain deferred until the clean-public baseline lands."
+    "reason": "The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r9.zip. Returned packages must pass scripts/import_legal_authority_fixture_package.py before fixtures are added to this manifest. Known hallucination/sanction filings remain deferred until the clean-public baseline lands."
   }
 }
