@@ -78,6 +78,23 @@ def courtlistener_like_lookup_row(
     }
 
 
+def unsupported_reporter_lookup_row(
+    *,
+    citation: str,
+    start_index: int,
+    end_index: int,
+) -> dict[str, Any]:
+    return {
+        "citation": citation,
+        "normalized_citations": [citation],
+        "start_index": start_index,
+        "end_index": end_index,
+        "status": 400,
+        "error_message": "unsupported_reporter",
+        "clusters": [],
+    }
+
+
 def _load_inventory(path: Path) -> dict[str, list[dict[str, Any]]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     out: dict[str, list[dict[str, Any]]] = {}

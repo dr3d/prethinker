@@ -267,6 +267,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "reason_code": [
                 "citation_not_found",
                 "ambiguous_authority",
+                "unsupported_reporter",
                 "authority_text_unavailable",
                 "quote_not_found_in_authority",
                 "quote_outside_cited_pin",

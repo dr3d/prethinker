@@ -17,12 +17,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from src.legal_authority_resolvers import LocalAuthorityInventoryResolver
+from src.legal_authority_resolvers import LocalAuthorityInventoryResolver, unsupported_reporter_lookup_row
 
 
 CITATION_RE = re.compile(
     r"(?P<case>[A-Z][A-Za-z0-9.&' -]+? v\. [A-Z][A-Za-z0-9.&' -]+?),\s+"
-    r"(?P<volume>\d+)\s+(?P<reporter>U\.S\.)\s+(?P<page>\d+)"
+    r"(?P<volume>\d+)\s+(?P<reporter>U\.S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
     r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
 )
 QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"')
@@ -61,6 +61,51 @@ def verify_legal_authorities(
             citation_line = paragraph.start_line + paragraph.text[: match.start()].count("\n")
             source_scope = f"source_line_{citation_line}"
             line_atom = f"line_{citation_line}"
+            facts.append(
+                f"legal_citation_mention({document_id}, {mention_id}, {citation_atom}, {line_atom}, {source_scope})."
+            )
+            if not _supported_reporter(match.group("reporter")):
+                lookup = unsupported_reporter_lookup_row(
+                    citation=citation,
+                    start_index=match.start("volume"),
+                    end_index=match.end("page"),
+                )
+                lookup_rows.append(lookup)
+                resolution_status, authority_id = "invalid_reporter", "invalid_authority"
+                facts.append(
+                    "legal_authority_resolution("
+                    f"{mention_id}, {citation_atom}, {resolution_status}, {authority_id}, {source_scope})."
+                )
+                facts.append(
+                    "legal_verification_abstention("
+                    f"{mention_id}, authority_resolution, unsupported_reporter, {source_scope})."
+                )
+                issue_rows.append(
+                    {
+                        "mention_id": mention_id,
+                        "issue": resolution_status,
+                        "reason": "unsupported_reporter",
+                        "line": citation_line,
+                    }
+                )
+                mentions.append(
+                    {
+                        "mention_id": mention_id,
+                        "case_name": case_name,
+                        "citation": citation,
+                        "normalized_citation": citation_atom,
+                        "line": citation_line,
+                        "pin": match.group("pin") or "",
+                        "resolution_status": resolution_status,
+                        "authority_id": authority_id,
+                        "metadata_checks": [],
+                        "quote_check": None,
+                        "pin_check": None,
+                        "proposition_boundary": None,
+                    }
+                )
+                continue
+
             resolution = resolver.lookup_citation(
                 citation=citation,
                 start_index=match.start("volume"),
@@ -72,9 +117,6 @@ def verify_legal_authorities(
             authority = authority_matches[0] if len(authority_matches) == 1 else None
             resolution_status, authority_id = _resolution(authority_matches)
 
-            facts.append(
-                f"legal_citation_mention({document_id}, {mention_id}, {citation_atom}, {line_atom}, {source_scope})."
-            )
             facts.append(
                 "legal_authority_resolution("
                 f"{mention_id}, {citation_atom}, {resolution_status}, {authority_id}, {source_scope})."
@@ -265,6 +307,7 @@ def verify_legal_authorities(
         "resolved": sum(1 for row in mentions if row["resolution_status"] == "resolved"),
         "unresolved": sum(1 for row in mentions if row["resolution_status"] == "unresolved"),
         "ambiguous": sum(1 for row in mentions if row["resolution_status"] == "ambiguous"),
+        "invalid_reporter": sum(1 for row in mentions if row["resolution_status"] == "invalid_reporter"),
         "quote_claims": sum(1 for row in mentions if row.get("quote_check")),
         "quote_exact_or_normalized_match": sum(
             1
@@ -366,6 +409,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         in {
             "unresolved",
             "ambiguous",
+            "invalid_reporter",
             "metadata_mismatch",
             "authority_text_unavailable",
             "quote_not_found_in_authority",
@@ -400,6 +444,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Review-required mentions: `{summary['review_required_mentions']}`",
         f"- Resolved: `{summary['resolved']}`",
         f"- Unresolved: `{summary['unresolved']}`",
+        f"- Invalid reporter: `{summary['invalid_reporter']}`",
         f"- Quote claims: `{summary['quote_claims']}`",
         f"- Quote mismatches: `{summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
@@ -492,7 +537,7 @@ def _paragraphs(text: str) -> list[Paragraph]:
 
 
 def _citation_text(match: re.Match[str]) -> str:
-    return f"{match.group('volume')} {match.group('reporter')} {match.group('page')}"
+    return f"{match.group('volume')} {_clean_space(match.group('reporter'))} {match.group('page')}"
 
 
 def _citation_atom(citation: str) -> str:
@@ -526,6 +571,10 @@ def _resolution_reason(status: str) -> str:
         "invalid_reporter": "unsupported_reporter",
         "unavailable": "authority_lookup_unavailable",
     }.get(status, status)
+
+
+def _supported_reporter(reporter: str) -> bool:
+    return _clean_space(reporter) == "U.S."
 
 
 def _metadata_matches(field: str, extracted: str, authority: dict[str, Any]) -> bool:

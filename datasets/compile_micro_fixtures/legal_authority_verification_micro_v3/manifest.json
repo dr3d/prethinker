@@ -1,0 +1,13 @@
+{
+  "fixture_id": "legal_authority_verification_micro_v3",
+  "domain_profile": "legal_authority_verification_v1",
+  "schema_version": "compile_micro_fixture_manifest_v1",
+  "purpose": "Third adversarial legal-authority verification fixture: unsupported reporter citation must be visible as invalid_reporter instead of silently ignored or treated as unresolved.",
+  "source_kind": "synthetic_micro_fixture",
+  "files": {
+    "source": "source.md",
+    "expected_facts": "expected_facts.pl",
+    "forbidden_facts": "forbidden_facts.pl"
+  },
+  "claim_status": "research_micro_fixture_not_legal_advice"
+}
