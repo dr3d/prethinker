@@ -22,6 +22,8 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "candidate_oracle_reviews",
         "source_oracle_reviews",
         "sec_value_axis_integrity",
+        "fda_violation_alignment",
+        "domain_omission_accountability_audit",
         "compile_fact_qa_exclusions",
         "compile_fact_qa_manifest_sources",
         "reference_judge_null_control_reports",
@@ -44,6 +46,12 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
     source_review_command = next(command for command in commands if command["id"] == "source_oracle_reviews")
     assert "--expect-md" in source_review_command["command"]
     assert "docs/SOURCE_ORACLE_REVIEW_STATUS.md" in source_review_command["command"]
+    fda_alignment_command = next(command for command in commands if command["id"] == "fda_violation_alignment")
+    assert "--expect-md" in fda_alignment_command["command"]
+    assert "docs/FDA_VIOLATION_ALIGNMENT_STATUS.md" in fda_alignment_command["command"]
+    omission_command = next(command for command in commands if command["id"] == "domain_omission_accountability_audit")
+    assert "audit_domain_omission_accountability.py" in omission_command["command"][1]
+    assert "--compile-json" in omission_command["command"]
     status_command = next(command for command in commands if command["id"] == "current_compile_fact_qa_status")
     assert "--exclusion-audit" in status_command["command"]
     assert any("compile_fact_qa_exclusions.json" in item for item in status_command["command"])

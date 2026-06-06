@@ -265,6 +265,18 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "domain_omission_accountability_audit",
+            "command": [
+                python,
+                "scripts/audit_domain_omission_accountability.py",
+                *_domain_omission_accountability_audit_inputs(),
+                "--out-json",
+                str(report_root / "domain_omission_accountability_audit.json"),
+                "--out-md",
+                str(report_root / "domain_omission_accountability_audit.md"),
+            ],
+        },
+        {
             "id": "compile_fact_qa_exclusions",
             "command": [
                 python,
@@ -385,6 +397,13 @@ def _fda_violation_alignment_audit_inputs() -> list[str]:
     return args
 
 
+def _domain_omission_accountability_audit_inputs() -> list[str]:
+    args: list[str] = []
+    for compile_json in _all_compile_jsons_from_manifest():
+        args.extend(["--compile-json", str(compile_json)])
+    return args
+
+
 def _fda_violation_alignment_compile_jsons_from_manifest() -> list[Path]:
     manifest_path = REPO_ROOT / COMPILE_FACT_QA_MANIFEST
     if not manifest_path.exists():
@@ -403,6 +422,34 @@ def _fda_violation_alignment_compile_jsons_from_manifest() -> list[Path]:
         cell_id = str(cell.get("id", ""))
         family = str(cell.get("domain_family", ""))
         if not cell_id.startswith("fda_") and family != "fda_warning_letter":
+            continue
+        bundle = str(cell.get("domain_lens_bundle", "")).strip()
+        if not bundle:
+            continue
+        bundle_root = Path(bundle)
+        if not bundle_root.is_absolute():
+            bundle_root = REPO_ROOT / bundle_root
+        union_root = bundle_root / "unions"
+        if not union_root.exists():
+            continue
+        compile_jsons.extend(sorted(union_root.rglob("domain_bootstrap_file_*.json")))
+    return compile_jsons
+
+
+def _all_compile_jsons_from_manifest() -> list[Path]:
+    manifest_path = REPO_ROOT / COMPILE_FACT_QA_MANIFEST
+    if not manifest_path.exists():
+        return []
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    cells = manifest.get("cells")
+    if not isinstance(cells, list):
+        return []
+    compile_jsons: list[Path] = []
+    for cell in cells:
+        if not isinstance(cell, dict):
             continue
         bundle = str(cell.get("domain_lens_bundle", "")).strip()
         if not bundle:
