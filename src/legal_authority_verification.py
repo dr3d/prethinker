@@ -28,22 +28,31 @@ from src.legal_authority_resolvers import (
 
 CASE_WORD_RE = r"(?:[A-Z][A-Za-z0-9.&']*|of|the|and|for|in|on|to|ex|rel\.|&)"
 CASE_PARTY_RE = rf"{CASE_WORD_RE}(?:\s+{CASE_WORD_RE}){{0,8}}"
+CASE_NAME_RE = r"[A-Z][^\n]{0,180}? v\. [A-Z][^\n]{0,180}?"
+SUPPORTED_REPORTER_RE = (
+    r"U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.|A\. ?D\. ?3d|WL"
+)
 CITATION_RE = re.compile(
-    rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
-    r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
+    rf"(?P<case>{CASE_NAME_RE}),\s+"
+    rf"(?P<volume>\d+)\s+(?P<reporter>{SUPPORTED_REPORTER_RE})\s+(?P<page>\d+)"
     r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\)"
 )
 GENERIC_CITATION_RE = re.compile(
-    rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
+    rf"(?P<case>{CASE_NAME_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>[A-Z][A-Za-z. ]{1,24})\s+(?P<page>\d+)"
     r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\)"
 )
 BARE_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
-    r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
+    rf"(?P<volume>\d+)\s+(?P<reporter>{SUPPORTED_REPORTER_RE})\s+"
     r"(?P<page>\d+)"
     r"(?:,\s+(?P<pin_comma>\d+(?:-\d+)?)|\s+at\s+(?P<pin_at>\d+(?:-\d+)?))?"
     r"(?:\s+\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\))?"
+)
+ILLINOIS_APP_CITATION_RE = re.compile(
+    rf"(?P<case>{CASE_NAME_RE}),\s+"
+    r"(?P<citation_year>\d{4})\s+IL\s+App\s+\((?P<district>[^)]+)\)\s+(?P<docket>\d+(?:-[A-Z])?)\s+"
+    r"\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\)"
 )
 NAMED_SHORT_FORM_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
@@ -816,9 +825,29 @@ def _paragraphs(text: str) -> list[Paragraph]:
 
 
 def _citation_extracts(text: str) -> list[CitationExtract]:
+    illinois_matches = [
+        CitationExtract(
+            case_name=_clean_case_name(match.group("case")),
+            citation=(
+                f"{match.group('citation_year')} IL App "
+                f"({match.group('district')}) {match.group('docket')}"
+            ),
+            volume=match.group("citation_year"),
+            reporter="IL App",
+            page=match.group("docket"),
+            pin="",
+            court=_court_from_parenthetical(match.group("parenthetical") or ""),
+            year=match.group("year") or "",
+            start=_case_span_start(text, match, _clean_case_name(match.group("case"))),
+            end=match.end(),
+            lookup_start=match.start("citation_year"),
+            lookup_end=match.end("docket"),
+        )
+        for match in ILLINOIS_APP_CITATION_RE.finditer(text)
+    ]
     full_matches = [
         CitationExtract(
-            case_name=_clean_space(match.group("case")),
+            case_name=_clean_case_name(match.group("case")),
             citation=_citation_text(
                 volume=match.group("volume"),
                 reporter=match.group("reporter"),
@@ -830,14 +859,15 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
             pin=match.group("pin") or "",
             court=_court_from_parenthetical(match.group("parenthetical") or ""),
             year=match.group("year") or "",
-            start=match.start(),
+            start=_case_span_start(text, match, _clean_case_name(match.group("case"))),
             end=match.end(),
             lookup_start=match.start("volume"),
             lookup_end=match.end("page"),
         )
         for match in CITATION_RE.finditer(text)
+        if not any(_spans_overlap(match.span(), (row.start, row.end)) for row in illinois_matches)
     ]
-    occupied = [(row.start, row.end) for row in full_matches]
+    occupied = [(row.start, row.end) for row in [*illinois_matches, *full_matches]]
     unsupported_matches: list[CitationExtract] = []
     for match in GENERIC_CITATION_RE.finditer(text):
         if any(_spans_overlap(match.span(), span) for span in occupied):
@@ -846,7 +876,7 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
             continue
         unsupported_matches.append(
             CitationExtract(
-                case_name=_clean_space(match.group("case")),
+                case_name=_clean_case_name(match.group("case")),
                 citation=_citation_text(
                     volume=match.group("volume"),
                     reporter=match.group("reporter"),
@@ -858,7 +888,7 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                 pin=match.group("pin") or "",
                 court=_court_from_parenthetical(match.group("parenthetical") or ""),
                 year=match.group("year") or "",
-                start=match.start(),
+                start=_case_span_start(text, match, _clean_case_name(match.group("case"))),
                 end=match.end(),
                 lookup_start=match.start("volume"),
                 lookup_end=match.end("page"),
@@ -889,11 +919,36 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                 lookup_end=match.end("page"),
             )
         )
-    return sorted([*full_matches, *unsupported_matches, *bare_matches], key=lambda row: (row.start, row.end))
+    return sorted([*illinois_matches, *full_matches, *unsupported_matches, *bare_matches], key=lambda row: (row.start, row.end))
 
 
 def _spans_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
     return left[0] < right[1] and right[0] < left[1]
+
+
+def _case_span_start(text: str, match: re.Match[str], case_name: str) -> int:
+    if not case_name:
+        return match.start()
+    case_start = text.find(case_name, match.start(), match.end())
+    if case_start >= 0:
+        return case_start
+    return match.start()
+
+
+def _clean_case_name(value: str) -> str:
+    case_name = _clean_space(value).strip(" ,;")
+    for delimiter in (":", '"'):
+        if delimiter in case_name:
+            candidate = case_name.rsplit(delimiter, maxsplit=1)[-1].strip(" ,;")
+            if " v. " in candidate:
+                case_name = candidate
+    if " v. " not in case_name:
+        return case_name
+    left, right = case_name.split(" v. ", maxsplit=1)
+    left_match = re.search(rf"({CASE_PARTY_RE})$", left)
+    if left_match:
+        left = left_match.group(1)
+    return f"{left.strip(' ,;')} v. {right.strip(' ,;')}"
 
 
 def _citation_text(*, volume: str, reporter: str, page: str) -> str:
@@ -1004,6 +1059,9 @@ def _supported_reporter(reporter: str) -> bool:
         "F. Supp. 2d",
         "F. Supp. 3d",
         "S. Ct.",
+        "A.D.3d",
+        "WL",
+        "IL App",
     }
 
 
@@ -1019,6 +1077,11 @@ def _normalized_reporter_text(reporter: str) -> str:
         "F.Supp.2d": "F. Supp. 2d",
         "F.Supp.3d": "F. Supp. 3d",
         "S.Ct.": "S. Ct.",
+        "A.D.3d": "A.D.3d",
+        "A.D. 3d": "A.D.3d",
+        "AD3d": "A.D.3d",
+        "WL": "WL",
+        "ILApp": "IL App",
     }
     if compact in mapping:
         return mapping[compact]
@@ -1038,6 +1101,13 @@ def _metadata_matches(field: str, extracted: str, authority: dict[str, Any]) -> 
 
 def _court_from_parenthetical(parenthetical: str) -> str:
     before_year = re.split(r"\b\d{4}\b", parenthetical, maxsplit=1)[0]
+    before_year = re.sub(
+        r"\b(?:Jan\.?|January|Feb\.?|February|Mar\.?|March|Apr\.?|April|May|Jun\.?|June|Jul\.?|July|"
+        r"Aug\.?|August|Sep\.?|Sept\.?|September|Oct\.?|October|Nov\.?|November|Dec\.?|December)\b.*$",
+        "",
+        before_year,
+        flags=re.IGNORECASE,
+    )
     return _clean_space(before_year.strip(" ,;"))
 
 

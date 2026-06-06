@@ -144,6 +144,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v9
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v10
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v11
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v12
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v13
 ```
 
 They contain:
@@ -175,6 +176,10 @@ They contain:
 - one court-parenthetical metadata mismatch that must block citation-clean
   certification instead of treating a same-citation, wrong-court authority as
   verified.
+- one sanction-style reporter-shape fixture covering `A.D.3d`, `WL` full-date
+  parentheticals, and Illinois Appellate citations that must extract and
+  abstain unresolved rather than being falsely treated as unsupported reporters
+  or verified authorities.
 - one short-form citation such as `Id.` that must require context and abstain
   instead of inventing a resolved authority.
 - one named short-form citation such as `Brown, 347 U.S. at 495` that also

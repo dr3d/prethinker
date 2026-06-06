@@ -423,6 +423,10 @@ def _normalized_reporter_text(reporter: str) -> str:
         "F.Supp.2d": "F. Supp. 2d",
         "F.Supp.3d": "F. Supp. 3d",
         "S.Ct.": "S. Ct.",
+        "A.D.3d": "A.D.3d",
+        "AD3d": "A.D.3d",
+        "WL": "WL",
+        "ILApp": "IL App",
     }
     if compact in mapping:
         return mapping[compact]

@@ -18,7 +18,8 @@
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9",
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v10",
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11",
-      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v12"
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v12",
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v13"
     ]
   },
   "accountability_requirements": [

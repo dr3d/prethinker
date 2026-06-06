@@ -20,7 +20,7 @@ This page does not read source prose, call an LLM, or judge messy human question
 - Unsupported expected facts support<2: `31`
 - Unsupported split support 0 / support 1: `24 / 7`
 - Unsupported repair postures: `compile_recall_boundary` x21, `compile_stability_boundary` x4, `value_choice_variance_boundary` x3, `primary_constant_boundary` x2, `source_choice_boundary` x1
-- Excluded associated fixtures: `34` (audit `pass`; missing `0`)
+- Excluded associated fixtures: `35` (audit `pass`; missing `0`)
 
 ## Excluded Associated Fixtures
 
@@ -37,7 +37,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `diagnostic_boundary_probe` | 9 |
 | `diagnostic_lane_not_promoted` | 3 |
 | `external_judged_qa_package` | 1 |
-| `seed_or_component_micro_fixture` | 15 |
+| `seed_or_component_micro_fixture` | 16 |
 
 ### Rows
 
@@ -67,6 +67,7 @@ this table makes the non-claim-bearing cells visible without promoting them.
 | `legal_authority_verification_micro_v10` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Tenth legal authority verification micro-fixture validates controlled clean-public mutation traps: fabricated quote, altered citation, and metadata year mismatch. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v11` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Eleventh legal authority verification micro-fixture validates that support-cue language triggers proposition-review abstention instead of citation-clean certification. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v12` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Twelfth legal authority verification micro-fixture validates court-parenthetical metadata mismatch blocking. It is not a standing compile-fact transfer measurement cell. |
+| `legal_authority_verification_micro_v13` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Thirteenth legal authority verification micro-fixture validates sanction-style A.D.3d, WL, and Illinois Appellate citation extraction without unsupported-reporter false blocks. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v2` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Second legal authority verification micro-fixture validates metadata mismatch, ambiguous citation, and authority-text-unavailable abstention behavior. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v3` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Third legal authority verification micro-fixture validates unsupported-reporter visibility as invalid_reporter plus explicit abstention. It is not a standing compile-fact transfer measurement cell. |
 | `legal_authority_verification_micro_v4` | `seed_or_component_micro_fixture` | `candidate_lane_seed` | Fourth legal authority verification micro-fixture validates authority-scoped quote verification when a real quote is attached to the wrong cited authority. It is not a standing compile-fact transfer measurement cell. |

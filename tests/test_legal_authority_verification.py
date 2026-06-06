@@ -26,6 +26,7 @@ FIXTURE_V9 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_ver
 FIXTURE_V10 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v10"
 FIXTURE_V11 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v11"
 FIXTURE_V12 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v12"
+FIXTURE_V13 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v13"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -589,6 +590,95 @@ def test_legal_authority_checks_court_parenthetical_metadata(tmp_path: Path) -> 
         }
     ]
     assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"]["answer"] == "no"
+
+
+def test_legal_authority_extracts_corporate_party_commas_without_losing_case_metadata(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        "Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019).",
+        encoding="utf-8",
+    )
+    inventory = tmp_path / "authority_inventory.json"
+    inventory.write_text(
+        json.dumps(
+            {
+                "schema_version": "legal_authority_inventory_v1",
+                "authorities": [
+                    {
+                        "authority_id": "auth_varghese_925_f3d_1339",
+                        "canonical_citation": "925 F.3d 1339",
+                        "case_name": "Varghese v. China Southern Airlines Co., Ltd.",
+                        "court": "11th Cir.",
+                        "year": "2019",
+                        "reporter": "F.3d",
+                        "volume": "925",
+                        "page": "1339",
+                        "pages": {},
+                    }
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=inventory,
+        document_id="legal_authority_corporate_commas",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["resolved"] == 1
+    assert report["summary"]["verified_mentions"] == 1
+    assert report["summary"]["metadata_checks"] == 6
+    assert report["summary"]["metadata_mismatch"] == 0
+    assert report["mentions"][0]["case_name"] == "Varghese v. China Southern Airlines Co., Ltd."
+    assert report["mentions"][0]["court"] == "11th Cir."
+
+
+def test_legal_authority_extracts_sanction_package_reporter_shapes_without_invalid_reporter(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        "\n\n".join(
+            [
+                "Matter of Bourguignon v. Coordinated Behavioral Health Servs., Inc., 114 A.D.3d 947 (3d Dep't 2014).",
+                "Martinez v. Delta Airlines, Inc., 2019 WL 4639462 (Tex. App. Sept. 25, 2019).",
+                "Shaboon v. Egyptair, 2013 IL App (1st) 111279-U (Ill. App. Ct. 2013).",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    inventory = tmp_path / "authority_inventory.json"
+    inventory.write_text(
+        json.dumps({"schema_version": "legal_authority_inventory_v1", "authorities": []}) + "\n",
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=inventory,
+        document_id="legal_authority_sanction_reporters",
+    )
+
+    assert report["summary"]["citation_mentions"] == 3
+    assert report["summary"]["resolved"] == 0
+    assert report["summary"]["unresolved"] == 3
+    assert report["summary"]["invalid_reporter"] == 0
+    assert report["summary"]["verification_abstentions"] == 3
+    assert report["summary"]["false_verified"] == 0
+    assert [row["citation"] for row in report["mentions"]] == [
+        "114 A.D.3d 947",
+        "2019 WL 4639462",
+        "2013 IL App (1st) 111279-U",
+    ]
+    assert report["mentions"][1]["court"] == "Tex. App."
+    assert report["mentions"][2]["court"] == "Ill. App. Ct."
+    assert "legal_citation_mention(legal_authority_sanction_reporters, mention_003, cite_2013_il_app_1st_111279_u" in facts_text(
+        report
+    )
 
 
 def test_legal_authority_pin_range_contains_matched_quote_page(tmp_path: Path) -> None:
@@ -1441,6 +1531,35 @@ def test_legal_authority_micro_fixture_v12_blocks_court_parenthetical_mismatch()
     }
 
 
+def test_legal_authority_micro_fixture_v13_extracts_sanction_style_reporter_shapes() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V13 / "source.md",
+        authority_inventory_path=FIXTURE_V13 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v13",
+    )
+
+    assert report["summary"]["citation_mentions"] == 3
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 3
+    assert report["summary"]["resolved"] == 0
+    assert report["summary"]["unresolved"] == 3
+    assert report["summary"]["invalid_reporter"] == 0
+    assert report["summary"]["verification_abstentions"] == 3
+    assert report["summary"]["false_verified"] == 0
+    assert [row["citation"] for row in report["mentions"]] == [
+        "114 A.D.3d 947",
+        "2019 WL 4639462",
+        "2013 IL App (1st) 111279-U",
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 3,
+        "blocking_issue_types": ["unresolved"],
+        "review_required_count": 0,
+        "answer": "no",
+    }
+
+
 def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanctions() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
@@ -1486,6 +1605,9 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v12" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v13" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
     assert classes["clean_public_filings"]["status"] == "seeded"
     assert classes["clean_public_filings"]["fixtures"] == [
         "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_001",
@@ -1497,5 +1619,7 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
     assert "legal_authority_known_hallucination_sanction_20260606_01.zip" in manifest[
         "next_external_work_order_needed"
     ]["reason"]
-    assert "citation-parser coverage gaps" in manifest["next_external_work_order_needed"]["reason"]
+    assert "extracts all 18 citation mentions" in manifest["next_external_work_order_needed"]["reason"]
+    assert "invalid_reporter=0 and false_verified=0" in manifest["next_external_work_order_needed"]["reason"]
+    assert "placeholder variables/source labels" in manifest["next_external_work_order_needed"]["reason"]
     assert "C:\\prethinker\\tmp" in manifest["next_external_work_order_needed"]["reason"]
