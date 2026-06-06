@@ -200,6 +200,24 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
             errors.append(f"citation_mentions_expected_3_to_6_got_{citation_mentions}")
         if int(verifier_summary.get("invalid_reporter", 0) or 0):
             errors.append(f"clean_public_fixture_has_invalid_reporter:{verifier_summary.get('invalid_reporter')}")
+        short_form_citations = int(verifier_summary.get("short_form_citations", 0) or 0)
+        if short_form_citations:
+            expected_short_form_abstentions = [
+                fact
+                for fact in expected_facts
+                if fact.startswith("legal_verification_abstention(short_form_")
+                and "short_form_citation_requires_context" in fact
+            ]
+            expected_short_form_resolutions = [
+                fact for fact in expected_facts if fact.startswith("legal_authority_resolution(short_form_")
+            ]
+            if len(expected_short_form_abstentions) != short_form_citations:
+                errors.append(
+                    "short_form_abstentions_expected_"
+                    f"{short_form_citations}_got_{len(expected_short_form_abstentions)}"
+                )
+            if expected_short_form_resolutions:
+                errors.append(f"short_form_resolution_expected_forbidden:{len(expected_short_form_resolutions)}")
         quote_claims = int(verifier_summary.get("quote_claims", 0) or 0)
         if quote_claims < 1:
             errors.append("missing_quote_claim")

@@ -246,6 +246,40 @@ def test_validate_legal_authority_fixture_package_rejects_unknown_reporter_inven
     assert "authority_1:reporter_not_allowed:Umbrella" in report["fixtures"][0]["errors"]
 
 
+def test_validate_legal_authority_fixture_package_requires_short_form_abstentions(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    source_path = package / "clean_legal_filing_001" / "source.md"
+    source_path.write_text(source_path.read_text(encoding="utf-8") + "\nId. at 675.\n", encoding="utf-8")
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    assert "short_form_abstentions_expected_1_got_0" in report["fixtures"][0]["errors"]
+
+
+def test_validate_legal_authority_fixture_package_rejects_short_form_resolution_oracle(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    source_path = package / "clean_legal_filing_001" / "source.md"
+    source_path.write_text(source_path.read_text(encoding="utf-8") + "\nId. at 675.\n", encoding="utf-8")
+    expected_path = package / "clean_legal_filing_001" / "expected_facts.pl"
+    with expected_path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            "legal_verification_abstention(short_form_001, authority_resolution, "
+            "short_form_citation_requires_context, source_line_11).\n"
+        )
+        handle.write(
+            "legal_authority_resolution(short_form_001, cite_576_us_644, resolved, "
+            "auth_obergefell_576_us_644, source_line_11).\n"
+        )
+
+    report = build_report(package_path=package)
+
+    assert report["summary"]["status"] == "fail"
+    errors = report["fixtures"][0]["errors"]
+    assert "short_form_abstentions_expected_1_got_1" not in errors
+    assert "short_form_resolution_expected_forbidden:1" in errors
+
+
 def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Path) -> None:
     package = _write_package(tmp_path)
     zip_path = tmp_path / "legal_authority_clean_public_filings_20260606_01.zip"
