@@ -20,6 +20,7 @@ FIXTURE_V3 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_ver
 FIXTURE_V4 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v4"
 FIXTURE_V5 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v5"
 FIXTURE_V6 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v6"
+FIXTURE_V8 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v8"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -1079,6 +1080,31 @@ def test_legal_authority_ibid_short_form_requires_context(tmp_path: Path) -> Non
     assert not any("legal_authority_resolution(short_form_001" in fact for fact in report["facts"])
 
 
+def test_legal_authority_named_short_form_requires_context() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V8 / "source.md",
+        authority_inventory_path=FIXTURE_V8 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v8",
+    )
+
+    assert report["summary"]["citation_mentions"] == 0
+    assert report["summary"]["short_form_citations"] == 1
+    assert report["ledger_queries"]["which_citations_require_context"] == [
+        {
+            "short_form_id": "short_form_001",
+            "citation": "Brown, 347 U.S. at 495",
+            "line": 5,
+            "reason": "short_form_citation_requires_context",
+        }
+    ]
+    assert (
+        "legal_verification_abstention("
+        "short_form_001, authority_resolution, short_form_citation_requires_context, source_line_5)."
+    ) in report["facts"]
+    assert not any("legal_citation_mention(" in fact for fact in report["facts"])
+    assert not any("legal_authority_resolution(short_form_001" in fact for fact in report["facts"])
+
+
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
@@ -1106,10 +1132,16 @@ def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v6" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v7" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_clean_public_baseline"
     assert manifest["next_external_work_order_needed"]["needed_now"] is True
     assert "clean-public-filings batch" in manifest["next_external_work_order_needed"]["reason"]
-    assert "legal_authority_clean_public_filings_work_order_20260606_r9.zip" in manifest[
+    assert "legal_authority_clean_public_filings_work_order_20260606_r10.zip" in manifest[
         "next_external_work_order_needed"
     ]["reason"]
     assert "Known hallucination/sanction filings remain deferred" in manifest["next_external_work_order_needed"]["reason"]

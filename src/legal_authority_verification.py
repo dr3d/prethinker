@@ -45,6 +45,12 @@ BARE_CITATION_RE = re.compile(
     r"(?:,\s+(?P<pin_comma>\d+(?:-\d+)?)|\s+at\s+(?P<pin_at>\d+(?:-\d+)?))?"
     r"(?:\s+\([^)]*?(?P<year>\d{4})[^)]*?\))?"
 )
+NAMED_SHORT_FORM_CITATION_RE = re.compile(
+    r"(?<![A-Za-z0-9_])"
+    r"(?P<name>[A-Z][A-Za-z0-9.&']{1,40}),\s+"
+    r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
+    r"at\s+(?P<pin>\d+(?:-\d+)?)"
+)
 SHORT_FORM_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])(?P<form>id\.|ibid\.)(?:\s+at\s+(?P<pin>\d+(?:-\d+)?))?",
     re.IGNORECASE,
@@ -359,6 +365,38 @@ def verify_legal_authorities(
                 }
             )
             mentions.append(mention_report)
+
+        for match in NAMED_SHORT_FORM_CITATION_RE.finditer(paragraph.text):
+            if any(_spans_overlap(match.span(), span) for span in citation_spans):
+                continue
+            short_form_index += 1
+            short_form_id = f"short_form_{short_form_index:03d}"
+            line = paragraph.start_line + paragraph.text[: match.start()].count("\n")
+            source_scope = f"source_line_{line}"
+            citation_text = _clean_space(match.group(0))
+            pin = match.group("pin") or ""
+            row = {
+                "short_form_id": short_form_id,
+                "citation": citation_text,
+                "pin": _page_atom(pin) if pin else "",
+                "line": line,
+                "source_scope": source_scope,
+                "reason": "short_form_citation_requires_context",
+            }
+            short_form_refs.append(row)
+            issue_rows.append(
+                {
+                    "mention_id": short_form_id,
+                    "issue": "short_form_citation_requires_context",
+                    "citation": citation_text,
+                    "line": line,
+                    "reason": "short_form_citation_requires_context",
+                }
+            )
+            facts.append(
+                "legal_verification_abstention("
+                f"{short_form_id}, authority_resolution, short_form_citation_requires_context, {source_scope})."
+            )
 
         for match in SHORT_FORM_CITATION_RE.finditer(paragraph.text):
             if any(_spans_overlap(match.span(), span) for span in citation_spans):

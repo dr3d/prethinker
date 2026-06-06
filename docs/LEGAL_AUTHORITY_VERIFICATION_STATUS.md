@@ -4,9 +4,9 @@ This generated report runs the deterministic legal-authority verifier over fixtu
 It reads local fixture files and authority inventories only; it does not call an LLM or live legal resolver.
 
 - Manifest: `datasets/legal_authority_verification/fixture_corpus_manifest.json`
-- Fixtures: `7`
-- Expected facts: `148 / 148`
-- Matched forbidden facts: `0 / 37`
+- Fixtures: `8`
+- Expected facts: `149 / 149`
+- Matched forbidden facts: `0 / 39`
 - Citation mentions: `17`
 - Verified / blocked / review-required mentions: `6 / 10 / 1`
 - Resolved / unresolved / ambiguous / invalid reporter / unavailable: `14 / 1 / 1 / 1 / 0`
@@ -15,9 +15,9 @@ It reads local fixture files and authority inventories only; it does not call an
 - Pin mismatches: `1`
 - Authority text sources: `11`
 - Authority text available / unavailable sources: `10 / 1`
-- Short-form citations requiring context: `1`
+- Short-form citations requiring context: `2`
 - Proposition boundaries: `1`
-- Verification abstentions: `10`
+- Verification abstentions: `11`
 - False verified: `0`
 - Blocking rows: `0`
 - Status: `pass`
@@ -27,9 +27,9 @@ It reads local fixture files and authority inventories only; it does not call an
 | Signature | Expected matched/total | Forbidden matched/total |
 | --- | ---: | ---: |
 | `legal_authority_metadata_check/5` | 64/64 | 0/8 |
-| `legal_authority_resolution/5` | 17/17 | 0/8 |
+| `legal_authority_resolution/5` | 17/17 | 0/9 |
 | `legal_authority_text_source/5` | 11/11 | 0/2 |
-| `legal_citation_mention/5` | 17/17 | 0/1 |
+| `legal_citation_mention/5` | 17/17 | 0/2 |
 | `legal_pin_cite_check/5` | 7/7 | 0/4 |
 | `legal_proposition_claim/5` | 1/1 | 0/1 |
 | `legal_proposition_source_span/5` | 1/1 | 0/1 |
@@ -37,13 +37,13 @@ It reads local fixture files and authority inventories only; it does not call an
 | `legal_quote_claim/5` | 9/9 | 0/0 |
 | `legal_quote_span_match/5` | 9/9 | 0/9 |
 | `legal_support_assessment/5` | 1/1 | 0/1 |
-| `legal_verification_abstention/4` | 10/10 | 0/1 |
+| `legal_verification_abstention/4` | 11/11 | 0/1 |
 
 ## Fixture Classes
 
 | Class | Status | Fixtures |
 | --- | --- | ---: |
-| `controlled_adversarial_mutations` | `seeded` | 7 |
+| `controlled_adversarial_mutations` | `seeded` | 8 |
 | `clean_public_filings` | `planned` | 0 |
 | `known_hallucination_or_sanction_filings` | `deferred_until_clean_public_baseline` | 0 |
 
@@ -58,8 +58,9 @@ It reads local fixture files and authority inventories only; it does not call an
 | `legal_authority_verification_micro_v5` | `controlled_adversarial_mutations` | 31/31 | 0 | 0 | `4/0/0` | `yes` | `[]` |
 | `legal_authority_verification_micro_v6` | `controlled_adversarial_mutations` | 21/21 | 0 | 0 | `1/1/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v7` | `controlled_adversarial_mutations` | 1/1 | 0 | 0 | `0/0/0` | `no` | `[]` |
+| `legal_authority_verification_micro_v8` | `controlled_adversarial_mutations` | 1/1 | 0 | 0 | `0/0/0` | `no` | `[]` |
 
 ## Next External Work Order
 
 - Needed now: `True`
-- Reason: The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r9.zip. Returned packages must pass scripts/import_legal_authority_fixture_package.py before fixtures are added to this manifest. Known hallucination/sanction filings remain deferred until the clean-public baseline lands.
+- Reason: The controlled micro-fixture gate is now stable. The next external input is a clean-public-filings batch; a local offsite packet is prepared at tmp/legal_authority_clean_public_filings_work_order_20260606_r10.zip. Returned packages must pass scripts/import_legal_authority_fixture_package.py before fixtures are added to this manifest. Known hallucination/sanction filings remain deferred until the clean-public baseline lands.

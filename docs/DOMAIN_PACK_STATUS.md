@@ -8,11 +8,11 @@ This report does not read source prose, QA questions, or judge outputs.
 - Domains: `8`
 - Predicates: `75` (`69` domain-specific plus shared carriers)
 - Lenses: `34`
-- Associated fixtures: `37`
+- Associated fixtures: `38`
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
-- Expected facts in associated fixtures: `721`
-- Forbidden facts in associated fixtures: `287`
+- Expected facts in associated fixtures: `722`
+- Forbidden facts in associated fixtures: `289`
 - Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
-| `legal_authority_verification_v1` | 13 | 12 | 3 | 7 | 148 | 37 |
+| `legal_authority_verification_v1` | 13 | 12 | 3 | 8 | 149 | 39 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
@@ -93,6 +93,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `legal_authority_verification_micro_v5` | `fixture_id_prefix` | 31 | 9 | `legal_authority_metadata_check/5`:14, `legal_authority_resolution/5`:4, `legal_authority_text_source/5`:3, `legal_citation_mention/5`:4, `legal_pin_cite_check/5`:2, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2 |
 | `legal_authority_verification_micro_v6` | `fixture_id_prefix` | 21 | 6 | `legal_authority_metadata_check/5`:10, `legal_authority_resolution/5`:2, `legal_authority_text_source/5`:1, `legal_citation_mention/5`:2, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2, `legal_verification_abstention/4`:1 |
 | `legal_authority_verification_micro_v7` | `fixture_id_prefix` | 1 | 2 | `legal_verification_abstention/4`:1 |
+| `legal_authority_verification_micro_v8` | `fixture_id_prefix` | 1 | 2 | `legal_verification_abstention/4`:1 |
 
 ## ntsb_investigation_v1
 
