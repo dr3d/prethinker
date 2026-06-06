@@ -29,13 +29,14 @@ lesson are documented in the governed document compilation technical note.
 12. [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
 13. [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
 14. [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for the current source-only review queue.
-15. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
-16. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
-17. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
-18. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
-19. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
-20. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
-21. [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate next lane for deterministic citation, quote, and pin-cite checks; not a legal-QA or product-readiness claim.
+15. [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the legal citation/quote/pin lane.
+16. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
+17. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
+18. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a domain becomes a customizable governed predicate pack.
+19. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of the live work.
+20. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document artifact contract.
+21. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA, judging, and failure-surface interpretation.
+22. [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate next lane for deterministic citation, quote, and pin-cite checks; not a legal-QA or product-readiness claim.
 
 ## Core Architecture
 
@@ -60,6 +61,7 @@ lesson are documented in the governed document compilation technical note.
 - [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md)
 - [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md)
 - [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md)
+- [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md)
 - [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md)
 - [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md)
 - [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md)

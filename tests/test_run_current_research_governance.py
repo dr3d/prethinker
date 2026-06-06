@@ -17,6 +17,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
         "fixture_bank_domain_inventory",
         "domain_predicate_proposal_status",
         "pending_external_work_orders",
+        "legal_authority_verification_status",
         "query_micro_fixture_contracts",
         "query_grounding_status",
         "candidate_oracle_reviews",
@@ -34,6 +35,9 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
     assert "--expect-md" in pending_command["command"]
     assert "--include-tmp-zips" not in pending_command["command"]
     assert "docs/PENDING_EXTERNAL_WORK_ORDERS.md" in pending_command["command"]
+    legal_status_command = next(command for command in commands if command["id"] == "legal_authority_verification_status")
+    assert "--expect-md" in legal_status_command["command"]
+    assert "docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md" in legal_status_command["command"]
     query_contract_command = next(command for command in commands if command["id"] == "query_micro_fixture_contracts")
     assert "--expect-md" in query_contract_command["command"]
     assert "docs/QUERY_MICRO_FIXTURE_CONTRACT_STATUS.md" in query_contract_command["command"]

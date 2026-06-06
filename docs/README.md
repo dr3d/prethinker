@@ -35,17 +35,18 @@ Use this short path if you are new:
 10. [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
 11. [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
 12. [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for the current source-only review queue.
-13. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
-14. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
-15. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
-16. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
-17. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
-18. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
-19. [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future review lenses read evidence without mutating the KB.
-20. [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate next lane for deterministic authority, quote, and pin-cite verification; not a legal-QA claim.
-21. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - doctrine for designing fixtures as boundary probes rather than random ingestion.
-22. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
-23. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
+13. [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the legal citation/quote/pin lane.
+14. [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
+15. [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
+16. [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
+17. [Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md) - how a bounded document family becomes a governed predicate pack.
+18. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
+19. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
+20. [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future review lenses read evidence without mutating the KB.
+21. [Legal Authority Verification Research Plan](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md) - candidate next lane for deterministic authority, quote, and pin-cite verification; not a legal-QA claim.
+22. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - doctrine for designing fixtures as boundary probes rather than random ingestion.
+23. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
+24. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
 
 Then go deeper:
 
@@ -69,6 +70,7 @@ Then go deeper:
 - [FDA Violation Alignment Status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md)
 - [Domain Predicate Proposal Status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md)
 - [Pending External Work Orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md)
+- [Legal Authority Verification Status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md)
 - [Candidate Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md)
 - [Source Oracle Review Status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)

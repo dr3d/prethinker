@@ -48,7 +48,7 @@ dataset label. Promote only when the principle survives unlike probes.
 | 5 | Fixture-bank predicate packs | Which retained official-document families can become closed, lens-scoped predicate packs without collecting new documents or grinding rows? | `docs/DOMAIN_PACK_STATUS.md`, `docs/DOMAIN_ACCOUNTABILITY_STATUS.md`, `docs/DOMAIN_PACK_RESEARCH_EVIDENCE.md`, domain registries |
 | 6 | Overlay discipline | Can ACH and future lenses read compiled evidence without mutating KB truth, QA verdicts, or compile metrics? | `docs/OVERLAY_ARCHITECTURE.md`, `docs/ACH_OVERLAY_PROBE.md` |
 | 7 | Provider/runtime discipline | Which model/provider/settings conditions are comparable enough for claims? | `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`, `docs/MODEL_VARIANCE_PRE_REGISTRATION_20260604.md`, `docs/DOMAIN_PACK_VARIANCE_STATUS.md` |
-| 8 | Legal authority verification candidate | Can the governed-compile method verify citation existence, authority metadata, quotes, and pin-cite locality while abstaining from legal proposition support? | `docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md`, `datasets/domain_profiles/legal_authority_verification_v1/` |
+| 8 | Legal authority verification candidate | Can the governed-compile method verify citation existence, authority metadata, quotes, and pin-cite locality while abstaining from legal proposition support? | `docs/LEGAL_AUTHORITY_VERIFICATION_RESEARCH_PLAN.md`, `docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md`, `datasets/domain_profiles/legal_authority_verification_v1/` |
 | 9 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete claims or generated artifact strata? | `README.md`, `docs/PUBLIC_DOCS_GUIDE.md` |
 
 ## Current Architecture Pressure

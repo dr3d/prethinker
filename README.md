@@ -46,6 +46,7 @@ propagation = visible recomputation, not hidden belief
 - [FDA violation alignment status](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for current FDA violation/category/citation boundaries.
 - [Domain predicate proposal status](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated review queue for candidate predicate surfaces before they become claims.
 - [Pending external work orders](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
+- [Legal authority verification status](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the legal citation/quote/pin lane.
 - [Candidate oracle review status](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
 - [Source oracle review status](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
@@ -153,6 +154,7 @@ The short version:
 - [docs/FDA_VIOLATION_ALIGNMENT_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/FDA_VIOLATION_ALIGNMENT_STATUS.md) - generated expected-hold audit for FDA violation/category/citation alignment boundaries.
 - [docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_PROPOSAL_STATUS.md) - generated candidate-predicate review queue.
 - [docs/PENDING_EXTERNAL_WORK_ORDERS.md](https://github.com/dr3d/prethinker/blob/main/docs/PENDING_EXTERNAL_WORK_ORDERS.md) - generated packet audit for queued source-only oracle reviews.
+- [docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md) - generated deterministic fixture audit for the legal citation/quote/pin lane.
 - [docs/CANDIDATE_ORACLE_REVIEW_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/CANDIDATE_ORACLE_REVIEW_STATUS.md) - generated audit for retained blind/source-only candidate review packages.
 - [docs/SOURCE_ORACLE_REVIEW_STATUS.md](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_ORACLE_REVIEW_STATUS.md) - generated audit for retained source-only expected/forbidden oracle packages.
 - [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - maintained public-doc reading map.

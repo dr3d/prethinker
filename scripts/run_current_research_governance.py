@@ -185,6 +185,19 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
             ],
         },
         {
+            "id": "legal_authority_verification_status",
+            "command": [
+                python,
+                "scripts/audit_legal_authority_verification_status.py",
+                "--out-json",
+                str(report_root / "legal_authority_verification_status.json"),
+                "--out-md",
+                str(report_root / "legal_authority_verification_status.md"),
+                "--expect-md",
+                "docs/LEGAL_AUTHORITY_VERIFICATION_STATUS.md",
+            ],
+        },
+        {
             "id": "query_micro_fixture_contracts",
             "command": [
                 python,

@@ -177,4 +177,6 @@ def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_resolver_contract_stable"
-    assert manifest["next_external_work_order_needed"]["needed_now"] is False
+    assert manifest["next_external_work_order_needed"]["needed_now"] is True
+    assert "clean-public-filings batch" in manifest["next_external_work_order_needed"]["reason"]
+    assert "Known hallucination/sanction filings remain deferred" in manifest["next_external_work_order_needed"]["reason"]
