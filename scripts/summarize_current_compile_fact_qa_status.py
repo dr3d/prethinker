@@ -205,7 +205,7 @@ def _cell_row(
     typed_plan = dict(cell.get("typed_plan_summary") or {})
     per_run_counts = _per_run_counts(cell.get("verdict_summary_by_file") or {})
     settings = dict(source.get("effective_settings") or {})
-    return {
+    row = {
         "id": cell_id,
         "family": _family_for_cell(cell_id=cell_id, fixture_id=fixture_id),
         "fixture_id": fixture_id,
@@ -253,6 +253,57 @@ def _cell_row(
         ),
         "variance_groups": variance_groups,
     }
+    row["favorable_variance_root_checks"] = _favorable_variance_root_checks(
+        cell=row,
+        variance_groups=variance_groups,
+    )
+    return row
+
+
+def _favorable_variance_root_checks(
+    *,
+    cell: dict[str, Any],
+    variance_groups: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Fail current cells that retain a favorable root from a registered variance band."""
+
+    source_root = _normalized_path(cell.get("source_root"))
+    if not source_root:
+        return []
+    exact = int(cell.get("exact_support_ge_2") or 0)
+    checks: list[dict[str, Any]] = []
+    for group in variance_groups:
+        supported_min = _optional_int(group.get("supported_min"))
+        supported_max = _optional_int(group.get("supported_max"))
+        if supported_min is None or supported_max is None or supported_min >= supported_max:
+            continue
+        matching_root = None
+        for root in group.get("roots") or []:
+            if not isinstance(root, dict):
+                continue
+            if _normalized_path(root.get("root")) == source_root:
+                matching_root = root
+                break
+        if not matching_root:
+            continue
+        group_id = str(group.get("id") or "")
+        root_id = str(matching_root.get("id") or "")
+        check = {
+            "status": "pass",
+            "group_id": group_id,
+            "root_id": root_id,
+            "actual_support": exact,
+            "supported_min": supported_min,
+            "supported_max": supported_max,
+        }
+        if exact > supported_min:
+            check["status"] = "fail"
+            check["blocking_reason"] = (
+                f"{cell['id']}:favorable_variance_root:{group_id}:{root_id}:"
+                f"actual={exact}:min={supported_min}:max={supported_max}"
+            )
+        checks.append(check)
+    return checks
 
 
 def _variance_groups_by_fixture(report: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
@@ -268,13 +319,33 @@ def _variance_groups_by_fixture(report: dict[str, Any]) -> dict[str, list[dict[s
             "title": str(group.get("title") or ""),
             "claim_read": str(group.get("claim_read") or ""),
             "support_band": _support_band(group),
+            "supported_min": _optional_int(group.get("supported_min")),
+            "supported_max": _optional_int(group.get("supported_max")),
+            "expected_min": _optional_int(group.get("expected_min")),
+            "expected_max": _optional_int(group.get("expected_max")),
             "unexpected_band": _count_band(group.get("unexpected_min"), group.get("unexpected_max")),
             "supported_forbidden_total": int(group.get("supported_forbidden_total") or 0),
             "status": str(group.get("status") or ""),
             "root_count": int(group.get("root_count") or 0),
+            "roots": _variance_root_rows(group.get("roots") or []),
         }
         out.setdefault(fixture_id, []).append(row)
     return out
+
+
+def _variance_root_rows(roots: list[Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for root in roots:
+        if not isinstance(root, dict):
+            continue
+        rows.append(
+            {
+                "id": str(root.get("id") or ""),
+                "root": str(root.get("root") or ""),
+                "supported_fact_count": _optional_int(root.get("supported_fact_count")),
+            }
+        )
+    return rows
 
 
 def _excluded_fixture_rows(report: dict[str, Any]) -> list[dict[str, str]]:
@@ -797,6 +868,9 @@ def _blocking_reasons(
             )
         if cell["forbidden_emissions_ge_1"]:
             blockers.append(f"{cell_id}:forbidden_emissions_ge_1:{cell['forbidden_emissions_ge_1']}")
+        for check in cell.get("favorable_variance_root_checks") or []:
+            if isinstance(check, dict) and check.get("status") == "fail":
+                blockers.append(str(check.get("blocking_reason") or "favorable_variance_root"))
     return blockers
 
 
@@ -1235,6 +1309,25 @@ def _count_band(min_value: Any, max_value: Any) -> str:
     if min_value == max_value:
         return f"`{min_value}`"
     return f"`{min_value}-{max_value}`"
+
+
+def _optional_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _normalized_path(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        return str(Path(text).resolve()).rstrip("\\/").casefold()
+    except (OSError, RuntimeError, ValueError):
+        return text.replace("\\", "/").rstrip("/").casefold()
 
 
 def _family_for_cell(*, cell_id: str, fixture_id: str) -> str:

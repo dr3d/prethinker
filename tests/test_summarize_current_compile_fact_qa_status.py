@@ -261,6 +261,77 @@ def test_summarize_current_compile_fact_qa_status_blocks_forbidden_emissions(tmp
     assert "fdca_501_a_2_a" in md
 
 
+def test_summarize_current_compile_fact_qa_status_blocks_retained_favorable_variance_root(
+    tmp_path: Path,
+) -> None:
+    manifest_run = _write_manifest_run(tmp_path)
+    source_audit = _write_source_audit(tmp_path)
+    variance_status = tmp_path / "variance_status.json"
+    variance_status.write_text(
+        json.dumps(
+            {
+                "summary": {"status": "pass"},
+                "groups": [
+                    {
+                        "id": "sec_seed_same_condition_band",
+                        "title": "SEC seed same-condition band",
+                        "fixture_id": "sec_form_8k_skeleton_v1",
+                        "claim_read": "Use the lower repeat root, not the favorable root.",
+                        "root_count": 2,
+                        "supported_min": 1,
+                        "supported_max": 2,
+                        "expected_min": 2,
+                        "expected_max": 2,
+                        "supported_forbidden_total": 0,
+                        "unexpected_min": 0,
+                        "unexpected_max": 0,
+                        "status": "pass",
+                        "roots": [
+                            {
+                                "id": "low",
+                                "root": "C:\\prethinker_tmp_archive\\lower",
+                                "supported_fact_count": 1,
+                            },
+                            {
+                                "id": "high",
+                                "root": "C:\\prethinker_tmp_archive\\example",
+                                "supported_fact_count": 2,
+                            },
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_report(
+        manifest_run_path=manifest_run,
+        source_audit_path=source_audit,
+        variance_status_path=variance_status,
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert report["cells"][0]["favorable_variance_root_checks"] == [
+        {
+            "status": "fail",
+            "group_id": "sec_seed_same_condition_band",
+            "root_id": "high",
+            "actual_support": 2,
+            "supported_min": 1,
+            "supported_max": 2,
+            "blocking_reason": (
+                "sec_form_8k_skeleton_seed:favorable_variance_root:"
+                "sec_seed_same_condition_band:high:actual=2:min=1:max=2"
+            ),
+        }
+    ]
+    assert (
+        "sec_form_8k_skeleton_seed:favorable_variance_root:"
+        "sec_seed_same_condition_band:high:actual=2:min=1:max=2"
+    ) in report["summary"]["blocking_reasons"]
+
+
 def test_compile_fact_status_markdown_freshness_check_passes_matching_doc(tmp_path: Path) -> None:
     manifest_run = _write_manifest_run(tmp_path)
     source_audit = _write_source_audit(tmp_path)
