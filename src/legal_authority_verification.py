@@ -20,10 +20,19 @@ from typing import Any
 from src.legal_authority_resolvers import LocalAuthorityInventoryResolver, unsupported_reporter_lookup_row
 
 
+CASE_WORD_RE = r"(?:[A-Z][A-Za-z0-9.&']*|of|the|and|for|in|on|to|ex|rel\.|&)"
+CASE_PARTY_RE = rf"{CASE_WORD_RE}(?:\s+{CASE_WORD_RE}){{0,8}}"
 CITATION_RE = re.compile(
-    r"(?P<case>[A-Z][A-Za-z0-9.&' -]+? v\. [A-Z][A-Za-z0-9.&' -]+?),\s+"
+    rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>U\.S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
     r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
+)
+BARE_CITATION_RE = re.compile(
+    r"(?<![A-Za-z0-9_])"
+    r"(?P<volume>\d+)\s+(?P<reporter>U\.S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
+    r"(?P<page>\d+)"
+    r"(?:,\s+(?P<pin_comma>\d+)|\s+at\s+(?P<pin_at>\d+))?"
+    r"(?:\s+\((?P<year>\d{4})\))?"
 )
 QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"')
 
@@ -32,6 +41,19 @@ QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"')
 class Paragraph:
     text: str
     start_line: int
+
+
+@dataclass(frozen=True)
+class CitationExtract:
+    case_name: str
+    citation: str
+    reporter: str
+    pin: str
+    year: str
+    start: int
+    end: int
+    lookup_start: int
+    lookup_end: int
 
 
 def verify_legal_authorities(
@@ -52,23 +74,23 @@ def verify_legal_authorities(
     quote_index = 0
     proposition_index = 0
     for paragraph in paragraphs:
-        for match in CITATION_RE.finditer(paragraph.text):
+        for citation_extract in _citation_extracts(paragraph.text):
             mention_index += 1
             mention_id = f"mention_{mention_index:03d}"
-            case_name = _clean_space(match.group("case"))
-            citation = _citation_text(match)
+            case_name = citation_extract.case_name
+            citation = citation_extract.citation
             citation_atom = _citation_atom(citation)
-            citation_line = paragraph.start_line + paragraph.text[: match.start()].count("\n")
+            citation_line = paragraph.start_line + paragraph.text[: citation_extract.start].count("\n")
             source_scope = f"source_line_{citation_line}"
             line_atom = f"line_{citation_line}"
             facts.append(
                 f"legal_citation_mention({document_id}, {mention_id}, {citation_atom}, {line_atom}, {source_scope})."
             )
-            if not _supported_reporter(match.group("reporter")):
+            if not _supported_reporter(citation_extract.reporter):
                 lookup = unsupported_reporter_lookup_row(
                     citation=citation,
-                    start_index=match.start("volume"),
-                    end_index=match.end("page"),
+                    start_index=citation_extract.lookup_start,
+                    end_index=citation_extract.lookup_end,
                 )
                 lookup_rows.append(lookup)
                 resolution_status, authority_id = "invalid_reporter", "invalid_authority"
@@ -95,7 +117,7 @@ def verify_legal_authorities(
                         "citation": citation,
                         "normalized_citation": citation_atom,
                         "line": citation_line,
-                        "pin": match.group("pin") or "",
+                        "pin": citation_extract.pin,
                         "resolution_status": resolution_status,
                         "authority_id": authority_id,
                         "metadata_checks": [],
@@ -108,8 +130,8 @@ def verify_legal_authorities(
 
             resolution = resolver.lookup_citation(
                 citation=citation,
-                start_index=match.start("volume"),
-                end_index=match.end("page"),
+                start_index=citation_extract.lookup_start,
+                end_index=citation_extract.lookup_end,
             )
             authority_matches = resolution.authority_matches
             lookup = resolution.lookup_row
@@ -127,7 +149,7 @@ def verify_legal_authorities(
                 "citation": citation,
                 "normalized_citation": citation_atom,
                 "line": citation_line,
-                "pin": match.group("pin") or "",
+                "pin": citation_extract.pin,
                 "resolution_status": resolution_status,
                 "authority_id": authority_id,
                 "metadata_checks": [],
@@ -153,7 +175,12 @@ def verify_legal_authorities(
                 mentions.append(mention_report)
                 continue
 
-            for field, extracted in (("case_name", case_name), ("year", match.group("year"))):
+            metadata_candidates = []
+            if case_name:
+                metadata_candidates.append(("case_name", case_name))
+            if citation_extract.year:
+                metadata_candidates.append(("year", citation_extract.year))
+            for field, extracted in metadata_candidates:
                 status = "match" if _metadata_matches(field, extracted, authority) else "mismatch"
                 mention_report["metadata_checks"].append(
                     {
@@ -177,7 +204,7 @@ def verify_legal_authorities(
                         }
                     )
 
-            quote_match = QUOTE_RE.search(paragraph.text, match.end())
+            quote_match = QUOTE_RE.search(paragraph.text, citation_extract.end)
             if quote_match:
                 quote_index += 1
                 quote_id = f"quote_{quote_index:03d}"
@@ -224,7 +251,7 @@ def verify_legal_authorities(
                         "legal_verification_abstention("
                         f"{quote_id}, quote_verification, {abstention_reason}, {quote_scope})."
                     )
-                pin = match.group("pin")
+                pin = citation_extract.pin
                 pin_status, pin_atom = _pin_status(pin=pin, quote_status=quote_status, matched_location=matched_location, authority=authority)
                 if pin_status != "not_applicable":
                     facts.append(
@@ -249,11 +276,11 @@ def verify_legal_authorities(
                             f"{mention_id}, pin_cite_verification, quote_outside_cited_pin, {source_scope})."
                         )
 
-            if _has_proposition_boundary(paragraph.text, match.end()):
+            if _has_proposition_boundary(paragraph.text, citation_extract.end):
                 proposition_index += 1
                 proposition_id = f"proposition_{mention_index:03d}"
-                boundary_scope = f"source_line_{paragraph.start_line + paragraph.text[match.end():].count(chr(10))}"
-                proposition_digest = _proposition_digest(paragraph.text[match.end():])
+                boundary_scope = f"source_line_{paragraph.start_line + paragraph.text[citation_extract.end:].count(chr(10))}"
+                proposition_digest = _proposition_digest(paragraph.text[citation_extract.end:])
                 claim_location = f"filing_line_{citation_line}"
                 facts.append(
                     "legal_proposition_claim("
@@ -536,8 +563,56 @@ def _paragraphs(text: str) -> list[Paragraph]:
     return paragraphs
 
 
-def _citation_text(match: re.Match[str]) -> str:
-    return f"{match.group('volume')} {_clean_space(match.group('reporter'))} {match.group('page')}"
+def _citation_extracts(text: str) -> list[CitationExtract]:
+    full_matches = [
+        CitationExtract(
+            case_name=_clean_space(match.group("case")),
+            citation=_citation_text(
+                volume=match.group("volume"),
+                reporter=match.group("reporter"),
+                page=match.group("page"),
+            ),
+            reporter=match.group("reporter"),
+            pin=match.group("pin") or "",
+            year=match.group("year") or "",
+            start=match.start(),
+            end=match.end(),
+            lookup_start=match.start("volume"),
+            lookup_end=match.end("page"),
+        )
+        for match in CITATION_RE.finditer(text)
+    ]
+    occupied = [(row.start, row.end) for row in full_matches]
+    bare_matches: list[CitationExtract] = []
+    for match in BARE_CITATION_RE.finditer(text):
+        if any(_spans_overlap(match.span(), span) for span in occupied):
+            continue
+        bare_matches.append(
+            CitationExtract(
+                case_name="",
+                citation=_citation_text(
+                    volume=match.group("volume"),
+                    reporter=match.group("reporter"),
+                    page=match.group("page"),
+                ),
+                reporter=match.group("reporter"),
+                pin=match.group("pin_comma") or match.group("pin_at") or "",
+                year=match.group("year") or "",
+                start=match.start(),
+                end=match.end(),
+                lookup_start=match.start("volume"),
+                lookup_end=match.end("page"),
+            )
+        )
+    return sorted([*full_matches, *bare_matches], key=lambda row: (row.start, row.end))
+
+
+def _spans_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
+    return left[0] < right[1] and right[0] < left[1]
+
+
+def _citation_text(*, volume: str, reporter: str, page: str) -> str:
+    return f"{volume} {_clean_space(reporter)} {page}"
 
 
 def _citation_atom(citation: str) -> str:

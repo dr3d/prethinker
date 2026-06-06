@@ -1,0 +1,13 @@
+{
+  "fixture_id": "legal_authority_verification_micro_v5",
+  "domain_profile": "legal_authority_verification_v1",
+  "schema_version": "compile_micro_fixture_manifest_v1",
+  "purpose": "Fifth adversarial legal-authority verification fixture: bare reporter citations must resolve without inventing case-name metadata.",
+  "source_kind": "synthetic_micro_fixture",
+  "files": {
+    "source": "source.md",
+    "expected_facts": "expected_facts.pl",
+    "forbidden_facts": "forbidden_facts.pl"
+  },
+  "claim_status": "research_micro_fixture_not_legal_advice"
+}

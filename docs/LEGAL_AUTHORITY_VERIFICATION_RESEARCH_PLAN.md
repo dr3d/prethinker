@@ -130,6 +130,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v1
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v2
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v3
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v4
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v5
 ```
 
 They contain:
@@ -140,6 +141,8 @@ They contain:
 - ambiguous citation resolution;
 - unsupported reporter visibility as `invalid_reporter` plus explicit
   abstention;
+- bare reporter citations that resolve without inventing case-name or year
+  metadata when those fields are not stated in that citation mention;
 - one real authority with a fabricated quote;
 - one real quote attached to the wrong cited authority;
 - one real authority with the quote present in the authority but outside the

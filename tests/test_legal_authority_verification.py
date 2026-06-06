@@ -12,6 +12,7 @@ FIXTURE = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verifi
 FIXTURE_V2 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v2"
 FIXTURE_V3 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v3"
 FIXTURE_V4 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v4"
+FIXTURE_V5 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v5"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -165,6 +166,44 @@ def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_sco
     }
 
 
+def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_without_metadata_invention() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V5 / "source.md",
+        authority_inventory_path=FIXTURE_V5 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v5",
+    )
+
+    assert report["summary"]["citation_mentions"] == 4
+    assert report["summary"]["verified_mentions"] == 4
+    assert report["summary"]["blocked_mentions"] == 0
+    assert report["summary"]["resolved"] == 4
+    assert report["summary"]["quote_claims"] == 2
+    assert report["summary"]["quote_exact_or_normalized_match"] == 2
+    assert report["summary"]["pin_mismatch"] == 0
+    assert report["summary"]["false_verified"] == 0
+    assert report["summary"]["document_outcome"] == "citation_clean"
+
+    full = report["mentions"][0]
+    bare = report["mentions"][1:]
+    assert full["case_name"] == "Brown v. Board of Education"
+    assert {check["field"]: check["status"] for check in full["metadata_checks"]} == {
+        "case_name": "match",
+        "year": "match",
+    }
+    assert all(row["case_name"] == "" for row in bare)
+    assert all(row["metadata_checks"] == [] for row in bare)
+
+    queries = report["ledger_queries"]
+    assert queries["which_cases_have_metadata_mismatches"] == []
+    assert queries["which_pin_cites_do_not_contain_the_quote"] == []
+    assert queries["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": True,
+        "blocking_issue_count": 0,
+        "review_required_count": 0,
+        "answer": "yes",
+    }
+
+
 def test_legal_authority_micro_fixture_emits_expected_and_not_forbidden_facts() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE / "source.md",
@@ -252,6 +291,28 @@ def test_legal_authority_micro_fixture_v4_emits_expected_and_not_forbidden_facts
     assert emitted.isdisjoint(forbidden)
 
 
+def test_legal_authority_micro_fixture_v5_emits_expected_and_not_forbidden_facts() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V5 / "source.md",
+        authority_inventory_path=FIXTURE_V5 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v5",
+    )
+    emitted = {line.strip() for line in facts_text(report).splitlines() if line.strip()}
+    expected = {
+        line.strip()
+        for line in (FIXTURE_V5 / "expected_facts.pl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    forbidden = {
+        line.strip()
+        for line in (FIXTURE_V5 / "forbidden_facts.pl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+
+    assert expected <= emitted
+    assert emitted.isdisjoint(forbidden)
+
+
 def test_legal_authority_report_renders_review_required_boundary() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE / "source.md",
@@ -289,6 +350,9 @@ def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v4" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v5" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "deferred_until_resolver_contract_stable"

@@ -1,0 +1,44 @@
+{
+  "schema_version": "legal_authority_inventory_v1",
+  "authorities": [
+    {
+      "authority_id": "auth_brown_347_us_483",
+      "canonical_citation": "347 U.S. 483",
+      "case_name": "Brown v. Board of Education",
+      "court": "Supreme Court of the United States",
+      "year": "1954",
+      "reporter": "U.S.",
+      "volume": "347",
+      "page": "483",
+      "pages": {
+        "495": "We conclude that in the field of public education the doctrine of separate but equal has no place. Separate educational facilities are inherently unequal."
+      }
+    },
+    {
+      "authority_id": "auth_obergefell_576_us_644",
+      "canonical_citation": "576 U.S. 644",
+      "case_name": "Obergefell v. Hodges",
+      "court": "Supreme Court of the United States",
+      "year": "2015",
+      "reporter": "U.S.",
+      "volume": "576",
+      "page": "644",
+      "pages": {
+        "675": "The Court now holds that same-sex couples may exercise the fundamental right to marry."
+      }
+    },
+    {
+      "authority_id": "auth_miranda_384_us_436",
+      "canonical_citation": "384 U.S. 436",
+      "case_name": "Miranda v. Arizona",
+      "court": "Supreme Court of the United States",
+      "year": "1966",
+      "reporter": "U.S.",
+      "volume": "384",
+      "page": "436",
+      "pages": {
+        "444": "The prosecution may not use statements stemming from custodial interrogation unless it demonstrates procedural safeguards."
+      }
+    }
+  ]
+}

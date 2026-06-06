@@ -8,11 +8,11 @@ This report does not read source prose, QA questions, or judge outputs.
 - Domains: `8`
 - Predicates: `74` (`68` domain-specific plus shared carriers)
 - Lenses: `34`
-- Associated fixtures: `34`
+- Associated fixtures: `35`
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
-- Expected facts in associated fixtures: `637`
-- Forbidden facts in associated fixtures: `269`
+- Expected facts in associated fixtures: `653`
+- Forbidden facts in associated fixtures: `278`
 - Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
-| `legal_authority_verification_v1` | 12 | 11 | 3 | 4 | 64 | 19 |
+| `legal_authority_verification_v1` | 12 | 11 | 3 | 5 | 80 | 28 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
@@ -90,6 +90,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `legal_authority_verification_micro_v2` | `fixture_id_prefix` | 18 | 6 | `legal_authority_metadata_check/5`:6, `legal_authority_resolution/5`:4, `legal_citation_mention/5`:4, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:2 |
 | `legal_authority_verification_micro_v3` | `fixture_id_prefix` | 3 | 3 | `legal_authority_resolution/5`:1, `legal_citation_mention/5`:1, `legal_verification_abstention/4`:1 |
 | `legal_authority_verification_micro_v4` | `fixture_id_prefix` | 8 | 3 | `legal_authority_metadata_check/5`:2, `legal_authority_resolution/5`:1, `legal_citation_mention/5`:1, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:1 |
+| `legal_authority_verification_micro_v5` | `fixture_id_prefix` | 16 | 9 | `legal_authority_metadata_check/5`:2, `legal_authority_resolution/5`:4, `legal_citation_mention/5`:4, `legal_pin_cite_check/5`:2, `legal_quote_claim/5`:2, `legal_quote_span_match/5`:2 |
 
 ## ntsb_investigation_v1
 

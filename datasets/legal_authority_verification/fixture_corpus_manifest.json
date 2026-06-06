@@ -20,7 +20,8 @@
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v2",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v3",
-        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v4"
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v4",
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v5"
       ],
       "required_files": [
         "source.md",
@@ -35,6 +36,7 @@
         "metadata mismatch",
         "ambiguous citation",
         "unsupported reporter citation",
+        "bare reporter citation without case-name metadata",
         "fabricated quote on a real authority",
         "real quote attached to the wrong authority",
         "quote outside cited pin",

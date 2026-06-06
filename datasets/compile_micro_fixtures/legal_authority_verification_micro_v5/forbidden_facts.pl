@@ -1,0 +1,9 @@
+legal_authority_metadata_check(mention_002, auth_brown_347_us_483, case_name, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_brown_347_us_483, year, match, source_line_7).
+legal_authority_metadata_check(mention_003, auth_obergefell_576_us_644, case_name, match, source_line_9).
+legal_authority_metadata_check(mention_003, auth_obergefell_576_us_644, year, match, source_line_9).
+legal_authority_metadata_check(mention_004, auth_miranda_384_us_436, case_name, match, source_line_11).
+legal_authority_metadata_check(mention_004, auth_miranda_384_us_436, year, match, source_line_11).
+legal_quote_span_match(quote_001, auth_obergefell_576_us_644, exact_match, page_675, authority_inventory).
+legal_quote_span_match(quote_002, auth_brown_347_us_483, exact_match, page_495, authority_inventory).
+legal_pin_cite_check(mention_002, auth_brown_347_us_483, page_495, quote_outside_pin, source_line_7).

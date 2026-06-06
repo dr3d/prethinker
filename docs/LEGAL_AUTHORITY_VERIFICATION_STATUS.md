@@ -4,13 +4,13 @@ This generated report runs the deterministic legal-authority verifier over fixtu
 It reads local fixture files and authority inventories only; it does not call an LLM or live legal resolver.
 
 - Manifest: `datasets/legal_authority_verification/fixture_corpus_manifest.json`
-- Fixtures: `4`
-- Expected facts: `64 / 64`
-- Matched forbidden facts: `0 / 19`
-- Citation mentions: `11`
-- Verified / blocked / review-required mentions: `1 / 9 / 1`
-- Resolved / unresolved / ambiguous / invalid reporter: `8 / 1 / 1 / 1`
-- Quote claims / quote matches / quote mismatches: `5 / 2 / 2`
+- Fixtures: `5`
+- Expected facts: `80 / 80`
+- Matched forbidden facts: `0 / 28`
+- Citation mentions: `15`
+- Verified / blocked / review-required mentions: `5 / 9 / 1`
+- Resolved / unresolved / ambiguous / invalid reporter: `12 / 1 / 1 / 1`
+- Quote claims / quote matches / quote mismatches: `7 / 4 / 2`
 - Pin mismatches: `1`
 - Proposition boundaries: `1`
 - False verified: `0`
@@ -21,7 +21,7 @@ It reads local fixture files and authority inventories only; it does not call an
 
 | Class | Status | Fixtures |
 | --- | --- | ---: |
-| `controlled_adversarial_mutations` | `seeded` | 4 |
+| `controlled_adversarial_mutations` | `seeded` | 5 |
 | `clean_public_filings` | `planned` | 0 |
 | `known_hallucination_or_sanction_filings` | `deferred_until_resolver_contract_stable` | 0 |
 
@@ -33,6 +33,7 @@ It reads local fixture files and authority inventories only; it does not call an
 | `legal_authority_verification_micro_v2` | `controlled_adversarial_mutations` | 18/18 | 0 | 0 | `0/4/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v3` | `controlled_adversarial_mutations` | 3/3 | 0 | 0 | `0/1/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v4` | `controlled_adversarial_mutations` | 8/8 | 0 | 0 | `0/1/0` | `no` | `[]` |
+| `legal_authority_verification_micro_v5` | `controlled_adversarial_mutations` | 16/16 | 0 | 0 | `4/0/0` | `yes` | `[]` |
 
 ## Next External Work Order
 
