@@ -11027,6 +11027,89 @@ def _sec_source_scope_values(facts: list[str]) -> set[str]:
     return values
 
 
+def _sec_source_scope_to_filing_ids(facts: list[str]) -> dict[str, set[str]]:
+    values: dict[str, set[str]] = {}
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "sec_filing" or len(args) != 6:
+            continue
+        filing_id = str(args[0]).strip().strip("'\"")
+        source_scope = str(args[5]).strip().strip("'\"")
+        if filing_id and source_scope:
+            values.setdefault(source_scope, set()).add(filing_id)
+    return values
+
+
+def _apply_sec_source_scope_filing_id_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Replace SEC companion filing_id source-scope mistakes using unique typed wrapper rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    source_scope_to_filing_ids = _sec_source_scope_to_filing_ids(facts)
+    source_scope_to_filing_id = {
+        source_scope: next(iter(filing_ids))
+        for source_scope, filing_ids in source_scope_to_filing_ids.items()
+        if len(filing_ids) == 1 and source_scope not in filing_ids
+    }
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    skipped: list[dict[str, str]] = []
+    for fact in facts:
+        candidate = fact
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None:
+            predicate, args = parsed
+            if predicate in SEC_FILING_ID_SIGNATURES and predicate != "sec_filing" and args:
+                filing_id = str(args[0]).strip().strip("'\"")
+                replacement = source_scope_to_filing_id.get(filing_id, "")
+                if replacement:
+                    args[0] = replacement
+                    candidate = f"{predicate}({', '.join(args)})."
+                    reductions.append(
+                        {
+                            "from": fact,
+                            "to": candidate,
+                            "slot": "filing_id",
+                            "value": filing_id,
+                            "canonical": replacement,
+                            "authority": "unique_sec_filing_source_scope_mapping",
+                        }
+                    )
+                elif filing_id in source_scope_to_filing_ids and len(source_scope_to_filing_ids[filing_id]) != 1:
+                    skipped.append(
+                        {
+                            "fact": fact,
+                            "slot": "filing_id",
+                            "value": filing_id,
+                            "issue": "ambiguous_sec_filing_source_scope_mapping",
+                        }
+                    )
+        if candidate not in seen:
+            out.append(candidate)
+            seen.add(candidate)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_sec_source_scope_filing_id_convergence_count"] = len(reductions)
+    source_compile["deterministic_sec_source_scope_filing_id_convergences"] = reductions[:100]
+    source_compile["deterministic_sec_source_scope_filing_id_convergence_skipped"] = skipped[:100]
+    source_compile["deterministic_sec_source_scope_filing_id_convergence_policy"] = {
+        "schema_version": "deterministic_sec_source_scope_filing_id_convergence_v1",
+        "authority": "typed_carrier_slot_consistency_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Repairs SEC companion rows whose filing_id slot reuses the source_or_scope atom "
+            "from exactly one sec_filing/6 wrapper row in the same typed compile. It reads only "
+            "typed carrier arguments, requires a unique wrapper mapping, and creates no new "
+            "answer-bearing facts beyond replacing the inconsistent key."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100], "skipped": skipped[:100]}
+
+
 def _apply_sec_source_scope_filing_id_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
     """Drop SEC rows that reuse a source/provenance atom as the filing_id."""
 

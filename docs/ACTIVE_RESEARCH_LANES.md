@@ -310,6 +310,14 @@ guard now blocks/drops contradictory SEC signatory omissions and unregistered
 omission kind/reason triples; rescoring the repaired transfer_003 stability
 artifact stayed at `12/13`, `0/10` supported forbidden, while unexpected
 same-signature facts dropped from 2 to 0.
+A typed-only source-scope-to-filing-id convergence candidate was tested after
+the imported t001 source review. It correctly explains why some exhibit rows
+were present but keyed to the fixture/source atom rather than the filing atom;
+however, wiring it into the standing scorer surfaced source-reviewed forbidden
+`filed` exhibit rows in t001 and tripped the favorable-root guard. Keep this as
+a tested unpromoted candidate unless a future compile path can separate key
+convergence from exhibit-treatment overstatement under forbidden-support and
+variance gates.
 The current compile-fact status report now exposes drift slots for unsupported
 rows: the two telephone substitutions drift on both `identifier_kind` and
 `identifier_value`, while the duplicate commission-file row drifts only on

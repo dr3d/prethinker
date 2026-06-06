@@ -110,6 +110,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_sec_exhibit_treatment_specificity_integrity,
     _apply_sec_filing_id_atom_reduction,
     _apply_sec_identifier_value_atom_reduction,
+    _apply_sec_source_scope_filing_id_convergence,
     _apply_sec_source_scope_filing_id_integrity,
     _apply_sec_signature_omission_contradiction_integrity,
     _apply_sec_typed_slot_prefix_reduction,
@@ -8709,6 +8710,62 @@ def test_sec_source_scope_filing_id_integrity_drops_provenance_as_filing_id_only
     policy = source_compile["deterministic_sec_source_scope_filing_id_integrity_policy"]
     assert policy["not_source_interpretation"] is True
     assert policy["not_query_interpretation"] is True
+
+
+def test_sec_source_scope_filing_id_convergence_repairs_unique_typed_wrapper_mapping() -> None:
+    source_compile = {
+        "facts": [
+            "sec_filing(filing_servicenow_8k, form_8_k, current_report, v_2025_12_23, not_stated, sec_material_event_ugly_003).",
+            "sec_exhibit(sec_material_event_ugly_003, exhibit_10_1, agreement, not_stated, exhibit_table_row_10_1).",
+            "sec_exhibit(sec_material_event_ugly_003, exhibit_104, cover_page_ixbrl, not_stated, exhibit_table_row_104).",
+            "sec_registrant_identifier(sec_material_event_ugly_003, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
+            "sec_registrant(filing_servicenow_8k, servicenow_inc, delaware, sec_material_event_ugly_003).",
+        ]
+    }
+
+    report = _apply_sec_source_scope_filing_id_convergence(source_compile)
+    drop_report = _apply_sec_source_scope_filing_id_integrity(source_compile)
+
+    assert report["reduction_count"] == 3
+    assert drop_report["dropped_count"] == 0
+    assert source_compile["facts"] == [
+        "sec_filing(filing_servicenow_8k, form_8_k, current_report, v_2025_12_23, not_stated, sec_material_event_ugly_003).",
+        "sec_exhibit(filing_servicenow_8k, exhibit_10_1, agreement, not_stated, exhibit_table_row_10_1).",
+        "sec_exhibit(filing_servicenow_8k, exhibit_104, cover_page_ixbrl, not_stated, exhibit_table_row_104).",
+        "sec_registrant_identifier(filing_servicenow_8k, servicenow_inc, ticker_symbol, ticker_now, source_cover_page).",
+        "sec_registrant(filing_servicenow_8k, servicenow_inc, delaware, sec_material_event_ugly_003).",
+    ]
+    policy = source_compile["deterministic_sec_source_scope_filing_id_convergence_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
+
+
+def test_sec_source_scope_filing_id_convergence_skips_ambiguous_wrapper_mapping() -> None:
+    source_compile = {
+        "facts": [
+            "sec_filing(filing_a, form_8_k, current_report, v_2025_12_23, not_stated, source_document).",
+            "sec_filing(filing_b, form_8_k, current_report, v_2025_12_24, not_stated, source_document).",
+            "sec_exhibit(source_document, exhibit_10_1, agreement, not_stated, exhibit_table_row_10_1).",
+        ]
+    }
+
+    report = _apply_sec_source_scope_filing_id_convergence(source_compile)
+    drop_report = _apply_sec_source_scope_filing_id_integrity(source_compile)
+
+    assert report["reduction_count"] == 0
+    assert report["skipped"] == [
+        {
+            "fact": "sec_exhibit(source_document, exhibit_10_1, agreement, not_stated, exhibit_table_row_10_1).",
+            "slot": "filing_id",
+            "value": "source_document",
+            "issue": "ambiguous_sec_filing_source_scope_mapping",
+        }
+    ]
+    assert drop_report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "sec_filing(filing_a, form_8_k, current_report, v_2025_12_23, not_stated, source_document).",
+        "sec_filing(filing_b, form_8_k, current_report, v_2025_12_24, not_stated, source_document).",
+    ]
 
 
 def test_state_ag_typed_atom_reduction_canonicalizes_closed_slot_aliases_only() -> None:
