@@ -1,0 +1,9 @@
+legal_citation_mention(legal_authority_verification_micro_v12, mention_001, cite_12_f_3d_34, line_3, source_line_3).
+legal_authority_resolution(mention_001, cite_12_f_3d_34, resolved, auth_smith_12_f3d_34, source_line_3).
+legal_authority_metadata_check(mention_001, auth_smith_12_f3d_34, case_name, match, source_line_3).
+legal_authority_metadata_check(mention_001, auth_smith_12_f3d_34, volume, match, source_line_3).
+legal_authority_metadata_check(mention_001, auth_smith_12_f3d_34, reporter, match, source_line_3).
+legal_authority_metadata_check(mention_001, auth_smith_12_f3d_34, page, match, source_line_3).
+legal_authority_metadata_check(mention_001, auth_smith_12_f3d_34, court, mismatch, source_line_3).
+legal_authority_metadata_check(mention_001, auth_smith_12_f3d_34, year, match, source_line_3).
+legal_authority_text_source(auth_smith_12_f3d_34, authority_text, authority_unavailable, no_digest, authority_inventory).

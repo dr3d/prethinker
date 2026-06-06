@@ -54,7 +54,7 @@ the domain-pack work:
 - citation mention extraction with source coordinates;
 - citation resolution against a declared authority inventory or external legal
   authority database;
-- case-name, year, reporter, volume, and first-page metadata checks;
+- case-name, court, year, reporter, volume, and first-page metadata checks;
 - quote existence checks against authority text;
 - pin-cite locality checks when source pages or paragraphs are available;
 - explicit unresolved, ambiguous, unavailable, and abstention rows.
@@ -143,6 +143,7 @@ datasets/compile_micro_fixtures/legal_authority_verification_micro_v8
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v9
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v10
 datasets/compile_micro_fixtures/legal_authority_verification_micro_v11
+datasets/compile_micro_fixtures/legal_authority_verification_micro_v12
 ```
 
 They contain:
@@ -171,6 +172,9 @@ They contain:
 - one proposition-support boundary that must abstain.
 - one support-cue proposition boundary such as `held that` that must abstain
   instead of certifying legal support.
+- one court-parenthetical metadata mismatch that must block citation-clean
+  certification instead of treating a same-citation, wrong-court authority as
+  verified.
 - one short-form citation such as `Id.` that must require context and abstain
   instead of inventing a resolved authority.
 - one named short-form citation such as `Brown, 347 U.S. at 495` that also

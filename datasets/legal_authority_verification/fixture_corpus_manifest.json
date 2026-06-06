@@ -21,7 +21,8 @@
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9",
         "datasets/compile_micro_fixtures/legal_authority_verification_micro_v10",
-        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11"
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11",
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v12"
       ],
       "id": "controlled_adversarial_mutations",
       "must_include": [
@@ -40,6 +41,7 @@
         "clean-public mutation false-verification traps",
         "proposition-support abstention",
         "support-cue proposition-review abstention",
+        "court parenthetical metadata mismatch",
         "short-form citation context-required abstention",
         "named short-form citation context-required abstention"
       ],
@@ -122,8 +124,8 @@
     }
   ],
   "next_external_work_order_needed": {
-    "needed_now": true,
-    "reason": "Clean-public legal filings have been imported and pass the deterministic baseline audit. The next external input is a known hallucination/sanction legal-authority batch; a local offsite packet is archived outside active governance tmp at C:\\prethinker_tmp_archive\\pending_work_orders\\legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip. Returned packages should be placed in tmp, named legal_authority_known_hallucination_sanction_20260606_01.zip, and must pass scripts/validate_legal_authority_fixture_package.py --fixture-class known_hallucination_or_sanction_filings before fixtures are added to this manifest."
+    "needed_now": false,
+    "reason": "The first known hallucination/sanction package was returned as legal_authority_known_hallucination_sanction_20260606_01.zip and retained outside active governance after failing intake validation. The package is useful diagnostic material, but it is not ready to add to this manifest: its oracle facts used placeholder variables/source labels, and it exposed local citation-parser coverage gaps for A.D.3d, Illinois Appellate, and full-date WL parentheticals. No new external package is needed until those local parser/intake issues are resolved. Any future corrected concrete-fact work-order request should be emitted as a fresh zip in C:\\prethinker\\tmp, not in the archive."
   },
   "purpose": "Fixture-class plan for legal authority verification. This manifest prevents premature expansion into real sanctioned/hallucination filings before the clean-public baseline lands under the deterministic resolver and report contract.",
   "schema": "prethinker.legal_authority_verification.fixture_corpus_manifest.v1",

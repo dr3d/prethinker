@@ -31,19 +31,19 @@ CASE_PARTY_RE = rf"{CASE_WORD_RE}(?:\s+{CASE_WORD_RE}){{0,8}}"
 CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
-    r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
+    r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\)"
 )
 GENERIC_CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>[A-Z][A-Za-z. ]{1,24})\s+(?P<page>\d+)"
-    r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
+    r"(?:,\s+(?P<pin>\d+(?:-\d+)?))?\s+\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\)"
 )
 BARE_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
     r"(?P<page>\d+)"
     r"(?:,\s+(?P<pin_comma>\d+(?:-\d+)?)|\s+at\s+(?P<pin_at>\d+(?:-\d+)?))?"
-    r"(?:\s+\([^)]*?(?P<year>\d{4})[^)]*?\))?"
+    r"(?:\s+\((?P<parenthetical>[^)]*?(?P<year>\d{4})[^)]*?)\))?"
 )
 NAMED_SHORT_FORM_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
@@ -72,6 +72,7 @@ class CitationExtract:
     reporter: str
     page: str
     pin: str
+    court: str
     year: str
     start: int
     end: int
@@ -149,6 +150,7 @@ def verify_legal_authorities(
                         "normalized_citation": citation_atom,
                         "line": citation_line,
                         "pin": citation_extract.pin,
+                        "court": citation_extract.court,
                         "resolution_status": resolution_status,
                         "authority_id": authority_id,
                         "metadata_checks": [],
@@ -181,6 +183,7 @@ def verify_legal_authorities(
                 "normalized_citation": citation_atom,
                 "line": citation_line,
                 "pin": citation_extract.pin,
+                "court": citation_extract.court,
                 "resolution_status": resolution_status,
                 "authority_id": authority_id,
                 "metadata_checks": [],
@@ -224,6 +227,8 @@ def verify_legal_authorities(
                 metadata_candidates.append(("reporter", _normalized_reporter_text(citation_extract.reporter)))
             if citation_extract.page:
                 metadata_candidates.append(("page", citation_extract.page))
+            if citation_extract.court:
+                metadata_candidates.append(("court", citation_extract.court))
             if citation_extract.year:
                 metadata_candidates.append(("year", citation_extract.year))
             for field, extracted in metadata_candidates:
@@ -823,6 +828,7 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
             reporter=match.group("reporter"),
             page=match.group("page"),
             pin=match.group("pin") or "",
+            court=_court_from_parenthetical(match.group("parenthetical") or ""),
             year=match.group("year") or "",
             start=match.start(),
             end=match.end(),
@@ -850,6 +856,7 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                 reporter=match.group("reporter"),
                 page=match.group("page"),
                 pin=match.group("pin") or "",
+                court=_court_from_parenthetical(match.group("parenthetical") or ""),
                 year=match.group("year") or "",
                 start=match.start(),
                 end=match.end(),
@@ -874,6 +881,7 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                 reporter=match.group("reporter"),
                 page=match.group("page"),
                 pin=match.group("pin_comma") or match.group("pin_at") or "",
+                court=_court_from_parenthetical(match.group("parenthetical") or ""),
                 year=match.group("year") or "",
                 start=match.start(),
                 end=match.end(),
@@ -1021,9 +1029,23 @@ def _metadata_matches(field: str, extracted: str, authority: dict[str, Any]) -> 
     expected = str(authority.get(field) or "")
     if field == "case_name":
         return _normalize_name(extracted) == _normalize_name(expected)
+    if field == "court":
+        return _normalize_court_text(extracted) == _normalize_court_text(expected)
     if field == "reporter":
         return _normalized_reporter_text(extracted) == _normalized_reporter_text(expected)
     return extracted.strip() == expected.strip()
+
+
+def _court_from_parenthetical(parenthetical: str) -> str:
+    before_year = re.split(r"\b\d{4}\b", parenthetical, maxsplit=1)[0]
+    return _clean_space(before_year.strip(" ,;"))
+
+
+def _normalize_court_text(court: str) -> str:
+    compact = _clean_space(court).casefold()
+    compact = compact.replace(".", "")
+    compact = compact.replace("u s ", "us ")
+    return compact
 
 
 def _quote_span_match(quote: str, authority: dict[str, Any]) -> tuple[str, str]:

@@ -25,6 +25,7 @@ FIXTURE_V8 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_ver
 FIXTURE_V9 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v9"
 FIXTURE_V10 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v10"
 FIXTURE_V11 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v11"
+FIXTURE_V12 = ROOT / "datasets" / "compile_micro_fixtures" / "legal_authority_verification_micro_v12"
 
 
 def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
@@ -495,7 +496,7 @@ def test_legal_authority_resolves_declared_federal_reporter_inventory(tmp_path: 
                         "authority_id": "auth_smith_12_f_3d_34",
                         "canonical_citation": "12 F.3d 34",
                         "case_name": "Smith v. Jones",
-                        "court": "United States Court of Appeals",
+                        "court": "9th Cir.",
                         "year": "1995",
                         "reporter": "F.3d",
                         "volume": "12",
@@ -524,8 +525,70 @@ def test_legal_authority_resolves_declared_federal_reporter_inventory(tmp_path: 
         {"field": "volume", "extracted": "12", "authority_value": "12", "status": "match"},
         {"field": "reporter", "extracted": "F.3d", "authority_value": "F.3d", "status": "match"},
         {"field": "page", "extracted": "34", "authority_value": "34", "status": "match"},
+        {"field": "court", "extracted": "9th Cir.", "authority_value": "9th Cir.", "status": "match"},
         {"field": "year", "extracted": "1995", "authority_value": "1995", "status": "match"},
     ]
+
+
+def test_legal_authority_checks_court_parenthetical_metadata(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text("Smith v. Jones, 12 F.3d 34 (10th Cir. 1995).", encoding="utf-8")
+    inventory = tmp_path / "authority_inventory.json"
+    inventory.write_text(
+        json.dumps(
+            {
+                "schema_version": "legal_authority_inventory_v1",
+                "authorities": [
+                    {
+                        "authority_id": "auth_smith_12_f3d_34",
+                        "canonical_citation": "12 F.3d 34",
+                        "case_name": "Smith v. Jones",
+                        "court": "9th Cir.",
+                        "year": "1995",
+                        "reporter": "F.3d",
+                        "volume": "12",
+                        "page": "34",
+                        "pages": {},
+                    }
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=inventory,
+        document_id="legal_authority_court_parenthetical",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["resolved"] == 1
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 1
+    assert report["summary"]["metadata_checks"] == 6
+    assert report["summary"]["metadata_mismatch"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert {check["field"]: check["status"] for check in report["mentions"][0]["metadata_checks"]} == {
+        "case_name": "match",
+        "volume": "match",
+        "reporter": "match",
+        "page": "match",
+        "court": "mismatch",
+        "year": "match",
+    }
+    assert report["ledger_queries"]["which_cases_have_metadata_mismatches"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "12 F.3d 34",
+            "field": "court",
+            "status": "mismatch",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"]["answer"] == "no"
 
 
 def test_legal_authority_pin_range_contains_matched_quote_page(tmp_path: Path) -> None:
@@ -1343,6 +1406,41 @@ def test_legal_authority_micro_fixture_v11_abstains_on_support_cue_proposition()
     assert not any("support_verified" in fact for fact in report["facts"])
 
 
+def test_legal_authority_micro_fixture_v12_blocks_court_parenthetical_mismatch() -> None:
+    report = verify_legal_authorities(
+        source_path=FIXTURE_V12 / "source.md",
+        authority_inventory_path=FIXTURE_V12 / "authority_inventory.json",
+        document_id="legal_authority_verification_micro_v12",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["resolved"] == 1
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 1
+    assert report["summary"]["review_required_mentions"] == 0
+    assert report["summary"]["metadata_checks"] == 6
+    assert report["summary"]["metadata_match"] == 5
+    assert report["summary"]["metadata_mismatch"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert report["summary"]["document_outcome"] == "review_required"
+
+    assert report["ledger_queries"]["which_cases_have_metadata_mismatches"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "12 F.3d 34",
+            "field": "court",
+            "status": "mismatch",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 1,
+        "blocking_issue_types": ["metadata_mismatch"],
+        "review_required_count": 0,
+        "answer": "no",
+    }
+
+
 def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanctions() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(
@@ -1385,6 +1483,9 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
     assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11" in classes[
         "controlled_adversarial_mutations"
     ]["fixtures"]
+    assert "datasets/compile_micro_fixtures/legal_authority_verification_micro_v12" in classes[
+        "controlled_adversarial_mutations"
+    ]["fixtures"]
     assert classes["clean_public_filings"]["status"] == "seeded"
     assert classes["clean_public_filings"]["fixtures"] == [
         "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_001",
@@ -1392,14 +1493,9 @@ def test_legal_fixture_corpus_manifest_tracks_clean_public_baseline_before_sanct
         "datasets/legal_authority_verification/clean_public_filings/clean_legal_filing_003",
     ]
     assert classes["known_hallucination_or_sanction_filings"]["status"] == "queued_for_source_only_packet"
-    assert manifest["next_external_work_order_needed"]["needed_now"] is True
-    assert "Clean-public legal filings have been imported" in manifest["next_external_work_order_needed"]["reason"]
-    assert "legal_authority_known_hallucination_sanction_work_order_20260606_r1.zip" in manifest[
-        "next_external_work_order_needed"
-    ]["reason"]
+    assert manifest["next_external_work_order_needed"]["needed_now"] is False
     assert "legal_authority_known_hallucination_sanction_20260606_01.zip" in manifest[
         "next_external_work_order_needed"
     ]["reason"]
-    assert "--fixture-class known_hallucination_or_sanction_filings" in manifest[
-        "next_external_work_order_needed"
-    ]["reason"]
+    assert "citation-parser coverage gaps" in manifest["next_external_work_order_needed"]["reason"]
+    assert "C:\\prethinker\\tmp" in manifest["next_external_work_order_needed"]["reason"]

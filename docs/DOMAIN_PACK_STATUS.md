@@ -8,11 +8,11 @@ This report does not read source prose, QA questions, or judge outputs.
 - Domains: `8`
 - Predicates: `75` (`69` domain-specific plus shared carriers)
 - Lenses: `34`
-- Associated fixtures: `41`
+- Associated fixtures: `42`
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
-- Expected facts in associated fixtures: `769`
-- Forbidden facts in associated fixtures: `302`
+- Expected facts in associated fixtures: `778`
+- Forbidden facts in associated fixtures: `304`
 - Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
-| `legal_authority_verification_v1` | 13 | 12 | 3 | 11 | 196 | 52 |
+| `legal_authority_verification_v1` | 13 | 12 | 3 | 12 | 205 | 54 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
@@ -89,6 +89,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | `legal_authority_verification_micro_v1` | `fixture_id_prefix` | 51 | 7 | `legal_authority_metadata_check/5`:20, `legal_authority_resolution/5`:5, `legal_authority_text_source/5`:4, `legal_citation_mention/5`:5, `legal_pin_cite_check/5`:3, `legal_proposition_claim/5`:1, `legal_proposition_source_span/5`:1, `legal_proposition_support_boundary/5`:1, `legal_quote_claim/5`:3, `legal_quote_span_match/5`:3, `legal_support_assessment/5`:1, `legal_verification_abstention/4`:4 |
 | `legal_authority_verification_micro_v10` | `fixture_id_prefix` | 22 | 5 | `legal_authority_metadata_check/5`:10, `legal_authority_resolution/5`:3, `legal_authority_text_source/5`:2, `legal_citation_mention/5`:3, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:2 |
 | `legal_authority_verification_micro_v11` | `fixture_id_prefix` | 13 | 4 | `legal_authority_metadata_check/5`:5, `legal_authority_resolution/5`:1, `legal_authority_text_source/5`:1, `legal_citation_mention/5`:1, `legal_proposition_claim/5`:1, `legal_proposition_source_span/5`:1, `legal_proposition_support_boundary/5`:1, `legal_support_assessment/5`:1, `legal_verification_abstention/4`:1 |
+| `legal_authority_verification_micro_v12` | `fixture_id_prefix` | 9 | 2 | `legal_authority_metadata_check/5`:6, `legal_authority_resolution/5`:1, `legal_authority_text_source/5`:1, `legal_citation_mention/5`:1 |
 | `legal_authority_verification_micro_v2` | `fixture_id_prefix` | 29 | 7 | `legal_authority_metadata_check/5`:15, `legal_authority_resolution/5`:4, `legal_authority_text_source/5`:2, `legal_citation_mention/5`:4, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:2 |
 | `legal_authority_verification_micro_v3` | `fixture_id_prefix` | 3 | 3 | `legal_authority_resolution/5`:1, `legal_citation_mention/5`:1, `legal_verification_abstention/4`:1 |
 | `legal_authority_verification_micro_v4` | `fixture_id_prefix` | 12 | 3 | `legal_authority_metadata_check/5`:5, `legal_authority_resolution/5`:1, `legal_authority_text_source/5`:1, `legal_citation_mention/5`:1, `legal_pin_cite_check/5`:1, `legal_quote_claim/5`:1, `legal_quote_span_match/5`:1, `legal_verification_abstention/4`:1 |

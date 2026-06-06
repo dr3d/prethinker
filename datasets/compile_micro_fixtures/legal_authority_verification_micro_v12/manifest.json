@@ -1,0 +1,14 @@
+{
+  "fixture_id": "legal_authority_verification_micro_v12",
+  "domain_profile": "legal_authority_verification_v1",
+  "schema_version": "compile_micro_fixture_manifest_v1",
+  "purpose": "Twelfth adversarial legal-authority verification fixture: a resolved citation with mismatched court parenthetical metadata must block clean certification.",
+  "source_kind": "synthetic_micro_fixture",
+  "files": {
+    "source": "source.md",
+    "authority_inventory": "authority_inventory.json",
+    "expected_facts": "expected_facts.pl",
+    "forbidden_facts": "forbidden_facts.pl"
+  },
+  "claim_status": "research_micro_fixture_not_legal_advice"
+}

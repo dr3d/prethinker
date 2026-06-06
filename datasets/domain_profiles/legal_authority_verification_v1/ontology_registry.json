@@ -17,7 +17,8 @@
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v8",
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v9",
       "datasets/compile_micro_fixtures/legal_authority_verification_micro_v10",
-      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11"
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v11",
+      "datasets/compile_micro_fixtures/legal_authority_verification_micro_v12"
     ]
   },
   "accountability_requirements": [
@@ -84,7 +85,7 @@
       "signature": "legal_authority_metadata_check/5",
       "args": ["mention_id", "authority_id", "metadata_field", "check_status", "source_or_scope"],
       "category": "legal_authority_metadata",
-      "notes": "Records whether extracted metadata such as case name, year, reporter, volume, or first page matches the resolved authority metadata. Details stay in the report; the fact row carries only compact check status."
+      "notes": "Records whether extracted metadata such as case name, court, year, reporter, volume, or first page matches the resolved authority metadata. Details stay in the report; the fact row carries only compact check status."
     },
     {
       "signature": "legal_authority_text_source/5",

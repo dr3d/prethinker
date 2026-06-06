@@ -1,0 +1,16 @@
+{
+  "authorities": [
+    {
+      "authority_id": "auth_smith_12_f3d_34",
+      "canonical_citation": "12 F.3d 34",
+      "case_name": "Smith v. Jones",
+      "court": "9th Cir.",
+      "page": "34",
+      "pages": {},
+      "reporter": "F.3d",
+      "volume": "12",
+      "year": "1995"
+    }
+  ],
+  "schema_version": "legal_authority_inventory_v1"
+}

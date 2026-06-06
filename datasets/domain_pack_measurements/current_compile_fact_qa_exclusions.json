@@ -193,6 +193,15 @@
       ]
     },
     {
+      "fixture_id": "legal_authority_verification_micro_v12",
+      "reason_code": "seed_or_component_micro_fixture",
+      "status": "candidate_lane_seed",
+      "note": "Twelfth legal authority verification micro-fixture validates court-parenthetical metadata mismatch blocking. It is not a standing compile-fact transfer measurement cell.",
+      "evidence_roots": [
+        "datasets\\compile_micro_fixtures\\legal_authority_verification_micro_v12"
+      ]
+    },
+    {
       "fixture_id": "ntsb_investigation_report_id_omission_v1",
       "reason_code": "accountability_control_micro_fixture",
       "status": "omission_control",
