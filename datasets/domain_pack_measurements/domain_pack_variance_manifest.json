@@ -113,7 +113,7 @@
       "id": "sec_t001_current_mainline_retest_negative",
       "title": "SEC transfer_001 current-mainline full-bundle retest negative",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "claim_read": "Use as a pre-source-review negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. The imported source-only review and source-scope filing-id guard now tighten the current standing manifest cell to 3/13 with source-reviewed registrant alias blockers; do not use this 5/13 root as the current score.",
+      "claim_read": "Use as historical negative current-mainline retest evidence only: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. Later source-only review, source-scope guards, and no-truncation contract guidance supersede this 5/13 root; do not use it as the current score.",
       "roots": [
         {
           "id": "current_mainline_r1",
@@ -123,15 +123,15 @@
       ]
     },
     {
-      "id": "sec_t001_contract_probe_20260606",
-      "title": "SEC transfer_001 legal-name/exhibit-treatment contract probe",
+      "id": "sec_t001_no_truncate_contract_20260606",
+      "title": "SEC transfer_001 no-truncation contract probe",
       "fixture_id": "sec_form_8k_skeleton_transfer_001",
-      "claim_read": "Use as the current contract-probe evidence: legal-name and exhibit-treatment contract clarifications lift support to 9/13 and remove support>=2 forbidden rows, but one Qwen MoE run still emits source-reviewed svc_now_inc alias rows at support=1. The cell remains red under the standing no-forbidden-emission gate.",
+      "claim_read": "Use as the current SEC transfer_001 contract-probe evidence: no-truncation legal-name guidance lifts support to 11/13 with 0 supported forbidden rows and 0 unexpected rows. Telephone and signatory remain unsupported boundaries.",
       "roots": [
         {
-          "id": "contract_probe_r1",
-          "role": "fresh local-Qwen N=3 lens bundle after legal-name and exhibit-treatment contract clarifications",
-          "path": "C:/prethinker_tmp_archive/sec_t001_contract_probe_20260606/sec-t001-exhibit-treatment-boundary-r1-20260606"
+          "id": "no_truncate_full_r1",
+          "role": "fresh local-Qwen N=3 full lens bundle after legal-name no-truncation guidance",
+          "path": "C:/prethinker_tmp_archive/sec_t001_no_truncate_contract_20260606/sec-t001-no-truncate-full-r1-20260606"
         }
       ]
     },

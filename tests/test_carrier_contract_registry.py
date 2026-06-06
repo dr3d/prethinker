@@ -446,6 +446,8 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "not ticker symbols" in registrant_text
     assert "do not split conjoined" in registrant_text
     assert "do not abbreviate name components" in registrant_text
+    assert "Do not truncate legal-name words" in registrant_text
+    assert "unless the source itself states the abbreviation" in registrant_text
     assert "same registrant_id" in registrant_text
     assert "full_cover_table" in registrant_text
 
@@ -462,6 +464,7 @@ def test_sec_form_8k_contracts_keep_skeleton_and_substance_separate() -> None:
     assert "do not substitute ticker symbols" in identifier_text
     assert "do not split conjoined brand words" in identifier_text
     assert "abbreviate components" in identifier_text
+    assert "market-style abbreviations inside registrant_id" in identifier_text
     assert "numeric-leading" in identifier_text
     assert "do not infer CIK" in identifier_text
     assert "unstated_cik" in identifier_text

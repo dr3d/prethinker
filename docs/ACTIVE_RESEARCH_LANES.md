@@ -285,20 +285,20 @@ standing manifest first demoted transfer_001 to the current-mainline negative
 retest at `5/13`, then the imported source-only review
 `sec_t001_source_review_20260605` tightened the forbidden set. The safe
 source-scope filing-id guard removes fixture-id-as-filing-id rows, and
-follow-up legal-name/exhibit-treatment contract guidance lifts the current
-standing t001 cell to `9/13`; the cell remains red with `2/0` forbidden
-emissions at support>=1/support>=2 from source-reviewed `svc_now_inc` alias
-rows. The older transfer_001 `11/13` root and the later 5/13 root are
-historical mechanism/negative evidence, not the current standing cell.
+follow-up no-truncation legal-name guidance lifts the current standing t001
+cell to `11/13`; the cell now has `0/0` forbidden emissions at
+support>=1/support>=2 and 0 unexpected same-signature rows. The older
+transfer_001 `11/13` root, the later 5/13 root, and the red 9/13 alias probe
+are historical mechanism/negative evidence, not the current standing cell.
 Transfer_002 was rerun under the current full-bundle mainline on 2026-06-05 and
 preserved `11/12` before the new source-scope guard; current standing support is
 `10/12`. The seed lift came from a fresh
 2026-06-05 same-local-Qwen rerun after clarifying the exhibit/item treatment
 axis: Exhibit 10.1 now compiles as `filed` at support=3, and the
 source-rejected `incorporated_by_reference` exhibit-role row is absent. The
-remaining boundary is transfer_001 registrant aliasing, wrapper
-filing/telephone recall, one duplicate commission-file value, unstable
-item-treatment recall, and MoE jitter rather than prose leakage. Dense compile
+remaining boundary is wrapper/telephone recall, transfer_001 and transfer_003
+signatory support, one duplicate commission-file value, unstable item-treatment
+recall, and MoE jitter rather than prose leakage. Dense compile
 substitutions on transfer_003
 with Gemma 4 12B Q4 and Qwen 27B Q4 both landed at `10/12`, `0` forbidden,
 with clean gates, missing the same role-semantics rows. SEC therefore supports

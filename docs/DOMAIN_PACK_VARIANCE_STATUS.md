@@ -5,13 +5,10 @@ This report does not read source prose, QA questions, judge output, or oracle an
 
 ## Summary
 
-- Status: `fail`
+- Status: `pass`
 - Groups: `10`
 - Roots: `17`
 - Warnings: `0`
-
-Blocking reasons:
-- `contract_probe_r1:supported_forbidden_fact`
 
 ## Groups
 
@@ -24,7 +21,7 @@ Blocking reasons:
 | `osha_seed_qwen_moe_same_condition` | `osha_incident_domain_v1` | 1 | `21/21` | 0 | `0` | `pass` |
 | `fda_transfer002_qwen_moe_same_condition_negative` | `fda_warning_letter_domain_transfer_002` | 1 | `11/29` | 0 | `33` | `pass` |
 | `sec_t001_current_mainline_retest_negative` | `sec_form_8k_skeleton_transfer_001` | 1 | `5/13` | 0 | `15` | `pass` |
-| `sec_t001_contract_probe_20260606` | `sec_form_8k_skeleton_transfer_001` | 1 | `9/13` | 2 | `2` | `fail` |
+| `sec_t001_no_truncate_contract_20260606` | `sec_form_8k_skeleton_transfer_001` | 1 | `11/13` | 0 | `0` | `pass` |
 | `sec_t002_current_mainline_retest` | `sec_form_8k_skeleton_transfer_002` | 1 | `11/12` | 0 | `2` | `pass` |
 | `ntsb_transfer001_qwen_moe_same_condition` | `ntsb_investigation_transfer_surface_001` | 2 | `22/25` | 0 | `16` | `pass` |
 
@@ -146,7 +143,7 @@ Roots:
 
 - Group: `sec_t001_current_mainline_retest_negative`
 - Fixture: `sec_form_8k_skeleton_transfer_001`
-- Read: Use as a pre-source-review negative current-mainline retest: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. The imported source-only review and source-scope filing-id guard now tighten the current standing manifest cell to 3/13 with source-reviewed registrant alias blockers; do not use this 5/13 root as the current score.
+- Read: Use as historical negative current-mainline retest evidence only: the wrapper date recovered, but registrant/exhibit axes destabilized and the older retained 11/13 root should not be treated as a stable current-pack score. Later source-only review, source-scope guards, and no-truncation contract guidance supersede this 5/13 root; do not use it as the current score.
 - Support band: `5/13`
 - Supported forbidden total: `0`
 - Unexpected band: `15`
@@ -159,22 +156,22 @@ Roots:
 Roots:
 - `current_mainline_r1`: `C:\prethinker_tmp_archive\sec_t001_current_pack_rerun_negative_20260605\sec-t001-current-pack-r1-20260605`
 
-## SEC transfer_001 legal-name/exhibit-treatment contract probe
+## SEC transfer_001 no-truncation contract probe
 
-- Group: `sec_t001_contract_probe_20260606`
+- Group: `sec_t001_no_truncate_contract_20260606`
 - Fixture: `sec_form_8k_skeleton_transfer_001`
-- Read: Use as the current contract-probe evidence: legal-name and exhibit-treatment contract clarifications lift support to 9/13 and remove support>=2 forbidden rows, but one Qwen MoE run still emits source-reviewed svc_now_inc alias rows at support=1. The cell remains red under the standing no-forbidden-emission gate.
-- Support band: `9/13`
-- Supported forbidden total: `2`
-- Unexpected band: `2`
-- Status: `fail`
+- Read: Use as the current SEC transfer_001 contract-probe evidence: no-truncation legal-name guidance lifts support to 11/13 with 0 supported forbidden rows and 0 unexpected rows. Telephone and signatory remain unsupported boundaries.
+- Support band: `11/13`
+- Supported forbidden total: `0`
+- Unexpected band: `0`
+- Status: `pass`
 
 | Root | Role | Score | Per-Run Exact | Forbidden | Unexpected | Gates | Model / Settings | Reconcile |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| `contract_probe_r1` | fresh local-Qwen N=3 lens bundle after legal-name and exhibit-treatment contract clarifications | `9/13` | `26/39` | 2 | 2 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
+| `no_truncate_full_r1` | fresh local-Qwen N=3 full lens bundle after legal-name no-truncation guidance | `11/13` | `30/39` | 0 | 0 | atom `0`; lens `0`; value `pass` | `lmstudio` `qwen/qwen3.6-35b-a3b`; temp `0.0`; top_p `1.0`; ctx `65536`; matcher `constant_slot` | `not_recorded` |
 
 Roots:
-- `contract_probe_r1`: `C:\prethinker_tmp_archive\sec_t001_contract_probe_20260606\sec-t001-exhibit-treatment-boundary-r1-20260606`
+- `no_truncate_full_r1`: `C:\prethinker_tmp_archive\sec_t001_no_truncate_contract_20260606\sec-t001-no-truncate-full-r1-20260606`
 
 ## SEC transfer_002 current-mainline full-bundle retest
 

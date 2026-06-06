@@ -145,11 +145,12 @@ SEC Form 8-K skeleton pack
     transfer_001: 5 / 13, 0 / 8 supported forbidden, clean atom/lens gates
       after the current-mainline full-bundle negative retest replaced the
       older favorable breadth root. A later imported source-only review
-      rejected 10 candidate variants. Follow-up legal-name and
-      exhibit-treatment contract guidance lifted the current standing manifest
-      cell to 9 / 13 support>=2, but it remains red with 2 / 0 forbidden
-      emissions at support>=1 / support>=2 from rejected `svc_now_inc`
-      registrant-alias rows.
+      rejected 10 candidate variants. Follow-up source-scope and
+      no-truncation contract guidance now lifts the current standing manifest
+      cell to 11 / 13 support>=2 with 0 / 0 forbidden emissions at
+      support>=1 / support>=2 and 0 unexpected same-signature rows. The
+      remaining unsupported rows are telephone and signatory support
+      boundaries, not alias leakage.
     transfer_002: 11 / 12, 0 / 6 supported forbidden, clean atom/lens gates
       before the source-scope filing-id integrity guard; current standing
       manifest support is now 10 / 12 under the stricter guard.
@@ -180,15 +181,15 @@ SEC Form 8-K skeleton pack
   current compile-fact QA precision detail:
     docs\CURRENT_COMPILE_FACT_QA_STATUS.md now lists the exact repeated
     unexpected same-signature facts at support>=2 and any emitted forbidden
-    facts. The current standing manifest is red after importing
-    `sec_t001_source_review_20260605` and the 2026-06-06 SEC t001 contract
-    probe: overall support is 111 / 141 at support>=2 and 305 / 423 per-run
-    exact, with 0 prose-dependent exact rows, 0 unregistered exact typed
-    plans, and 2 / 0 forbidden emissions at
-    support>=1 / support>=2. The only current manifest blocker is SEC
-    transfer_001 source-reviewed registrant aliasing (`svc_now_inc` in the
-    current probe). The typed source-scope filing-id guard is promoted; a
-    company-specific alias reducer is not.
+    facts. The current standing manifest is green after importing
+    `sec_t001_source_review_20260605`, promoting the typed source-scope
+    filing-id guard, and adding SEC no-truncation contract guidance: overall
+    support is 113 / 141 at support>=2 and 309 / 423 per-run exact, with 0
+    prose-dependent exact rows, 0 unregistered exact typed plans, and 0 / 0
+    forbidden emissions at support>=1 / support>=2. SEC transfer_001 remains
+    bounded at 11 / 13: telephone and signatory support are still below the
+    claim threshold. The typed source-scope filing-id guard is promoted; a
+    company-specific alias reducer was not added.
     FDA transfer_002 remains 11 / 29 support>=2 with 0 / 8 supported forbidden
     in the fresh full-lens current-pack retest. The prior 21 / 29
     contract-only root is historical context, not the current full-lens recall
