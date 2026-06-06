@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.legal_authority_resolvers import LocalAuthorityInventoryResolver
+from src.legal_authority_resolvers import (
+    CitationResolution,
+    CourtListenerCitationLookupResolver,
+    LocalAuthorityInventoryResolver,
+)
 from src.legal_authority_verification import facts_text, render_markdown, verify_legal_authorities
 
 
@@ -87,6 +91,209 @@ def test_local_authority_inventory_resolver_uses_courtlistener_like_lookup_shape
     assert unresolved.authority_matches == []
     assert unresolved.lookup_row["status"] == 404
     assert unresolved.lookup_row["error_message"] == "citation_not_found"
+
+
+def test_legal_authority_verifier_accepts_explicit_resolver_without_inventory_load(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text("Brown v. Board of Education, 347 U.S. 483 (1954).", encoding="utf-8")
+    inventory = json.loads((FIXTURE / "authority_inventory.json").read_text(encoding="utf-8"))
+    brown = next(row for row in inventory["authorities"] if row["authority_id"] == "auth_brown_347_us_483")
+    calls = []
+
+    class FakeResolver:
+        def lookup_citation(self, *, citation: str, start_index: int, end_index: int) -> CitationResolution:
+            calls.append((citation, start_index, end_index))
+            return CitationResolution(
+                authority_matches=[brown],
+                lookup_row={
+                    "citation": citation,
+                    "normalized_citations": [citation],
+                    "start_index": start_index,
+                    "end_index": end_index,
+                    "status": 200,
+                    "error_message": "",
+                    "clusters": [
+                        {
+                            "authority_id": brown["authority_id"],
+                            "case_name": brown["case_name"],
+                            "canonical_citation": brown["canonical_citation"],
+                            "year": brown["year"],
+                        }
+                    ],
+                },
+            )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=tmp_path / "missing_inventory.json",
+        document_id="legal_authority_injected_resolver",
+        resolver=FakeResolver(),
+    )
+
+    assert calls == [("347 U.S. 483", 29, 41)]
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["verified_mentions"] == 1
+    assert report["summary"]["false_verified"] == 0
+
+
+def test_courtlistener_lookup_resolver_maps_lookup_clusters_to_local_inventory() -> None:
+    calls = []
+
+    class FakeCourtListenerClient:
+        def citation_lookup(self, *, text: str) -> list[dict[str, object]]:
+            calls.append(text)
+            return [
+                {
+                    "citation": "576 U.S. 644",
+                    "normalized_citations": ["576 U.S. 644"],
+                    "start_index": 0,
+                    "end_index": 12,
+                    "status": 200,
+                    "error_message": "",
+                    "clusters": [
+                        {
+                            "id": 576644,
+                            "case_name": "Obergefell v. Hodges",
+                            "citations": [
+                                {
+                                    "volume": 576,
+                                    "reporter": "U.S.",
+                                    "page": "644",
+                                }
+                            ],
+                            "date_filed": "2015-06-26",
+                        }
+                    ],
+                }
+            ]
+
+    resolver = CourtListenerCitationLookupResolver.from_inventory_path(
+        client=FakeCourtListenerClient(),
+        path=FIXTURE / "authority_inventory.json",
+    )
+    resolved = resolver.lookup_citation(citation="576 U.S. 644", start_index=0, end_index=12)
+
+    assert calls == ["576 U.S. 644"]
+    assert resolved.lookup_row["status"] == 200
+    assert resolved.lookup_row["clusters"][0]["case_name"] == "Obergefell v. Hodges"
+    assert [row["authority_id"] for row in resolved.authority_matches] == ["auth_obergefell_576_us_644"]
+
+
+def test_courtlistener_lookup_resolver_can_emit_limited_external_authority_without_inventory() -> None:
+    class FakeCourtListenerClient:
+        def citation_lookup(self, *, text: str) -> list[dict[str, object]]:
+            return [
+                {
+                    "citation": "347 U.S. 483",
+                    "normalized_citations": ["347 U.S. 483"],
+                    "status": 200,
+                    "clusters": [
+                        {
+                            "id": 347483,
+                            "case_name": "Brown v. Board of Education",
+                            "citations": [{"volume": 347, "reporter": "U.S.", "page": "483"}],
+                            "date_filed": "1954-05-17",
+                        }
+                    ],
+                }
+            ]
+
+    resolver = CourtListenerCitationLookupResolver(client=FakeCourtListenerClient())
+    resolved = resolver.lookup_citation(citation="347 U.S. 483", start_index=4, end_index=16)
+
+    assert resolved.lookup_row["start_index"] == 4
+    assert resolved.lookup_row["end_index"] == 16
+    assert resolved.authority_matches == [
+        {
+            "authority_id": "courtlistener_cluster_347483",
+            "canonical_citation": "347 U.S. 483",
+            "case_name": "Brown v. Board of Education",
+            "court": "",
+            "year": "1954",
+            "reporter": "U.S.",
+            "volume": "347",
+            "page": "483",
+            "pages": {},
+        }
+    ]
+
+
+def test_courtlistener_lookup_resolver_preserves_ambiguity_even_with_one_inventory_match() -> None:
+    class FakeCourtListenerClient:
+        def citation_lookup(self, *, text: str) -> list[dict[str, object]]:
+            return [
+                {
+                    "citation": "347 U.S. 483",
+                    "normalized_citations": ["347 U.S. 483", "347 Fiction 483"],
+                    "status": 300,
+                    "error_message": "Multiple Choices",
+                    "clusters": [
+                        {
+                            "id": 347483,
+                            "case_name": "Brown v. Board of Education",
+                            "citations": [{"volume": 347, "reporter": "U.S.", "page": "483"}],
+                        },
+                        {
+                            "id": 909,
+                            "case_name": "Example v. Example",
+                            "citations": [{"volume": 347, "reporter": "Fiction", "page": "483"}],
+                        },
+                    ],
+                }
+            ]
+
+    resolver = CourtListenerCitationLookupResolver.from_inventory_path(
+        client=FakeCourtListenerClient(),
+        path=FIXTURE / "authority_inventory.json",
+    )
+    resolved = resolver.lookup_citation(citation="347 U.S. 483", start_index=0, end_index=12)
+
+    assert resolved.lookup_row["status"] == 300
+    assert [row["authority_id"] for row in resolved.authority_matches] == [
+        "auth_brown_347_us_483",
+        "courtlistener_cluster_909",
+    ]
+
+
+def test_external_resolver_throttling_is_unavailable_not_unresolved(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text("Brown v. Board of Education, 347 U.S. 483 (1954).", encoding="utf-8")
+
+    class ThrottledResolver:
+        def lookup_citation(self, *, citation: str, start_index: int, end_index: int) -> CitationResolution:
+            return CitationResolution(
+                authority_matches=[],
+                lookup_row={
+                    "citation": citation,
+                    "normalized_citations": [citation],
+                    "start_index": start_index,
+                    "end_index": end_index,
+                    "status": 429,
+                    "error_message": "Too many citations requested.",
+                    "clusters": [],
+                },
+            )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=tmp_path / "missing_inventory.json",
+        document_id="legal_authority_throttled_resolver",
+        resolver=ThrottledResolver(),
+    )
+
+    assert report["mentions"][0]["resolution_status"] == "unavailable"
+    assert report["issues"] == [
+        {
+            "mention_id": "mention_001",
+            "issue": "unavailable",
+            "reason": "authority_lookup_unavailable",
+            "line": 1,
+        }
+    ]
+    assert (
+        "legal_verification_abstention("
+        "mention_001, authority_resolution, authority_lookup_unavailable, source_line_1)."
+    ) in report["facts"]
 
 
 def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavailable_text() -> None:

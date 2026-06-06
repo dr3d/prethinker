@@ -162,8 +162,10 @@ They contain:
 - one proposition-support boundary that must abstain.
 
 The fixtures use local authority inventories so the first prototype can run
-offline. A later CourtListener-backed run can replace or supplement those
-inventories while keeping the same report contract.
+offline. A CourtListener-backed resolver can replace or supplement those
+inventories through the same report contract, but live or cached external
+lookup is a separate measurement condition from the local claim-bearing
+baseline.
 
 ## Prototype Resolver
 
@@ -199,8 +201,8 @@ The current implementation has two layers:
 
 - a local deterministic resolver backed by checked-in
   `authority_inventory.json` files;
-- a token-gated CourtListener citation-lookup adapter seam for future live
-  runs.
+- an explicit resolver-injection seam plus a token-gated CourtListener
+  citation-lookup resolver adapter for live/cached comparison runs.
 
 The local inventory remains the reproducible claim path. CourtListener live
 lookup is useful for fixture acquisition and resolver comparison, but it should
@@ -210,6 +212,10 @@ evidence. Retained cache entries include payload JSON plus
 `prethinker.courtlistener_cache_metadata.v1` sidecars recording provider,
 method, URL, body digest, and cache filename; they may replay without a token.
 Cache misses are live calls and remain token-gated.
+
+The verifier defaults to the local resolver. Any external resolver must be
+passed explicitly, and a citation resolved by CourtListener without retained
+authority text still abstains on quote and pin-cite verification.
 
 Authority text used for quote/pin verification is also emitted as a compact
 provenance ledger: available page/paragraph scopes get a digest, while missing

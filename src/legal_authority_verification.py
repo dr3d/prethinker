@@ -17,7 +17,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from src.legal_authority_resolvers import LocalAuthorityInventoryResolver, unsupported_reporter_lookup_row
+from src.legal_authority_resolvers import (
+    LegalAuthorityResolver,
+    LocalAuthorityInventoryResolver,
+    unsupported_reporter_lookup_row,
+)
 
 
 CASE_WORD_RE = r"(?:[A-Z][A-Za-z0-9.&']*|of|the|and|for|in|on|to|ex|rel\.|&)"
@@ -63,9 +67,10 @@ def verify_legal_authorities(
     source_path: Path,
     authority_inventory_path: Path,
     document_id: str = "legal_authority_micro",
+    resolver: LegalAuthorityResolver | None = None,
 ) -> dict[str, Any]:
     source_text = source_path.read_text(encoding="utf-8")
-    resolver = LocalAuthorityInventoryResolver.from_path(authority_inventory_path)
+    resolver = resolver or LocalAuthorityInventoryResolver.from_path(authority_inventory_path)
     paragraphs = _paragraphs(source_text)
     facts: list[str] = []
     authority_text_source_facts: set[str] = set()
@@ -141,7 +146,7 @@ def verify_legal_authorities(
             lookup = resolution.lookup_row
             lookup_rows.append(lookup)
             authority = authority_matches[0] if len(authority_matches) == 1 else None
-            resolution_status, authority_id = _resolution(authority_matches)
+            resolution_status, authority_id = _resolution(authority_matches, lookup)
 
             facts.append(
                 "legal_authority_resolution("
@@ -171,7 +176,7 @@ def verify_legal_authorities(
                         "line": citation_line,
                     }
                 )
-                abstention_reason = "ambiguous_authority" if resolution_status == "ambiguous" else "citation_not_found"
+                abstention_reason = _resolution_reason(resolution_status)
                 facts.append(
                     "legal_verification_abstention("
                     f"{mention_id}, authority_resolution, {abstention_reason}, {source_scope})."
@@ -747,7 +752,14 @@ def _proposition_digest(proposition_tail: str) -> str:
     return f"sha256_{digest}"
 
 
-def _resolution(matches: list[dict[str, Any]]) -> tuple[str, str]:
+def _resolution(matches: list[dict[str, Any]], lookup_row: dict[str, Any] | None = None) -> tuple[str, str]:
+    status = int((lookup_row or {}).get("status") or 0)
+    if status == 429:
+        return "unavailable", "authority_lookup_unavailable"
+    if status == 400:
+        return "invalid_reporter", "invalid_authority"
+    if status == 300:
+        return "ambiguous", "ambiguous_authority"
     if not matches:
         return "unresolved", "authority_not_found"
     if len(matches) > 1:
