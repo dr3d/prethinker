@@ -31,7 +31,12 @@ from scripts.validate_legal_authority_fixture_package import (  # noqa: E402
 
 
 DEFAULT_MANIFEST = REPO_ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json"
-DEFAULT_DEST_ROOT = REPO_ROOT / "datasets" / "legal_authority_verification" / "clean_public_filings"
+DEFAULT_DEST_ROOTS = {
+    "clean_public_filings": REPO_ROOT / "datasets" / "legal_authority_verification" / "clean_public_filings",
+    "known_hallucination_or_sanction_filings": (
+        REPO_ROOT / "datasets" / "legal_authority_verification" / "known_hallucination_or_sanction_filings"
+    ),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("package", type=Path)
     parser.add_argument("--fixture-class", default="clean_public_filings")
     parser.add_argument("--expected-fixture-count", type=int, default=3)
-    parser.add_argument("--dest-root", type=Path, default=DEFAULT_DEST_ROOT)
+    parser.add_argument("--dest-root", type=Path)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path)
@@ -76,12 +81,12 @@ def import_package(
     package_path: Path,
     fixture_class: str = "clean_public_filings",
     expected_fixture_count: int = 3,
-    dest_root: Path = DEFAULT_DEST_ROOT,
+    dest_root: Path | None = None,
     manifest_path: Path = DEFAULT_MANIFEST,
     dry_run: bool = False,
 ) -> dict[str, Any]:
     package_path = _resolve(package_path)
-    dest_root = _resolve(dest_root)
+    dest_root = _resolve(dest_root or _default_dest_root(fixture_class))
     manifest_path = _resolve(manifest_path)
     validation = build_validation_report(
         package_path=package_path,
@@ -220,6 +225,13 @@ def _manifest_update_errors(*, manifest_path: Path, fixture_class: str) -> list[
     if not any(isinstance(row, dict) and row.get("id") == fixture_class for row in classes):
         errors.append(f"manifest_fixture_class_not_found:{fixture_class}")
     return errors
+
+
+def _default_dest_root(fixture_class: str) -> Path:
+    return DEFAULT_DEST_ROOTS.get(
+        fixture_class,
+        REPO_ROOT / "datasets" / "legal_authority_verification" / fixture_class,
+    )
 
 
 def _report(

@@ -5,7 +5,7 @@ import zipfile
 from pathlib import Path
 
 from scripts.import_legal_authority_fixture_package import import_package
-from test_validate_legal_authority_fixture_package import _write_package
+from test_validate_legal_authority_fixture_package import _convert_package_to_known_sanction_shape, _write_package
 
 
 def test_import_legal_authority_fixture_package_copies_fixtures_and_updates_manifest(tmp_path: Path) -> None:
@@ -88,6 +88,65 @@ def test_import_legal_authority_fixture_package_refuses_existing_destination(tmp
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     clean_public = next(row for row in manifest["fixture_classes"] if row["id"] == "clean_public_filings")
     assert clean_public["fixtures"] == []
+
+
+def test_import_legal_authority_fixture_package_defaults_destination_by_fixture_class(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    import scripts.import_legal_authority_fixture_package as importer
+
+    package = _write_package(tmp_path)
+    _convert_package_to_known_sanction_shape(package)
+    manifest_path = _write_manifest(tmp_path)
+    monkeypatch.setattr(
+        importer,
+        "DEFAULT_DEST_ROOTS",
+        {
+            "clean_public_filings": tmp_path / "wrong_clean_public",
+            "known_hallucination_or_sanction_filings": tmp_path / "known_sanction_default",
+        },
+    )
+
+    report = import_package(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+        manifest_path=manifest_path,
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["dest_root"].endswith("known_sanction_default")
+    assert (tmp_path / "known_sanction_default" / "clean_legal_filing_001" / "sanction_or_correction_source.md").exists()
+    assert not (tmp_path / "wrong_clean_public").exists()
+
+
+def test_import_legal_authority_fixture_package_allows_explicit_destination_override(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    import scripts.import_legal_authority_fixture_package as importer
+
+    package = _write_package(tmp_path)
+    _convert_package_to_known_sanction_shape(package)
+    manifest_path = _write_manifest(tmp_path)
+    monkeypatch.setattr(
+        importer,
+        "DEFAULT_DEST_ROOTS",
+        {"known_hallucination_or_sanction_filings": tmp_path / "known_sanction_default"},
+    )
+    dest_root = tmp_path / "explicit_known_sanction_dest"
+
+    report = import_package(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+        dest_root=dest_root,
+        manifest_path=manifest_path,
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["dest_root"].endswith("explicit_known_sanction_dest")
+    assert (dest_root / "clean_legal_filing_002" / "sanction_or_correction_source.md").exists()
+    assert not (tmp_path / "known_sanction_default").exists()
 
 
 def _write_manifest(tmp_path: Path) -> Path:
