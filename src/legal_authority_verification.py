@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.legal_authority_resolvers import LocalAuthorityInventoryResolver
+
 
 CITATION_RE = re.compile(
     r"(?P<case>[A-Z][A-Za-z0-9.&' -]+? v\. [A-Z][A-Za-z0-9.&' -]+?),\s+"
@@ -39,7 +41,7 @@ def verify_legal_authorities(
     document_id: str = "legal_authority_micro",
 ) -> dict[str, Any]:
     source_text = source_path.read_text(encoding="utf-8")
-    inventory = _load_inventory(authority_inventory_path)
+    resolver = LocalAuthorityInventoryResolver.from_path(authority_inventory_path)
     paragraphs = _paragraphs(source_text)
     facts: list[str] = []
     mentions: list[dict[str, Any]] = []
@@ -59,12 +61,13 @@ def verify_legal_authorities(
             citation_line = paragraph.start_line + paragraph.text[: match.start()].count("\n")
             source_scope = f"source_line_{citation_line}"
             line_atom = f"line_{citation_line}"
-            authority_matches = inventory.get(citation, [])
-            lookup = _courtlistener_like_lookup(
+            resolution = resolver.lookup_citation(
                 citation=citation,
-                match=match,
-                authority_matches=authority_matches,
+                start_index=match.start("volume"),
+                end_index=match.end("page"),
             )
+            authority_matches = resolution.authority_matches
+            lookup = resolution.lookup_row
             lookup_rows.append(lookup)
             authority = authority_matches[0] if len(authority_matches) == 1 else None
             resolution_status, authority_id = _resolution(authority_matches)
@@ -410,16 +413,6 @@ def facts_text(report: dict[str, Any]) -> str:
     return "\n".join(report.get("facts", [])) + "\n"
 
 
-def _load_inventory(path: Path) -> dict[str, list[dict[str, Any]]]:
-    data = json.loads(path.read_text(encoding="utf-8"))
-    out: dict[str, list[dict[str, Any]]] = {}
-    for row in data.get("authorities", []):
-        citation = str(row.get("canonical_citation") or "").strip()
-        if citation:
-            out.setdefault(citation, []).append(row)
-    return out
-
-
 def _mention_brief(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "mention_id": row.get("mention_id", ""),
@@ -529,40 +522,6 @@ def _pin_status(
 def _has_proposition_boundary(paragraph: str, citation_end: int) -> bool:
     tail = paragraph[citation_end:].casefold()
     return "proposition" in tail
-
-
-def _courtlistener_like_lookup(
-    *,
-    citation: str,
-    match: re.Match[str],
-    authority_matches: list[dict[str, Any]],
-) -> dict[str, Any]:
-    if not authority_matches:
-        status = 404
-        error = "citation_not_found"
-    elif len(authority_matches) > 1:
-        status = 300
-        error = "ambiguous_citation"
-    else:
-        status = 200
-        error = ""
-    return {
-        "citation": citation,
-        "normalized_citations": [citation],
-        "start_index": match.start("volume"),
-        "end_index": match.end("page"),
-        "status": status,
-        "error_message": error,
-        "clusters": [
-            {
-                "authority_id": row.get("authority_id"),
-                "case_name": row.get("case_name"),
-                "canonical_citation": row.get("canonical_citation"),
-                "year": row.get("year"),
-            }
-            for row in authority_matches
-        ],
-    }
 
 
 def _false_verified_count(mentions: list[dict[str, Any]]) -> int:

@@ -147,6 +147,7 @@ inventory while keeping the same report contract.
 The first deterministic prototype is:
 
 ```text
+src/legal_authority_resolvers.py
 src/legal_authority_verification.py
 scripts/run_legal_authority_verification.py
 ```
@@ -171,9 +172,18 @@ Status values follow the same broad shape:
 - `404`: citation-like value did not resolve;
 - `429`: reserved for external throttling, not used by the offline fixture.
 
-The first implementation is local and deterministic. CourtListener integration
-requires a token and should be a later adapter, not an excuse to let the LLM
-verify citations.
+The current implementation has two layers:
+
+- a local deterministic resolver backed by checked-in
+  `authority_inventory.json` files;
+- a token-gated CourtListener citation-lookup adapter seam for future live
+  runs.
+
+The local inventory remains the reproducible claim path. CourtListener live
+lookup is useful for fixture acquisition and resolver comparison, but it should
+not turn a measurement into an unrecorded external dependency. Live outputs
+need a provider manifest and retained cache before they become research
+evidence.
 
 ## Metrics
 
@@ -219,7 +229,7 @@ The first local prototype does not need a credential. A CourtListener-backed
 phase will need:
 
 ```text
-COURTLISTENER_TOKEN=<token>
+COURTLISTENER_API_TOKEN=<token>
 ```
 
 It will also need a decision on whether bulk authority text should be cached

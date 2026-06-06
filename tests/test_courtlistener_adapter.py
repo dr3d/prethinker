@@ -34,6 +34,13 @@ def test_courtlistener_client_requires_token_for_live_calls(tmp_path, monkeypatc
         client.search(q="breach of lease")
 
 
+def test_courtlistener_client_requires_token_for_citation_lookup(tmp_path, monkeypatch):
+    monkeypatch.delenv("COURTLISTENER_API_TOKEN", raising=False)
+    client = CourtListenerClient(cache_dir=tmp_path)
+    with pytest.raises(RuntimeError, match="COURTLISTENER_API_TOKEN"):
+        client.citation_lookup(text="Brown v. Board of Education, 347 U.S. 483 (1954)")
+
+
 def test_normalize_opinion_record_tolerates_search_result_shape():
     raw = {
         "id": 123,

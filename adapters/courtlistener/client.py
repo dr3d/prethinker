@@ -41,14 +41,53 @@ class CourtListenerClient:
     def get_docket(self, docket_id: str | int) -> dict[str, Any]:
         return self.get_json(f"/dockets/{docket_id}/")
 
+    def citation_lookup(self, *, text: str) -> list[dict[str, Any]]:
+        """Call CourtListener's citation lookup endpoint.
+
+        This is token-gated and cached like the other live calls. It is not used
+        by the legal verification tests unless an explicit live fixture is
+        added; the research lane's claim path should remain reproducible from
+        checked-in inventories.
+        """
+
+        if not self.api_token:
+            raise RuntimeError("COURTLISTENER_API_TOKEN is required for live CourtListener API calls.")
+        url = self._url("/citation-lookup/", {})
+        body = urllib.parse.urlencode({"text": text}).encode("utf-8")
+        payload = self._request_json(
+            method="POST",
+            url=url,
+            body=body,
+            extra_headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        if isinstance(payload, list):
+            return payload
+        if isinstance(payload, dict) and isinstance(payload.get("results"), list):
+            return payload["results"]
+        raise RuntimeError("Unexpected CourtListener citation lookup response shape.")
+
     def get_json(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         if not self.api_token:
             raise RuntimeError("COURTLISTENER_API_TOKEN is required for live CourtListener API calls.")
         url = self._url(path, params or {})
-        cached = self._cache_path(url)
+        payload = self._request_json(method="GET", url=url)
+        if not isinstance(payload, dict):
+            raise RuntimeError("Unexpected CourtListener JSON response shape.")
+        return payload
+
+    def _request_json(
+        self,
+        *,
+        method: str,
+        url: str,
+        body: bytes | None = None,
+        extra_headers: dict[str, str] | None = None,
+    ) -> Any:
+        cached = self._cache_path(method=method, url=url, body=body)
         if cached.exists():
             return json.loads(cached.read_text(encoding="utf-8"))
-        req = urllib.request.Request(url, headers={"Authorization": f"Token {self.api_token}"})
+        headers = {"Authorization": f"Token {self.api_token}", **(extra_headers or {})}
+        req = urllib.request.Request(url, data=body, headers=headers, method=method)
         with urllib.request.urlopen(req, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
         cached.parent.mkdir(parents=True, exist_ok=True)
@@ -60,6 +99,7 @@ class CourtListenerClient:
         query = urllib.parse.urlencode({k: str(v) for k, v in sorted(params.items())})
         return f"{self.base_url}{clean_path}" + (f"?{query}" if query else "")
 
-    def _cache_path(self, url: str) -> Path:
-        digest = hashlib.sha256(url.encode("utf-8")).hexdigest()
+    def _cache_path(self, *, method: str, url: str, body: bytes | None = None) -> Path:
+        cache_key = method.upper().encode("utf-8") + b"\0" + url.encode("utf-8") + b"\0" + (body or b"")
+        digest = hashlib.sha256(cache_key).hexdigest()
         return self.cache_dir / f"{digest}.json"

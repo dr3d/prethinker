@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from src.legal_authority_resolvers import LocalAuthorityInventoryResolver
 from src.legal_authority_verification import facts_text, render_markdown, verify_legal_authorities
 
 
@@ -42,6 +43,23 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
         "review_required_count": 1,
         "answer": "no",
     }
+
+
+def test_local_authority_inventory_resolver_uses_courtlistener_like_lookup_shape() -> None:
+    resolver = LocalAuthorityInventoryResolver.from_path(FIXTURE / "authority_inventory.json")
+
+    resolved = resolver.lookup_citation(citation="576 U.S. 644", start_index=12, end_index=24)
+    assert len(resolved.authority_matches) == 1
+    assert resolved.lookup_row["status"] == 200
+    assert resolved.lookup_row["error_message"] == ""
+    assert resolved.lookup_row["start_index"] == 12
+    assert resolved.lookup_row["end_index"] == 24
+    assert resolved.lookup_row["clusters"][0]["authority_id"] == "auth_obergefell_576_us_644"
+
+    unresolved = resolver.lookup_citation(citation="999 U.S. 999", start_index=3, end_index=15)
+    assert unresolved.authority_matches == []
+    assert unresolved.lookup_row["status"] == 404
+    assert unresolved.lookup_row["error_message"] == "citation_not_found"
 
 
 def test_legal_authority_micro_fixture_emits_expected_and_not_forbidden_facts() -> None:
