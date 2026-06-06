@@ -13,6 +13,7 @@ It reads local fixture files and authority inventories only; it does not call an
 - Metadata checks / matches / mismatches: `64 / 62 / 2`
 - Quote claims / quote matches / quote mismatches: `9 / 5 / 3`
 - Pin mismatches: `1`
+- Pin unavailable: `0`
 - Authority text sources: `11`
 - Authority text available / unavailable sources: `10 / 1`
 - Short-form citations requiring context: `2`

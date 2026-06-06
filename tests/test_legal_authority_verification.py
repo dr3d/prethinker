@@ -549,6 +549,61 @@ def test_legal_authority_pin_range_contains_matched_quote_page(tmp_path: Path) -
     }
 
 
+def test_legal_authority_unavailable_pin_abstains_instead_of_verifying(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        (
+            "Obergefell v. Hodges, 576 U.S. 644, 676 (2015), states "
+            '"The Court now holds that same-sex couples may exercise the fundamental right to marry."'
+        ),
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=FIXTURE / "authority_inventory.json",
+        document_id="legal_authority_pin_unavailable",
+    )
+
+    assert report["summary"]["verified_mentions"] == 0
+    assert report["summary"]["blocked_mentions"] == 1
+    assert report["summary"]["pin_mismatch"] == 0
+    assert report["summary"]["pin_unavailable"] == 1
+    assert report["summary"]["verification_abstentions"] == 1
+    assert report["summary"]["false_verified"] == 0
+    assert report["mentions"][0]["pin_check"] == {
+        "pin": "page_676",
+        "status": "pin_unavailable",
+    }
+    assert report["issues"] == [
+        {
+            "mention_id": "mention_001",
+            "issue": "pin_cite_unavailable",
+            "pin": "page_676",
+            "line": 1,
+        }
+    ]
+    assert (
+        "legal_verification_abstention("
+        "mention_001, pin_cite_verification, pin_unavailable, source_line_1)."
+    ) in report["facts"]
+    assert report["ledger_queries"]["which_pin_cites_are_unavailable"] == [
+        {
+            "mention_id": "mention_001",
+            "citation": "576 U.S. 644",
+            "pin": "page_676",
+            "status": "pin_unavailable",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 1,
+        "blocking_issue_types": ["pin_cite_unavailable"],
+        "review_required_count": 0,
+        "answer": "no",
+    }
+
+
 def test_legal_authority_report_carries_authority_text_source_url_without_fact_expansion(tmp_path: Path) -> None:
     source = tmp_path / "source.md"
     source.write_text(

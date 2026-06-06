@@ -321,6 +321,19 @@ def verify_legal_authorities(
                             "legal_verification_abstention("
                             f"{mention_id}, pin_cite_verification, quote_outside_cited_pin, {source_scope})."
                         )
+                    elif pin_status == "pin_unavailable":
+                        issue_rows.append(
+                            {
+                                "mention_id": mention_id,
+                                "issue": "pin_cite_unavailable",
+                                "pin": pin_atom,
+                                "line": citation_line,
+                            }
+                        )
+                        facts.append(
+                            "legal_verification_abstention("
+                            f"{mention_id}, pin_cite_verification, pin_unavailable, {source_scope})."
+                        )
 
             if _has_proposition_boundary(paragraph.text, citation_extract.end):
                 proposition_index += 1
@@ -468,6 +481,9 @@ def verify_legal_authorities(
         "pin_mismatch": sum(
             1 for row in mentions if row.get("pin_check") and row["pin_check"]["status"] == "quote_outside_pin"
         ),
+        "pin_unavailable": sum(
+            1 for row in mentions if row.get("pin_check") and row["pin_check"]["status"] == "pin_unavailable"
+        ),
         "authority_text_sources": len(authority_text_sources),
         "authority_text_available_sources": sum(
             1 for row in authority_text_sources.values() if row.get("text_status") == "available"
@@ -600,6 +616,16 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         for row in mentions
         if row.get("pin_check") and row["pin_check"].get("status") == "quote_outside_pin"
     ]
+    unavailable_pin_cites = [
+        {
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "pin": row["pin_check"]["pin"],
+            "status": row["pin_check"]["status"],
+        }
+        for row in mentions
+        if row.get("pin_check") and row["pin_check"].get("status") == "pin_unavailable"
+    ]
     proposition_review = [
         {
             "mention_id": row["mention_id"],
@@ -636,6 +662,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
             "authority_text_unavailable",
             "quote_not_found_in_authority",
             "quote_outside_cited_pin",
+            "pin_cite_unavailable",
             "short_form_citation_requires_context",
         }
     ]
@@ -651,6 +678,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         "which_authority_text_sources_were_used": authority_text_sources,
         "which_citations_require_context": short_form_context_required,
         "which_pin_cites_do_not_contain_the_quote": pin_mismatches,
+        "which_pin_cites_are_unavailable": unavailable_pin_cites,
         "which_propositions_require_human_review": proposition_review,
         "which_authorities_are_attached_to_propositions": proposition_authorities,
         "can_this_filing_be_certified_citation_clean": {
@@ -681,6 +709,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Quote claims: `{summary['quote_claims']}`",
         f"- Quote mismatches: `{summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
+        f"- Pin unavailable: `{summary['pin_unavailable']}`",
         f"- Authority text sources: `{summary['authority_text_sources']}`",
         f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
         f"- Short-form citations requiring context: `{summary['short_form_citations']}`",
@@ -739,6 +768,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Short-form citations requiring context: `{len(queries.get('which_citations_require_context') or [])}`",
                 f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
                 f"- Pin-cite mismatches: `{len(queries.get('which_pin_cites_do_not_contain_the_quote') or [])}`",
+                f"- Unavailable pin-cites: `{len(queries.get('which_pin_cites_are_unavailable') or [])}`",
                 f"- Proposition authority links: `{len(queries.get('which_authorities_are_attached_to_propositions') or [])}`",
             ]
         )
@@ -1088,8 +1118,8 @@ def _mention_blocking_reasons(mention: dict[str, Any]) -> list[str]:
     if quote_check and quote_check.get("status") in {"no_match", "authority_unavailable"}:
         reasons.append(str(quote_check.get("status")))
     pin_check = mention.get("pin_check")
-    if pin_check and pin_check.get("status") == "quote_outside_pin":
-        reasons.append("quote_outside_pin")
+    if pin_check and pin_check.get("status") in {"quote_outside_pin", "pin_unavailable"}:
+        reasons.append(str(pin_check.get("status")))
     return reasons
 
 

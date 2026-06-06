@@ -477,6 +477,7 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "quote_claims": 0,
         "quote_mismatch": 0,
         "pin_mismatch": 0,
+        "pin_unavailable": 0,
         "authority_text_sources": 0,
         "authority_text_available_sources": 0,
         "authority_text_unavailable_sources": 0,
@@ -519,6 +520,7 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "quote_claims",
             "quote_mismatch",
             "pin_mismatch",
+            "pin_unavailable",
             "authority_text_sources",
             "authority_text_available_sources",
             "authority_text_unavailable_sources",
@@ -543,6 +545,7 @@ def _ledger_query_summary(queries: dict[str, Any]) -> dict[str, Any]:
         "unavailable_citation_lookups": len(queries.get("which_citation_lookups_are_unavailable") or []),
         "authority_text_sources": len(queries.get("which_authority_text_sources_were_used") or []),
         "authority_text_unavailable": len(queries.get("which_authority_text_is_unavailable") or []),
+        "pin_unavailable": len(queries.get("which_pin_cites_are_unavailable") or []),
         "proposition_authority_links": len(queries.get("which_authorities_are_attached_to_propositions") or []),
     }
 
@@ -599,6 +602,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Metadata checks / matches / mismatches: `{summary['metadata_checks']} / {summary['metadata_match']} / {summary['metadata_mismatch']}`",
         f"- Quote claims / quote mismatches: `{summary['quote_claims']} / {summary['quote_mismatch']}`",
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
+        f"- Pin unavailable: `{summary['pin_unavailable']}`",
         f"- Authority text sources: `{summary['authority_text_sources']}`",
         f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
         f"- Verification abstentions: `{summary['verification_abstentions']}`",

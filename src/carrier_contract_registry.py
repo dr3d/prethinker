@@ -316,7 +316,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "Legal verification abstention: the row records an explicit non-verification boundary.",
-            "Use this when citation resolution fails, lookup is unavailable, a short-form citation needs preceding context, authority text is unavailable, a quote is not found, a quote is outside the cited pin, proposition support requires legal review, or good-law status is outside scope.",
+            "Use this when citation resolution fails, lookup is unavailable, a short-form citation needs preceding context, authority text is unavailable, a pin cite is unavailable, a quote is not found, a quote is outside the cited pin, proposition support requires legal review, or good-law status is outside scope.",
             "An abstention is not a verified answer and should be reported as review-required or blocked.",
         ],
         "value_domains": {
@@ -335,6 +335,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
                 "authority_lookup_unavailable",
                 "short_form_citation_requires_context",
                 "authority_text_unavailable",
+                "pin_unavailable",
                 "quote_not_found_in_authority",
                 "quote_outside_cited_pin",
                 "requires_human_legal_review",
