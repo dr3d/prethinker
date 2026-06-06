@@ -44,7 +44,7 @@ It reads local fixture files and authority inventories only; it does not call an
 | --- | --- | ---: |
 | `controlled_adversarial_mutations` | `seeded` | 6 |
 | `clean_public_filings` | `planned` | 0 |
-| `known_hallucination_or_sanction_filings` | `deferred_until_resolver_contract_stable` | 0 |
+| `known_hallucination_or_sanction_filings` | `deferred_until_clean_public_baseline` | 0 |
 
 ## Fixture Results
 

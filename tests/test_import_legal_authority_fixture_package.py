@@ -161,7 +161,7 @@ def _write_manifest(tmp_path: Path) -> Path:
                     {"id": "clean_public_filings", "status": "planned", "fixtures": []},
                     {
                         "id": "known_hallucination_or_sanction_filings",
-                        "status": "deferred_until_resolver_contract_stable",
+                        "status": "deferred_until_clean_public_baseline",
                         "fixtures": [],
                     },
                 ],
