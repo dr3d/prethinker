@@ -163,8 +163,8 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
     forbidden_authority_text_sources = _signature_count(forbidden_facts, "legal_authority_text_source/5")
 
     errors.extend(_manifest_errors(manifest, fixture_id=fixture_id, fixture_class=fixture_class))
-    errors.extend(_metadata_errors(metadata, fixture_id=fixture_id, inventory=inventory))
-    errors.extend(_inventory_errors(inventory))
+    errors.extend(_metadata_errors(metadata, fixture_id=fixture_id, inventory=inventory, fixture_class=fixture_class))
+    errors.extend(_inventory_errors(inventory, fixture_class=fixture_class))
     errors.extend(_fact_errors(expected_facts, label="expected_facts.pl"))
     errors.extend(_fact_errors(forbidden_facts, label="forbidden_facts.pl"))
     if fixture_class == "clean_public_filings":
@@ -196,9 +196,13 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
         if int(verifier_summary.get("false_verified", 0) or 0):
             errors.append(f"false_verified:{verifier_summary.get('false_verified')}")
         citation_mentions = int(verifier_summary.get("citation_mentions", 0) or 0)
-        if citation_mentions < 3 or citation_mentions > 6:
-            errors.append(f"citation_mentions_expected_3_to_6_got_{citation_mentions}")
-        if int(verifier_summary.get("invalid_reporter", 0) or 0):
+        errors.extend(
+            _citation_count_errors(
+                fixture_class=fixture_class,
+                citation_mentions=citation_mentions,
+            )
+        )
+        if fixture_class == "clean_public_filings" and int(verifier_summary.get("invalid_reporter", 0) or 0):
             errors.append(f"clean_public_fixture_has_invalid_reporter:{verifier_summary.get('invalid_reporter')}")
         short_form_citations = int(verifier_summary.get("short_form_citations", 0) or 0)
         if short_form_citations:
@@ -219,21 +223,23 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
             if expected_short_form_resolutions:
                 errors.append(f"short_form_resolution_expected_forbidden:{len(expected_short_form_resolutions)}")
         quote_claims = int(verifier_summary.get("quote_claims", 0) or 0)
-        if quote_claims < 1:
-            errors.append("missing_quote_claim")
-        if quote_claims >= 1:
-            authority_text_sources = int(verifier_summary.get("authority_text_sources", 0) or 0)
-            if authority_text_sources < 1:
-                errors.append("quote_fixture_missing_authority_text_source_receipts")
-            if expected_authority_text_sources < 1:
-                errors.append("expected_facts_missing_authority_text_source_receipt")
-        if expected_authority_text_sources >= 1 and forbidden_authority_text_sources < 1:
-            errors.append("forbidden_facts_missing_authority_text_source_trap")
+        if fixture_class == "clean_public_filings":
+            if quote_claims < 1:
+                errors.append("missing_quote_claim")
+            if quote_claims >= 1:
+                authority_text_sources = int(verifier_summary.get("authority_text_sources", 0) or 0)
+                if authority_text_sources < 1:
+                    errors.append("quote_fixture_missing_authority_text_source_receipts")
+                if expected_authority_text_sources < 1:
+                    errors.append("expected_facts_missing_authority_text_source_receipt")
+            if expected_authority_text_sources >= 1 and forbidden_authority_text_sources < 1:
+                errors.append("forbidden_facts_missing_authority_text_source_trap")
         mentions = list(report.get("mentions") or [])
-        if not any(row.get("quote_check") and str(row.get("pin") or "").strip() for row in mentions):
-            errors.append("missing_quoted_pin_cite")
-        if not any(not row.get("quote_check") for row in mentions):
-            errors.append("missing_no_quote_citation")
+        if fixture_class == "clean_public_filings":
+            if not any(row.get("quote_check") and str(row.get("pin") or "").strip() for row in mentions):
+                errors.append("missing_quoted_pin_cite")
+            if not any(not row.get("quote_check") for row in mentions):
+                errors.append("missing_no_quote_citation")
         if int(verifier_summary.get("review_required_mentions", 0) or 0):
             warnings.append("clean_public_fixture_contains_proposition_review_boundary")
 
@@ -271,7 +277,13 @@ def _manifest_errors(manifest: dict[str, Any], *, fixture_id: str, fixture_class
     return errors
 
 
-def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str, inventory: dict[str, Any]) -> list[str]:
+def _metadata_errors(
+    metadata: dict[str, Any],
+    *,
+    fixture_id: str,
+    inventory: dict[str, Any],
+    fixture_class: str,
+) -> list[str]:
     errors: list[str] = []
     if str(metadata.get("fixture_id") or "").strip() != fixture_id:
         errors.append("source_metadata_fixture_id_mismatch")
@@ -290,7 +302,9 @@ def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str, inventory: di
         if str(independence.get("review_basis") or "").strip() != "source_and_authority_inventory_only":
             errors.append("oracle_independence_review_basis_not_source_and_authority_inventory_only")
     authority_sources = metadata.get("authority_sources")
-    if not isinstance(authority_sources, list) or not authority_sources:
+    if not isinstance(authority_sources, list):
+        errors.append("source_metadata_authority_sources_not_list")
+    elif fixture_class == "clean_public_filings" and not authority_sources:
         errors.append("source_metadata_missing_authority_sources")
     else:
         inventory_by_id = {
@@ -322,12 +336,16 @@ def _metadata_errors(metadata: dict[str, Any], *, fixture_id: str, inventory: di
     return errors
 
 
-def _inventory_errors(inventory: dict[str, Any]) -> list[str]:
+def _inventory_errors(inventory: dict[str, Any], *, fixture_class: str) -> list[str]:
     errors: list[str] = []
     if str(inventory.get("schema_version") or "").strip() != "legal_authority_inventory_v1":
         errors.append("authority_inventory_schema_version_not_legal_authority_inventory_v1")
     authorities = inventory.get("authorities")
-    if not isinstance(authorities, list) or not authorities:
+    if not isinstance(authorities, list):
+        return [*errors, "authority_inventory_authorities_not_list"]
+    if not authorities:
+        if fixture_class == "known_hallucination_or_sanction_filings":
+            return errors
         return [*errors, "authority_inventory_missing_authorities"]
     seen_ids: set[str] = set()
     seen_citations: set[str] = set()
@@ -361,6 +379,16 @@ def _inventory_errors(inventory: dict[str, Any]) -> list[str]:
             if url and not _is_http_url(url):
                 errors.append(f"authority_{index}:{key}_not_http")
     return errors
+
+
+def _citation_count_errors(*, fixture_class: str, citation_mentions: int) -> list[str]:
+    if fixture_class == "known_hallucination_or_sanction_filings":
+        if citation_mentions < 1 or citation_mentions > 12:
+            return [f"citation_mentions_expected_1_to_12_got_{citation_mentions}"]
+        return []
+    if citation_mentions < 3 or citation_mentions > 6:
+        return [f"citation_mentions_expected_3_to_6_got_{citation_mentions}"]
+    return []
 
 
 def _is_http_url(value: str) -> bool:

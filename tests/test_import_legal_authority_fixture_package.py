@@ -118,6 +118,11 @@ def test_import_legal_authority_fixture_package_defaults_destination_by_fixture_
     assert report["summary"]["dest_root"].endswith("known_sanction_default")
     assert (tmp_path / "known_sanction_default" / "clean_legal_filing_001" / "sanction_or_correction_source.md").exists()
     assert not (tmp_path / "wrong_clean_public").exists()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    known = next(row for row in manifest["fixture_classes"] if row["id"] == "known_hallucination_or_sanction_filings")
+    assert known["status"] == "seeded"
+    assert manifest["next_external_work_order_needed"]["needed_now"] is False
+    assert "false-verification audit" in manifest["next_external_work_order_needed"]["reason"]
 
 
 def test_import_legal_authority_fixture_package_allows_explicit_destination_override(

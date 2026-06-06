@@ -346,6 +346,55 @@ def test_validate_legal_authority_fixture_package_rejects_wrong_known_sanction_s
     )
 
 
+def test_validate_legal_authority_fixture_package_accepts_minimal_known_sanction_unresolved_fixture(
+    tmp_path: Path,
+) -> None:
+    package = tmp_path / "legal_authority_known_sanction_20260606_01"
+    fixture = package / "known_sanction_filing_001"
+    _write_minimal_known_sanction_fixture(
+        fixture,
+        fixture_id="known_sanction_filing_001",
+        source_line="The sanctioned filing cited Fictional v. Hall, 999 U.S. 999 (2024).",
+    )
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+        expected_fixture_count=1,
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["fixture_count"] == 1
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["matched_expected_fact_count"] == report["summary"]["expected_fact_count"]
+    assert report["summary"]["matched_forbidden_fact_count"] == 0
+    assert report["summary"]["false_verified"] == 0
+    assert report["fixtures"][0]["errors"] == []
+
+
+def test_validate_legal_authority_fixture_package_allows_known_sanction_unsupported_reporter(
+    tmp_path: Path,
+) -> None:
+    package = tmp_path / "legal_authority_known_sanction_20260606_02"
+    fixture = package / "known_sanction_filing_001"
+    _write_minimal_known_sanction_fixture(
+        fixture,
+        fixture_id="known_sanction_filing_001",
+        source_line="The sanctioned filing cited Fictional v. Hall, 12 Umbrella 34 (2024).",
+    )
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+        expected_fixture_count=1,
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["fixtures"][0]["verifier_summary"]["invalid_reporter"] == 1
+    assert "clean_public_fixture_has_invalid_reporter:1" not in report["fixtures"][0]["errors"]
+
+
 def _write_package(tmp_path: Path) -> Path:
     package = tmp_path / "legal_authority_clean_public_filings_20260606_01"
     package.mkdir()
@@ -459,6 +508,91 @@ Miranda v. Arizona, 384 U.S. 436 (1966), is also cited.
     )
     (path / "review_notes.md").write_text(
         "# Review Notes\n\nSynthetic unit-test package for the intake validator.\n",
+        encoding="utf-8",
+    )
+
+
+def _write_minimal_known_sanction_fixture(path: Path, *, fixture_id: str, source_line: str) -> None:
+    path.mkdir(parents=True)
+    (path / "source.md").write_text(
+        "# Known Sanction Filing Excerpt\n\n"
+        "## Filing Excerpt\n\n"
+        f"{source_line}\n",
+        encoding="utf-8",
+    )
+    (path / "authority_inventory.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "legal_authority_inventory_v1",
+                "authorities": [],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (path / "source_metadata.json").write_text(
+        json.dumps(
+            {
+                "fixture_id": fixture_id,
+                "source_title": f"Known sanction filing fixture {fixture_id}",
+                "source_url": "https://example.test/sanctioned-filing",
+                "source_court_or_body": "Test court",
+                "source_docket_or_case": "Test docket",
+                "source_date": "2026-06-06",
+                "excerpt_method": "faithful_public_excerpt_or_transcription",
+                "omitted_source_scope": "",
+                "authority_sources": [],
+                "oracle_independence": {
+                    "used_model_output": False,
+                    "review_basis": "source_and_authority_inventory_only",
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (path / "manifest.json").write_text(
+        json.dumps(
+            {
+                "fixture_id": fixture_id,
+                "domain_profile": "legal_authority_verification_v1",
+                "schema_version": "compile_micro_fixture_manifest_v1",
+                "purpose": "Known hallucination/sanction legal-authority excerpt for deterministic verification.",
+                "source_kind": "known_hallucination_or_sanction_filing_excerpt",
+                "files": {
+                    "source": "source.md",
+                    "expected_facts": "expected_facts.pl",
+                    "forbidden_facts": "forbidden_facts.pl",
+                },
+                "claim_status": "research_fixture_not_legal_advice",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    report = verify_legal_authorities(
+        source_path=path / "source.md",
+        authority_inventory_path=path / "authority_inventory.json",
+        document_id=fixture_id,
+    )
+    (path / "expected_facts.pl").write_text(facts_text(report), encoding="utf-8")
+    (path / "forbidden_facts.pl").write_text(
+        "legal_authority_resolution(mention_001, cite_999_us_999, resolved, auth_fake, source_line_5).\n",
+        encoding="utf-8",
+    )
+    (path / "sanction_or_correction_source.md").write_text(
+        "# Sanction Or Correction Source\n\n"
+        "Public sanction/correction source identifies the citation defect in this excerpt.\n",
+        encoding="utf-8",
+    )
+    (path / "review_notes.md").write_text(
+        "# Review Notes\n\nMinimal known-sanction package for intake validator regression coverage.\n",
         encoding="utf-8",
     )
 

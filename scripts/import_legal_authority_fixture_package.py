@@ -201,13 +201,23 @@ def _update_manifest(*, manifest_path: Path, fixture_class: str, fixture_paths: 
     existing = [str(item) for item in target.get("fixtures", []) if str(item).strip()]
     merged = sorted(dict.fromkeys([*existing, *fixture_paths]))
     target["fixtures"] = merged
-    if fixture_class == "clean_public_filings" and merged:
+    if merged:
         target["status"] = "seeded"
+    if fixture_class == "clean_public_filings" and merged:
         manifest["next_external_work_order_needed"] = {
             "needed_now": False,
             "reason": (
                 "Clean-public legal filings have been imported. Next expansion should be decided from "
                 "the imported baseline audit before known hallucination/sanction fixtures are opened."
+            ),
+        }
+    elif fixture_class == "known_hallucination_or_sanction_filings" and merged:
+        manifest["next_external_work_order_needed"] = {
+            "needed_now": False,
+            "reason": (
+                "Known hallucination/sanction legal-authority fixtures have been imported. Next expansion "
+                "should be decided from the imported false-verification audit rather than opening another "
+                "sanction packet immediately."
             ),
         }
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
