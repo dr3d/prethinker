@@ -957,6 +957,44 @@ def test_legal_authority_courtlistener_resolver_carries_cluster_source_url(tmp_p
     ) in report["facts"]
 
 
+def test_legal_authority_short_form_citation_blocks_certification_without_fake_resolution(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text(
+        "Brown v. Board of Education, 347 U.S. 483, 495 (1954).\nId. at 495.",
+        encoding="utf-8",
+    )
+
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=FIXTURE / "authority_inventory.json",
+        document_id="legal_authority_short_form",
+    )
+
+    assert report["summary"]["citation_mentions"] == 1
+    assert report["summary"]["short_form_citations"] == 1
+    assert report["summary"]["document_outcome"] == "review_required"
+    assert report["ledger_queries"]["which_citations_require_context"] == [
+        {
+            "short_form_id": "short_form_001",
+            "citation": "Id. at 495",
+            "line": 2,
+            "reason": "short_form_citation_requires_context",
+        }
+    ]
+    assert report["ledger_queries"]["can_this_filing_be_certified_citation_clean"] == {
+        "citation_clean": False,
+        "blocking_issue_count": 1,
+        "blocking_issue_types": ["short_form_citation_requires_context"],
+        "review_required_count": 0,
+        "answer": "no",
+    }
+    assert (
+        "legal_verification_abstention("
+        "short_form_001, authority_resolution, short_form_citation_requires_context, source_line_2)."
+    ) in report["facts"]
+    assert not any("legal_authority_resolution(short_form_001" in fact for fact in report["facts"])
+
+
 def test_legal_fixture_corpus_manifest_defers_sanction_expansion() -> None:
     manifest = json.loads(
         (ROOT / "datasets" / "legal_authority_verification" / "fixture_corpus_manifest.json").read_text(

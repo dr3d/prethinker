@@ -261,6 +261,7 @@ compiled ledger, not from a second pass over source prose:
 which_citations_do_not_resolve
 which_citations_are_ambiguous
 which_citations_use_unsupported_reporters
+which_citations_require_context
 which_cases_have_metadata_mismatches
 which_quotes_cannot_be_found
 which_authority_text_is_unavailable
@@ -290,6 +291,7 @@ Secondary metrics:
 
 - citation extraction precision/recall;
 - authority resolution rate;
+- short-form/context-required citation count;
 - quote-match precision/recall;
 - pin-cite locality accuracy;
 - abstention rate;

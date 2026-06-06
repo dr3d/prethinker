@@ -44,6 +44,10 @@ BARE_CITATION_RE = re.compile(
     r"(?:,\s+(?P<pin_comma>\d+(?:-\d+)?)|\s+at\s+(?P<pin_at>\d+(?:-\d+)?))?"
     r"(?:\s+\([^)]*?(?P<year>\d{4})[^)]*?\))?"
 )
+SHORT_FORM_CITATION_RE = re.compile(
+    r"(?<![A-Za-z0-9_])(?P<form>id\.|ibid\.)(?:\s+at\s+(?P<pin>\d+(?:-\d+)?))?",
+    re.IGNORECASE,
+)
 QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"')
 
 
@@ -85,12 +89,16 @@ def verify_legal_authorities(
     mentions: list[dict[str, Any]] = []
     lookup_rows: list[dict[str, Any]] = []
     issue_rows: list[dict[str, Any]] = []
+    short_form_refs: list[dict[str, Any]] = []
 
     mention_index = 0
+    short_form_index = 0
     quote_index = 0
     proposition_index = 0
     for paragraph in paragraphs:
-        for citation_extract in _citation_extracts(paragraph.text):
+        citation_extracts = _citation_extracts(paragraph.text)
+        citation_spans = [(row.start, row.end) for row in citation_extracts]
+        for citation_extract in citation_extracts:
             mention_index += 1
             mention_id = f"mention_{mention_index:03d}"
             case_name = citation_extract.case_name
@@ -347,9 +355,41 @@ def verify_legal_authorities(
                         "proposition_id": proposition_id,
                         "issue": "proposition_support_requires_human_review",
                         "line": citation_line,
-                    }
-                )
+                }
+            )
             mentions.append(mention_report)
+
+        for match in SHORT_FORM_CITATION_RE.finditer(paragraph.text):
+            if any(_spans_overlap(match.span(), span) for span in citation_spans):
+                continue
+            short_form_index += 1
+            short_form_id = f"short_form_{short_form_index:03d}"
+            line = paragraph.start_line + paragraph.text[: match.start()].count("\n")
+            source_scope = f"source_line_{line}"
+            citation_text = _clean_space(match.group(0))
+            pin = match.group("pin") or ""
+            row = {
+                "short_form_id": short_form_id,
+                "citation": citation_text,
+                "pin": _page_atom(pin) if pin else "",
+                "line": line,
+                "source_scope": source_scope,
+                "reason": "short_form_citation_requires_context",
+            }
+            short_form_refs.append(row)
+            issue_rows.append(
+                {
+                    "mention_id": short_form_id,
+                    "issue": "short_form_citation_requires_context",
+                    "citation": citation_text,
+                    "line": line,
+                    "reason": "short_form_citation_requires_context",
+                }
+            )
+            facts.append(
+                "legal_verification_abstention("
+                f"{short_form_id}, authority_resolution, short_form_citation_requires_context, {source_scope})."
+            )
 
     for mention in mentions:
         mention["verification_status"] = _mention_verification_status(mention)
@@ -395,6 +435,7 @@ def verify_legal_authorities(
         "authority_text_unavailable_sources": sum(
             1 for row in authority_text_sources.values() if row.get("text_status") == "authority_unavailable"
         ),
+        "short_form_citations": len(short_form_refs),
         "proposition_boundaries": sum(1 for row in mentions if row.get("proposition_boundary")),
         "verification_abstentions": verification_abstentions,
         "false_verified": false_verified,
@@ -409,6 +450,7 @@ def verify_legal_authorities(
         "summary": summary,
         "courtlistener_like_lookup": lookup_rows,
         "authority_text_sources": sorted(authority_text_sources.values(), key=lambda row: (row["authority_id"], row["text_scope"])),
+        "short_form_citations": short_form_refs,
         "mentions": mentions,
         "issues": issue_rows,
         "facts": [*facts, *sorted(authority_text_source_facts)],
@@ -497,6 +539,16 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         for row in mentions
         if row.get("quote_check") and row["quote_check"].get("status") == "authority_unavailable"
     ]
+    short_form_context_required = [
+        {
+            "short_form_id": row.get("mention_id", ""),
+            "citation": row.get("citation", ""),
+            "line": row.get("line", ""),
+            "reason": row.get("reason", ""),
+        }
+        for row in issues
+        if row.get("issue") == "short_form_citation_requires_context"
+    ]
     pin_mismatches = [
         {
             "mention_id": row["mention_id"],
@@ -542,6 +594,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
             "authority_text_unavailable",
             "quote_not_found_in_authority",
             "quote_outside_cited_pin",
+            "short_form_citation_requires_context",
         }
     ]
     blocking_issue_types = sorted({str(row.get("issue") or "") for row in blocking_issues if row.get("issue")})
@@ -553,6 +606,7 @@ def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
         "which_quotes_cannot_be_found": quote_mismatches,
         "which_authority_text_is_unavailable": unavailable_authority_text,
         "which_authority_text_sources_were_used": authority_text_sources,
+        "which_citations_require_context": short_form_context_required,
         "which_pin_cites_do_not_contain_the_quote": pin_mismatches,
         "which_propositions_require_human_review": proposition_review,
         "which_authorities_are_attached_to_propositions": proposition_authorities,
@@ -585,6 +639,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Pin mismatches: `{summary['pin_mismatch']}`",
         f"- Authority text sources: `{summary['authority_text_sources']}`",
         f"- Authority text available / unavailable sources: `{summary['authority_text_available_sources']} / {summary['authority_text_unavailable_sources']}`",
+        f"- Short-form citations requiring context: `{summary['short_form_citations']}`",
         f"- Proposition support boundaries: `{summary['proposition_boundaries']}`",
         f"- Verification abstentions: `{summary['verification_abstentions']}`",
         f"- False verified: `{summary['false_verified']}`",
@@ -636,6 +691,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Unsupported reporter citations: `{len(queries.get('which_citations_use_unsupported_reporters') or [])}`",
                 f"- Unavailable authority text: `{len(queries.get('which_authority_text_is_unavailable') or [])}`",
                 f"- Authority text source receipts: `{len(queries.get('which_authority_text_sources_were_used') or [])}`",
+                f"- Short-form citations requiring context: `{len(queries.get('which_citations_require_context') or [])}`",
                 f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
                 f"- Pin-cite mismatches: `{len(queries.get('which_pin_cites_do_not_contain_the_quote') or [])}`",
                 f"- Proposition authority links: `{len(queries.get('which_authorities_are_attached_to_propositions') or [])}`",

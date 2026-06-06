@@ -15,6 +15,7 @@ It reads local fixture files and authority inventories only; it does not call an
 - Pin mismatches: `1`
 - Authority text sources: `11`
 - Authority text available / unavailable sources: `10 / 1`
+- Short-form citations requiring context: `0`
 - Proposition boundaries: `1`
 - Verification abstentions: `9`
 - False verified: `0`
