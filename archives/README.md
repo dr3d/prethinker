@@ -32,3 +32,13 @@ Recent repo-cleanup sweeps moved bulky or stale local material to:
 - `C:\prethinker_tmp_archive\tmp_sweep_20260514`
 - `C:\prethinker_tmp_archive\tmp_lean_markdown_docs_cleanup_20260522`
 - `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522`
+- `C:\prethinker_tmp_archive\rag_current_context_20260606`
+- `C:\prethinker_tmp_archive\tmp_closeout_sweep_20260606`
+
+The `rag_current_context_20260606` bundle is the curated current-context shelf:
+front-door docs, the phase-close technical notes, domain-pack status/evidence
+docs, and the latest close-out governance reports. It is intended for future
+agent/RAG context without resurfacing stale worksheet sediment.
+
+The `tmp_closeout_sweep_20260606` bundle is a bulk move of ignored local
+generated reports from `tmp\` after the June 2026 close-out documentation pass.

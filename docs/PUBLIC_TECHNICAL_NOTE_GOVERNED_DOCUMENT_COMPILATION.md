@@ -31,7 +31,7 @@ language through source-record text, display strings, query-shape routing, and
 judge-facing answer tokens. The new gates lowered the apparent score, but made
 the remaining result more real.
 
-This note is not a product announcement. It does not claim broad document
+This note is not a product announcement. It is not a claim of broad document
 understanding, 90%+ general QA accuracy, model-independent recall, or
 self-serve schema induction. It is a technical checkpoint: what survived after
 the score stopped being allowed to cheat?
@@ -113,11 +113,11 @@ Those numbers are not current accuracy claims.
 The old scorecard included figures like:
 
 ```text
-cold transfer: 73.75%
-native run: 92.33% on 2163 rows
-sealed unseen: 95.0%
-real-world four-fixture spotcheck: per-fixture 40/0/0
-later worksheet cells: 98-99%-looking ranges under permissive surfaces
+historical/not-current cold transfer: 73.75%
+historical/not-current native run: 92.33% on 2163 rows
+historical/not-current sealed unseen: 95.0%
+historical/not-current real-world four-fixture spotcheck: per-fixture 40/0/0
+historical/not-current later worksheet cells: 98-99%-looking ranges under permissive surfaces
 ```
 
 Those numbers are quarantined for three reasons.
