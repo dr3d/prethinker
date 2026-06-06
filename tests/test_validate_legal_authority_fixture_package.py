@@ -20,7 +20,17 @@ def test_validate_legal_authority_fixture_package_accepts_clean_public_batch(tmp
     assert report["summary"]["matched_forbidden_fact_count"] == 0
     assert report["summary"]["false_verified"] == 0
     assert report["summary"]["citation_mentions"] == 9
+    assert report["summary"]["metadata_checks"] == 45
+    assert report["summary"]["metadata_match"] == 45
+    assert report["summary"]["metadata_mismatch"] == 0
     signatures = {row["signature"]: row for row in report["summary"]["fact_signature_summary"]}
+    assert signatures["legal_authority_metadata_check/5"] == {
+        "signature": "legal_authority_metadata_check/5",
+        "expected": 45,
+        "matched_expected": 45,
+        "forbidden": 0,
+        "matched_forbidden": 0,
+    }
     assert signatures["legal_citation_mention/5"] == {
         "signature": "legal_citation_mention/5",
         "expected": 9,
@@ -101,8 +111,8 @@ def test_validate_legal_authority_fixture_package_rejects_claim_bearing_support_
 
     assert report["summary"]["status"] == "fail"
     errors = report["fixtures"][0]["errors"]
-    assert "expected_facts.pl:line_22:tier2_support_assessment_not_allowed_clean_public" in errors
-    assert "expected_facts.pl:line_23:proposition_boundary_must_abstain_clean_public" in errors
+    assert "expected_facts.pl:line_31:tier2_support_assessment_not_allowed_clean_public" in errors
+    assert "expected_facts.pl:line_32:proposition_boundary_must_abstain_clean_public" in errors
 
 
 def test_validate_legal_authority_fixture_package_requires_expected_authority_text_receipts(tmp_path: Path) -> None:

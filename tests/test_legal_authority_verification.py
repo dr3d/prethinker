@@ -28,8 +28,8 @@ def test_legal_authority_micro_fixture_catches_hallucination_shapes() -> None:
     assert report["summary"]["review_required_mentions"] == 1
     assert report["summary"]["resolved"] == 4
     assert report["summary"]["unresolved"] == 1
-    assert report["summary"]["metadata_checks"] == 8
-    assert report["summary"]["metadata_match"] == 8
+    assert report["summary"]["metadata_checks"] == 20
+    assert report["summary"]["metadata_match"] == 20
     assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_mismatch"] == 1
     assert report["summary"]["pin_mismatch"] == 1
@@ -102,8 +102,8 @@ def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavail
     assert report["summary"]["review_required_mentions"] == 0
     assert report["summary"]["resolved"] == 3
     assert report["summary"]["ambiguous"] == 1
-    assert report["summary"]["metadata_checks"] == 6
-    assert report["summary"]["metadata_match"] == 4
+    assert report["summary"]["metadata_checks"] == 15
+    assert report["summary"]["metadata_match"] == 13
     assert report["summary"]["metadata_mismatch"] == 2
     assert report["summary"]["quote_claims"] == 1
     assert report["summary"]["authority_text_sources"] == 2
@@ -184,8 +184,8 @@ def test_legal_authority_micro_fixture_v4_keeps_quote_verification_authority_sco
     assert report["summary"]["blocked_mentions"] == 1
     assert report["summary"]["review_required_mentions"] == 0
     assert report["summary"]["resolved"] == 1
-    assert report["summary"]["metadata_checks"] == 2
-    assert report["summary"]["metadata_match"] == 2
+    assert report["summary"]["metadata_checks"] == 5
+    assert report["summary"]["metadata_match"] == 5
     assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_claims"] == 1
     assert report["summary"]["quote_exact_or_normalized_match"] == 0
@@ -220,8 +220,8 @@ def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_witho
     assert report["summary"]["verified_mentions"] == 4
     assert report["summary"]["blocked_mentions"] == 0
     assert report["summary"]["resolved"] == 4
-    assert report["summary"]["metadata_checks"] == 2
-    assert report["summary"]["metadata_match"] == 2
+    assert report["summary"]["metadata_checks"] == 14
+    assert report["summary"]["metadata_match"] == 14
     assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_claims"] == 2
     assert report["summary"]["quote_exact_or_normalized_match"] == 2
@@ -235,11 +235,21 @@ def test_legal_authority_micro_fixture_v5_resolves_bare_reporter_citations_witho
     assert full["case_name"] == "Brown v. Board of Education"
     assert {check["field"]: check["status"] for check in full["metadata_checks"]} == {
         "case_name": "match",
+        "volume": "match",
+        "reporter": "match",
+        "page": "match",
         "year": "match",
     }
     assert report["mentions"][2]["citation"] == "576 U.S. 644"
     assert all(row["case_name"] == "" for row in bare)
-    assert all(row["metadata_checks"] == [] for row in bare)
+    assert [
+        {check["field"]: check["status"] for check in row["metadata_checks"]}
+        for row in bare
+    ] == [
+        {"volume": "match", "reporter": "match", "page": "match"},
+        {"volume": "match", "reporter": "match", "page": "match"},
+        {"volume": "match", "reporter": "match", "page": "match"},
+    ]
 
     queries = report["ledger_queries"]
     assert queries["which_cases_have_metadata_mismatches"] == []
@@ -264,8 +274,8 @@ def test_legal_authority_micro_fixture_v6_checks_quotes_before_citations() -> No
     assert report["summary"]["citation_mentions"] == 2
     assert report["summary"]["verified_mentions"] == 1
     assert report["summary"]["blocked_mentions"] == 1
-    assert report["summary"]["metadata_checks"] == 4
-    assert report["summary"]["metadata_match"] == 4
+    assert report["summary"]["metadata_checks"] == 10
+    assert report["summary"]["metadata_match"] == 10
     assert report["summary"]["metadata_mismatch"] == 0
     assert report["summary"]["quote_claims"] == 2
     assert report["summary"]["quote_exact_or_normalized_match"] == 1
@@ -439,7 +449,7 @@ def test_legal_authority_report_renders_review_required_boundary() -> None:
 
     assert "Document outcome: `review_required`" in markdown
     assert "Verified mentions: `1`" in markdown
-    assert "Metadata checks / matches / mismatches: `8 / 8 / 0`" in markdown
+    assert "Metadata checks / matches / mismatches: `20 / 20 / 0`" in markdown
     assert "Verification abstentions: `4`" in markdown
     assert "`review_required`" in markdown
     assert "`blocked`" in markdown

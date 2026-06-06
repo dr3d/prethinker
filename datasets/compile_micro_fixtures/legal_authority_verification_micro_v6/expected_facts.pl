@@ -1,6 +1,9 @@
 legal_citation_mention(legal_authority_verification_micro_v6, mention_001, cite_347_us_483, line_5, source_line_5).
 legal_authority_resolution(mention_001, cite_347_us_483, resolved, auth_brown_347_us_483, source_line_5).
 legal_authority_metadata_check(mention_001, auth_brown_347_us_483, case_name, match, source_line_5).
+legal_authority_metadata_check(mention_001, auth_brown_347_us_483, volume, match, source_line_5).
+legal_authority_metadata_check(mention_001, auth_brown_347_us_483, reporter, match, source_line_5).
+legal_authority_metadata_check(mention_001, auth_brown_347_us_483, page, match, source_line_5).
 legal_authority_metadata_check(mention_001, auth_brown_347_us_483, year, match, source_line_5).
 legal_quote_claim(mention_001, quote_001, sha256_e478036a43df, filing_line_5, source_line_5).
 legal_quote_span_match(quote_001, auth_brown_347_us_483, normalized_match, page_495, authority_inventory).
@@ -8,6 +11,9 @@ legal_pin_cite_check(mention_001, auth_brown_347_us_483, page_495, pin_contains_
 legal_citation_mention(legal_authority_verification_micro_v6, mention_002, cite_347_us_483, line_7, source_line_7).
 legal_authority_resolution(mention_002, cite_347_us_483, resolved, auth_brown_347_us_483, source_line_7).
 legal_authority_metadata_check(mention_002, auth_brown_347_us_483, case_name, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_brown_347_us_483, volume, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_brown_347_us_483, reporter, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_brown_347_us_483, page, match, source_line_7).
 legal_authority_metadata_check(mention_002, auth_brown_347_us_483, year, match, source_line_7).
 legal_quote_claim(mention_002, quote_002, sha256_fed2ea7aca36, filing_line_7, source_line_7).
 legal_quote_span_match(quote_002, auth_brown_347_us_483, no_match, no_match, authority_inventory).

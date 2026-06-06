@@ -1,10 +1,16 @@
 legal_citation_mention(legal_authority_micro_v2, mention_001, cite_410_us_113, line_5, source_line_5).
 legal_authority_resolution(mention_001, cite_410_us_113, resolved, auth_roe_410_us_113, source_line_5).
 legal_authority_metadata_check(mention_001, auth_roe_410_us_113, case_name, mismatch, source_line_5).
+legal_authority_metadata_check(mention_001, auth_roe_410_us_113, volume, match, source_line_5).
+legal_authority_metadata_check(mention_001, auth_roe_410_us_113, reporter, match, source_line_5).
+legal_authority_metadata_check(mention_001, auth_roe_410_us_113, page, match, source_line_5).
 legal_authority_metadata_check(mention_001, auth_roe_410_us_113, year, match, source_line_5).
 legal_citation_mention(legal_authority_micro_v2, mention_002, cite_410_us_113, line_7, source_line_7).
 legal_authority_resolution(mention_002, cite_410_us_113, resolved, auth_roe_410_us_113, source_line_7).
 legal_authority_metadata_check(mention_002, auth_roe_410_us_113, case_name, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_roe_410_us_113, volume, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_roe_410_us_113, reporter, match, source_line_7).
+legal_authority_metadata_check(mention_002, auth_roe_410_us_113, page, match, source_line_7).
 legal_authority_metadata_check(mention_002, auth_roe_410_us_113, year, mismatch, source_line_7).
 legal_citation_mention(legal_authority_micro_v2, mention_003, cite_123_us_456, line_11, source_line_11).
 legal_authority_resolution(mention_003, cite_123_us_456, ambiguous, ambiguous_authority, source_line_11).
@@ -12,6 +18,9 @@ legal_verification_abstention(mention_003, authority_resolution, ambiguous_autho
 legal_citation_mention(legal_authority_micro_v2, mention_004, cite_372_us_335, line_15, source_line_15).
 legal_authority_resolution(mention_004, cite_372_us_335, resolved, auth_gideon_372_us_335, source_line_15).
 legal_authority_metadata_check(mention_004, auth_gideon_372_us_335, case_name, match, source_line_15).
+legal_authority_metadata_check(mention_004, auth_gideon_372_us_335, volume, match, source_line_15).
+legal_authority_metadata_check(mention_004, auth_gideon_372_us_335, reporter, match, source_line_15).
+legal_authority_metadata_check(mention_004, auth_gideon_372_us_335, page, match, source_line_15).
 legal_authority_metadata_check(mention_004, auth_gideon_372_us_335, year, match, source_line_15).
 legal_quote_claim(mention_004, quote_001, sha256_91ef50f9fbec, filing_line_15, source_line_15).
 legal_quote_span_match(quote_001, auth_gideon_372_us_335, authority_unavailable, authority_unavailable, authority_inventory).

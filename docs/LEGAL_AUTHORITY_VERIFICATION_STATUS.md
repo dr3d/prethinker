@@ -5,12 +5,12 @@ It reads local fixture files and authority inventories only; it does not call an
 
 - Manifest: `datasets/legal_authority_verification/fixture_corpus_manifest.json`
 - Fixtures: `6`
-- Expected facts: `105 / 105`
+- Expected facts: `147 / 147`
 - Matched forbidden facts: `0 / 35`
 - Citation mentions: `17`
 - Verified / blocked / review-required mentions: `6 / 10 / 1`
 - Resolved / unresolved / ambiguous / invalid reporter: `14 / 1 / 1 / 1`
-- Metadata checks / matches / mismatches: `22 / 20 / 2`
+- Metadata checks / matches / mismatches: `64 / 62 / 2`
 - Quote claims / quote matches / quote mismatches: `9 / 5 / 3`
 - Pin mismatches: `1`
 - Authority text sources: `11`
@@ -25,7 +25,7 @@ It reads local fixture files and authority inventories only; it does not call an
 
 | Signature | Expected matched/total | Forbidden matched/total |
 | --- | ---: | ---: |
-| `legal_authority_metadata_check/5` | 22/22 | 0/8 |
+| `legal_authority_metadata_check/5` | 64/64 | 0/8 |
 | `legal_authority_resolution/5` | 17/17 | 0/7 |
 | `legal_authority_text_source/5` | 11/11 | 0/2 |
 | `legal_citation_mention/5` | 17/17 | 0/0 |
@@ -50,12 +50,12 @@ It reads local fixture files and authority inventories only; it does not call an
 
 | Fixture | Class | Expected | Forbidden matched | False verified | Mentions verified/blocked/review | Certification | Errors |
 | --- | --- | ---: | ---: | ---: | --- | --- | --- |
-| `legal_authority_verification_micro_v1` | `controlled_adversarial_mutations` | 39/39 | 0 | 0 | `1/3/1` | `no` | `[]` |
-| `legal_authority_verification_micro_v2` | `controlled_adversarial_mutations` | 20/20 | 0 | 0 | `0/4/0` | `no` | `[]` |
+| `legal_authority_verification_micro_v1` | `controlled_adversarial_mutations` | 51/51 | 0 | 0 | `1/3/1` | `no` | `[]` |
+| `legal_authority_verification_micro_v2` | `controlled_adversarial_mutations` | 29/29 | 0 | 0 | `0/4/0` | `no` | `[]` |
 | `legal_authority_verification_micro_v3` | `controlled_adversarial_mutations` | 3/3 | 0 | 0 | `0/1/0` | `no` | `[]` |
-| `legal_authority_verification_micro_v4` | `controlled_adversarial_mutations` | 9/9 | 0 | 0 | `0/1/0` | `no` | `[]` |
-| `legal_authority_verification_micro_v5` | `controlled_adversarial_mutations` | 19/19 | 0 | 0 | `4/0/0` | `yes` | `[]` |
-| `legal_authority_verification_micro_v6` | `controlled_adversarial_mutations` | 15/15 | 0 | 0 | `1/1/0` | `no` | `[]` |
+| `legal_authority_verification_micro_v4` | `controlled_adversarial_mutations` | 12/12 | 0 | 0 | `0/1/0` | `no` | `[]` |
+| `legal_authority_verification_micro_v5` | `controlled_adversarial_mutations` | 31/31 | 0 | 0 | `4/0/0` | `yes` | `[]` |
+| `legal_authority_verification_micro_v6` | `controlled_adversarial_mutations` | 21/21 | 0 | 0 | `1/1/0` | `no` | `[]` |
 
 ## Next External Work Order
 

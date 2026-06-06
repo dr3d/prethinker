@@ -47,7 +47,9 @@ class Paragraph:
 class CitationExtract:
     case_name: str
     citation: str
+    volume: str
     reporter: str
+    page: str
     pin: str
     year: str
     start: int
@@ -189,6 +191,12 @@ def verify_legal_authorities(
             metadata_candidates = []
             if case_name:
                 metadata_candidates.append(("case_name", case_name))
+            if citation_extract.volume:
+                metadata_candidates.append(("volume", citation_extract.volume))
+            if citation_extract.reporter:
+                metadata_candidates.append(("reporter", _normalized_reporter_text(citation_extract.reporter)))
+            if citation_extract.page:
+                metadata_candidates.append(("page", citation_extract.page))
             if citation_extract.year:
                 metadata_candidates.append(("year", citation_extract.year))
             for field, extracted in metadata_candidates:
@@ -633,7 +641,9 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                 reporter=match.group("reporter"),
                 page=match.group("page"),
             ),
+            volume=match.group("volume"),
             reporter=match.group("reporter"),
+            page=match.group("page"),
             pin=match.group("pin") or "",
             year=match.group("year") or "",
             start=match.start(),
@@ -656,7 +666,9 @@ def _citation_extracts(text: str) -> list[CitationExtract]:
                     reporter=match.group("reporter"),
                     page=match.group("page"),
                 ),
+                volume=match.group("volume"),
                 reporter=match.group("reporter"),
+                page=match.group("page"),
                 pin=match.group("pin_comma") or match.group("pin_at") or "",
                 year=match.group("year") or "",
                 start=match.start(),
@@ -767,6 +779,8 @@ def _metadata_matches(field: str, extracted: str, authority: dict[str, Any]) -> 
     expected = str(authority.get(field) or "")
     if field == "case_name":
         return _normalize_name(extracted) == _normalize_name(expected)
+    if field == "reporter":
+        return _normalized_reporter_text(extracted) == _normalized_reporter_text(expected)
     return extracted.strip() == expected.strip()
 
 

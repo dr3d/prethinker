@@ -54,7 +54,7 @@ the domain-pack work:
 - citation mention extraction with source coordinates;
 - citation resolution against a declared authority inventory or external legal
   authority database;
-- case-name, court, year, reporter, and page metadata checks;
+- case-name, year, reporter, volume, and first-page metadata checks;
 - quote existence checks against authority text;
 - pin-cite locality checks when source pages or paragraphs are available;
 - explicit unresolved, ambiguous, unavailable, and abstention rows.
