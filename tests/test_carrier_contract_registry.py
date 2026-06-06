@@ -46,6 +46,19 @@ def test_legal_citation_contract_preserves_future_amendment_scope() -> None:
     assert "full_obligation_text" in text
 
 
+def test_legal_verification_abstention_contract_admits_runtime_reason_codes() -> None:
+    contract = carrier_contract("legal_verification_abstention/4")
+
+    assert contract is not None
+    text = " ".join(contract["contract"])
+    reason_codes = contract["value_domains"]["reason_code"]
+
+    assert "lookup is unavailable" in text
+    assert "short-form citation needs preceding context" in text
+    assert "authority_lookup_unavailable" in reason_codes
+    assert "short_form_citation_requires_context" in reason_codes
+
+
 def test_fda_warning_letter_contracts_keep_domain_slots_compact() -> None:
     warning_letter = carrier_contract("fda_warning_letter/5")
     violation = carrier_contract("fda_violation/5")
