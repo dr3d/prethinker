@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import io
 import json
+import urllib.error
 import urllib.parse
 from pathlib import Path
 
 import pytest
 
-from adapters.courtlistener.client import CourtListenerClient
+from adapters.courtlistener.client import CourtListenerClient, CourtListenerRequestError
 from adapters.courtlistener.normalize import normalize_opinion_record
 from adapters.courtlistener.predicates import legal_predicate_signatures, semantic_ir_contracts
 from adapters.courtlistener.to_harness import record_to_harness_case
@@ -132,6 +134,29 @@ def test_courtlistener_client_writes_cache_metadata_for_live_citation_lookup(tmp
     assert metadata["url"] == url
     assert metadata["body_sha256"]
     assert metadata["cache_file"] == cached.name
+
+
+def test_courtlistener_client_surfaces_http_error_status_for_live_citation_lookup(tmp_path, monkeypatch):
+    monkeypatch.setenv("COURTLISTENER_API_TOKEN", "test-token")
+
+    def fake_urlopen(request, timeout):
+        raise urllib.error.HTTPError(
+            url=request.full_url,
+            code=429,
+            msg="Too Many Requests",
+            hdrs=None,
+            fp=io.BytesIO(b'{"detail":"throttled"}'),
+        )
+
+    monkeypatch.setattr("adapters.courtlistener.client.urllib.request.urlopen", fake_urlopen)
+    client = CourtListenerClient(cache_dir=tmp_path)
+
+    with pytest.raises(CourtListenerRequestError) as exc_info:
+        client.citation_lookup(text="Brown v. Board of Education, 347 U.S. 483 (1954)")
+
+    assert exc_info.value.status == 429
+    assert "CourtListener HTTP 429" in str(exc_info.value)
+    assert "throttled" in str(exc_info.value)
 
 
 def test_normalize_opinion_record_tolerates_search_result_shape():

@@ -306,6 +306,41 @@ def test_external_resolver_throttling_is_unavailable_not_unresolved(tmp_path: Pa
     ) in report["facts"]
 
 
+def test_courtlistener_lookup_resolver_maps_throttling_exception_to_abstention(tmp_path: Path) -> None:
+    source = tmp_path / "source.md"
+    source.write_text("Brown v. Board of Education, 347 U.S. 483 (1954).", encoding="utf-8")
+
+    class ThrottledLookupError(RuntimeError):
+        status = 429
+
+    class FakeCourtListenerClient:
+        def citation_lookup(self, *, text: str) -> list[dict[str, object]]:
+            raise ThrottledLookupError("CourtListener throttled citation lookup")
+
+    resolver = CourtListenerCitationLookupResolver(client=FakeCourtListenerClient())
+    report = verify_legal_authorities(
+        source_path=source,
+        authority_inventory_path=tmp_path / "missing_inventory.json",
+        document_id="legal_authority_throttled_courtlistener_client",
+        resolver=resolver,
+    )
+
+    assert report["mentions"][0]["resolution_status"] == "unavailable"
+    assert report["issues"] == [
+        {
+            "mention_id": "mention_001",
+            "issue": "unavailable",
+            "reason": "authority_lookup_unavailable",
+            "line": 1,
+        }
+    ]
+    assert (
+        "legal_verification_abstention("
+        "mention_001, authority_resolution, authority_lookup_unavailable, source_line_1)."
+    ) in report["facts"]
+    assert report["summary"]["false_verified"] == 0
+
+
 def test_legal_authority_micro_fixture_v2_catches_metadata_ambiguity_and_unavailable_text() -> None:
     report = verify_legal_authorities(
         source_path=FIXTURE_V2 / "source.md",

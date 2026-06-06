@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -11,6 +12,14 @@ from typing import Any
 
 DEFAULT_BASE_URL = "https://www.courtlistener.com/api/rest/v4"
 DEFAULT_CACHE_DIR = Path("datasets") / "courtlistener" / "generated" / "cache"
+
+
+class CourtListenerRequestError(RuntimeError):
+    """Typed live-request failure so resolver layers can abstain deterministically."""
+
+    def __init__(self, *, status: int, message: str) -> None:
+        self.status = status
+        super().__init__(message)
 
 
 class CourtListenerClient:
@@ -86,8 +95,14 @@ class CourtListenerClient:
             raise RuntimeError("COURTLISTENER_API_TOKEN is required for live CourtListener API calls.")
         headers = {"Authorization": f"Token {self.api_token}", **(extra_headers or {})}
         req = urllib.request.Request(url, data=body, headers=headers, method=method)
-        with urllib.request.urlopen(req, timeout=30) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            raise CourtListenerRequestError(
+                status=int(exc.code),
+                message=_http_error_message(exc=exc, method=method, url=url),
+            ) from exc
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         self._write_cache_metadata(cached=cached, method=method, url=url, body=body)
@@ -120,3 +135,14 @@ class CourtListenerClient:
             json.dumps(metadata, ensure_ascii=False, indent=2, sort_keys=True),
             encoding="utf-8",
         )
+
+
+def _http_error_message(*, exc: urllib.error.HTTPError, method: str, url: str) -> str:
+    prefix = f"CourtListener HTTP {int(exc.code)} for {method.upper()} {url}"
+    try:
+        body = exc.read().decode("utf-8", errors="replace").strip()
+    except Exception:
+        body = ""
+    if body:
+        return f"{prefix}: {body}"
+    return prefix

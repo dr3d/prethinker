@@ -21,6 +21,7 @@ from src.legal_authority_resolvers import (
     CourtListenerCitationLookupResolver,
     LegalAuthorityResolver,
     LocalAuthorityInventoryResolver,
+    TRANSIENT_LOOKUP_STATUSES,
     unsupported_reporter_lookup_row,
 )
 
@@ -889,7 +890,7 @@ def _proposition_digest(proposition_tail: str) -> str:
 
 def _resolution(matches: list[dict[str, Any]], lookup_row: dict[str, Any] | None = None) -> tuple[str, str]:
     status = int((lookup_row or {}).get("status") or 0)
-    if status == 429:
+    if status in TRANSIENT_LOOKUP_STATUSES:
         return "unavailable", "authority_lookup_unavailable"
     if status == 400:
         return "invalid_reporter", "invalid_authority"

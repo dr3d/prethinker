@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any, Protocol
 
 
+TRANSIENT_LOOKUP_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+
+
 @dataclass(frozen=True)
 class CitationResolution:
     authority_matches: list[dict[str, Any]]
@@ -92,7 +95,22 @@ class CourtListenerCitationLookupResolver:
         start_index: int,
         end_index: int,
     ) -> CitationResolution:
-        lookup_rows = self.client.citation_lookup(text=citation)
+        try:
+            lookup_rows = self.client.citation_lookup(text=citation)
+        except Exception as exc:
+            status = _exception_status(exc)
+            if status in TRANSIENT_LOOKUP_STATUSES:
+                return CitationResolution(
+                    authority_matches=[],
+                    lookup_row=external_lookup_unavailable_row(
+                        citation=citation,
+                        start_index=start_index,
+                        end_index=end_index,
+                        status=status,
+                        error_message=str(exc) or "external citation lookup unavailable",
+                    ),
+                )
+            raise
         lookup_row = _select_lookup_row(
             lookup_rows=lookup_rows,
             citation=citation,
@@ -160,6 +178,36 @@ def courtlistener_like_lookup_row(
             for row in authority_matches
         ],
     }
+
+
+def external_lookup_unavailable_row(
+    *,
+    citation: str,
+    start_index: int,
+    end_index: int,
+    status: int = 429,
+    error_message: str = "external citation lookup unavailable",
+) -> dict[str, Any]:
+    return {
+        "citation": citation,
+        "normalized_citations": [citation],
+        "start_index": start_index,
+        "end_index": end_index,
+        "status": status,
+        "error_message": error_message,
+        "clusters": [],
+    }
+
+
+def _exception_status(exc: Exception) -> int:
+    for attr in ("status", "code"):
+        value = getattr(exc, attr, None)
+        try:
+            if value is not None:
+                return int(value)
+        except (TypeError, ValueError):
+            continue
+    return 0
 
 
 def _select_lookup_row(
