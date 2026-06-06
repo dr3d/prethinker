@@ -38,6 +38,13 @@ REQUIRED_FIXTURE_FILES = {
     "manifest.json",
     "review_notes.md",
 }
+CLASS_REQUIRED_FIXTURE_FILES = {
+    "known_hallucination_or_sanction_filings": {"sanction_or_correction_source.md"},
+}
+FIXTURE_CLASS_SOURCE_KINDS = {
+    "clean_public_filings": "public_legal_filing_excerpt",
+    "known_hallucination_or_sanction_filings": "known_hallucination_or_sanction_filing_excerpt",
+}
 REQUIRED_AUTHORITY_FIELDS = {
     "authority_id",
     "canonical_citation",
@@ -132,7 +139,8 @@ def _audit_fixture(path: Path, *, fixture_class: str) -> dict[str, Any]:
     warnings: list[str] = []
     fixture_id = path.name
     present = {item.name for item in path.iterdir()} if path.exists() and path.is_dir() else set()
-    missing = sorted(REQUIRED_FIXTURE_FILES - present)
+    required_files = REQUIRED_FIXTURE_FILES | CLASS_REQUIRED_FIXTURE_FILES.get(fixture_class, set())
+    missing = sorted(required_files - present)
     errors.extend(f"missing_{name}" for name in missing)
 
     manifest = _load_json(path / "manifest.json") if (path / "manifest.json").exists() else {}
@@ -218,8 +226,9 @@ def _manifest_errors(manifest: dict[str, Any], *, fixture_id: str, fixture_class
         errors.append("manifest_fixture_id_mismatch")
     if str(manifest.get("domain_profile") or "").strip() != "legal_authority_verification_v1":
         errors.append("manifest_domain_profile_not_legal_authority_verification_v1")
-    if fixture_class == "clean_public_filings" and str(manifest.get("source_kind") or "").strip() != "public_legal_filing_excerpt":
-        errors.append("manifest_source_kind_not_public_legal_filing_excerpt")
+    expected_source_kind = FIXTURE_CLASS_SOURCE_KINDS.get(fixture_class)
+    if expected_source_kind and str(manifest.get("source_kind") or "").strip() != expected_source_kind:
+        errors.append(f"manifest_source_kind_not_{expected_source_kind}")
     if str(manifest.get("claim_status") or "").strip() != "research_fixture_not_legal_advice":
         errors.append("manifest_claim_status_not_research_fixture_not_legal_advice")
     return errors

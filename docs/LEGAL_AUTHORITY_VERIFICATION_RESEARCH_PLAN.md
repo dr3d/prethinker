@@ -278,6 +278,10 @@ datasets/legal_authority_verification/fixture_corpus_manifest.json
 3. Add controlled adversarial mutations of that filing.
 4. Add known public hallucination/sanction examples only after the resolver and
    report contract are stable.
+   The intake validator already reserves this fixture class with
+   `source_kind=known_hallucination_or_sanction_filing_excerpt` and a required
+   `sanction_or_correction_source.md`, so the next phase has a file-shape gate
+   before any real sanction examples become claim-bearing.
 5. Add optional CourtListener lookup behind an explicit provider manifest and
    rate-limit discipline.
 

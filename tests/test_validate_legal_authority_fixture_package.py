@@ -164,6 +164,57 @@ def test_validate_legal_authority_fixture_package_accepts_zip_shape(tmp_path: Pa
     assert report["summary"]["fixture_count"] == 3
 
 
+def test_validate_legal_authority_fixture_package_accepts_known_sanction_shape(tmp_path: Path) -> None:
+    package = _write_package(tmp_path)
+    _convert_package_to_known_sanction_shape(package)
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+    )
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["fixture_class"] == "known_hallucination_or_sanction_filings"
+
+
+def test_validate_legal_authority_fixture_package_requires_sanction_source_for_known_sanction_shape(
+    tmp_path: Path,
+) -> None:
+    package = _write_package(tmp_path)
+    _convert_package_to_known_sanction_shape(package)
+    (package / "clean_legal_filing_001" / "sanction_or_correction_source.md").unlink()
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert "missing_sanction_or_correction_source.md" in report["fixtures"][0]["errors"]
+
+
+def test_validate_legal_authority_fixture_package_rejects_wrong_known_sanction_source_kind(
+    tmp_path: Path,
+) -> None:
+    package = _write_package(tmp_path)
+    _convert_package_to_known_sanction_shape(package)
+    manifest_path = package / "clean_legal_filing_001" / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_kind"] = "public_legal_filing_excerpt"
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = build_report(
+        package_path=package,
+        fixture_class="known_hallucination_or_sanction_filings",
+    )
+
+    assert report["summary"]["status"] == "fail"
+    assert (
+        "manifest_source_kind_not_known_hallucination_or_sanction_filing_excerpt"
+        in report["fixtures"][0]["errors"]
+    )
+
+
 def _write_package(tmp_path: Path) -> Path:
     package = tmp_path / "legal_authority_clean_public_filings_20260606_01"
     package.mkdir()
@@ -171,6 +222,21 @@ def _write_package(tmp_path: Path) -> Path:
         fixture_id = f"clean_legal_filing_{index:03d}"
         _write_fixture(package / fixture_id, fixture_id=fixture_id)
     return package
+
+
+def _convert_package_to_known_sanction_shape(package: Path) -> None:
+    for fixture in package.iterdir():
+        if not fixture.is_dir():
+            continue
+        manifest_path = fixture / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["source_kind"] = "known_hallucination_or_sanction_filing_excerpt"
+        manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (fixture / "sanction_or_correction_source.md").write_text(
+            "# Sanction Or Correction Source\n\n"
+            "Public correction source says the legal-authority issue was independently identified.\n",
+            encoding="utf-8",
+        )
 
 
 def _write_fixture(path: Path, *, fixture_id: str) -> None:
