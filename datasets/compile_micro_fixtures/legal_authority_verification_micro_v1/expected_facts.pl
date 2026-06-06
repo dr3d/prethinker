@@ -32,5 +32,8 @@ legal_citation_mention(legal_authority_micro, mention_005, cite_347_us_483, line
 legal_authority_resolution(mention_005, cite_347_us_483, resolved, auth_brown_347_us_483, source_line_20).
 legal_authority_metadata_check(mention_005, auth_brown_347_us_483, case_name, match, source_line_20).
 legal_authority_metadata_check(mention_005, auth_brown_347_us_483, year, match, source_line_20).
+legal_proposition_claim(mention_005, proposition_005, sha256_32a826c9c51b, filing_line_20, human_review_required).
+legal_proposition_source_span(proposition_005, auth_brown_347_us_483, span_not_selected, no_deterministic_span, source_line_22).
+legal_support_assessment(proposition_005, auth_brown_347_us_483, deterministic_abstain, no_independent_review, source_line_22).
 legal_proposition_support_boundary(mention_005, proposition_005, deterministic_abstain, human_review_required, source_line_22).
 legal_verification_abstention(proposition_005, proposition_support, requires_human_legal_review, source_line_22).

@@ -108,6 +108,19 @@ quote as an atom. Proposition text is not a Tier 1 value; a proposition boundary
 row can say that review is required without pretending the support question is
 deterministically solved.
 
+Initial Tier 2 review-target carrier families:
+
+```text
+legal_proposition_claim/5
+legal_proposition_source_span/5
+legal_support_assessment/5
+```
+
+These rows are allowed to organize human review. They may carry compact
+proposition IDs, proposition digests, candidate span IDs, and review state.
+They must not store proposition prose or convert an unreviewed model proposal
+into a support verdict.
+
 ## First Micro-Fixture
 
 Initial fixture:
@@ -185,6 +198,12 @@ Secondary metrics:
 High abstention is acceptable. False verification is the dangerous failure.
 
 ## Expansion Sequence
+
+Fixture-class manifest:
+
+```text
+datasets/legal_authority_verification/fixture_corpus_manifest.json
+```
 
 1. Prove the micro-fixture with deterministic expected/forbidden facts.
 2. Add a small public filing sample where all authorities are available.

@@ -198,6 +198,20 @@ def verify_legal_authorities(
                 proposition_index += 1
                 proposition_id = f"proposition_{mention_index:03d}"
                 boundary_scope = f"source_line_{paragraph.start_line + paragraph.text[match.end():].count(chr(10))}"
+                proposition_digest = _proposition_digest(paragraph.text[match.end():])
+                claim_location = f"filing_line_{citation_line}"
+                facts.append(
+                    "legal_proposition_claim("
+                    f"{mention_id}, {proposition_id}, {proposition_digest}, {claim_location}, human_review_required)."
+                )
+                facts.append(
+                    "legal_proposition_source_span("
+                    f"{proposition_id}, {authority['authority_id']}, span_not_selected, no_deterministic_span, {boundary_scope})."
+                )
+                facts.append(
+                    "legal_support_assessment("
+                    f"{proposition_id}, {authority['authority_id']}, deterministic_abstain, no_independent_review, {boundary_scope})."
+                )
                 facts.append(
                     "legal_proposition_support_boundary("
                     f"{mention_id}, {proposition_id}, deterministic_abstain, human_review_required, {boundary_scope})."
@@ -208,8 +222,11 @@ def verify_legal_authorities(
                 )
                 mention_report["proposition_boundary"] = {
                     "proposition_id": proposition_id,
+                    "proposition_digest": proposition_digest,
                     "boundary_status": "deterministic_abstain",
                     "review_requirement": "human_review_required",
+                    "candidate_span_status": "no_deterministic_span",
+                    "support_assessment": "deterministic_abstain",
                 }
                 issue_rows.append(
                     {
@@ -247,7 +264,7 @@ def verify_legal_authorities(
         "document_outcome": document_outcome,
         "status": "pass" if false_verified == 0 else "fail",
     }
-    return {
+    report = {
         "schema_version": "legal_authority_verification_report_v1",
         "source": str(source_path),
         "authority_inventory": str(authority_inventory_path),
@@ -256,6 +273,80 @@ def verify_legal_authorities(
         "mentions": mentions,
         "issues": issue_rows,
         "facts": facts,
+    }
+    report["ledger_queries"] = build_ledger_queries(report)
+    return report
+
+
+def build_ledger_queries(report: dict[str, Any]) -> dict[str, Any]:
+    """Return practical query answers derived only from structured ledger rows."""
+
+    mentions = list(report.get("mentions") or [])
+    issues = list(report.get("issues") or [])
+    unresolved = [
+        _mention_brief(row)
+        for row in mentions
+        if row.get("resolution_status") in {"unresolved", "ambiguous", "invalid_reporter", "unavailable"}
+    ]
+    metadata_mismatches = [
+        {
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "field": check["field"],
+            "status": check["status"],
+        }
+        for row in mentions
+        for check in row.get("metadata_checks", [])
+        if check.get("status") == "mismatch"
+    ]
+    quote_mismatches = [
+        {
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "quote_id": row["quote_check"]["quote_id"],
+            "status": row["quote_check"]["status"],
+        }
+        for row in mentions
+        if row.get("quote_check") and row["quote_check"].get("status") == "no_match"
+    ]
+    pin_mismatches = [
+        {
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "pin": row["pin_check"]["pin"],
+            "status": row["pin_check"]["status"],
+        }
+        for row in mentions
+        if row.get("pin_check") and row["pin_check"].get("status") == "quote_outside_pin"
+    ]
+    proposition_review = [
+        {
+            "mention_id": row["mention_id"],
+            "citation": row["citation"],
+            "proposition_id": row["proposition_boundary"]["proposition_id"],
+            "review_requirement": row["proposition_boundary"]["review_requirement"],
+            "support_assessment": row["proposition_boundary"].get("support_assessment", ""),
+        }
+        for row in mentions
+        if row.get("proposition_boundary")
+    ]
+    blocking_issues = [
+        row
+        for row in issues
+        if row.get("issue") in {"unresolved", "ambiguous", "metadata_mismatch", "quote_not_found_in_authority", "quote_outside_cited_pin"}
+    ]
+    return {
+        "which_citations_do_not_resolve": unresolved,
+        "which_cases_have_metadata_mismatches": metadata_mismatches,
+        "which_quotes_cannot_be_found": quote_mismatches,
+        "which_pin_cites_do_not_contain_the_quote": pin_mismatches,
+        "which_propositions_require_human_review": proposition_review,
+        "can_this_filing_be_certified_citation_clean": {
+            "citation_clean": not blocking_issues,
+            "blocking_issue_count": len(blocking_issues),
+            "review_required_count": len(proposition_review),
+            "answer": "yes" if not blocking_issues and not proposition_review else "no",
+        },
     }
 
 
@@ -295,6 +386,23 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| `{row['mention_id']}` | `{row['citation']}` | `{row['resolution_status']}` | "
             f"`{quote}` | `{pin}` | `{proposition}` |"
         )
+    queries = report.get("ledger_queries") or {}
+    if queries:
+        clean = queries.get("can_this_filing_be_certified_citation_clean") or {}
+        lines.extend(
+            [
+                "",
+                "## Ledger Query Answers",
+                "",
+                f"- Certification answer: `{clean.get('answer', '')}`",
+                f"- Citation clean: `{clean.get('citation_clean', False)}`",
+                f"- Blocking issues: `{clean.get('blocking_issue_count', 0)}`",
+                f"- Review-required propositions: `{clean.get('review_required_count', 0)}`",
+                f"- Unresolved citations: `{len(queries.get('which_citations_do_not_resolve') or [])}`",
+                f"- Quote mismatches: `{len(queries.get('which_quotes_cannot_be_found') or [])}`",
+                f"- Pin-cite mismatches: `{len(queries.get('which_pin_cites_do_not_contain_the_quote') or [])}`",
+            ]
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -310,6 +418,16 @@ def _load_inventory(path: Path) -> dict[str, list[dict[str, Any]]]:
         if citation:
             out.setdefault(citation, []).append(row)
     return out
+
+
+def _mention_brief(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "mention_id": row.get("mention_id", ""),
+        "citation": row.get("citation", ""),
+        "resolution_status": row.get("resolution_status", ""),
+        "authority_id": row.get("authority_id", ""),
+        "line": row.get("line", ""),
+    }
 
 
 def _paragraphs(text: str) -> list[Paragraph]:
@@ -345,6 +463,11 @@ def _citation_atom(citation: str) -> str:
 
 def _quote_digest(quote: str) -> str:
     digest = hashlib.sha256(_normalize_text(quote).encode("utf-8")).hexdigest()[:12]
+    return f"sha256_{digest}"
+
+
+def _proposition_digest(proposition_tail: str) -> str:
+    digest = hashlib.sha256(_normalize_text(proposition_tail).encode("utf-8")).hexdigest()[:12]
     return f"sha256_{digest}"
 
 

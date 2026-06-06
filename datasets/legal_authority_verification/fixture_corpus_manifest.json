@@ -1,0 +1,103 @@
+{
+  "schema": "prethinker.legal_authority_verification.fixture_corpus_manifest.v1",
+  "status": "candidate_research_lane",
+  "purpose": "Fixture-class plan for legal authority verification. This manifest prevents premature expansion into real sanctioned/hallucination filings before the deterministic resolver and report contract are stable.",
+  "claim_boundary": {
+    "current_claim": "The micro-fixture exercises deterministic citation, metadata, quote, pin-cite, and proposition-review-boundary rows.",
+    "non_claims": [
+      "No claim that Prethinker verifies proposition-level legal support.",
+      "No claim that Prethinker checks good-law status.",
+      "No claim that the legal lane is product-ready.",
+      "No claim-bearing result from sanctioned/hallucination filings until independently sourced fixtures and deterministic resolver gates exist."
+    ]
+  },
+  "fixture_classes": [
+    {
+      "id": "controlled_adversarial_mutations",
+      "status": "seeded",
+      "purpose": "Known-answer adversarial legal-authority checks made from a controlled source/inventory pair.",
+      "fixtures": [
+        "datasets/compile_micro_fixtures/legal_authority_verification_micro_v1"
+      ],
+      "required_files": [
+        "source.md",
+        "authority_inventory.json",
+        "expected_facts.pl",
+        "forbidden_facts.pl",
+        "manifest.json"
+      ],
+      "must_include": [
+        "clean citation and quote",
+        "unresolved citation",
+        "fabricated quote on a real authority",
+        "quote outside cited pin",
+        "proposition-support abstention"
+      ],
+      "promotion_gate": [
+        "false_verified=0",
+        "expected facts emitted",
+        "forbidden facts absent",
+        "typed micro-fixture validator pass",
+        "domain predicate schema validator pass"
+      ]
+    },
+    {
+      "id": "clean_public_filings",
+      "status": "planned",
+      "purpose": "Real public legal filings whose cited authorities are available for deterministic citation, metadata, quote, and pin checks.",
+      "fixtures": [],
+      "required_files": [
+        "source.md",
+        "source_metadata.json",
+        "authority_inventory.json or authority_lookup_manifest.json",
+        "expected_facts.pl",
+        "forbidden_facts.pl",
+        "manifest.json"
+      ],
+      "must_include": [
+        "public source URL or retained public source record",
+        "declared authority lookup source",
+        "source-only expected/forbidden oracle",
+        "no answer-key or model-output contamination in oracle packet"
+      ],
+      "promotion_gate": [
+        "source-only oracle review",
+        "false_verified=0",
+        "quote and pin checks source-backed where authority text is available",
+        "explicit abstention where authority text is unavailable"
+      ]
+    },
+    {
+      "id": "known_hallucination_or_sanction_filings",
+      "status": "deferred_until_resolver_contract_stable",
+      "purpose": "Known public examples of AI-fabricated legal citations, fabricated quotes, or citation misuse.",
+      "fixtures": [],
+      "required_files": [
+        "source.md",
+        "sanction_or_correction_source.md",
+        "source_metadata.json",
+        "authority_inventory.json or authority_lookup_manifest.json",
+        "expected_facts.pl",
+        "forbidden_facts.pl",
+        "manifest.json"
+      ],
+      "must_include": [
+        "original filing or quoted filing excerpt",
+        "public sanction/correction/order source when available",
+        "source-only oracle separating citation existence from proposition support",
+        "explicit false-verification traps in forbidden_facts.pl"
+      ],
+      "promotion_gate": [
+        "resolver/report contract already passing controlled adversarial mutations",
+        "independent source-only oracle review",
+        "false_verified=0",
+        "no LLM-as-verifier claim",
+        "all proposition-support rows remain review-required unless independently reviewed"
+      ]
+    }
+  ],
+  "next_external_work_order_needed": {
+    "needed_now": false,
+    "reason": "The current lane can continue improving schema, ledger queries, and local resolver behavior without external sanctioned-filing packets. Real public filings should be requested after the deterministic resolver/report contract remains stable under the micro and clean-public fixture gates."
+  }
+}

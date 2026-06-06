@@ -6,13 +6,13 @@ This report does not read source prose, QA questions, or judge outputs.
 ## Summary
 
 - Domains: `8`
-- Predicates: `71` (`65` domain-specific plus shared carriers)
+- Predicates: `74` (`68` domain-specific plus shared carriers)
 - Lenses: `34`
 - Associated fixtures: `31`
 - Unassigned fixtures: `4`
 - Unassigned fixtures accounted for: `4 / 4`
-- Expected facts in associated fixtures: `605`
-- Forbidden facts in associated fixtures: `254`
+- Expected facts in associated fixtures: `608`
+- Forbidden facts in associated fixtures: `257`
 - Schema status: `pass` (0 errors, 3 warnings)
 - Unassigned ledger errors: `0`
 - Status: `pass`
@@ -20,7 +20,7 @@ This report does not read source prose, QA questions, or judge outputs.
 | Domain | Predicates | Domain-specific | Lenses | Fixtures | Expected | Forbidden |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `fda_warning_letter_v1` | 22 | 21 | 10 | 10 | 293 | 80 |
-| `legal_authority_verification_v1` | 9 | 8 | 3 | 1 | 32 | 4 |
+| `legal_authority_verification_v1` | 12 | 11 | 3 | 1 | 35 | 7 |
 | `ntsb_investigation_v1` | 11 | 10 | 6 | 3 | 39 | 29 |
 | `osha_incident_v1` | 10 | 9 | 4 | 5 | 111 | 35 |
 | `procurement_gao_decision_v1` | 1 | 1 | 1 | 2 | 2 | 16 |
@@ -69,8 +69,8 @@ This report does not read source prose, QA questions, or judge outputs.
 ## legal_authority_verification_v1
 
 - Registry: `datasets/domain_profiles/legal_authority_verification_v1/ontology_registry.json`
-- Predicates: `9`
-- Domain-specific predicates: `8`
+- Predicates: `12`
+- Domain-specific predicates: `11`
 - Lenses: `3`
 - Accountability requirements: `1`
 
@@ -80,13 +80,13 @@ This report does not read source prose, QA questions, or judge outputs.
 | --- | --- |
 | `citation_resolution` | `legal_citation_mention/5`, `legal_authority_resolution/5`, `legal_authority_metadata_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
 | `quote_pin_check` | `legal_quote_claim/5`, `legal_quote_span_match/5`, `legal_pin_cite_check/5`, `legal_verification_abstention/4`, `domain_omission/5` |
-| `proposition_boundary` | `legal_proposition_support_boundary/5`, `legal_verification_abstention/4`, `domain_omission/5` |
+| `proposition_boundary` | `legal_proposition_claim/5`, `legal_proposition_source_span/5`, `legal_support_assessment/5`, `legal_proposition_support_boundary/5`, `legal_verification_abstention/4`, `domain_omission/5` |
 
 ### Fixture Oracles
 
 | Fixture | Association | Expected | Forbidden | Expected signatures |
 | --- | --- | ---: | ---: | --- |
-| `legal_authority_verification_micro_v1` | `fixture_id_prefix` | 32 | 4 | `legal_authority_metadata_check/5`:8, `legal_authority_resolution/5`:5, `legal_citation_mention/5`:5, `legal_pin_cite_check/5`:3, `legal_proposition_support_boundary/5`:1, `legal_quote_claim/5`:3, `legal_quote_span_match/5`:3, `legal_verification_abstention/4`:4 |
+| `legal_authority_verification_micro_v1` | `fixture_id_prefix` | 35 | 7 | `legal_authority_metadata_check/5`:8, `legal_authority_resolution/5`:5, `legal_citation_mention/5`:5, `legal_pin_cite_check/5`:3, `legal_proposition_claim/5`:1, `legal_proposition_source_span/5`:1, `legal_proposition_support_boundary/5`:1, `legal_quote_claim/5`:3, `legal_quote_span_match/5`:3, `legal_support_assessment/5`:1, `legal_verification_abstention/4`:4 |
 
 ## ntsb_investigation_v1
 
