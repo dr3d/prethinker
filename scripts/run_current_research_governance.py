@@ -182,6 +182,7 @@ def governance_commands(*, out_root: Path, include_pytest: bool) -> list[dict[st
                 str(report_root / "pending_external_work_orders.md"),
                 "--expect-md",
                 "docs/PENDING_EXTERNAL_WORK_ORDERS.md",
+                "--include-tmp-zips",
             ],
         },
         {

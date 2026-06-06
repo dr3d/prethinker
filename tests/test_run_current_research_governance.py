@@ -34,7 +34,7 @@ def test_governance_commands_include_current_claim_checks(tmp_path: Path) -> Non
     ]
     pending_command = next(command for command in commands if command["id"] == "pending_external_work_orders")
     assert "--expect-md" in pending_command["command"]
-    assert "--include-tmp-zips" not in pending_command["command"]
+    assert "--include-tmp-zips" in pending_command["command"]
     assert "docs/PENDING_EXTERNAL_WORK_ORDERS.md" in pending_command["command"]
     legal_status_command = next(command for command in commands if command["id"] == "legal_authority_verification_status")
     assert "--expect-md" in legal_status_command["command"]
