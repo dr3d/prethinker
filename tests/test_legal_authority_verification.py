@@ -391,7 +391,7 @@ def test_legal_authority_micro_fixture_v3_catches_unsupported_reporter() -> None
 
 def test_legal_authority_resolves_declared_federal_reporter_inventory(tmp_path: Path) -> None:
     source = tmp_path / "source.md"
-    source.write_text("Smith v. Jones, 12 F.3d 34 (1995).", encoding="utf-8")
+    source.write_text("Smith v. Jones, 12 F.3d 34, 36 (9th Cir. 1995).", encoding="utf-8")
     inventory = tmp_path / "authority_inventory.json"
     inventory.write_text(
         json.dumps(
@@ -425,6 +425,7 @@ def test_legal_authority_resolves_declared_federal_reporter_inventory(tmp_path: 
     assert report["summary"]["resolved"] == 1
     assert report["summary"]["invalid_reporter"] == 0
     assert report["summary"]["verified_mentions"] == 1
+    assert report["mentions"][0]["pin"] == "36"
     assert report["mentions"][0]["metadata_checks"] == [
         {"field": "case_name", "extracted": "Smith v. Jones", "authority_value": "Smith v. Jones", "status": "match"},
         {"field": "volume", "extracted": "12", "authority_value": "12", "status": "match"},

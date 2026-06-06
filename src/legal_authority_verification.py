@@ -30,19 +30,19 @@ CASE_PARTY_RE = rf"{CASE_WORD_RE}(?:\s+{CASE_WORD_RE}){{0,8}}"
 CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+(?P<page>\d+)"
-    r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
+    r"(?:,\s+(?P<pin>\d+))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
 )
 GENERIC_CITATION_RE = re.compile(
     rf"(?P<case>{CASE_PARTY_RE} v\. {CASE_PARTY_RE}),\s+"
     r"(?P<volume>\d+)\s+(?P<reporter>[A-Z][A-Za-z. ]{1,24})\s+(?P<page>\d+)"
-    r"(?:,\s+(?P<pin>\d+))?\s+\((?P<year>\d{4})\)"
+    r"(?:,\s+(?P<pin>\d+))?\s+\([^)]*?(?P<year>\d{4})[^)]*?\)"
 )
 BARE_CITATION_RE = re.compile(
     r"(?<![A-Za-z0-9_])"
     r"(?P<volume>\d+)\s+(?P<reporter>U\. ?S\.|F\. ?(?:2d|3d|4th)|F\. ?Supp\. ?(?:2d|3d)?|S\. ?Ct\.)\s+"
     r"(?P<page>\d+)"
     r"(?:,\s+(?P<pin_comma>\d+)|\s+at\s+(?P<pin_at>\d+))?"
-    r"(?:\s+\((?P<year>\d{4})\))?"
+    r"(?:\s+\([^)]*?(?P<year>\d{4})[^)]*?\))?"
 )
 QUOTE_RE = re.compile(r'"(?P<quote>[^"]+)"')
 
